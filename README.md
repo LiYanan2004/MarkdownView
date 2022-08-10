@@ -1,6 +1,6 @@
 # MarkdownView
 
-MarkdownView is a Swift Package for rendering Markdown text natively in SwiftUI
+MarkdownView is a Swift Package for rendering Markdown text natively in SwiftUI.
 
 Thanks to [apple/swift-markdown](https://github.com/apple/swift-markdown), it can fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
 
