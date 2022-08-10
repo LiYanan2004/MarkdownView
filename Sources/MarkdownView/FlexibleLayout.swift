@@ -57,25 +57,3 @@ struct FlexibleLayout: Layout {
         }
     }
 }
-
-struct Flexible_Layout_Previews: PreviewProvider {
-    static var previews: some View {
-        FlexibleLayout {
-            Builder()
-        }.background(.red)
-    }
-
-    @ViewBuilder
-    static func Builder() -> some View {
-        Text("hello world")
-        Text("**AppleHello world**")
-        Text("**YESYESYEYEYEYEY**")
-        Text("[appe](apple.com)")
-        Text("BBBidisjidsjidjsdjsdjisisdB")
-        Text("BBBidisjidsjijifdijfidjfidfiddijijfdijidjfidjfijidjijfidjfidjijdfjidfjidjfidfjdijfidjfidjidjfidjfidjidjidjjidjfijdfjidfjiididididididididiidjsdjsdjisisdB")
-        Text("BBBidisjidsjidjsdjsdjisisdB")
-        Text("BBBidisjidsjidjsdjsdjisisdB")
-    
-        
-    }
-}

@@ -260,33 +260,40 @@ public struct MarkdownRenderer: MarkupVisitor {
     }
     
     mutating public func visitImage(_ image: Markdown.Image) -> AnyView {
-        if let source = image.source {
-            var handler: String?
-            imageHandlerConfiguration.imageHandlers.keys.forEach {
-                if source.hasPrefix($0) {
-                    handler = $0
-                    return
-                }
-            }
-            
-            if let handler {
-                let ImageView = imageHandlerConfiguration.imageHandlers[handler]!.image(URL(string: source)!)
-                return AnyView(VStack {
-                    AnyView(ImageView)
-                    if let title = image.title, !title.isEmpty {
-                        SwiftUI.Text(title)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        SwiftUI.Text(image.plainText)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    }
-                })
+        guard let source = URL(string: image.source ?? "") else { return AnyView(SwiftUI.Text(image.plainText)) }
+        
+        var handler: String?
+        imageHandlerConfiguration.imageHandlers.keys.forEach {
+            if source.scheme == $0 {
+                handler = $0
+                return
             }
         }
         
-        return AnyView(SwiftUI.Text(image.plainText))
+        let ImageView: any View
+        if let handler {
+            // Found a specific handler.
+            ImageView = imageHandlerConfiguration.imageHandlers[handler]!.image(source)
+        } else {
+            // Didn't find a specific handler.
+            // Try to load the image from the Base URL.
+            ImageView = MarkdownImageHandler
+                .storageImage(baseURL: imageHandlerConfiguration.baseURL)
+                .image(source)
+        }
+        
+        return AnyView(VStack {
+            AnyView(ImageView)
+            if let title = image.title, !title.isEmpty {
+                SwiftUI.Text(title)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            } else {
+                SwiftUI.Text(image.plainText)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+        })
     }
 }
 

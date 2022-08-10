@@ -25,8 +25,15 @@ extension MarkdownImageHandler {
 }
 
 class ImageHandlerConfiguration {
+    var baseURL:URL
+    
+    init(baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
+        self.baseURL = baseURL
+    }
+    
     var imageHandlers: [String: MarkdownImageHandler] = [
         "http": .networkImage,
+        "https": .networkImage,
     ]
     
     func addHandler(

@@ -22,10 +22,15 @@ struct LocalImage: View {
             .frame(maxWidth: .infinity)
             .containerShape(Rectangle())
             .onTapGesture(perform: reloadImage)
+            .onChange(of: url) { _ in
+                reloadImage()
+            }
         } else {
             GeometryReader { proxy in
                 Rectangle()
-                    .frame(maxWidth: .infinity)
+                    .foregroundStyle(.quaternary)
+                    .aspectRatio(4 / 3, contentMode: .fit)
+                    .opacity(0.5)
                     .task(priority: .background) {
                         await loadContent(size: proxy.size)
                     }
