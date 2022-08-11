@@ -2,24 +2,24 @@ import SwiftUI
 
 public struct MarkdownImageHandler {
     typealias SwiftUIImage = SwiftUI.Image
-    var image: (URL) -> any View
+    var image: (URL, String) -> any View
     
-    public init(@ViewBuilder image: @escaping (URL) -> some View) {
+    public init(@ViewBuilder image: @escaping (URL, String) -> some View) {
         self.image = image
     }
 }
 
 extension MarkdownImageHandler {
-    public static var networkImage = MarkdownImageHandler {
-        NetworkImage(url: $0)
+    public static var networkImage = MarkdownImageHandler { 
+        NetworkImage(url: $0, alt: $1)
     }
     
-    public static func storageImage(
+    public static func relativePathImage(
         baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     ) -> MarkdownImageHandler {
-        MarkdownImageHandler { url in
-            let url = baseURL.appendingPathComponent(url.absoluteString)
-            LocalImage(url: url)
+        MarkdownImageHandler {
+            let url = baseURL.appendingPathComponent($0.absoluteString)
+            NetworkImage(url: url, alt: $1)
         }
     }
 }

@@ -18,27 +18,21 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(subview)
         }
         
-        return AnyView(
-            VStack(alignment: .leading) {
-                ForEach(subviews.indices, id: \.self) { index in
-                    subviews[index]
-                }
+        return AnyView(VStack(alignment: .leading) {
+            ForEach(subviews.indices, id: \.self) { index in
+                subviews[index]
             }
-        )
+        })
     }
     
     mutating public func visitText(_ text: Markdown.Text) -> AnyView {
         let text = text.string
         var subText = [SwiftUI.Text]()
         
-        var firstTokenIdx: String.Index? = nil
         let tagger = NLTagger(tagSchemes: [.tokenType])
         tagger.string = text
         let options = NLTagger.Options(arrayLiteral: [.omitPunctuation, .omitWhitespace])
         tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .tokenType, options: options) { _, tokenRange in
-            if firstTokenIdx == nil {
-                firstTokenIdx = tokenRange.lowerBound
-            }
             let forwardTextAsArray = Array(text[tokenRange.upperBound...])
             var string = String(text[tokenRange])
             if forwardTextAsArray.isEmpty == false {
@@ -53,8 +47,19 @@ public struct MarkdownRenderer: MarkupVisitor {
             subText.append(SwiftUI.Text(string))
             return true
         }
-        if firstTokenIdx ?? text.startIndex > text.startIndex {
-            subText.insert(Text(text[text.startIndex..<firstTokenIdx!]), at: 0)
+        
+        // Fixed: Prefix whitespace or punctuation will not render as expected.
+        let textAsArray = Array(text)
+        var index = 0
+        var forwardChar = textAsArray[index]
+        var prefixText = ""
+        while (forwardChar.isWhitespace || forwardChar.isPunctuation) && index < textAsArray.endIndex {
+            prefixText.append(forwardChar)
+            index += 1
+            forwardChar = textAsArray[min(index, textAsArray.endIndex - 1)]
+        }
+        if prefixText.isEmpty == false {
+            subText.insert(SwiftUI.Text(prefixText), at: 0)
         }
 
         return AnyView(ForEach(subText.indices, id: \.self) { index in
@@ -69,11 +74,9 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(visit(child))
         }
         
-        return AnyView(
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
-            }.italic()
-        )
+        return AnyView(ForEach(subviews.indices, id: \.self) { index in
+            subviews[index].italic()
+        })
     }
     
     mutating public func visitStrong(_ strong: Strong) -> AnyView {
@@ -81,11 +84,9 @@ public struct MarkdownRenderer: MarkupVisitor {
         for child in strong.children {
             subviews.append(visit(child))
         }
-        return AnyView(
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index].fontWeight(.bold)
-            }
-        )
+        return AnyView(ForEach(subviews.indices, id: \.self) { index in
+            subviews[index].fontWeight(.bold)
+        })
     }
     
     mutating public func visitParagraph(_ paragraph: Paragraph) -> AnyView {
@@ -147,10 +148,13 @@ public struct MarkdownRenderer: MarkupVisitor {
         }
     }
     
+    // MARK: - KNOWN ISSUE: Unexpected layout if inline code is too long.
     mutating public func visitInlineCode(_ inlineCode: InlineCode) -> AnyView {
         return AnyView(
             Text(inlineCode.code)
                 .font(.system(.body, design: .monospaced))
+                .scaleEffect(0.9)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 5))
         )
     }
     
@@ -179,11 +183,9 @@ public struct MarkdownRenderer: MarkupVisitor {
         for child in strikethrough.children {
             subviews.append(visit(child))
         }
-        return AnyView(
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index].strikethrough()
-            }
-        )
+        return AnyView(ForEach(subviews.indices, id: \.self) { index in
+            subviews[index].strikethrough()
+        })
     }
     
     mutating public func visitListItem(_ listItem: ListItem) -> AnyView {
@@ -299,6 +301,18 @@ public struct MarkdownRenderer: MarkupVisitor {
         )
     }
     
+    public func visitSoftBreak(_ softBreak: SoftBreak) -> AnyView {
+        AnyView(SwiftUI.Text(" "))
+    }
+    
+    public func visitThematicBreak(_ thematicBreak: ThematicBreak) -> AnyView {
+        AnyView(Divider())
+    }
+
+    public func visitLineBreak(_ lineBreak: LineBreak) -> AnyView {
+        AnyView(HardBreak())
+    }
+    
     mutating public func visitImage(_ image: Markdown.Image) -> AnyView {
         guard let source = URL(string: image.source ?? "") else { return AnyView(SwiftUI.Text(image.plainText)) }
         
@@ -310,29 +324,27 @@ public struct MarkdownRenderer: MarkupVisitor {
             }
         }
         
+        let alt: String
+        if let title = image.title, !title.isEmpty {
+            alt = title
+        } else {
+            alt = image.plainText
+        }
+        
         let ImageView: any View
         if let handler {
             // Found a specific handler.
-            ImageView = imageHandlerConfiguration.imageHandlers[handler]!.image(source)
+            ImageView = imageHandlerConfiguration.imageHandlers[handler]!.image(source, alt)
         } else {
             // Didn't find a specific handler.
             // Try to load the image from the Base URL.
             ImageView = MarkdownImageHandler
-                .storageImage(baseURL: imageHandlerConfiguration.baseURL)
-                .image(source)
+                .relativePathImage(baseURL: imageHandlerConfiguration.baseURL)
+                .image(source, alt)
         }
         
         return AnyView(VStack {
             AnyView(ImageView)
-            if let title = image.title, !title.isEmpty {
-                SwiftUI.Text(title)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-            } else {
-                SwiftUI.Text(image.plainText)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-            }
         })
     }
 }
@@ -399,10 +411,17 @@ extension Markup {
     }
 }
 
-struct Newline: View {
+fileprivate struct Newline: View {
     var count: Int = 1
     var body: some View {
         SwiftUI.Text([String](repeating: "\n", count: count - 1).joined())
             .frame(maxWidth: .infinity)
+    }
+}
+
+fileprivate struct HardBreak: View {
+    var body: some View {
+        Newline()
+            .frame(height: 0)
     }
 }
