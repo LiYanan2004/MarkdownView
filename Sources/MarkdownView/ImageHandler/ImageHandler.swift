@@ -18,7 +18,7 @@ extension MarkdownImageHandler {
         baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     ) -> MarkdownImageHandler {
         MarkdownImageHandler { url in
-            let url = baseURL.appendingPathComponent(url.lastPathComponent)
+            let url = baseURL.appendingPathComponent(url.absoluteString)
             LocalImage(url: url)
         }
     }

@@ -14,10 +14,9 @@ struct LocalImage: View {
         } else if let localizedError {
             VStack {
                 Text(localizedError)
-                    .padding(.vertical)
-                    
                 Text("Tap to reload.")
             }
+            .padding(.vertical)
             .foregroundColor(.secondary)
             .frame(maxWidth: .infinity)
             .containerShape(Rectangle())

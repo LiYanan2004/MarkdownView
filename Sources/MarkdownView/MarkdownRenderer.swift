@@ -1,5 +1,6 @@
 import SwiftUI
 import Markdown
+import NaturalLanguage
 
 public struct MarkdownRenderer: MarkupVisitor {
     
@@ -17,15 +18,48 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(subview)
         }
         
-        return AnyView(FlexibleLayout {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
+        return AnyView(
+            VStack(alignment: .leading) {
+                ForEach(subviews.indices, id: \.self) { index in
+                    subviews[index]
+                }
             }
-        })
+        )
     }
     
     mutating public func visitText(_ text: Markdown.Text) -> AnyView {
-        return AnyView(SwiftUI.Text(text.string))
+        let text = text.string
+        var subText = [SwiftUI.Text]()
+        
+        var firstTokenIdx: String.Index? = nil
+        let tagger = NLTagger(tagSchemes: [.tokenType])
+        tagger.string = text
+        let options = NLTagger.Options(arrayLiteral: [.omitPunctuation, .omitWhitespace])
+        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .tokenType, options: options) { _, tokenRange in
+            if firstTokenIdx == nil {
+                firstTokenIdx = tokenRange.lowerBound
+            }
+            let forwardTextAsArray = Array(text[tokenRange.upperBound...])
+            var string = String(text[tokenRange])
+            if forwardTextAsArray.isEmpty == false {
+                var index = 0
+                var forwardChar = forwardTextAsArray[index]
+                while (forwardChar.isWhitespace || forwardChar.isPunctuation) && index < forwardTextAsArray.endIndex {
+                    string.append(forwardChar)
+                    index += 1
+                    forwardChar = forwardTextAsArray[min(index, forwardTextAsArray.endIndex - 1)]
+                }
+            }
+            subText.append(SwiftUI.Text(string))
+            return true
+        }
+        if firstTokenIdx ?? text.startIndex > text.startIndex {
+            subText.insert(Text(text[text.startIndex..<firstTokenIdx!]), at: 0)
+        }
+
+        return AnyView(ForEach(subText.indices, id: \.self) { index in
+            subText[index]
+        })
     }
     
     mutating public func visitEmphasis(_ emphasis: Markdown.Emphasis) -> AnyView {
@@ -62,8 +96,10 @@ public struct MarkdownRenderer: MarkupVisitor {
         if paragraph.hasSuccessor && !paragraph.isContainedInList {
             subviews.append(AnyView(Newline()))
         }
-        return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index]
+        return AnyView(FlexibleLayout {
+            ForEach(subviews.indices, id: \.self) { index in
+                subviews[index]
+            }
         })
     }
     
@@ -85,9 +121,11 @@ public struct MarkdownRenderer: MarkupVisitor {
         case 6: font = .body
         default: font = .body
         }
-        return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index]
-                .font(.system(font, weight: .bold))
+        return AnyView(FlexibleLayout {
+            ForEach(subviews.indices, id: \.self) { index in
+                subviews[index]
+                    .font(.system(font, weight: .bold))
+            }
         })
     }
     
@@ -98,8 +136,10 @@ public struct MarkdownRenderer: MarkupVisitor {
         }
         if let destination = URL(string: link.destination ?? "") {
             return AnyView(SwiftUI.Link(destination: destination) {
-                ForEach(subviews.indices, id: \.self) { index in
-                    subviews[index]
+                FlexibleLayout {
+                    ForEach(subviews.indices, id: \.self) { index in
+                        subviews[index]
+                    }
                 }
             })
         } else {
