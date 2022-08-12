@@ -18,9 +18,9 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(subview)
         }
         
-        return AnyView(VStack(alignment: .leading) {
+        return AnyView(VStack(alignment: .leading, spacing: 8) {
             ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
+                subviews[index].clipped()
             }
         })
     }
@@ -85,7 +85,7 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(visit(child))
         }
         return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index].fontWeight(.bold)
+            subviews[index].bold()
         })
     }
     
@@ -95,7 +95,7 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(visit(child))
         }
         if paragraph.hasSuccessor && !paragraph.isContainedInList {
-            subviews.append(AnyView(Newline()))
+            subviews.append(AnyView(PaddingLine()))
         }
         return AnyView(FlexibleLayout {
             ForEach(subviews.indices, id: \.self) { index in
@@ -108,9 +108,6 @@ public struct MarkdownRenderer: MarkupVisitor {
         var subviews = [AnyView]()
         for child in heading.children {
             subviews.append(visit(child))
-        }
-        if heading.hasSuccessor {
-            subviews.append(AnyView(Newline()))
         }
         let font: Font.TextStyle
         switch heading.level {
@@ -169,12 +166,11 @@ public struct MarkdownRenderer: MarkupVisitor {
                     if let language = codeBlock.language {
                         SwiftUI.Text(language)
                             .font(.caption)
-                            .scenePadding()
+                            .padding(8)
                             .foregroundStyle(.secondary)
                     }
                 }
-            
-            Newline()
+            PaddingLine()
         })
     }
     
@@ -226,7 +222,7 @@ public struct MarkdownRenderer: MarkupVisitor {
         }
         
         if orderedList.hasSuccessor {
-            subviews.append(AnyView(Newline()))
+            subviews.append(AnyView(PaddingLine()))
         }
         
         return AnyView(VStack(alignment: .leading) {
@@ -262,7 +258,7 @@ public struct MarkdownRenderer: MarkupVisitor {
         }
         
         if unorderedList.hasSuccessor {
-            subviews.append(AnyView(Newline()))
+            subviews.append(AnyView(PaddingLine()))
         }
         
         return AnyView(VStack(alignment: .leading) {
@@ -296,7 +292,7 @@ public struct MarkdownRenderer: MarkupVisitor {
                         .foregroundStyle(.quaternary)
                 }
                 
-                Newline()
+                PaddingLine()
             }
         )
     }
@@ -310,7 +306,7 @@ public struct MarkdownRenderer: MarkupVisitor {
     }
 
     public func visitLineBreak(_ lineBreak: LineBreak) -> AnyView {
-        AnyView(HardBreak())
+        AnyView(NewLine())
     }
     
     mutating public func visitImage(_ image: Markdown.Image) -> AnyView {
@@ -411,7 +407,7 @@ extension Markup {
     }
 }
 
-fileprivate struct Newline: View {
+fileprivate struct PaddingLine: View {
     var count: Int = 1
     var body: some View {
         SwiftUI.Text([String](repeating: "\n", count: count - 1).joined())
@@ -419,9 +415,9 @@ fileprivate struct Newline: View {
     }
 }
 
-fileprivate struct HardBreak: View {
+fileprivate struct NewLine: View {
     var body: some View {
-        Newline()
-            .frame(height: 0)
+        PaddingLine()
+            .frame(height: 0) // Break the Text into two lines while maintaining the line spacing
     }
 }

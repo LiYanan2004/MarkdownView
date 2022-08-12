@@ -1,59 +1,55 @@
 import SwiftUI
 
 struct FlexibleLayout: Layout {
-    
-    func width(proposal: ProposedViewSize, subviews: Subviews) -> CGFloat {
-        let totalWidth = subviews.reduce(CGFloat.zero) { result, subview in
-            result + subview.sizeThatFits(.infinity).width
-        }
-        let width = min(proposal.width ?? .infinity, totalWidth)
-        
-        return width
-    }
-    
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = width(proposal: proposal, subviews: subviews)
-        var totalHeight: CGFloat = .zero
+        guard let totalWidth = proposal.width else { return .zero }
+
+        let proposal = ProposedViewSize(width: totalWidth, height: nil)
         
-        var currentWidth: CGFloat = .zero
-        var maxHeight: CGFloat = .zero
+        var size = CGSize.zero
+        var x = CGFloat.zero
+        var y = CGFloat.zero
+        var rowHeight = CGFloat.zero
         
         subviews.forEach {
-            let subviewSize = $0.sizeThatFits(ProposedViewSize(width: width, height: nil))
-            
-            totalHeight = max(totalHeight, subviewSize.height)
-            
-            if currentWidth + subviewSize.width <= width {
-                currentWidth += subviewSize.width
-                maxHeight = max(subviewSize.height, maxHeight)
-            } else {
-                totalHeight += maxHeight
-                currentWidth = subviewSize.width
-                maxHeight = subviewSize.height
+            let subviewSize = $0.sizeThatFits(proposal)
+
+            if x + subviewSize.width > totalWidth {
+                // This element cannot be accommodated horizontally.
+                // Increase the height.
+                y += rowHeight
+                x = .zero
+                rowHeight = subviewSize.height
             }
+            rowHeight = max(subviewSize.height, rowHeight)
+            x += subviewSize.width
+            size.width = min(subviewSize.width + size.width, totalWidth)
+            size.height = max(y + subviewSize.height, size.height)
         }
-        
-        return CGSize(width: width, height: totalHeight)
+        return size
     }
-    
+
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let width = width(proposal: proposal, subviews: subviews)
-        
-        var currentWidth: CGFloat = .zero
-        var currentHeight: CGFloat = .zero
-        
+        guard let totalWidth = proposal.width else { return }
+
+        let proposal = ProposedViewSize(width: totalWidth, height: nil)
+
+        var rowHeight = CGFloat.zero
+        var x: CGFloat = bounds.minX
+        var y: CGFloat = bounds.minY
         subviews.indices.forEach {
-            let subviewSize = subviews[$0].sizeThatFits(ProposedViewSize(width: width, height: nil))
+            let subviewSize = subviews[$0].sizeThatFits(proposal)
             let subviewProposal = ProposedViewSize(subviewSize)
-            
-            if currentWidth + subviewSize.width <= width {
-                currentWidth += subviewSize.width
-            } else {
-                currentHeight += subviews[max(0, $0 - 1)].sizeThatFits(ProposedViewSize(width: width, height: nil)).height
-                currentWidth = subviewSize.width
+
+            if x + subviewSize.width > bounds.maxX {
+                y += rowHeight
+                x = bounds.minX
+                rowHeight = .zero
             }
-            
-            subviews[$0].place(at: CGPoint(x: bounds.minX + currentWidth, y: bounds.minY + currentHeight), anchor: .topTrailing, proposal: subviewProposal)
+
+            subviews[$0].place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: subviewProposal)
+            rowHeight = max(subviewSize.height, rowHeight)
+            x += subviewSize.width
         }
     }
 }

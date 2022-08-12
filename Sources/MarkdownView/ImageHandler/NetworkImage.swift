@@ -1,4 +1,5 @@
 import SwiftUI
+import SVGKit
 
 struct NetworkImage: View {
     var url: URL
@@ -9,35 +10,37 @@ struct NetworkImage: View {
     @Environment(\.displayScale) private var scale
     
     var body: some View {
-        if let image {
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: maxSize.width, maxHeight: maxSize.height)
-        } else if let localizedError {
-            Text(localizedError + "\n" + "Tap to reload.")
-                .multilineTextAlignment(.center)
-                .padding(.vertical)
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity)
-                .containerShape(Rectangle())
-                .onTapGesture(perform: reloadImage)
-        } else {
-            GeometryReader { proxy in
-                Rectangle()
-                    .fill(.quaternary)
-                    .task(id: url, priority: .background) {
-                        await loadContent(size: proxy.size)
-                    }
+        VStack {
+            if let image {
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: maxSize.width, maxHeight: maxSize.height)
+            } else if let localizedError {
+                Text(localizedError + "\n" + "Tap to reload.")
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .containerShape(Rectangle())
+                    .onTapGesture(perform: reloadImage)
+            } else {
+                GeometryReader { proxy in
+                    Rectangle()
+                        .fill(.quaternary)
+                        .task(id: url) {
+                            await loadContent(size: proxy.size)
+                        }
+                }
             }
+            
+            Text(alt)
+                .foregroundStyle(.secondary)
+                .font(.callout)
+                .onChange(of: url) { _ in
+                    reloadImage()
+                }
         }
-        
-        Text(alt)
-            .foregroundStyle(.secondary)
-            .font(.callout)
-            .onChange(of: url) { _ in
-                reloadImage()
-            }
     }
     
     private func reloadImage() {
@@ -53,6 +56,15 @@ struct NetworkImage: View {
             if let image = NSImage(data: data) {
                 self.maxSize = image.size
                 self.image = Image(nsImage: image)
+            } else {
+                if String(data: data, encoding: .utf8)?.contains("<svg") ?? false {
+                    if let image = SVGKImage(contentsOf: url).nsImage {
+                        self.maxSize = image.size
+                        self.image = Image(nsImage: image)
+                        return
+                    }
+                }
+                throw ImageError.formatError
             }
             #elseif os(iOS) || os(tvOS)
             if let image = UIImage(data: data) {
@@ -63,6 +75,13 @@ struct NetworkImage: View {
                     try await prepareThumbnailAndDisplay(for: image, size: size)
                 }
             } else {
+                if String(data: data, encoding: .utf8)?.contains("<svg") ?? false {
+                    if let image = SVGKImage(contentsOf: url).uiImage {
+                        self.maxSize = image.size
+                        self.image = Image(uiImage: image)
+                        return
+                    }
+                }
                 throw ImageError.formatError
             }
             #endif
