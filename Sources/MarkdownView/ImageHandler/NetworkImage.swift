@@ -15,7 +15,7 @@ struct NetworkImage: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: maxSize.width, maxHeight: maxSize.height)
+                    .frame(maxWidth: maxSize.width)
             } else if let localizedError {
                 Text(localizedError + "\n" + "Tap to reload.")
                     .multilineTextAlignment(.center)

@@ -18,7 +18,7 @@ public struct MarkdownRenderer: MarkupVisitor {
             subviews.append(subview)
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: 8) {
+        return AnyView(LazyVStack(alignment: .leading, spacing: 8) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index].clipped()
             }
@@ -151,7 +151,7 @@ public struct MarkdownRenderer: MarkupVisitor {
             Text(inlineCode.code)
                 .font(.system(.body, design: .monospaced))
                 .scaleEffect(0.9)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 5))
+                .background(.secondary.blendMode(.overlay), in: RoundedRectangle(cornerRadius: 5))
         )
     }
     
