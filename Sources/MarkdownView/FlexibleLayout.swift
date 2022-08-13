@@ -31,25 +31,47 @@ struct FlexibleLayout: Layout {
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         guard let totalWidth = proposal.width else { return }
-
+        
         let proposal = ProposedViewSize(width: totalWidth, height: nil)
-
+        
         var rowHeight = CGFloat.zero
         var x: CGFloat = bounds.minX
         var y: CGFloat = bounds.minY
+        
+        var viewRects = [ViewRect]()
         subviews.indices.forEach {
             let subviewSize = subviews[$0].sizeThatFits(proposal)
-            let subviewProposal = ProposedViewSize(subviewSize)
-
+            
             if x + subviewSize.width > bounds.maxX {
+                // Place the last row.
+                placeView(&viewRects, rowHeight: rowHeight)
                 y += rowHeight
                 x = bounds.minX
                 rowHeight = .zero
             }
-
-            subviews[$0].place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: subviewProposal)
+            
+            let viewRect = ViewRect(element: subviews[$0], topLeadingPoint: CGPoint(x: x, y: y), size: subviewSize)
+            viewRects.append(viewRect)
             rowHeight = max(subviewSize.height, rowHeight)
             x += subviewSize.width
         }
+        
+        // Place the last row.
+        placeView(&viewRects, rowHeight: rowHeight)
+    }
+    
+    private func placeView(_ viewRects: inout [ViewRect], rowHeight: CGFloat) {
+        for view in viewRects {
+            let proposal = ProposedViewSize(view.size)
+            let centerPoint = CGPoint(x: view.topLeadingPoint.x, y: view.topLeadingPoint.y + rowHeight / 2)
+            view.element.place(at: centerPoint, anchor: .leading, proposal: proposal)
+        }
+        viewRects.removeAll()
+    }
+    
+    struct ViewRect {
+        var element: LayoutSubviews.Element
+        var topLeadingPoint: CGPoint
+        var size: CGSize
     }
 }

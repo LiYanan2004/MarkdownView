@@ -26,8 +26,7 @@ struct NetworkImage: View {
                     .onTapGesture(perform: reloadImage)
             } else {
                 GeometryReader { proxy in
-                    Rectangle()
-                        .fill(.quaternary)
+                    Color.black.opacity(0.001)
                         .task(id: url) {
                             await loadContent(size: proxy.size)
                         }

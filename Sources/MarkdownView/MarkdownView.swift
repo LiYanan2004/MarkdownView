@@ -3,7 +3,8 @@ import Markdown
 
 public struct MarkdownView: View {
     @Binding private var text: String
-    private var imageHandlerConfiguration = ImageHandlerConfiguration()
+    var imageHandlerConfiguration = ImageHandlerConfiguration()
+    var lazyLoad = true
     
     public init(text: Binding<String>, baseURL: URL? = nil) {
         _text = text
@@ -19,19 +20,17 @@ public struct MarkdownView: View {
         }
     }
     
-    public var body: some View {
-        let document = Document(parsing: text)
-        var renderer = MarkdownRenderer(imageHandlerConfiguration: imageHandlerConfiguration)
-        
-        renderer.RepresentedView(from: document)
+    var configuration: RendererConfiguration {
+        RendererConfiguration(
+            imageHandlerConfiguration: imageHandlerConfiguration,
+            lazyLoad: lazyLoad
+        )
     }
     
-    public func imageHandler(
-        _ handler: MarkdownImageHandler, forURLScheme urlScheme: String
-    ) -> MarkdownView {
-        let result = self
-        result.imageHandlerConfiguration.addHandler(handler, forURLScheme: urlScheme)
+    public var body: some View {
+        let document = Document(parsing: text)
         
-        return result
+        var renderer = Renderer(configuration: configuration)
+        renderer.RepresentedView(from: document)
     }
 }
