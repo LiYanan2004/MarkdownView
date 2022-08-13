@@ -6,7 +6,7 @@ struct FlexibleLayout: Layout {
 
         let proposal = ProposedViewSize(width: totalWidth, height: nil)
         
-        var size = CGSize.zero
+        var size = CGSize(width: totalWidth, height: 0)
         var x = CGFloat.zero
         var y = CGFloat.zero
         var rowHeight = CGFloat.zero
@@ -23,7 +23,6 @@ struct FlexibleLayout: Layout {
             }
             rowHeight = max(subviewSize.height, rowHeight)
             x += subviewSize.width
-            size.width = min(subviewSize.width + size.width, totalWidth)
             size.height = max(y + subviewSize.height, size.height)
         }
         return size

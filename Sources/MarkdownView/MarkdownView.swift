@@ -4,6 +4,7 @@ import Markdown
 public struct MarkdownView: View {
     @Binding private var text: String
     var imageHandlerConfiguration = ImageHandlerConfiguration()
+    var directiveBlockConfiguration = DirectiveBlockConfiguration()
     var lazyLoad = true
     
     public init(text: Binding<String>, baseURL: URL? = nil) {
@@ -20,15 +21,8 @@ public struct MarkdownView: View {
         }
     }
     
-    var configuration: RendererConfiguration {
-        RendererConfiguration(
-            imageHandlerConfiguration: imageHandlerConfiguration,
-            lazyLoad: lazyLoad
-        )
-    }
-    
     public var body: some View {
-        let document = Document(parsing: text)
+        let document = Document(parsing: text, options: .parseBlockDirectives)
         
         var renderer = Renderer(configuration: configuration)
         renderer.RepresentedView(from: document)

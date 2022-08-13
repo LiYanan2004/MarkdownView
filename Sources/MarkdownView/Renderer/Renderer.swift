@@ -114,17 +114,9 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitImage(_ image: Markdown.Image) -> AnyView {
-        let imageHandlerConfiguration = configuration.imageHandlerConfiguration
-        guard let source = URL(string: image.source ?? "") else { return
-            AnyView(SwiftUI.Text(image.plainText))
-        }
-        
-        var handler: String?
-        imageHandlerConfiguration.imageHandlers.keys.forEach {
-            if source.scheme == $0 {
-                handler = $0
-                return
-            }
+        let configuration = configuration.imageHandlerConfiguration
+        guard let source = URL(string: image.source ?? "") else {
+            return AnyView(SwiftUI.Text(image.plainText))
         }
         
         let alt: String
@@ -134,15 +126,23 @@ struct Renderer: MarkupVisitor {
             alt = image.plainText
         }
         
+        var handler: String?
+        configuration.imageHandlers.keys.forEach {
+            if source.scheme == $0 {
+                handler = $0
+                return
+            }
+        }
+        
         let ImageView: any View
         if let handler {
             // Found a specific handler.
-            ImageView = imageHandlerConfiguration.imageHandlers[handler]!.image(source, alt)
+            ImageView = configuration.imageHandlers[handler]!.image(source, alt)
         } else {
             // Didn't find a specific handler.
             // Try to load the image from the Base URL.
             ImageView = MarkdownImageHandler
-                .relativePathImage(baseURL: imageHandlerConfiguration.baseURL)
+                .relativePathImage(baseURL: configuration.baseURL)
                 .image(source, alt)
         }
         
