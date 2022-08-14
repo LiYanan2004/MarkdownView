@@ -131,20 +131,20 @@ struct Renderer: MarkupVisitor {
             alt = image.plainText
         }
         
-        var handler: String?
-        configuration.imageHandlers.keys.forEach {
-            if source.scheme == $0 {
-                handler = $0
-                return
+        var handler: MarkdownImageHandler?
+        if let scheme = source.scheme {
+            configuration.imageHandlers.forEach { key, value in
+                if scheme.lowercased() == key.lowercased() {
+                    handler = value
+                    return
+                }
             }
         }
         
         let ImageView: any View
         if let handler {
             // Found a specific handler.
-            ImageView = configuration
-                .imageHandlers[handler]!
-                .image(source, alt)
+            ImageView = handler.image(source, alt)
         } else {
             // Didn't find a specific handler.
             // Try to load the image from the Base URL.
