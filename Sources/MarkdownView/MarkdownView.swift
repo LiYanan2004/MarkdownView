@@ -23,7 +23,7 @@ public struct MarkdownView: View {
     /// - Parameters:
     ///   - text: Markdown Text.
     ///   - baseURL: A path where the images will load from
-    public init(_ text: String, baseURL: URL? = nil) {
+    public init(text: String, baseURL: URL? = nil) {
         _text = .constant(text)
         if let baseURL {
             imageHandlerConfiguration = ImageHandlerConfiguration(baseURL: baseURL)
@@ -31,9 +31,7 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        let document = Document(parsing: text, options: .parseBlockDirectives)
-        
-        var renderer = Renderer(configuration: configuration)
-        renderer.RepresentedView(from: document)
+        var renderer = Renderer(text: $text, withConfiguration: configuration)
+        renderer.RepresentedView()
     }
 }

@@ -2,11 +2,16 @@ import SwiftUI
 import Markdown
 
 struct Renderer: MarkupVisitor {
-
+    var text: Binding<String>
     var configuration: RendererConfiguration
     
-    mutating func RepresentedView(from doc: Document) -> AnyView {
-        visit(doc)
+    init(text: Binding<String>, withConfiguration configuration: RendererConfiguration) {
+        self.configuration = configuration
+        self.text = text
+    }
+    
+    mutating func RepresentedView() -> AnyView {
+        visit(Document(parsing: text.wrappedValue, options: .parseBlockDirectives))
     }
     
     mutating func visitDocument(_ document: Document) -> AnyView {

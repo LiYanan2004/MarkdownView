@@ -18,15 +18,8 @@ extension Renderer {
         var subviews = [AnyView]()
         for (index, listItem) in orderedList.listItems.enumerated() {
             let row = HStack(alignment: .firstTextBaseline) {
-                if let checkbox = listItem.checkbox {
-                    switch checkbox {
-                    case .checked:
-                        SwiftUI.Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.accentColor)
-                    case .unchecked:
-                        SwiftUI.Image(systemName: "circle")
-                            .foregroundStyle(.secondary)
-                    }
+                if listItem.checkbox != nil {
+                    CheckBox(listItem: listItem, text: text)
                 } else {
                     if orderedList.listDepth == 0 {
                         SwiftUI.Text("\t\(index + 1).")
@@ -54,20 +47,13 @@ extension Renderer {
         var subviews = [AnyView]()
         for listItem in unorderedList.listItems {
             let listRow = HStack(alignment: .firstTextBaseline) {
-                if let checkbox = listItem.checkbox {
-                    switch checkbox {
-                    case .checked:
-                        SwiftUI.Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.accentColor)
-                    case .unchecked:
-                        SwiftUI.Image(systemName: "circle")
-                            .foregroundStyle(.secondary)
-                    }
+                if listItem.checkbox != nil {
+                    CheckBox(listItem: listItem, text: text)
                 } else {
                     if unorderedList.listDepth == 0 {
-                        SwiftUI.Text("\t•")
+                        SwiftUI.Text("\t•").fontWeight(.black)
                     } else {
-                        SwiftUI.Text("•")
+                        SwiftUI.Text("•").fontWeight(.black)
                     }
                 }
                 visit(listItem)
@@ -84,5 +70,44 @@ extension Renderer {
                 subviews[index]
             }
         })
+    }
+}
+
+struct CheckBoxRewriter: MarkupRewriter {
+    func visitListItem(_ listItem: ListItem) -> Markup? {
+        var listItem = listItem
+        listItem.checkbox = listItem.checkbox == .checked ? .unchecked : .checked
+        return listItem
+    }
+}
+
+struct CheckBox: View {
+    var listItem: ListItem
+    @Binding var text: String
+    
+    var body: some View {
+        if let checkbox = listItem.checkbox {
+            switch checkbox {
+            case .checked:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.accentColor)
+                    .onTapGesture(perform: toggleStatus)
+            case .unchecked:
+                Image(systemName: "circle")
+                    .foregroundStyle(.secondary)
+                    .onTapGesture(perform: toggleStatus)
+            }
+        }
+    }
+    
+    func toggleStatus() {
+        guard let sourceRange = listItem.range else { return }
+        let rewriter = CheckBoxRewriter()
+        let newNode = rewriter.visitListItem(listItem) as! ListItem
+        let newMarkdownText = newNode.format().trimmingCharacters(in: .newlines)
+        
+        var separatedText = text.split(separator: "\n", omittingEmptySubsequences: false)
+        separatedText[sourceRange.lowerBound.line - 1] = Substring(stringLiteral: newMarkdownText)
+        text = separatedText.joined(separator: "\n")
     }
 }

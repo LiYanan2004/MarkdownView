@@ -33,7 +33,7 @@ If you still want to support older operating systems, there is a similar package
 You can create a `Markdown` view by providing a Markdown-formatted string.
 
 ```swift
-MarkdownView("This is the Apple's **newly published** [swift-markdown](https://github.com/apple/swift-markdown)")
+MarkdownView(text: "This is the Apple's **newly published** [swift-markdown](https://github.com/apple/swift-markdown)")
 ```
 
 ![](Images/bold_and_links.png)
