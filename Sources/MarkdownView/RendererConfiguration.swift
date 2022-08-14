@@ -3,6 +3,7 @@ import Foundation
 struct RendererConfiguration {
     var imageHandlerConfiguration: ImageHandlerConfiguration
     var directiveBlockConfiguration: DirectiveBlockConfiguration
+    var imageCacheController: ImageCacheController
     var lazyLoad: Bool
 }
 
@@ -11,6 +12,7 @@ extension MarkdownView {
         RendererConfiguration(
             imageHandlerConfiguration: imageHandlerConfiguration,
             directiveBlockConfiguration: directiveBlockConfiguration,
+            imageCacheController: imageCacheController,
             lazyLoad: lazyLoad
         )
     }

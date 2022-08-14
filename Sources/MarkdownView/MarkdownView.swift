@@ -3,6 +3,7 @@ import Markdown
 
 public struct MarkdownView: View {
     @Binding private var text: String
+    @StateObject var imageCacheController = ImageCacheController()
     var imageHandlerConfiguration = ImageHandlerConfiguration()
     var directiveBlockConfiguration = DirectiveBlockConfiguration()
     var lazyLoad = true

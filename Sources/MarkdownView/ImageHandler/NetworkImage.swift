@@ -8,6 +8,12 @@ struct NetworkImage: View {
     @State private var maxSize = CGSize.zero
     @State private var localizedError: String?
     @Environment(\.displayScale) private var scale
+    @EnvironmentObject private var cacheController: ImageCacheController
+    
+    init(url: URL, alt: String) {
+        self.url = url
+        self.alt = alt
+    }
     
     var body: some View {
         VStack {
@@ -49,39 +55,23 @@ struct NetworkImage: View {
     }
     
     private func loadContent(size: CGSize) async {
+        if let idx = cacheController.caches.firstIndex(where: { $0.id == url }) {
+            showImage(cacheController.caches[idx].image)
+            return
+        }
         do {
             let data = try await loadResource()
             #if os(macOS)
             if let image = NSImage(data: data) {
-                self.maxSize = image.size
-                self.image = Image(nsImage: image)
+                showImage(image)
             } else {
-                if String(data: data, encoding: .utf8)?.contains("<svg") ?? false {
-                    if let image = SVGKImage(contentsOf: url).nsImage {
-                        self.maxSize = image.size
-                        self.image = Image(nsImage: image)
-                        return
-                    }
-                }
-                throw ImageError.formatError
+                try await loadAsSVG(data: data)
             }
             #elseif os(iOS) || os(tvOS)
             if let image = UIImage(data: data) {
-                self.maxSize = image.size
-                if image.size.width <= size.width {
-                    self.image = Image(uiImage: image)
-                } else {
-                    try await prepareThumbnailAndDisplay(for: image, size: size)
-                }
+                try await prepareThumbnailAndDisplay(for: image, size: size)
             } else {
-                if String(data: data, encoding: .utf8)?.contains("<svg") ?? false {
-                    if let image = SVGKImage(contentsOf: url).uiImage {
-                        self.maxSize = image.size
-                        self.image = Image(uiImage: image)
-                        return
-                    }
-                }
-                throw ImageError.formatError
+                try await loadAsSVG(data: data)
             }
             #endif
         } catch {
@@ -101,12 +91,16 @@ extension NetworkImage {
     
 #if os(iOS) || os(tvOS)
     private func prepareThumbnailAndDisplay(for image: UIImage, size: CGSize) async throws {
-        let thumbnailSize = thumbnailSize(for: image, byReferencing: size)
-        if let thumbnail = await image.byPreparingThumbnail(ofSize: thumbnailSize) {
-            self.image = Image(uiImage: thumbnail)
+        if size.width >= image.size.width {
+            showImage(image)
             return
         }
-        throw ImageError.thumbnailError
+        let thumbnailSize = thumbnailSize(for: image, byReferencing: size)
+        if let thumbnail = await image.byPreparingThumbnail(ofSize: thumbnailSize) {
+            showImage(thumbnail)
+        } else {
+            throw ImageError.thumbnailError
+        }
     }
     
     private func thumbnailSize(for image: UIImage, byReferencing size: CGSize) -> CGSize {
@@ -116,6 +110,32 @@ extension NetworkImage {
         return CGSize(width: size.width * scale, height: thumbnailHeight * scale)
     }
 #endif
+    
+    func showImage(_ image: PlatformImage) {
+        self.maxSize = image.size
+#if os(iOS) || os(tvOS)
+        self.image = Image(uiImage: image)
+#else
+        self.image = Image(nsImage: image)
+#endif
+        cacheController.addImageCache(url: url, image: image)
+    }
+    
+    func loadAsSVG(data: Data) async throws {
+        guard String(data: data, encoding: .utf8)?.contains("<svg") ?? false else {
+            throw ImageError.formatError
+        }
+        let source = SVGKSource(inputSteam: InputStream(data: data))
+#if os(iOS) || os(tvOS)
+        if let image = SVGKImage(source: source).uiImage {
+            showImage(image)
+        } else { throw ImageError.formatError }
+#else
+        if let image = SVGKImage(source: source).nsImage {
+            showImage(image)
+        } else { throw ImageError.formatError }
+#endif
+    }
 }
 
 // MARK: - Errors

@@ -50,7 +50,7 @@ struct Renderer: MarkupVisitor {
         }
 
         return AnyView(ForEach(subText.indices, id: \.self) { index in
-            subText[index]
+            subText[index].textSelection(.enabled)
         })
     }
     
@@ -137,7 +137,9 @@ struct Renderer: MarkupVisitor {
         let ImageView: any View
         if let handler {
             // Found a specific handler.
-            ImageView = configuration.imageHandlers[handler]!.image(source, alt)
+            ImageView = configuration
+                .imageHandlers[handler]!
+                .image(source, alt)
         } else {
             // Didn't find a specific handler.
             // Try to load the image from the Base URL.
@@ -147,7 +149,9 @@ struct Renderer: MarkupVisitor {
         }
         
         return AnyView(VStack {
-            AnyView(ImageView)
+             AnyView(ImageView)
+                .drawingGroup()
+                .environmentObject(self.configuration.imageCacheController)
         })
     }
 }
