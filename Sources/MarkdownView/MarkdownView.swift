@@ -4,9 +4,13 @@ import Markdown
 public struct MarkdownView: View {
     @Binding private var text: String
     @StateObject var imageCacheController = ImageCacheController()
+    
+    var lazyLoad = true
     var imageHandlerConfiguration = ImageHandlerConfiguration()
     var directiveBlockConfiguration = DirectiveBlockConfiguration()
-    var lazyLoad = true
+    var codeBlockThemeConfiguration = CodeBlockThemeConfiguration(
+        lightModeThemeName: "xcode", darkModeThemeName: "dark"
+    )
     
     /// Parse the Markdown and render it as a single `View`
     /// - Parameters:

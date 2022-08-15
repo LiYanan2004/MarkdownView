@@ -16,11 +16,6 @@ extension MarkdownView {
     }
 }
 
-// MARK: - Styles
-extension MarkdownView {
-    
-}
-
 // MARK: - Image Handlers
 extension MarkdownView {
     /// Set your custom Image Handler
@@ -64,12 +59,25 @@ extension MarkdownView {
     /// - Returns: `MarkdownView` without any Directive Block Handler.
     /// 
     /// If your Directive Block's name conflicts with the default one, you can disable the default one.
-    @available(*, deprecated,
-      message: "The @background handler will not be enabled by default"
-    )
+    @available(*, deprecated, message: "The @background handler will not be enabled by default.")
     public func disableDefaultDirectiveBlockHandler() -> MarkdownView {
         let result = self
         result.directiveBlockConfiguration.directiveBlockHandlers = [:]
+        
+        return result
+    }
+}
+
+// MARK: - Code Block Theme
+extension MarkdownView {
+    /// Customize the theme of the Code Block
+    /// - Parameter configuration: Theme configuration of the Code Block, see ``CodeBlockThemeConfiguration``.
+    /// - Returns: `MarkdownView` with custom Code Block theme.
+    public func codeBlockThemeConfiguration(
+        using configuration: CodeBlockThemeConfiguration
+    ) -> MarkdownView {
+        var result = self
+        result.codeBlockThemeConfiguration = configuration
         
         return result
     }
