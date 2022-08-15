@@ -1,17 +1,24 @@
 import SwiftUI
 
 class ImageHandlerConfiguration {
+    /// The base URL for local images or network images.
     var baseURL: URL
     
+    /// Create a Configuration for image handling.
     init(baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
         self.baseURL = baseURL
     }
     
+    /// All the handlers that have been added.
     var imageHandlers: [String: MarkdownImageHandler] = [
         "http": .networkImage,
         "https": .networkImage,
     ]
     
+    /// Add custom handler for Image Handling.
+    /// - Parameters:
+    ///   - handler: Represention of the Image.
+    ///   - urlScheme: The url scheme to use the handler.
     func addHandler(
         _ handler: MarkdownImageHandler, forURLScheme urlScheme: String
     ) {
@@ -19,20 +26,29 @@ class ImageHandlerConfiguration {
     }
 }
 
+/// Handle the represention of the Image.
 public struct MarkdownImageHandler {
     typealias SwiftUIImage = SwiftUI.Image
+    
+    /// The Image View.
     var image: (URL, String) -> any View
     
-    public init(@ViewBuilder image: @escaping (URL, String) -> some View) {
-        self.image = image
+    
+    /// Create a Image Handler to handle image loading.
+    /// - Parameter imageView: The Image View containing the image from a `URL` and a `String` as the title of the image.
+    public init(@ViewBuilder imageView: @escaping (URL, String) -> some View) {
+        self.image = imageView
     }
 }
 
 extension MarkdownImageHandler {
-    public static var networkImage = MarkdownImageHandler { 
+    /// A handler used to load Network Images.
+    static var networkImage = MarkdownImageHandler {
         NetworkImage(url: $0, alt: $1)
     }
     
+    /// A handler used to load Images in a relative path url.
+    /// - note: You need to specify the `baseURL` when creating a `MarkdownView`
     public static func relativePathImage(
         baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     ) -> MarkdownImageHandler {
@@ -42,6 +58,7 @@ extension MarkdownImageHandler {
         }
     }
     
+    /// A handler used to load images from your Assets Catalog.
     public static func assetImage(
         name: @escaping (URL) -> String = \.lastPathComponent,
         in bundle: Bundle? = nil
@@ -61,7 +78,7 @@ extension MarkdownImageHandler {
                 })
             }
 #elseif os(iOS) || os(tvOS)
-            if let uiImage = Image(uiImage: UIImage(named: name(url), in: bundle, compatibleWith: nil)) {
+            if let uiImage = UIImage(named: name(url), in: bundle, compatibleWith: nil) {
                 return AnyView(VStack {
                     Image(uiImage: uiImage).resizable().aspectRatio(contentMode: .fit)
                     Text(alt).foregroundStyle(.secondary).font(.callout)
