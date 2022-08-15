@@ -64,6 +64,9 @@ extension MarkdownView {
     /// - Returns: `MarkdownView` without any Directive Block Handler.
     /// 
     /// If your Directive Block's name conflicts with the default one, you can disable the default one.
+    @available(*, deprecated,
+      message: "The @background handler will not be enabled by default"
+    )
     public func disableDefaultDirectiveBlockHandler() -> MarkdownView {
         let result = self
         result.directiveBlockConfiguration.directiveBlockHandlers = [:]

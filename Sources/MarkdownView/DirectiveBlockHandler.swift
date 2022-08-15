@@ -50,9 +50,7 @@ extension MarkdownDirectiveBlockHandler {
 }
 
 class DirectiveBlockConfiguration {
-    var directiveBlockHandlers: [String : MarkdownDirectiveBlockHandler] = [
-        "background": .backgroundColor
-    ]
+    var directiveBlockHandlers: [String : MarkdownDirectiveBlockHandler] = [:]
     
     /// Add custom handler for Directive Block
     /// - Parameters:
