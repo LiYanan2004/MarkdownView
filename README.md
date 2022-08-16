@@ -18,7 +18,7 @@ You can use MarkdownView in the following platforms:
 
 Sadly, the system requirements is relatively high because we need to use the Layout Protocal that only supports in the new Operating Systems to automatically position elements.  
 
-If you still want to support older operating systems, there is a similar package[gonzalezreal/MarkdownUI](https://github.com/gonzalezreal/MarkdownUI.git).
+If you still want to support older operating systems, there is a similar package [gonzalezreal/MarkdownUI](https://github.com/gonzalezreal/MarkdownUI.git).
 
 ## Advantage
 
@@ -26,6 +26,8 @@ If you still want to support older operating systems, there is a similar package
 - **SVG rendering** support
 -  Highly **Customizable** and **Extensible**
     - Supports almost all the **built-in modifiers**
+    - Supports Directive Block Rendering
+    - Supports custom image loading
 -  Fully Native SwiftUI code
 
 ## Usage
@@ -47,8 +49,9 @@ If your `Markdown` have CheckBoxes, you can provide a Binding string.
 ```swift
 MarkdownView(text: $text)
 ```   
-
 ![](Images/checkbox.png)
+
+> For more information, Check out [MarkdownView's Documentation](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
 
 ## Swift Package Manager
 

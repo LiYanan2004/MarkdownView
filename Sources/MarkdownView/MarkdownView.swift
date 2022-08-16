@@ -1,10 +1,13 @@
 import SwiftUI
 import Markdown
 
+/// A view that renders markdown text.
+///
+/// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)``.
+///
 public struct MarkdownView: View {
     @Binding private var text: String
     @StateObject var imageCacheController = ImageCacheController()
-    
     var lazyLoad = true
     var imageHandlerConfiguration = ImageHandlerConfiguration()
     var directiveBlockConfiguration = DirectiveBlockConfiguration()
@@ -12,10 +15,10 @@ public struct MarkdownView: View {
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
     
-    /// Parse the Markdown and render it as a single `View`
+    /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
-    ///   - text: A Binding Text that can be modified
-    ///   - baseURL: A path where the images will load from
+    ///   - text: A Binding Text that can be modified.
+    ///   - baseURL: A path where the images will load from.
     public init(text: Binding<String>, baseURL: URL? = nil) {
         _text = text
         if let baseURL {
@@ -23,10 +26,10 @@ public struct MarkdownView: View {
         }
     }
     
-    /// Parse the Markdown and render it as a single `View`
+    /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
     ///   - text: Markdown Text.
-    ///   - baseURL: A path where the images will load from
+    ///   - baseURL: A path where the images will load from.
     public init(text: String, baseURL: URL? = nil) {
         _text = .constant(text)
         if let baseURL {

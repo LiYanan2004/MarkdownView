@@ -48,7 +48,8 @@ extension MarkdownImageHandler {
     }
     
     /// A handler used to load Images in a relative path url.
-    /// - note: You need to specify the `baseURL` when creating a `MarkdownView`
+    /// 
+    /// - note: You need to specify the `baseURL` when creating a `MarkdownView`.
     public static func relativePathImage(
         baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     ) -> MarkdownImageHandler {

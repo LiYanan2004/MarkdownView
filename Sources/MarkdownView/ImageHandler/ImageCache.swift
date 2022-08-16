@@ -1,9 +1,9 @@
 import SwiftUI
 
 #if os(macOS)
-public typealias PlatformImage = NSImage
+typealias PlatformImage = NSImage
 #else
-public typealias PlatformImage = UIImage
+typealias PlatformImage = UIImage
 #endif
 
 /// A model that stores `URL` and loaded `Image`

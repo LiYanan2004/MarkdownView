@@ -102,19 +102,20 @@ struct HighlightCodeBlock: View {
     }
 }
 
-/// The Theme Configuration of the Code Block
+/// The Theme Configuration of the Code Block.
 ///
-/// - note: **Available theme names are**: "vs", "atelier-seaside-dark", "isbl-editor-dark", "brown-paper", "atelier-plateau-light", "school-book", "xcode", "atelier-sulphurpool-dark", "tomorrow-night-blue", "vs2015", "atelier-heath-dark", "paraiso-light", "rainbow", "qtcreator\_light", "a11y-light", "kimbie.dark", "atelier-heath-light", "far", "atelier-dune-dark", "shades-of-purple", "kimbie.light", "railscasts", "solarized-dark", "atelier-estuary-light", "xt256", "mono-blue", "ocean", "github-gist", "atelier-seaside-light", "tomorrow-night-eighties", "atom-one-dark", "qtcreator\_dark", "atelier-savanna-dark", "color-brewer", "pojoaque", "routeros", "atelier-forest-dark", "gml", "tomorrow-night", "obsidian", "lightfair", "atelier-lakeside-dark", "gruvbox-light", "idea", "tomorrow", "atelier-forest-light", "arduino-light", "gruvbox-dark", "dracula", "magula", "arta", "purebasic", "hopscotch", "github", "nord", "dark", "atom-one-light", "monokai", "docco", "default", "ascetic", "isbl-editor-light", "atelier-cave-light", "a11y-dark", "atelier-sulphurpool-light", "atelier-plateau-dark", "darkula", "atelier-cave-dark", "ir-black", "solarized-light", "tomorrow-night-bright", "atelier-savanna-light", "foundation", "codepen-embed", "atelier-estuary-dark", "googlecode", "atom-one-dark-reasonable", "atelier-dune-light", "paraiso-dark", "zenburn", "androidstudio", "grayscale", "sunburst", "agate", "hybrid", "darcula", "atelier-lakeside-light", "monokai-sublime", "an-old-hope"
+/// - note: **Available theme names are**: "vs", "atelier-seaside-dark", "isbl-editor-dark", "brown-paper", "atelier-plateau-light", "school-book", "xcode", "atelier-sulphurpool-dark", "tomorrow-night-blue", "vs2015", "atelier-heath-dark", "paraiso-light", "rainbow", "qtcreator\_light", "a11y-light", "kimbie.dark", "atelier-heath-light", "far", "atelier-dune-dark", "shades-of-purple", "kimbie.light", "railscasts", "solarized-dark", "atelier-estuary-light", "xt256", "mono-blue", "ocean", "github-gist", "atelier-seaside-light", "tomorrow-night-eighties", "atom-one-dark", "qtcreator\_dark", "atelier-savanna-dark", "color-brewer", "pojoaque", "routeros", "atelier-forest-dark", "gml", "tomorrow-night", "obsidian", "lightfair", "atelier-lakeside-dark", "gruvbox-light", "idea", "tomorrow", "atelier-forest-light", "arduino-light", "gruvbox-dark", "dracula", "magula", "arta", "purebasic", "hopscotch", "github", "nord", "dark", "atom-one-light", "monokai", "docco", "default", "ascetic", "isbl-editor-light", "atelier-cave-light", "a11y-dark", "atelier-sulphurpool-light", "atelier-plateau-dark", "darkula", "atelier-cave-dark", "ir-black", "solarized-light", "tomorrow-night-bright", "atelier-savanna-light", "foundation", "codepen-embed", "atelier-estuary-dark", "googlecode", "atom-one-dark-reasonable", "atelier-dune-light", "paraiso-dark", "zenburn", "androidstudio", "grayscale", "sunburst", "agate", "hybrid", "darcula", "atelier-lakeside-light", "monokai-sublime", "an-old-hope".
 ///
-/// For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr)
+/// For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
 public struct CodeBlockThemeConfiguration {
-    /// The theme name in Light Mode
+    /// The theme name in Light Mode.
     public var lightModeThemeName: String
     
-    /// The theme name in Dark Mode
+    /// The theme name in Dark Mode.
     public var darkModeThemeName: String
     
-    /// Creates a single theme for the Code Block
+    /// Creates a single theme for the Code Block.
+    ///
     /// - Parameter themeName: the name of the theme to use in both Light Mode and Dark Mode.
     ///
     /// - warning: You should test the visibility of the code in Light Mode and Dark Mode first.
