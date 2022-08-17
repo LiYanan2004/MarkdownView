@@ -2,6 +2,8 @@ import NaturalLanguage
 
 extension Renderer {
     func Split(_ text: String) -> [String] {
+        guard text.count > 0 else { return [] }
+        
         var subText = [String]()
         
         let tagger = NLTagger(tagSchemes: [.tokenType])
