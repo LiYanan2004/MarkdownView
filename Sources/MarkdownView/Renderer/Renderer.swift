@@ -153,11 +153,11 @@ struct Renderer: MarkupVisitor {
                 .image(source, alt)
         }
         
-        return AnyView(VStack {
-             AnyView(ImageView)
+        return AnyView(
+            ImageView
                 .drawingGroup()
                 .environmentObject(self.configuration.imageCacheController)
-        })
+        )
     }
 }
 

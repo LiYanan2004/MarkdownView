@@ -1,7 +1,7 @@
 import SwiftUI
 import Markdown
 
-/// A view that renders markdown text.
+/// A view to render markdown text.
 ///
 /// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)``.
 ///
@@ -26,7 +26,7 @@ public struct MarkdownView: View {
         }
     }
     
-    /// Parse the Markdown and render it as a single `View`.
+    /// Parse the Markdown and render it as a single view.
     /// - Parameters:
     ///   - text: Markdown Text.
     ///   - baseURL: A path where the images will load from.
