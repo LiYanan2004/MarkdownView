@@ -44,6 +44,10 @@ extension Renderer {
                 .padding(roundedSide.edge, roundedSide == .none ? 0 : 5)
         })
     }
+    
+    func visitInlineHTML(_ inlineHTML: InlineHTML) -> AnyView {
+        AnyView(SwiftUI.Text(inlineHTML.rawHTML))
+    }
 }
 
 // MARK: - Code Block
@@ -79,8 +83,11 @@ extension Renderer {
             PaddingLine()
         })
     }
+    
+    func visitHTMLBlock(_ html: HTMLBlock) -> AnyView {
+        AnyView(SwiftUI.Text(html.rawHTML))
+    }
 }
-
 
 struct HighlightCodeBlock: View {
     var highlighter: Highlightr
