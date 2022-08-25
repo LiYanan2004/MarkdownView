@@ -31,12 +31,11 @@ public struct MarkdownImageHandler {
     typealias SwiftUIImage = SwiftUI.Image
     
     /// The Image View.
-    var image: (URL, String) -> any View
-    
+    var image: (URL, String?) -> any View
     
     /// Create a Image Handler to handle image loading.
-    /// - Parameter imageView: The Image View containing the image from a `URL` and a `String` as the title of the image.
-    public init(@ViewBuilder imageView: @escaping (URL, String) -> some View) {
+    /// - Parameter imageView: The Image View to display an image. The `imageView` closure's parameter contains the URL of the Image and an optional title of the Image.
+    public init(@ViewBuilder imageView: @escaping (URL, String?) -> some View) {
         self.image = imageView
     }
 }
@@ -64,8 +63,8 @@ extension MarkdownImageHandler {
         name: @escaping (URL) -> String = \.lastPathComponent,
         in bundle: Bundle? = nil
     ) -> MarkdownImageHandler {
-        MarkdownImageHandler { url, alt  in
-#if os(macOS)
+        MarkdownImageHandler { url, alt in
+            #if os(macOS)
             let nsImage: NSImage?
             if let bundle = bundle, bundle != .main {
                 nsImage = bundle.image(forResource: name(url))
@@ -73,23 +72,14 @@ extension MarkdownImageHandler {
                 nsImage = NSImage(named: name(url))
             }
             if let nsImage {
-                return AnyView(VStack {
-                    Image(nsImage: nsImage).resizable().aspectRatio(contentMode: .fit)
-                    Text(alt).foregroundStyle(.secondary).font(.callout)
-                })
+                return AssetImage(image: nsImage, alt: alt)
             }
-#elseif os(iOS) || os(tvOS)
+            #elseif os(iOS) || os(tvOS)
             if let uiImage = UIImage(named: name(url), in: bundle, compatibleWith: nil) {
-                return AnyView(VStack {
-                    Image(uiImage: uiImage).resizable().aspectRatio(contentMode: .fit)
-                    Text(alt).foregroundStyle(.secondary).font(.callout)
-                })
+                return AssetImage(image: uiImage, alt: alt)
             }
-#endif
-            return AnyView(VStack {
-                Image(systemName: "externaldrive.fill.badge.xmark").font(.largeTitle)
-                Text("Resource Error").font(.callout)
-            }.foregroundStyle(.secondary))
+            #endif
+            return AssetImage(image: nil, alt: nil)
         }
     }
 }

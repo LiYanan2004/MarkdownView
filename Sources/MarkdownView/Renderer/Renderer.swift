@@ -124,11 +124,11 @@ struct Renderer: MarkupVisitor {
             return AnyView(SwiftUI.Text(image.plainText))
         }
         
-        let alt: String
+        let alt: String?
         if let title = image.title, !title.isEmpty {
             alt = title
         } else {
-            alt = image.plainText
+            alt = image.plainText.isEmpty ? nil : image.plainText
         }
         
         var handler: MarkdownImageHandler?

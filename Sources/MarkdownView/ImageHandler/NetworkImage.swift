@@ -3,17 +3,12 @@ import SVGKit
 
 struct NetworkImage: View {
     var url: URL
-    var alt: String
+    var alt: String?
     @State private var image: Image?
     @State private var maxSize = CGSize.zero
     @State private var localizedError: String?
     @Environment(\.displayScale) private var scale
     @EnvironmentObject private var cacheController: ImageCacheController
-    
-    init(url: URL, alt: String) {
-        self.url = url
-        self.alt = alt
-    }
     
     var body: some View {
         VStack {
@@ -39,12 +34,14 @@ struct NetworkImage: View {
                 }
             }
             
-            Text(alt)
-                .foregroundStyle(.secondary)
-                .font(.callout)
-                .onChange(of: url) { _ in
-                    reloadImage()
-                }
+            if let alt {
+                Text(alt)
+                    .foregroundStyle(.secondary)
+                    .font(.callout)
+            }
+        }
+        .onChange(of: url) { _ in
+            reloadImage()
         }
     }
     
