@@ -40,7 +40,7 @@ extension Renderer {
         var subviews = [AnyView]()
         for tableCell in row.cells {
             let cell = visitTableCell(tableCell).gridColumnAlignment(tableCell.alignment)
-            subviews.append(AnyView(cell))
+            subviews.append(AnyView(cell.gridCellColumns(Int(tableCell.colspan))))
         }
         
         return AnyView(GridRow {
