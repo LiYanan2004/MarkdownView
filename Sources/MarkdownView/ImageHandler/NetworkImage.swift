@@ -5,9 +5,10 @@ struct NetworkImage: View {
     var url: URL
     var alt: String?
     @State private var image: Image?
-    @State private var maxSize = CGSize.zero
+    @State private var imageSize = CGSize.zero
     @State private var localizedError: String?
     @Environment(\.displayScale) private var scale
+    @Environment(\.containerSize) private var containerSize
     @EnvironmentObject private var cacheController: ImageCacheController
     
     var body: some View {
@@ -16,7 +17,7 @@ struct NetworkImage: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: maxSize.width)
+                    .frame(maxWidth: imageSize.width)
             } else if let localizedError {
                 Text(localizedError + "\n" + "Tap to reload.")
                     .multilineTextAlignment(.center)
@@ -26,41 +27,48 @@ struct NetworkImage: View {
                     .containerShape(Rectangle())
                     .onTapGesture(perform: reloadImage)
             } else {
-                GeometryReader { proxy in
-                    Color.black.opacity(0.001)
-                        .task(id: url) {
-                            await loadContent(size: proxy.size)
-                        }
-                }
+                // Placeholder height = 5
+                let height = imageSize != .zero ? containerSize.width / imageSize.width * imageSize.height : 5
+                Color.black.opacity(0.001)
+                    .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
+                    .frame(height: height)
             }
-            
+
             if let alt {
                 Text(alt)
                     .foregroundStyle(.secondary)
                     .font(.callout)
             }
         }
-        .onChange(of: url) { _ in
-            reloadImage()
+        .overlay {
+            GeometryReader { proxy in
+                Color.black.opacity(0.001)
+                    .task(id: url) {
+                        reloadImage()
+                        await loadContent(size: proxy.size)
+                        showImage()
+                    }
+            }
         }
     }
     
     private func reloadImage() {
         image = nil
         localizedError = nil
-        maxSize = CGSize.zero
+        imageSize = CGSize.zero
     }
     
     private func loadContent(size: CGSize) async {
-        if let idx = cacheController.caches.firstIndex(where: { $0.id == url }) {
-            showImage(cacheController.caches[idx].image)
+        // Load image from Cache directly.
+        if isCached {
+            showImage()
             return
         }
         do {
             let data = try await loadResource()
             #if os(macOS)
             if let image = NSImage(data: data) {
-                showImage(image)
+                cacheController.cacheImage(image, url: url)
             } else {
                 try await loadAsSVG(data: data)
             }
@@ -76,6 +84,20 @@ struct NetworkImage: View {
             print(error.localizedDescription)
         }
     }
+    
+    func showImage() {
+        guard let image = cacheController.image(from: url) else { return }
+        self.imageSize = image.size
+#if os(iOS) || os(tvOS)
+        self.image = Image(uiImage: image)
+#else
+        self.image = Image(nsImage: image)
+#endif
+    }
+    
+    var isCached: Bool {
+        cacheController.image(from: url) != nil
+    }
 }
 
 // MARK: - Helper
@@ -89,7 +111,7 @@ extension NetworkImage {
 #if os(iOS) || os(tvOS)
     private func prepareThumbnailAndDisplay(for image: UIImage, size: CGSize) async throws {
         if size.width >= image.size.width {
-            showImage(image)
+            cacheController.cacheImage(image, url: url)
             return
         }
         let thumbnailSize = thumbnailSize(for: image, byReferencing: size)
@@ -108,16 +130,6 @@ extension NetworkImage {
     }
 #endif
     
-    func showImage(_ image: PlatformImage) {
-        self.maxSize = image.size
-#if os(iOS) || os(tvOS)
-        self.image = Image(uiImage: image)
-#else
-        self.image = Image(nsImage: image)
-#endif
-        cacheController.addImageCache(url: url, image: image)
-    }
-    
     func loadAsSVG(data: Data) async throws {
         guard String(data: data, encoding: .utf8)?.contains("<svg") ?? false else {
             throw ImageError.formatError
@@ -125,11 +137,11 @@ extension NetworkImage {
         let source = SVGKSource(inputSteam: InputStream(data: data))
 #if os(iOS) || os(tvOS)
         if let image = SVGKImage(source: source).uiImage {
-            showImage(image)
+            cacheController.cacheImage(image, url: url)
         } else { throw ImageError.formatError }
 #else
         if let image = SVGKImage(source: source).nsImage {
-            showImage(image)
+            cacheController.cacheImage(image, url: url)
         } else { throw ImageError.formatError }
 #endif
     }

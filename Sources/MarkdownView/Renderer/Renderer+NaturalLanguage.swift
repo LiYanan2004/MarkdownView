@@ -1,7 +1,35 @@
 import NaturalLanguage
+import SwiftUI
+
+struct TextView: View {
+    var text: String
+    @State private var isReady = false
+    @State private var subText: [String] = []
+    
+    var body: some View {
+        Group {
+            if isReady {
+                ForEach(subText.indices, id: \.self) { i in
+                    Text(subText[i])
+                }
+            } else {
+                Color.black.opacity(0.001)
+            }
+        }
+        .task(id: text, priority: .high) {
+            updateContent()
+        }
+    }
+    
+    @MainActor func updateContent() {
+        isReady = false
+        subText = Renderer.Split(text)
+        isReady = true
+    }
+}
 
 extension Renderer {
-    func Split(_ text: String) -> [String] {
+    static func Split(_ text: String) -> [String] {
         guard text.count > 0 else { return [] }
         
         var subText = [String]()

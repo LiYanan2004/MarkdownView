@@ -6,9 +6,9 @@ import Markdown
 /// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)``.
 ///
 public struct MarkdownView: View {
+    @State private var containerSize = CGSize.zero
     @Binding private var text: String
     @StateObject var imageCacheController = ImageCacheController()
-    var lazyLoad = true
     var imageHandlerConfiguration = ImageHandlerConfiguration()
     var directiveBlockConfiguration = DirectiveBlockConfiguration()
     var codeBlockThemeConfiguration = CodeBlockThemeConfiguration(
@@ -40,5 +40,34 @@ public struct MarkdownView: View {
     public var body: some View {
         var renderer = Renderer(text: $text, withConfiguration: configuration)
         renderer.RepresentedView()
+            .environment(\.containerSize, containerSize)
+            .overlay {
+                GeometryReader { proxy in
+                    Color.clear
+                        .preference(key: ContainerMeasurement.self, value: proxy.size)
+                }
+            }
+            .onPreferenceChange(ContainerMeasurement.self) { size in
+                containerSize = size
+            }
+    }
+}
+
+struct ContainerMeasurement: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
+    }
+}
+
+struct ContainerSize: EnvironmentKey {
+    static var defaultValue = CGSize.zero
+}
+
+extension EnvironmentValues {
+    var containerSize: CGSize {
+        get { self[ContainerSize.self] }
+        set { self[ContainerSize.self] = newValue }
     }
 }

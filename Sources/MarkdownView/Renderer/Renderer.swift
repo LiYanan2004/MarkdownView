@@ -21,19 +21,11 @@ struct Renderer: MarkupVisitor {
             subviews.append(visit(child))
         }
         
-        if configuration.lazyLoad {
-            return AnyView(LazyVStack(alignment: .leading, spacing: 8, pinnedViews: .sectionHeaders) {
-                ForEach(subviews.indices, id: \.self) { index in
-                    subviews[index]
-                }
-            })
-        } else {
-            return AnyView(VStack(alignment: .leading, spacing: 8) {
-                ForEach(subviews.indices, id: \.self) { index in
-                    subviews[index]
-                }
-            })
-        }
+        return AnyView(VStack(alignment: .leading, spacing: 8) {
+            ForEach(subviews.indices, id: \.self) { index in
+                subviews[index]
+            }
+        })
     }
     
     mutating func defaultVisit(_ markup: Markdown.Markup) -> AnyView {
@@ -49,14 +41,7 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitText(_ text: Markdown.Text) -> AnyView {
-        var subText = [SwiftUI.Text]()
-        Split(text.string).forEach {
-            subText.append(SwiftUI.Text($0))
-        }
-
-        return AnyView(ForEach(subText.indices, id: \.self) { index in
-            subText[index].textSelection(.enabled)
-        })
+        AnyView(TextView(text: text.plainText))
     }
     
     mutating func visitParagraph(_ paragraph: Paragraph) -> AnyView {
@@ -155,7 +140,6 @@ struct Renderer: MarkupVisitor {
         
         return AnyView(
             ImageView
-                .drawingGroup()
                 .environmentObject(self.configuration.imageCacheController)
         )
     }

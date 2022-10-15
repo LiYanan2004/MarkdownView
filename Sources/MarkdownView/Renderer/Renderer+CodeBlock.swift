@@ -7,7 +7,7 @@ extension Renderer {
     mutating func visitInlineCode(_ inlineCode: InlineCode) -> AnyView {
         var subText = [SwiftUI.Text]()
         
-        Split(inlineCode.code).forEach {
+        Renderer.Split(inlineCode.code).forEach {
             subText.append(SwiftUI.Text($0))
         }
 
