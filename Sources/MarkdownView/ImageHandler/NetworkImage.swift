@@ -69,16 +69,17 @@ struct NetworkImage: View {
             #if os(macOS)
             if let image = NSImage(data: data) {
                 cacheController.cacheImage(image, url: url)
-            } else {
-                try await loadAsSVG(data: data)
+                self.imageSize = image.size
+                return
             }
             #elseif os(iOS) || os(tvOS)
             if let image = UIImage(data: data) {
                 try await prepareThumbnailAndDisplay(for: image, size: size)
-            } else {
-                try await loadAsSVG(data: data)
+                self.imageSize = image.size
+                return
             }
             #endif
+            try await loadAsSVG(data: data)
         } catch {
             localizedError = error.localizedDescription
             print(error.localizedDescription)
@@ -87,7 +88,6 @@ struct NetworkImage: View {
     
     func showImage() {
         guard let image = cacheController.image(from: url) else { return }
-        self.imageSize = image.size
 #if os(iOS) || os(tvOS)
         self.image = Image(uiImage: image)
 #else
