@@ -1,9 +1,10 @@
 import SwiftUI
 import Markdown
+import Combine
 
 /// A view to render markdown text.
 ///
-/// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)``.
+/// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)`` to maintain a natural layout.
 ///
 public struct MarkdownView: View {
     @State private var containerSize = CGSize.zero
@@ -14,6 +15,11 @@ public struct MarkdownView: View {
     var codeBlockThemeConfiguration = CodeBlockThemeConfiguration(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
+    
+    // Update content 0.3s after the user stops entering.
+    @StateObject var contentUpdater = ContentUpdater()
+    @State private var representedView = AnyView(EmptyView()) // MarkdownView
+    @State private var isSetup = false
     
     /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
@@ -38,8 +44,7 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        var renderer = Renderer(text: $text, withConfiguration: configuration)
-        renderer.RepresentedView()
+        representedView
             .environment(\.containerSize, containerSize)
             .overlay {
                 GeometryReader { proxy in
@@ -47,27 +52,50 @@ public struct MarkdownView: View {
                         .preference(key: ContainerMeasurement.self, value: proxy.size)
                 }
             }
-            .onPreferenceChange(ContainerMeasurement.self) { size in
-                containerSize = size
+            .onPreferenceChange(ContainerMeasurement.self) { containerSize = $0 }
+            .task(id: text) {
+                if isSetup {
+                    // Push current text, waiting for next update.
+                    contentUpdater.push(text)
+                } else {
+                    // Render text when MarkdownView first appears.
+                    makeView(text: text)
+                    isSetup = true
+                }
             }
+            // Received a debouncedText, we need to reload MarkdownView.
+            .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
     }
-}
-
-struct ContainerMeasurement: PreferenceKey {
-    static var defaultValue: CGSize = .zero
     
-    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
-        value = nextValue()
+    private func makeView(text: String) {
+        var renderer = Renderer(
+            text: text,
+            configuration: configuration,
+            interactiveEditHandler: {
+                self.text = $0
+                makeView(text: $0)
+            }
+        )
+        let view = renderer.RepresentedView()
+        representedView = view
     }
 }
 
-struct ContainerSize: EnvironmentKey {
-    static var defaultValue = CGSize.zero
-}
-
-extension EnvironmentValues {
-    var containerSize: CGSize {
-        get { self[ContainerSize.self] }
-        set { self[ContainerSize.self] = newValue }
+/// Update content 0.3s after the user stops entering.
+class ContentUpdater: ObservableObject {
+    /// Send all the changes from raw text
+    private var relay = PassthroughSubject<String, Never>()
+    
+    /// A publisher to notify MarkdownView to update its content.
+    var textUpdater: AnyPublisher<String, Never>
+    
+    init() {
+        textUpdater = relay
+            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
+            .eraseToAnyPublisher()
+    }
+    
+    func push(_ text: String) {
+        relay.send(text)
     }
 }

@@ -2,16 +2,13 @@ import SwiftUI
 import Markdown
 
 struct Renderer: MarkupVisitor {
-    var text: Binding<String>
+    var text: String
     var configuration: RendererConfiguration
-    
-    init(text: Binding<String>, withConfiguration configuration: RendererConfiguration) {
-        self.configuration = configuration
-        self.text = text
-    }
+    // Handle text changes when toggle checkmarks.
+    var interactiveEditHandler: (String) -> Void
     
     mutating func RepresentedView() -> AnyView {
-        visit(Document(parsing: text.wrappedValue, options: .parseBlockDirectives))
+        visit(Document(parsing: text, options: .parseBlockDirectives))
     }
     
     mutating func visitDocument(_ document: Document) -> AnyView {

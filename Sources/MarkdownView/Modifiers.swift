@@ -8,10 +8,10 @@ extension MarkdownView {
     /// - Returns: `MarkdownView` with/without lazy loading functionality.
     ///
     /// If you set `lazyLoadingEnabled` to false, it may increase memory usage.
-    @available(*, deprecated, message: "Lazy loading is now deprecated. If you still have a performance issue, please post an issue.")
+    @available(*, deprecated, message: "If you still have a performance issue, please post an issue.")
     public func lazyLoading(_ lazyLoadingEnabled: Bool) -> MarkdownView {
         let result = self
-//        result.lazyLoad = lazyLoadingEnabled // This property has been deleted.
+        /* result.lazyLoad = lazyLoadingEnabled */
         return result
     }
 }

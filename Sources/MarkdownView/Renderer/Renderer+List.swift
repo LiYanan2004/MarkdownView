@@ -19,7 +19,7 @@ extension Renderer {
         for (index, listItem) in orderedList.listItems.enumerated() {
             let row = HStack(alignment: .firstTextBaseline) {
                 if listItem.checkbox != nil {
-                    CheckBox(listItem: listItem, text: text)
+                    CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
                 } else {
                     if orderedList.listDepth == 0 {
                         SwiftUI.Text("\t\(index + 1).")
@@ -48,7 +48,7 @@ extension Renderer {
         for listItem in unorderedList.listItems {
             let listRow = HStack(alignment: .firstTextBaseline) {
                 if listItem.checkbox != nil {
-                    CheckBox(listItem: listItem, text: text)
+                    CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
                 } else {
                     if unorderedList.listDepth == 0 {
                         SwiftUI.Text("\t•").fontWeight(.black)
@@ -83,7 +83,8 @@ struct CheckBoxRewriter: MarkupRewriter {
 
 struct CheckBox: View {
     var listItem: ListItem
-    @Binding var text: String
+    var text: String
+    var handler: (String) -> Void
     
     var body: some View {
         if let checkbox = listItem.checkbox {
@@ -108,6 +109,6 @@ struct CheckBox: View {
         
         var separatedText = text.split(separator: "\n", omittingEmptySubsequences: false)
         separatedText[sourceRange.lowerBound.line - 1] = Substring(stringLiteral: newMarkdownText)
-        text = separatedText.joined(separator: "\n")
+        handler(separatedText.joined(separator: "\n"))
     }
 }
