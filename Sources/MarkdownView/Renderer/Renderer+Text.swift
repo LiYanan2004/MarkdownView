@@ -3,17 +3,18 @@ import SwiftUI
 
 struct TextView: View {
     var text: String
-    @State private var isReady = false
     @State private var subText: [String] = []
     
     var body: some View {
         Group {
-            if isReady {
+            if text.isEmpty != subText.isEmpty {
+                // An invisible placeholder which is
+                // used to let SwiftUI execute `updateContent`
+                Color.black.opacity(0.001)
+            } else {
                 ForEach(subText.indices, id: \.self) { i in
                     Text(subText[i])
                 }
-            } else {
-                Color.black.opacity(0.001)
             }
         }
         .task(id: text, priority: .high) {
@@ -21,10 +22,8 @@ struct TextView: View {
         }
     }
     
-    @MainActor func updateContent() {
-        isReady = false
+    func updateContent() {
         subText = Renderer.Split(text)
-        isReady = true
     }
 }
 

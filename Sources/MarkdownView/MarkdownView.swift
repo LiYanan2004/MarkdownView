@@ -57,13 +57,7 @@ public struct MarkdownView: View {
             .onPreferenceChange(ContainerMeasurement.self) { containerSize = $0 }
             // Push current text, waiting for next update.
             .onChange(of: text, perform: contentUpdater.push(_:))
-            .onAppear {
-                // Load view immediately at the first launch.
-                guard !isSetup else { return }
-                // Render text when MarkdownView first appears.
-                makeView(text: text)
-                isSetup = true
-            }
+            // Load view immediately after the first launch.
             // Receive configuration changes and reload MarkdownView to fit.
             .task(id: configuration) { makeView(text: text) }
             // Received a debouncedText, we need to reload MarkdownView.
