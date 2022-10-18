@@ -5,44 +5,7 @@ import Highlightr
 // MARK: - Inline Code Block
 extension Renderer {
     mutating func visitInlineCode(_ inlineCode: InlineCode) -> AnyView {
-        var subText = [SwiftUI.Text]()
-        
-        Renderer.Split(inlineCode.code).forEach {
-            subText.append(SwiftUI.Text($0))
-        }
-
-        return AnyView(ForEach(subText.indices, id: \.self) { index in
-            let roundedSide: WithRoundedCorner.Side = {
-                if subText.count == 1 { return .bothSides }
-                if index == 0 { return .leading }
-                else if index == subText.count - 1 { return .trailing }
-                return .none
-            }()
-            let additionalSpace: CGFloat = {
-                if roundedSide == .none { return 0 }
-                else if roundedSide == .bothSides { return 10 }
-                return 5
-            }()
-            let blockBackground: GeometryReader = {
-                GeometryReader { proxy in
-                    let size = proxy.size
-                    Rectangle()
-                        .fill(.tint.opacity(0.2))
-                        .frame(width: size.width + additionalSpace,
-                               height: size.height + 5)
-                        .withCornerRadius(5, at: roundedSide)
-                        .offset(x: roundedSide == .leading || roundedSide == .bothSides ? -5 : 0,
-                                y: -2.5)
-                }
-            }()
-            
-            subText[index]
-                .font(.system(.body, design: .monospaced).bold())
-                .background { blockBackground }
-                .foregroundStyle(.tint)
-                .padding(.vertical, 8)
-                .padding(roundedSide.edge, roundedSide == .none ? 0 : 5)
-        })
+        AnyView(InlineCodeView(code: inlineCode.code))
     }
     
     func visitInlineHTML(_ inlineHTML: InlineHTML) -> AnyView {
@@ -50,34 +13,71 @@ extension Renderer {
     }
 }
 
+struct InlineCodeView: View {
+    var code: String
+    @State private var subText = [String]()
+    
+    var body: some View {
+        Group {
+            if subText.isEmpty != code.isEmpty {
+                // An invisible placeholder which is
+                // used to let SwiftUI execute `updateContent`
+                Color.black.opacity(0.001)
+            } else {
+                ForEach(subText.indices, id: \.self) { index in
+                    let roundedSide: WithRoundedCorner.Side = {
+                        if subText.count == 1 { return .bothSides }
+                        if index == 0 { return .leading }
+                        else if index == subText.count - 1 { return .trailing }
+                        return .none
+                    }()
+                    let additionalSpace: CGFloat = {
+                        if roundedSide == .none { return 0 }
+                        else if roundedSide == .bothSides { return 10 }
+                        return 5
+                    }()
+                    let blockBackground: GeometryReader = {
+                        GeometryReader { proxy in
+                            let size = proxy.size
+                            Rectangle()
+                                .fill(.tint.opacity(0.2))
+                                .frame(width: size.width + additionalSpace,
+                                       height: size.height + 5)
+                                .withCornerRadius(5, at: roundedSide)
+                                .offset(x: roundedSide == .leading || roundedSide == .bothSides ? -5 : 0,
+                                        y: -2.5)
+                        }
+                    }()
+                    SwiftUI.Text(subText[index])
+                        .font(.system(.body, design: .monospaced).bold())
+                        .background { blockBackground }
+                        .foregroundStyle(.tint)
+                        .padding(.vertical, 8)
+                        .padding(roundedSide.edge, roundedSide == .none ? 0 : 5)
+                }
+            }
+        }
+        .task(id: code, priority: .high) {
+            updateContent()
+        }
+    }
+    
+    func updateContent() {
+        subText = Renderer.Split(code)
+    }
+}
+
 // MARK: - Code Block
 
 extension Renderer {
     mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> AnyView {
-        AnyView(Group {
-            if let highlighter = Highlightr(), let language = codeBlock.language {
-                HighlightCodeBlock(
-                    highlighter: highlighter,
-                    language: language,
-                    code: codeBlock.code,
-                    themeConfiguration: configuration.codeBlockThemeConfiguration)
-            } else {
-                SwiftUI.Text(codeBlock.code)
-            }
-        }
-        .font(.system(.callout, design: .monospaced))
-        .drawingGroup()
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(alignment: .bottomTrailing) {
-            if let language = codeBlock.language {
-                SwiftUI.Text(language)
-                    .font(.caption)
-                    .padding(8)
-                    .foregroundStyle(.secondary)
-            }
-        })
+        AnyView(
+            HighlightedCodeBlock(
+                language: codeBlock.language,
+                code: codeBlock.code,
+                themeConfiguration: configuration.codeBlockThemeConfiguration
+            )
+        )
     }
     
     func visitHTMLBlock(_ html: HTMLBlock) -> AnyView {
@@ -85,22 +85,49 @@ extension Renderer {
     }
 }
 
-struct HighlightCodeBlock: View {
-    var highlighter: Highlightr
-    var language: String
+struct HighlightedCodeBlock: View {
+    var language: String?
     var code: String
-    var themeConfiguration: CodeBlockThemeConfiguration
-    @Environment(\.colorScheme) private var colorScheme
     
-    var highlightedCode: NSAttributedString? {
-        highlighter.setTheme(to: colorScheme == .dark ? themeConfiguration.darkModeThemeName : themeConfiguration.lightModeThemeName)
-        return highlighter.highlight(code, as: language)
+    var themeConfiguration: CodeBlockThemeConfiguration
+    
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var attributedCode: AttributedString?
+    
+    var highlighter: Highlightr? = Highlightr()
+    private var id: String { (language ?? "No Language Name") + code }
+
+    var body: some View {
+        Group {
+            if let attributedCode {
+                SwiftUI.Text(attributedCode)
+            } else {
+                SwiftUI.Text(code)
+            }
+        }
+        .task(id: id, highlight)
+        .lineSpacing(5)
+        .font(.system(.callout, design: .monospaced))
+        .padding()
+        .drawingGroup()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+        .overlay(alignment: .bottomTrailing) {
+            if let language {
+                SwiftUI.Text(language.uppercased())
+                    .font(.callout)
+                    .padding(8)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
     
-    var body: some View {
-        if let highlightedCode = highlightedCode {
-            let attributedString = AttributedString(highlightedCode)
-            Text(attributedString)
+    @Sendable private func highlight() {
+        guard let highlighter else { return }
+        highlighter.setTheme(to: colorScheme == .dark ? themeConfiguration.darkModeThemeName : themeConfiguration.lightModeThemeName)
+        let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language })
+        if let highlightedCode = highlighter.highlight(code, as: language) {
+            attributedCode = AttributedString(highlightedCode)
         }
     }
 }
