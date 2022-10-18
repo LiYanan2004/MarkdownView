@@ -22,11 +22,8 @@ extension Renderer {
                 if listItem.checkbox != nil {
                     CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
                 } else {
-                    if orderedList.listDepth == 0 {
-                        SwiftUI.Text("    \(index + 1).")
-                    } else {
-                        SwiftUI.Text("\(index + 1).")
-                    }
+                    SwiftUI.Text("\(index + 1).")
+                        .padding(.leading, orderedList.listDepth == 0 ? 12 : 0)
                 }
                 visit(listItem)
             }
@@ -47,11 +44,10 @@ extension Renderer {
                 if listItem.checkbox != nil {
                     CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
                 } else {
-                    if unorderedList.listDepth == 0 {
-                        SwiftUI.Text("    •").fontWeight(.black)
-                    } else {
-                        SwiftUI.Text("•").fontWeight(.black)
-                    }
+                    SwiftUI.Text("•")
+                        .font(.title2)
+                        .fontWeight(.black)
+                        .padding(.leading, unorderedList.listDepth == 0 ? 12 : 0)
                 }
                 visit(listItem)
             }
