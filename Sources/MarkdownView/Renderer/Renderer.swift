@@ -18,7 +18,7 @@ struct Renderer: MarkupVisitor {
             subviews.append(visit(child))
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: 8) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -45,9 +45,6 @@ struct Renderer: MarkupVisitor {
         var subviews = [AnyView]()
         for child in paragraph.children {
             subviews.append(visit(child))
-        }
-        if paragraph.hasSuccessor && !paragraph.isContainedInList {
-            subviews.append(AnyView(PaddingLine()))
         }
         return AnyView(FlexibleLayout {
             ForEach(subviews.indices, id: \.self) { index in
@@ -88,7 +85,7 @@ struct Renderer: MarkupVisitor {
                     .padding(.horizontal, 8)
                     .foregroundStyle(.secondary)
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: configuration.lineSpacing) {
                     ForEach(subviews.indices, id: \.self) { index in
                         subviews[index]
                     }

@@ -15,17 +15,11 @@ extension Renderer {
     }
 }
 
-struct PaddingLine: View {
-    var count: Int = 1
-    var body: some View {
-        SwiftUI.Text([String](repeating: "\n", count: count - 1).joined())
-            .frame(maxWidth: .infinity)
-    }
-}
-
+/// A helper view that can render next text in a new line.
 struct NewLine: View {
     var body: some View {
-        PaddingLine()
+        SwiftUI.Text("\n")
+            .frame(maxWidth: .infinity)
             .frame(height: 0) // Break the Text into two lines while maintaining the line spacing
     }
 }

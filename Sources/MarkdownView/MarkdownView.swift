@@ -7,8 +7,10 @@ import Combine
 /// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)`` to maintain a natural layout.
 ///
 public struct MarkdownView: View {
-    @State private var containerSize = CGSize.zero
     @Binding private var text: String
+    
+    @Environment(\.lineSpacing) var lineSpacing
+    @State private var containerSize = CGSize.zero
     @StateObject var imageCacheController = ImageCacheController()
     var imageHandlerConfiguration = ImageHandlerConfiguration()
     var directiveBlockConfiguration = DirectiveBlockConfiguration()
@@ -53,16 +55,17 @@ public struct MarkdownView: View {
                 }
             }
             .onPreferenceChange(ContainerMeasurement.self) { containerSize = $0 }
-            .task(id: text) {
-                if isSetup {
-                    // Push current text, waiting for next update.
-                    contentUpdater.push(text)
-                } else {
-                    // Render text when MarkdownView first appears.
-                    makeView(text: text)
-                    isSetup = true
-                }
+            // Push current text, waiting for next update.
+            .onChange(of: text, perform: contentUpdater.push(_:))
+            .onAppear {
+                // Load view immediately at the first launch.
+                guard !isSetup else { return }
+                // Render text when MarkdownView first appears.
+                makeView(text: text)
+                isSetup = true
             }
+            // Receive configuration changes and reload MarkdownView to fit.
+            .task(id: configuration) { makeView(text: text) }
             // Received a debouncedText, we need to reload MarkdownView.
             .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
     }

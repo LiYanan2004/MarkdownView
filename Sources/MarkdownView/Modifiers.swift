@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Content Loading
 extension MarkdownView {
-    /// Set the loading method.
+    /// Sets the loading method.
     ///
     /// - Parameter lazyLoadingEnabled: A Boolean value that indicates whether to enable lazy loading.
     /// - Returns: `MarkdownView` with/without lazy loading functionality.
@@ -18,7 +18,7 @@ extension MarkdownView {
 
 // MARK: - Image Handlers
 extension MarkdownView {
-    /// Set your custom Image Handler.
+    /// Sets your custom Image Handler.
     ///
     /// - parameters
     ///     - handler: the handler you have created to handle image loading and displaying.
@@ -38,7 +38,7 @@ extension MarkdownView {
 
 // MARK: - Custom Directive Blocks
 extension MarkdownView {
-    /// Set your custom Directive Block Handler.
+    /// Sets your custom Directive Block Handler.
     ///
     /// - parameter handler: the handler you have created to handle block displaying.
     /// - parameter name: specify which kind of Directive Block will use your own handler.
@@ -54,7 +54,7 @@ extension MarkdownView {
         return result
     }
     
-    /// Disable the default `@Background(background: _, textColor: _)` Directive Block.
+    /// Disables the default `@Background(background: _, textColor: _)` Directive Block.
     ///
     /// - Returns: `MarkdownView` without any Directive Block Handler.
     /// 
@@ -70,7 +70,7 @@ extension MarkdownView {
 
 // MARK: - Code Block Theme
 extension MarkdownView {
-    /// Customize the theme of the Code Block.
+    /// Sets the theme of the Code Blocks.
     /// 
     /// - Parameter configuration: Theme configuration of the Code Block, see ``CodeBlockThemeConfiguration``.
     /// - Returns: `MarkdownView` with custom Code Block theme.

@@ -2,12 +2,13 @@ import Markdown
 import SwiftUI
 
 extension Renderer {
+    /// List row which contains inner item.
     mutating func visitListItem(_ listItem: ListItem) -> AnyView {
         var subviews = [AnyView]()
         for child in listItem.children {
             subviews.append(visit(child))
         }
-        return AnyView(VStack(alignment: .leading) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -22,7 +23,7 @@ extension Renderer {
                     CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
                 } else {
                     if orderedList.listDepth == 0 {
-                        SwiftUI.Text("\t\(index + 1).")
+                        SwiftUI.Text("    \(index + 1).")
                     } else {
                         SwiftUI.Text("\(index + 1).")
                     }
@@ -32,11 +33,7 @@ extension Renderer {
             subviews.append(AnyView(row))
         }
         
-        if orderedList.hasSuccessor {
-            subviews.append(AnyView(PaddingLine()))
-        }
-        
-        return AnyView(VStack(alignment: .leading) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -51,7 +48,7 @@ extension Renderer {
                     CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
                 } else {
                     if unorderedList.listDepth == 0 {
-                        SwiftUI.Text("\t•").fontWeight(.black)
+                        SwiftUI.Text("    •").fontWeight(.black)
                     } else {
                         SwiftUI.Text("•").fontWeight(.black)
                     }
@@ -61,11 +58,7 @@ extension Renderer {
             subviews.append(AnyView(listRow))
         }
         
-        if unorderedList.hasSuccessor {
-            subviews.append(AnyView(PaddingLine()))
-        }
-        
-        return AnyView(VStack(alignment: .leading) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
