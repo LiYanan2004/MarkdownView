@@ -25,7 +25,7 @@ struct Renderer: MarkupVisitor {
             subviews.append(visit(child))
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -53,7 +53,7 @@ struct Renderer: MarkupVisitor {
         for child in paragraph.children {
             subviews.append(visit(child))
         }
-        return AnyView(FlexibleLayout {
+        return AnyView(FlexibleLayout(verticleSpacing: configuration.lineSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -92,7 +92,7 @@ struct Renderer: MarkupVisitor {
                     .padding(.horizontal, 8)
                     .foregroundStyle(.secondary)
                 
-                VStack(alignment: .leading, spacing: configuration.lineSpacing) {
+                VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                     ForEach(subviews.indices, id: \.self) { index in
                         subviews[index]
                     }

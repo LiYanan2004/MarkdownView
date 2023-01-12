@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FlexibleLayout: Layout {
+    var verticleSpacing: CGFloat = 0
+    
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         guard let totalWidth = proposal.width else { return .zero }
 
@@ -17,7 +19,7 @@ struct FlexibleLayout: Layout {
             if x + subviewSize.width > totalWidth {
                 // This element cannot be accommodated horizontally.
                 // Increase the height.
-                y += rowHeight
+                y += rowHeight + verticleSpacing
                 x = .zero
                 rowHeight = subviewSize.height
             }
@@ -45,7 +47,7 @@ struct FlexibleLayout: Layout {
             if x + subviewSize.width > bounds.maxX {
                 // Place the last row.
                 placeView(&viewRects, rowHeight: rowHeight)
-                y += rowHeight
+                y += rowHeight + verticleSpacing
                 x = bounds.minX
                 rowHeight = .zero
             }

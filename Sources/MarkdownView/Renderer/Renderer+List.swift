@@ -8,7 +8,7 @@ extension Renderer {
         for child in listItem.children {
             subviews.append(visit(child))
         }
-        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -30,7 +30,7 @@ extension Renderer {
             subviews.append(AnyView(row))
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -54,7 +54,7 @@ extension Renderer {
             subviews.append(AnyView(listRow))
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: configuration.lineSpacing) {
+        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }

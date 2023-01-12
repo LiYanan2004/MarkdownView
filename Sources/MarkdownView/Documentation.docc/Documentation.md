@@ -14,6 +14,12 @@ MarkdownView depends on [apple/swift-markdown](https://github.com/apple/swift-ma
 
 - ``MarkdownView/MarkdownView``
 
+### Layout Roles
+
+- ``MarkdownView/MarkdownView/markdownViewRole(_:)``
+
+- ``MarkdownView/MarkdownView/MarkdownViewRole`
+
 ### Lazy Loading
 
 - ``MarkdownView/MarkdownView/lazyLoading(_:)``

@@ -49,10 +49,12 @@ extension Renderer {
         case 6: fontStyle = .body
         default: fontStyle = .body
         }
-        return AnyView(FlexibleLayout {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index].font(.system(fontStyle, weight: .bold))
+        return AnyView(
+            FlexibleLayout {
+                ForEach(subviews.indices, id: \.self) { index in
+                    subviews[index].font(.system(fontStyle, weight: .bold))
+                }
             }
-        }.tag(heading.plainText))
+        )
     }
 }

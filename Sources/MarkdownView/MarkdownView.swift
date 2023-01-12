@@ -5,7 +5,6 @@ import Combine
 /// A view to render markdown text.
 ///
 /// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)`` to maintain a natural layout.
-///
 public struct MarkdownView: View {
     @Binding private var text: String
     
