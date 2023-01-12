@@ -83,3 +83,30 @@ extension MarkdownView {
         return result
     }
 }
+
+// MARK: - MarkdownView Role
+extension MarkdownView {
+    ///  Configures the role of the markdown text.
+    /// - Parameter role: A role to tell MarkdownView how to render its content.
+    /// - Returns: A rendered MarkdownView using the role you specified.
+    public func markdownViewRole(_ role: MarkdownViewRole) -> MarkdownView {
+        var result = self
+        result.role = role
+        
+        return result
+    }
+    
+    public enum MarkdownViewRole {
+        /// The normal role.
+        ///
+        /// A role that makes the view take the space it needs, like a normal SwiftUI View.
+        case normal
+        /// The editor role.
+        ///
+        /// A role that makes the view take the maximum space
+        /// and align its content in the top-leading, just like an editor.
+        ///
+        /// A Markdown Editor typically use this mode to provide a Live Preview.
+        case editor
+    }
+}

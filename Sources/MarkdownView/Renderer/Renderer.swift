@@ -8,7 +8,14 @@ struct Renderer: MarkupVisitor {
     var interactiveEditHandler: (String) -> Void
     
     mutating func RepresentedView() -> AnyView {
-        visit(Document(parsing: text, options: .parseBlockDirectives))
+        switch configuration.role {
+        case .normal: return visit(Document(parsing: text, options: .parseBlockDirectives))
+        case .editor:
+            return AnyView(
+                visit(Document(parsing: text, options: .parseBlockDirectives))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            )
+        }
     }
     
     mutating func visitDocument(_ document: Document) -> AnyView {

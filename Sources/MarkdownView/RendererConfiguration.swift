@@ -4,6 +4,7 @@ extension MarkdownView {
     var configuration: RendererConfiguration {
         RendererConfiguration(
             lineSpacing: lineSpacing,
+            role: role,
             codeBlockThemeConfiguration: codeBlockThemeConfiguration,
             imageHandlerConfiguration: imageHandlerConfiguration,
             directiveBlockConfiguration: directiveBlockConfiguration,
@@ -21,6 +22,7 @@ struct RendererConfiguration {
     ///     MarkdownView(...)
     ///         .lineSpacing(10)
     var lineSpacing: CGFloat = 16
+    var role: MarkdownView.MarkdownViewRole = .normal
     
     /// Sets the theme of the code block.
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr).

@@ -23,6 +23,8 @@ public struct MarkdownView: View {
     @State private var representedView = AnyView(EmptyView()) // MarkdownView
     @State private var isSetup = false
     
+    var role: MarkdownViewRole = .normal
+    
     /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
     ///   - text: A Binding Text that can be modified.
