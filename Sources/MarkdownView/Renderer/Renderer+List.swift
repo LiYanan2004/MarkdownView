@@ -2,7 +2,7 @@ import Markdown
 import SwiftUI
 
 extension Renderer {
-    /// List row which contains inner item.
+    /// List row which contains inner items.
     mutating func visitListItem(_ listItem: ListItem) -> AnyView {
         var subviews = [AnyView]()
         for child in listItem.children {

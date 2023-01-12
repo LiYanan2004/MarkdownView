@@ -32,10 +32,5 @@ let package = Package(
                 "SVGKit",
                 "Highlightr",
             ]),
-        .testTarget(
-            name: "MarkdownViewTests",
-            dependencies: [
-                "MarkdownView"
-            ]),
     ]
 )
