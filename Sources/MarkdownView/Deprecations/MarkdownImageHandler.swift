@@ -1,31 +1,5 @@
 import SwiftUI
 
-class ImageHandlerConfiguration {
-    /// The base URL for local images or network images.
-    var baseURL: URL
-    
-    /// Create a Configuration for image handling.
-    init(baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
-        self.baseURL = baseURL
-    }
-    
-    /// All the handlers that have been added.
-    var imageHandlers: [String: MarkdownImageHandler] = [
-        "http": .networkImage,
-        "https": .networkImage,
-    ]
-    
-    /// Add custom handler for Image Handling.
-    /// - Parameters:
-    ///   - handler: Represention of the Image.
-    ///   - urlScheme: The url scheme to use the handler.
-    func addHandler(
-        _ handler: MarkdownImageHandler, forURLScheme urlScheme: String
-    ) {
-        self.imageHandlers[urlScheme] = handler
-    }
-}
-
 /// Handle the represention of the Image.
 public struct MarkdownImageHandler {
     typealias SwiftUIImage = SwiftUI.Image
@@ -47,7 +21,7 @@ extension MarkdownImageHandler {
     }
     
     /// A handler used to load Images in a relative path url.
-    /// 
+    ///
     /// - note: You need to specify the `baseURL` when creating a `MarkdownView`.
     public static func relativePathImage(
         baseURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]

@@ -6,8 +6,8 @@ extension MarkdownView {
             role: role,
             lineSpacing: lineSpacing,
             codeBlockThemeConfiguration: codeBlockThemeConfiguration,
-            imageHandlerConfiguration: imageHandlerConfiguration,
-            directiveBlockConfiguration: directiveBlockConfiguration,
+            imageRenderer: imageRenderer,
+            blockDirectiveRenderer: blockDirectiveRenderer,
             imageCacheController: imageCacheController
         )
     }
@@ -30,8 +30,8 @@ struct RendererConfiguration {
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
     var codeBlockThemeConfiguration: CodeBlockThemeConfiguration
     
-    var imageHandlerConfiguration: ImageHandlerConfiguration
-    var directiveBlockConfiguration: DirectiveBlockConfiguration
+    var imageRenderer: ImageRenderer
+    var blockDirectiveRenderer: BlockDirectiveRenderer
     var imageCacheController: ImageCacheController
 }
 

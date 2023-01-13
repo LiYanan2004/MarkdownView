@@ -11,8 +11,8 @@ public struct MarkdownView: View {
     @Environment(\.lineSpacing) var lineSpacing
     @State private var containerSize = CGSize.zero
     @StateObject var imageCacheController = ImageCacheController()
-    var imageHandlerConfiguration = ImageHandlerConfiguration()
-    var directiveBlockConfiguration = DirectiveBlockConfiguration()
+    var imageRenderer = ImageRenderer()
+    var blockDirectiveRenderer = BlockDirectiveRenderer()
     var codeBlockThemeConfiguration = CodeBlockThemeConfiguration(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
@@ -31,7 +31,7 @@ public struct MarkdownView: View {
     public init(text: Binding<String>, baseURL: URL? = nil) {
         _text = text
         if let baseURL {
-            imageHandlerConfiguration = ImageHandlerConfiguration(baseURL: baseURL)
+            imageRenderer.baseURL = baseURL
         }
     }
     
@@ -42,7 +42,7 @@ public struct MarkdownView: View {
     public init(text: String, baseURL: URL? = nil) {
         _text = .constant(text)
         if let baseURL {
-            imageHandlerConfiguration = ImageHandlerConfiguration(baseURL: baseURL)
+            imageRenderer.baseURL = baseURL
         }
     }
     
@@ -74,7 +74,8 @@ public struct MarkdownView: View {
                 makeView(text: $0)
             }
         )
-        let view = renderer.RepresentedView()
+        let parseBD = !blockDirectiveRenderer.blockDirectiveHandlers.isEmpty
+        let view = renderer.representedView(parseBlockDirectives: parseBD)
         representedView = view
     }
 }

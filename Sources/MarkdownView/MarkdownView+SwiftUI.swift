@@ -1,68 +1,59 @@
 import SwiftUI
 
-// MARK: - Content Loading
+// MARK: - Display Images
 extension MarkdownView {
-    /// Sets the loading method.
+    /// Adds a built-in handler to render images.
     ///
-    /// - Parameter lazyLoadingEnabled: A Boolean value that indicates whether to enable lazy loading.
-    /// - Returns: `MarkdownView` with/without lazy loading functionality.
-    ///
-    /// If you set `lazyLoadingEnabled` to false, it may increase memory usage.
-    @available(*, deprecated, message: "If you still have a performance issue, please post an issue.")
-    public func lazyLoading(_ lazyLoadingEnabled: Bool) -> MarkdownView {
-        let result = self
-        /* result.lazyLoad = lazyLoadingEnabled */
-        return result
-    }
-}
-
-// MARK: - Image Handlers
-extension MarkdownView {
-    /// Sets your custom Image Handler.
+    /// Built-in handlers helps you quickly add image rendering from your assets or from a relative path.
     ///
     /// - parameters
-    ///     - handler: the handler you have created to handle image loading and displaying.
-    ///     - urlScheme: specify which kind of image will use your own handler.
-    /// - Returns: `MarkdownView` with custom image loading behavior.
+    ///     - handler: One of built-in handlers.
+    ///     - urlScheme: A scheme for the renderer to determine when to use the handler.
+    /// - Returns: A `MarkdownView` that can render the image with a specific scheme.
     ///
-    /// You can set this handler multiple times if you have multiple handlers.
+    /// You can set this handler multiple times if you want to add multiple schemes.
     public func imageHandler(
-        _ handler: MarkdownImageHandler, forURLScheme urlScheme: String
+        _ handler: BuiltInImageHandler, forURLScheme urlScheme: String
     ) -> MarkdownView {
         let result = self
-        result.imageHandlerConfiguration.addHandler(handler, forURLScheme: urlScheme)
-        
-        return result
-    }
-}
+        result.imageRenderer.addHandler(handler.displayable, forURLScheme: urlScheme)
 
-// MARK: - Custom Directive Blocks
-extension MarkdownView {
-    /// Sets your custom Directive Block Handler.
-    ///
-    /// - parameter handler: the handler you have created to handle block displaying.
-    /// - parameter name: specify which kind of Directive Block will use your own handler.
-    /// - Returns: `MarkdownView` with custom directive block loading behavior.
-    ///
-    /// You can set this handler multiple times if you have multiple handlers.
-    public func directiveBlockHandler(
-        _ handler: MarkdownDirectiveBlockHandler, for name: String
-    ) -> MarkdownView {
-        let result = self
-        result.directiveBlockConfiguration.addHandler(handler, for: name)
-        
         return result
     }
     
-    /// Disables the default `@Background(background: _, textColor: _)` Directive Block.
+    /// Adds your own handlers to render images.
     ///
-    /// - Returns: `MarkdownView` without any Directive Block Handler.
-    /// 
-    /// If your Directive Block's name conflicts with the default one, you can disable the default one.
-    @available(*, deprecated, message: "The @background handler will not be enabled by default.")
-    public func disableDefaultDirectiveBlockHandler() -> MarkdownView {
+    /// - parameters
+    ///     - handler: The handler you created to handle image loading and displaying.
+    ///     - urlScheme: A scheme for the renderer to determine when to use the handler.
+    /// - Returns: A `MarkdownView` that can render the image with a specific scheme.
+    ///
+    /// You can set this handler multiple times if you want to add multiple schemes.
+    public func imageHandler(
+        _ handler: some ImageDisplayable, forURLScheme urlScheme: String
+    ) -> MarkdownView {
         let result = self
-        result.directiveBlockConfiguration.directiveBlockHandlers = [:]
+        result.imageRenderer.addHandler(handler, forURLScheme: urlScheme)
+
+        return result
+    }
+}
+
+// MARK: - Display Directive Blocks
+extension MarkdownView {
+    /// Adds your custom block directive handler.
+    ///
+    /// - parameters:
+    ///     - handler: the handler you have created to handle block displaying.
+    ///     - name: specify which kind of Directive Block will use your own handler.
+    /// - Returns: `MarkdownView` with custom directive block loading behavior.
+    ///
+    /// You can set this handler multiple times if you have multiple handlers.
+    public func blockDirectiveHandler(
+        _ handler: some BlockDirectiveDisplayable, for name: String
+    ) -> MarkdownView {
+        let result = self
+        result.blockDirectiveRenderer.addHandler(handler, for: name)
         
         return result
     }

@@ -20,15 +20,13 @@ MarkdownView depends on [apple/swift-markdown](https://github.com/apple/swift-ma
 
 - ``MarkdownView/MarkdownView/MarkdownViewRole`
 
-### Lazy Loading
-
-- ``MarkdownView/MarkdownView/lazyLoading(_:)``
-
 ### Image Loading
 
-- ``MarkdownView/MarkdownView/imageHandler(_:forURLScheme:)``
+- ``MarkdownView/MarkdownView/imageHandler(_:forURLScheme:)-334nb``
 
-- ``MarkdownImageHandler``
+- ``MarkdownView/MarkdownView/imageHandler(_:forURLScheme:)-4t57t``
+
+- ``ImageDisplayable``
 
 ### Code Block Hightlight Theme
 
@@ -36,10 +34,16 @@ MarkdownView depends on [apple/swift-markdown](https://github.com/apple/swift-ma
 
 - ``CodeBlockThemeConfiguration``
 
-### Handle Directive Markdown Syntax
+### Handle Block Directive Markdown Syntax
+
+- ``MarkdownView/MarkdownView/blockDirectiveHandler(_:for:)``
+
+- ``ImageDisplayable``
+
+### Deprecations
+
+- ``MarkdownView/MarkdownView/lazyLoading(_:)``
+
+- ``MarkdownView/MarkdownView/imageHandler(_:forURLScheme:)-fpo5``
 
 - ``MarkdownView/MarkdownView/directiveBlockHandler(_:for:)``
-
-- ``MarkdownDirectiveBlockHandler``
-
-- ``MarkdownView/MarkdownView/disableDefaultDirectiveBlockHandler()``

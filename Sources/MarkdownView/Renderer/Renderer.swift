@@ -7,12 +7,14 @@ struct Renderer: MarkupVisitor {
     // Handle text changes when toggle checkmarks.
     var interactiveEditHandler: (String) -> Void
     
-    mutating func RepresentedView() -> AnyView {
+    mutating func representedView(parseBlockDirectives: Bool) -> AnyView {
+        let options: ParseOptions = parseBlockDirectives ? [.parseBlockDirectives] : []
+
         switch configuration.role {
-        case .normal: return visit(Document(parsing: text, options: .parseBlockDirectives))
+        case .normal: return visit(Document(parsing: text, options: options))
         case .editor:
             return AnyView(
-                visit(Document(parsing: text, options: .parseBlockDirectives))
+                visit(Document(parsing: text, options: options))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             )
         }
@@ -105,7 +107,7 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitImage(_ image: Markdown.Image) -> AnyView {
-        let configuration = configuration.imageHandlerConfiguration
+        let renderer = configuration.imageRenderer
         guard let source = URL(string: image.source ?? "") else {
             return AnyView(SwiftUI.Text(image.plainText))
         }
@@ -117,30 +119,18 @@ struct Renderer: MarkupVisitor {
             alt = image.plainText.isEmpty ? nil : image.plainText
         }
         
-        var handler: MarkdownImageHandler?
+        var handler: (any ImageDisplayable)?
         if let scheme = source.scheme {
-            configuration.imageHandlers.forEach { key, value in
+            renderer.imageHandlers.forEach { key, value in
                 if scheme.lowercased() == key.lowercased() {
                     handler = value
                     return
                 }
             }
         }
-        
-        let ImageView: any View
-        if let handler {
-            // Found a specific handler.
-            ImageView = handler.image(source, alt)
-        } else {
-            // Didn't find a specific handler.
-            // Try to load the image from the Base URL.
-            ImageView = MarkdownImageHandler
-                .relativePathImage(baseURL: configuration.baseURL)
-                .image(source, alt)
-        }
-        
+
         return AnyView(
-            ImageView
+            renderer.loadImage(handler: handler, url: source, alt: alt)
                 .environmentObject(self.configuration.imageCacheController)
         )
     }

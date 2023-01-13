@@ -3,34 +3,33 @@ import SwiftUI
 
 extension Renderer {
     mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> AnyView {
-        let configuration = configuration.directiveBlockConfiguration
+        let renderer = configuration.blockDirectiveRenderer
         
-        var handlerFound: MarkdownDirectiveBlockHandler?
-        configuration.directiveBlockHandlers.forEach { name, handler in
+        var handler: (any BlockDirectiveDisplayable)?
+        renderer.blockDirectiveHandlers.forEach { name, value in
             if name.lowercased() == blockDirective.name.lowercased() {
-                handlerFound = handler
+                handler = value
             }
         }
+        
+        let args = blockDirective
+            .argumentText
+            .parseNameValueArguments()
+            .map {
+                BlockDirectiveArgument($0)
+            }
         
         var subviews = [AnyView]()
         for child in blockDirective.children {
             subviews.append(AnyView(visit(child)))
         }
-        let wrappedContent: any View = {
+        let innerMarkdownView = AnyView(
             FlexibleLayout {
                 ForEach(subviews.indices, id: \.self) {
                     subviews[$0]
                 }
             }
-        }()
-        
-        if let handlerFound {
-            let arguments = blockDirective.argumentText.parseNameValueArguments().map {
-                MarkdownDirectiveBlockHandler.Argument($0)
-            }
-            return AnyView(
-                handlerFound.content(arguments, wrappedContent)
-            )
-        } else { return AnyView(EmptyView()) }
+        )
+        return renderer.loadBlockDirective(handler: handler, args: args, innerMarkdownView: innerMarkdownView)
     }
 }
