@@ -13,7 +13,7 @@ public struct MarkdownView: View {
     @StateObject var imageCacheController = ImageCacheController()
     var imageRenderer = ImageRenderer()
     var blockDirectiveRenderer = BlockDirectiveRenderer()
-    var codeBlockThemeConfiguration = CodeBlockThemeConfiguration(
+    var codeBlockTheme = CodeBlockTheme(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
     

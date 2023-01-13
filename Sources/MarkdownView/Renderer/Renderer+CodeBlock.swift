@@ -36,18 +36,16 @@ struct InlineCodeView: View {
                         else if roundedSide == .bothSides { return 10 }
                         return 5
                     }()
-                    let blockBackground: GeometryReader = {
-                        GeometryReader { proxy in
-                            let size = proxy.size
-                            Rectangle()
-                                .fill(.tint.opacity(0.2))
-                                .frame(width: size.width + additionalSpace,
-                                       height: size.height + 5)
-                                .withCornerRadius(5, at: roundedSide)
-                                .offset(x: roundedSide == .leading || roundedSide == .bothSides ? -5 : 0,
-                                        y: -2.5)
-                        }
-                    }()
+                    let blockBackground = GeometryReader { proxy in
+                        let size = proxy.size
+                        Rectangle()
+                            .fill(.tint.opacity(0.2))
+                            .frame(width: size.width + additionalSpace,
+                                   height: size.height + 5)
+                            .withCornerRadius(5, at: roundedSide)
+                            .offset(x: roundedSide == .leading || roundedSide == .bothSides ? -5 : 0,
+                                    y: -2.5)
+                    }
                     SwiftUI.Text(subText[index])
                         .font(.system(.body, design: .monospaced).bold())
                         .background { blockBackground }
@@ -75,7 +73,7 @@ extension Renderer {
             HighlightedCodeBlock(
                 language: codeBlock.language,
                 code: codeBlock.code,
-                themeConfiguration: configuration.codeBlockThemeConfiguration
+                theme: configuration.codeBlockTheme
             )
         )
     }
@@ -88,8 +86,7 @@ extension Renderer {
 struct HighlightedCodeBlock: View {
     var language: String?
     var code: String
-    
-    var themeConfiguration: CodeBlockThemeConfiguration
+    var theme: CodeBlockTheme
     
     @Environment(\.colorScheme) private var colorScheme
     @State private var attributedCode: AttributedString?
@@ -124,7 +121,7 @@ struct HighlightedCodeBlock: View {
     
     @Sendable private func highlight() {
         guard let highlighter else { return }
-        highlighter.setTheme(to: colorScheme == .dark ? themeConfiguration.darkModeThemeName : themeConfiguration.lightModeThemeName)
+        highlighter.setTheme(to: colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName)
         let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language })
         if let highlightedCode = highlighter.highlight(code, as: language) {
             attributedCode = AttributedString(highlightedCode)
@@ -132,15 +129,15 @@ struct HighlightedCodeBlock: View {
     }
 }
 
-/// The configuration for Code Blocks.
+/// The configuration for code blocks.
 ///
-/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
-public struct CodeBlockThemeConfiguration: Equatable {
+/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
+public struct CodeBlockTheme: Equatable {
     /// The theme name in Light Mode.
-    public var lightModeThemeName: String
+    var lightModeThemeName: String
     
     /// The theme name in Dark Mode.
-    public var darkModeThemeName: String
+    var darkModeThemeName: String
     
     /// Creates a single theme for the Code Block.
     ///
@@ -159,7 +156,7 @@ public struct CodeBlockThemeConfiguration: Equatable {
     ///   - darkModeThemeName: the name of the theme to use in Dark Mode.
     ///
     ///  If you want to use the same theme on both Dark Mode and Light Mode,
-    ///  you should use ``CodeBlockThemeConfiguration/init(themeName:)``.
+    ///  you should use ``init(themeName:)``.
     public init(lightModeThemeName: String, darkModeThemeName: String) {
         self.lightModeThemeName = lightModeThemeName
         self.darkModeThemeName = darkModeThemeName

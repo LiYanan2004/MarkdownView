@@ -5,7 +5,7 @@ extension MarkdownView {
         RendererConfiguration(
             role: role,
             lineSpacing: lineSpacing,
-            codeBlockThemeConfiguration: codeBlockThemeConfiguration,
+            codeBlockTheme: codeBlockTheme,
             imageRenderer: imageRenderer,
             blockDirectiveRenderer: blockDirectiveRenderer,
             imageCacheController: imageCacheController
@@ -27,8 +27,8 @@ struct RendererConfiguration {
     var componentSpacing: CGFloat = 12
     
     /// Sets the theme of the code block.
-    /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
-    var codeBlockThemeConfiguration: CodeBlockThemeConfiguration
+    /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
+    var codeBlockTheme: CodeBlockTheme
     
     var imageRenderer: ImageRenderer
     var blockDirectiveRenderer: BlockDirectiveRenderer
@@ -37,6 +37,6 @@ struct RendererConfiguration {
 
 extension RendererConfiguration: Equatable {
     static func == (lhs: RendererConfiguration, rhs: RendererConfiguration) -> Bool {
-        lhs.codeBlockThemeConfiguration == rhs.codeBlockThemeConfiguration
+        lhs.codeBlockTheme == rhs.codeBlockTheme && lhs.lineSpacing == rhs.lineSpacing
     }
 }

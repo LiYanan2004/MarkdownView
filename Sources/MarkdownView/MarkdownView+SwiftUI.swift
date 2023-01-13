@@ -63,13 +63,13 @@ extension MarkdownView {
 extension MarkdownView {
     /// Sets the theme of the Code Blocks.
     /// 
-    /// - Parameter configuration: Theme configuration of the Code Block, see ``CodeBlockThemeConfiguration``.
+    /// - Parameter theme: Theme configuration of the Code Block, see ``CodeBlockTheme``.
     /// - Returns: `MarkdownView` with custom Code Block theme.
-    public func codeBlockThemeConfiguration(
-        using configuration: CodeBlockThemeConfiguration
+    public func codeBlockTheme(
+        using theme: CodeBlockTheme
     ) -> MarkdownView {
         var result = self
-        result.codeBlockThemeConfiguration = configuration
+        result.codeBlockTheme = theme
         
         return result
     }

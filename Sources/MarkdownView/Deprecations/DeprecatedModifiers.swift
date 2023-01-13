@@ -47,4 +47,18 @@ extension MarkdownView {
         
         return result
     }
+    
+    /// Sets the theme of the Code Blocks.
+    ///
+    /// - Parameter configuration: Theme configuration of the Code Block, see ``CodeBlockThemeConfiguration``.
+    /// - Returns: `MarkdownView` with custom Code Block theme.
+    @available(*, deprecated, renamed: "codeBlockTheme")
+    public func codeBlockThemeConfiguration(
+        using configuration: CodeBlockThemeConfiguration
+    ) -> MarkdownView {
+        var result = self
+        result.codeBlockTheme = CodeBlockTheme(lightModeThemeName: configuration.lightModeThemeName, darkModeThemeName: configuration.darkModeThemeName)
+        
+        return result
+    }
 }
