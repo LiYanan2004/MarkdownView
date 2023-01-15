@@ -55,7 +55,7 @@ struct Renderer: MarkupVisitor {
         for child in paragraph.children {
             subviews.append(visit(child))
         }
-        return AnyView(FlexibleLayout(verticleSpacing: configuration.lineSpacing) {
+        return AnyView(FlexibleStack(verticleSpacing: configuration.lineSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
@@ -69,7 +69,7 @@ struct Renderer: MarkupVisitor {
         }
         if let destination = URL(string: link.destination ?? "") {
             return AnyView(SwiftUI.Link(destination: destination) {
-                FlexibleLayout {
+                FlexibleStack {
                     ForEach(subviews.indices, id: \.self) { index in
                         subviews[index]
                     }
@@ -107,7 +107,7 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitImage(_ image: Markdown.Image) -> AnyView {
-        let renderer = configuration.imageRenderer
+        let renderer = ImageRenderer.shared
         guard let source = URL(string: image.source ?? "") else {
             return AnyView(SwiftUI.Text(image.plainText))
         }

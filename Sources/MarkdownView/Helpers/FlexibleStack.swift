@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FlexibleLayout: Layout {
+struct FlexibleStack: Layout {
     var verticleSpacing: CGFloat = 0
     
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {

@@ -25,3 +25,7 @@ class BlockDirectiveRenderer {
         }
     }
 }
+
+extension BlockDirectiveRenderer {
+    static var shared: BlockDirectiveRenderer = BlockDirectiveRenderer()
+}

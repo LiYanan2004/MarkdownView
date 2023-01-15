@@ -11,8 +11,6 @@ public struct MarkdownView: View {
     @Environment(\.lineSpacing) var lineSpacing
     @State private var containerSize = CGSize.zero
     @StateObject var imageCacheController = ImageCacheController()
-    var imageRenderer = ImageRenderer()
-    var blockDirectiveRenderer = BlockDirectiveRenderer()
     var codeBlockTheme = CodeBlockTheme(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
@@ -31,7 +29,7 @@ public struct MarkdownView: View {
     public init(text: Binding<String>, baseURL: URL? = nil) {
         _text = text
         if let baseURL {
-            imageRenderer.baseURL = baseURL
+            ImageRenderer.shared.baseURL = baseURL
         }
     }
     
@@ -42,7 +40,7 @@ public struct MarkdownView: View {
     public init(text: String, baseURL: URL? = nil) {
         _text = .constant(text)
         if let baseURL {
-            imageRenderer.baseURL = baseURL
+            ImageRenderer.shared.baseURL = baseURL
         }
     }
     
@@ -74,7 +72,7 @@ public struct MarkdownView: View {
                 makeView(text: $0)
             }
         )
-        let parseBD = !blockDirectiveRenderer.blockDirectiveHandlers.isEmpty
+        let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveHandlers.isEmpty
         let view = renderer.representedView(parseBlockDirectives: parseBD)
         representedView = view
     }
@@ -96,5 +94,42 @@ class ContentUpdater: ObservableObject {
     
     func push(_ text: String) {
         relay.send(text)
+    }
+}
+
+extension MarkdownView {
+    var configuration: RendererConfiguration {
+        RendererConfiguration(
+            role: role,
+            lineSpacing: lineSpacing,
+            codeBlockTheme: codeBlockTheme,
+            imageCacheController: imageCacheController
+        )
+    }
+}
+
+struct RendererConfiguration {
+    var role: MarkdownView.MarkdownViewRole
+    
+    /// Sets the amount of space between lines in a paragraph in this view.
+    ///
+    /// Use SwiftUI's built-in `lineSpacing(_:)` to set the amount of spacing
+    /// from the bottom of one line to the top of the next for text elements in the view.
+    ///
+    ///     MarkdownView(...)
+    ///         .lineSpacing(10)
+    var lineSpacing: CGFloat
+    var componentSpacing: CGFloat = 12
+    
+    /// Sets the theme of the code block.
+    /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
+    var codeBlockTheme: CodeBlockTheme
+
+    var imageCacheController: ImageCacheController
+}
+
+extension RendererConfiguration: Equatable {
+    static func == (lhs: RendererConfiguration, rhs: RendererConfiguration) -> Bool {
+        lhs.codeBlockTheme == rhs.codeBlockTheme && lhs.lineSpacing == rhs.lineSpacing
     }
 }

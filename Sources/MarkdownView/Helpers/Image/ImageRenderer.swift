@@ -38,3 +38,7 @@ class ImageRenderer {
         }
     }
 }
+
+extension ImageRenderer {
+    static var shared: ImageRenderer = ImageRenderer()
+}

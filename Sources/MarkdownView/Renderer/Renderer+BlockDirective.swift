@@ -3,7 +3,7 @@ import SwiftUI
 
 extension Renderer {
     mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> AnyView {
-        let renderer = configuration.blockDirectiveRenderer
+        let renderer = BlockDirectiveRenderer.shared
         
         var handler: (any BlockDirectiveDisplayable)?
         renderer.blockDirectiveHandlers.forEach { name, value in
@@ -24,7 +24,7 @@ extension Renderer {
             subviews.append(AnyView(visit(child)))
         }
         let innerMarkdownView = AnyView(
-            FlexibleLayout {
+            FlexibleStack {
                 ForEach(subviews.indices, id: \.self) {
                     subviews[$0]
                 }

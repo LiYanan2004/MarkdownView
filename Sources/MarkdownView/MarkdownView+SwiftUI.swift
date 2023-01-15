@@ -15,10 +15,8 @@ extension MarkdownView {
     public func imageHandler(
         _ handler: BuiltInImageHandler, forURLScheme urlScheme: String
     ) -> MarkdownView {
-        let result = self
-        result.imageRenderer.addHandler(handler.displayable, forURLScheme: urlScheme)
-
-        return result
+        ImageRenderer.shared.addHandler(handler.displayable, forURLScheme: urlScheme)
+        return self
     }
     
     /// Adds your own handlers to render images.
@@ -32,10 +30,8 @@ extension MarkdownView {
     public func imageHandler(
         _ handler: some ImageDisplayable, forURLScheme urlScheme: String
     ) -> MarkdownView {
-        let result = self
-        result.imageRenderer.addHandler(handler, forURLScheme: urlScheme)
-
-        return result
+        ImageRenderer.shared.addHandler(handler, forURLScheme: urlScheme)
+        return self
     }
 }
 
@@ -52,10 +48,8 @@ extension MarkdownView {
     public func blockDirectiveHandler(
         _ handler: some BlockDirectiveDisplayable, for name: String
     ) -> MarkdownView {
-        let result = self
-        result.blockDirectiveRenderer.addHandler(handler, for: name)
-        
-        return result
+        BlockDirectiveRenderer.shared.addHandler(handler, for: name)
+        return self
     }
 }
 

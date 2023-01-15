@@ -56,7 +56,7 @@ extension Renderer {
             subviews.append(visit(child))
         }
         
-        return AnyView(FlexibleLayout {
+        return AnyView(FlexibleStack {
             ForEach(subviews.indices, id: \.self) {
                 subviews[$0]
             }

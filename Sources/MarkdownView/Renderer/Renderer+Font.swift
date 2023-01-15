@@ -50,7 +50,7 @@ extension Renderer {
         default: fontStyle = .body
         }
         return AnyView(
-            FlexibleLayout {
+            FlexibleStack {
                 ForEach(subviews.indices, id: \.self) { index in
                     subviews[index].font(.system(fontStyle, weight: .bold))
                 }
