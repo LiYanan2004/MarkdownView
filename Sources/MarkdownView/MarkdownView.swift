@@ -8,7 +8,7 @@ import Combine
 public struct MarkdownView: View {
     @Binding private var text: String
     
-    @Environment(\.lineSpacing) var lineSpacing
+    @Environment(\.lineSpacing) private var lineSpacing
     @State private var containerSize = CGSize.zero
     @StateObject var imageCacheController = ImageCacheController()
     var codeBlockTheme = CodeBlockTheme(

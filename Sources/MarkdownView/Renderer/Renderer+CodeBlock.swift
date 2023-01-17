@@ -92,7 +92,9 @@ struct HighlightedCodeBlock: View {
     @State private var attributedCode: AttributedString?
     
     var highlighter: Highlightr? = Highlightr()
-    private var id: String { (language ?? "No Language Name") + code }
+    private var id: String {
+        "\(colorScheme) mode: " + (language ?? "No Language Name") + code
+    }
 
     var body: some View {
         Group {
@@ -106,7 +108,6 @@ struct HighlightedCodeBlock: View {
         .lineSpacing(5)
         .font(.system(.callout, design: .monospaced))
         .padding()
-        .drawingGroup()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
         .overlay(alignment: .bottomTrailing) {
@@ -122,9 +123,11 @@ struct HighlightedCodeBlock: View {
     @Sendable private func highlight() {
         guard let highlighter else { return }
         highlighter.setTheme(to: colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName)
-        let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language })
+        let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language?.lowercased() })
         if let highlightedCode = highlighter.highlight(code, as: language) {
-            attributedCode = AttributedString(highlightedCode)
+            withAnimation {
+                attributedCode = AttributedString(highlightedCode)
+            }
         }
     }
 }
