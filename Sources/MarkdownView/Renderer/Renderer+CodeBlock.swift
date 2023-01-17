@@ -39,7 +39,7 @@ struct InlineCodeView: View {
                     let blockBackground = GeometryReader { proxy in
                         let size = proxy.size
                         Rectangle()
-                            .fill(.tint.opacity(0.2))
+                            .fill(.tint.opacity(0.1))
                             .frame(width: size.width + additionalSpace,
                                    height: size.height + 5)
                             .withCornerRadius(5, at: roundedSide)
@@ -47,20 +47,20 @@ struct InlineCodeView: View {
                                     y: -2.5)
                     }
                     SwiftUI.Text(subText[index])
-                        .font(.system(.body, design: .monospaced).bold())
+                        .font(.system(.subheadline, design: .monospaced).bold())
                         .background { blockBackground }
                         .foregroundStyle(.tint)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 2.5)
+                        // avoid integrating with the block above.
+                        .padding(.top, 1)
                         .padding(roundedSide.edge, roundedSide == .none ? 0 : 5)
                 }
             }
         }
-        .task(id: code, priority: .high) {
-            updateContent()
-        }
+        .task(id: code, updateContent)
     }
     
-    func updateContent() {
+    @Sendable func updateContent() {
         subText = Renderer.Split(code)
     }
 }

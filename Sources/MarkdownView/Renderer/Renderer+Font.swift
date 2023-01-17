@@ -49,12 +49,20 @@ extension Renderer {
         case 6: fontStyle = .body
         default: fontStyle = .body
         }
-        return AnyView(
-            FlexibleStack {
-                ForEach(subviews.indices, id: \.self) { index in
-                    subviews[index].font(.system(fontStyle, weight: .bold))
+        
+        let headingView: some View = {
+            VStack {
+                if heading.level == 1 {
+                    NewLine()
+                }
+                FlexibleStack {
+                    ForEach(subviews.indices, id: \.self) { index in
+                        subviews[index].font(.system(fontStyle, weight: .bold))
+                    }
                 }
             }
-        )
+        }()
+        
+        return AnyView(headingView)
     }
 }

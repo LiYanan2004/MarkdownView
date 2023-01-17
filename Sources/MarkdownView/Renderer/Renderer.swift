@@ -88,21 +88,21 @@ struct Renderer: MarkupVisitor {
         }
         
         return AnyView(
-            HStack(spacing: 0) {
-                Rectangle()
-                    .frame(width: 3)
-                    .padding(.horizontal, 8)
-                    .foregroundStyle(.secondary)
-                
-                VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-                    ForEach(subviews.indices, id: \.self) { index in
-                        subviews[index]
-                    }
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(subviews.indices, id: \.self) { index in
+                    subviews[index]
                 }
-                .padding(.vertical, 8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .font(.system(.body, design: .serif))
-            }.fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .font(.system(.body, design: .serif))
+            .padding(.leading, 20)
+            .background(.quaternary)
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .foregroundStyle(.secondary).frame(width: 4)
+            }
+            .cornerRadius(3)
         )
     }
     

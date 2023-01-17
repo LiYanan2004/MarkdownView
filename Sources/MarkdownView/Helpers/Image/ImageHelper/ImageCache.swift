@@ -42,3 +42,9 @@ class ImageCacheController: ObservableObject {
         caches = []
     }
 }
+
+extension ImageCacheController: Equatable {
+    static func == (lhs: ImageCacheController, rhs: ImageCacheController) -> Bool {
+        true
+    }
+}

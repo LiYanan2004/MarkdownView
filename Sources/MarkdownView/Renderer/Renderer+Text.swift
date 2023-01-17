@@ -17,12 +17,10 @@ struct TextView: View {
                 }
             }
         }
-        .task(id: text, priority: .high) {
-            updateContent()
-        }
+        .task(id: text, updateContent)
     }
     
-    func updateContent() {
+    @Sendable func updateContent() {
         subText = Renderer.Split(text)
     }
 }

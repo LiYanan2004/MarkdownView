@@ -108,7 +108,7 @@ extension MarkdownView {
     }
 }
 
-struct RendererConfiguration {
+struct RendererConfiguration: Equatable {
     var role: MarkdownView.MarkdownViewRole
     
     /// Sets the amount of space between lines in a paragraph in this view.
@@ -126,10 +126,4 @@ struct RendererConfiguration {
     var codeBlockTheme: CodeBlockTheme
 
     var imageCacheController: ImageCacheController
-}
-
-extension RendererConfiguration: Equatable {
-    static func == (lhs: RendererConfiguration, rhs: RendererConfiguration) -> Bool {
-        lhs.codeBlockTheme == rhs.codeBlockTheme && lhs.lineSpacing == rhs.lineSpacing
-    }
 }
