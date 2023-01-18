@@ -4,11 +4,9 @@ import SwiftUI
 extension Renderer {
     mutating func visitEmphasis(_ emphasis: Markdown.Emphasis) -> AnyView {
         var subviews = [AnyView]()
-        
         for child in emphasis.children {
             subviews.append(visit(child))
         }
-        
         return AnyView(ForEach(subviews.indices, id: \.self) { index in
             subviews[index].italic()
         })

@@ -47,7 +47,10 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitText(_ text: Markdown.Text) -> AnyView {
-        AnyView(TextView(text: text.plainText))
+        Task {
+            await RendererProcessor.main.addTextCounter()
+        }
+        return AnyView(TextView(text: text.plainText))
     }
     
     mutating func visitParagraph(_ paragraph: Paragraph) -> AnyView {

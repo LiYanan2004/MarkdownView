@@ -5,7 +5,10 @@ import Highlightr
 // MARK: - Inline Code Block
 extension Renderer {
     mutating func visitInlineCode(_ inlineCode: InlineCode) -> AnyView {
-        AnyView(InlineCodeView(code: inlineCode.code))
+        Task {
+            await RendererProcessor.main.addTextCounter()
+        }
+        return AnyView(InlineCodeView(code: inlineCode.code))
     }
     
     func visitInlineHTML(_ inlineHTML: InlineHTML) -> AnyView {
@@ -57,11 +60,18 @@ struct InlineCodeView: View {
                 }
             }
         }
-        .task(id: code, updateContent)
+        .task(id: code) {
+            Task.detached {
+                await self.updateContent()
+            }
+        }
     }
     
-    @Sendable func updateContent() {
-        subText = Renderer.Split(code)
+    func updateContent() async {
+        let splittedText = await RendererProcessor.main.splitText(code)
+        await MainActor.run {
+            subText = splittedText
+        }
     }
 }
 

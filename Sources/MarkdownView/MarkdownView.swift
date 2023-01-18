@@ -17,8 +17,8 @@ public struct MarkdownView: View {
     
     // Update content 0.3s after the user stops entering.
     @StateObject var contentUpdater = ContentUpdater()
-    @State private var representedView = AnyView(Color.black.opacity(0.001)) // MarkdownView
-    @State private var isSetup = false
+    @State private var representedView = AnyView(Color.black.opacity(0.001)) // RenderedView
+    @State private var renderComplete = false
     
     var role: MarkdownViewRole = .normal
     
@@ -45,36 +45,60 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        representedView
-            .environment(\.containerSize, containerSize)
-            .overlay {
-                GeometryReader { proxy in
-                    Color.clear
-                        .preference(key: ContainerMeasurement.self, value: proxy.size)
-                }
+        ZStack {
+            if role == .editor {
+                representedView
+                    .opacity(renderComplete ? 1 : 0.001)
+                    .onReceive(_markdownRenderComplete) {
+                        withAnimation {
+                            renderComplete = true
+                        }
+                    }
+            } else {
+                representedView
             }
-            .onPreferenceChange(ContainerMeasurement.self) { containerSize = $0 }
-            // Push current text, waiting for next update.
-            .onChange(of: text, perform: contentUpdater.push(_:))
-            // Load view immediately after the first launch.
-            // Receive configuration changes and reload MarkdownView to fit.
-            .task(id: configuration) { makeView(text: text) }
-            // Received a debouncedText, we need to reload MarkdownView.
-            .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
+        }
+        .environment(\.containerSize, containerSize)
+        .overlay {
+            GeometryReader { proxy in
+                Color.clear
+                    .preference(key: ContainerMeasurement.self, value: proxy.size)
+            }
+        }
+        .onPreferenceChange(ContainerMeasurement.self) { containerSize = $0 }
+        // Push current text, waiting for next update.
+        .onChange(of: text, perform: contentUpdater.push(_:))
+        // Load view immediately after the first launch.
+        // Receive configuration changes and reload MarkdownView to fit.
+        .task(id: configuration) { makeView(text: text) }
+        // Received a debouncedText, we need to reload MarkdownView.
+        .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
     }
     
     private func makeView(text: String) {
-        var renderer = Renderer(
-            text: text,
-            configuration: configuration,
-            interactiveEditHandler: {
-                self.text = $0
-                makeView(text: $0)
+        Task.detached {
+            let config = await self.configuration
+            let view = RendererProcessor.main.renderMarkdownView(text: text, config: config) { text in
+                Task { @MainActor in
+                    self.text = text
+                    self.makeView(text: text)
+                }
             }
+            Task { @MainActor in
+                representedView = view
+            }
+        }
+    }
+}
+
+extension MarkdownView {
+    var configuration: RendererConfiguration {
+        RendererConfiguration(
+            role: role,
+            lineSpacing: lineSpacing,
+            codeBlockTheme: codeBlockTheme,
+            imageCacheController: imageCacheController
         )
-        let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveHandlers.isEmpty
-        let view = renderer.representedView(parseBlockDirectives: parseBD)
-        representedView = view
     }
 }
 
@@ -94,17 +118,6 @@ class ContentUpdater: ObservableObject {
     
     func push(_ text: String) {
         relay.send(text)
-    }
-}
-
-extension MarkdownView {
-    var configuration: RendererConfiguration {
-        RendererConfiguration(
-            role: role,
-            lineSpacing: lineSpacing,
-            codeBlockTheme: codeBlockTheme,
-            imageCacheController: imageCacheController
-        )
     }
 }
 
