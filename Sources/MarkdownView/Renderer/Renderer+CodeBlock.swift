@@ -4,18 +4,19 @@ import Highlightr
 
 // MARK: - Inline Code Block
 extension Renderer {
-    mutating func visitInlineCode(_ inlineCode: InlineCode) -> AnyView {
-        Task {
-            await RendererProcessor.main.addTextCounter()
-        }
-        return AnyView(InlineCodeView(code: inlineCode.code))
+    mutating func visitInlineCode(_ inlineCode: InlineCode) -> Result {
+        var attributedString = AttributedString(stringLiteral: inlineCode.code)
+        attributedString.foregroundColor = configuration.tintColor
+        attributedString.backgroundColor = configuration.tintColor.opacity(0.1)
+        return Result(SwiftUI.Text(attributedString))
     }
     
-    func visitInlineHTML(_ inlineHTML: InlineHTML) -> AnyView {
-        AnyView(SwiftUI.Text(inlineHTML.rawHTML))
+    func visitInlineHTML(_ inlineHTML: InlineHTML) -> Result {
+        Result(SwiftUI.Text(inlineHTML.rawHTML))
     }
 }
 
+// MARK: Deprecated
 struct InlineCodeView: View {
     var code: String
     @State private var subText = [String]()
@@ -25,7 +26,7 @@ struct InlineCodeView: View {
             if subText.isEmpty != code.isEmpty {
                 // An invisible placeholder which is
                 // used to let SwiftUI execute `updateContent`
-                Color.black.opacity(0.001)
+                SwiftUI.Text(code)
             } else {
                 ForEach(subText.indices, id: \.self) { index in
                     let roundedSide: WithRoundedCorner.Side = {
@@ -62,34 +63,34 @@ struct InlineCodeView: View {
         }
         .task(id: code) {
             Task.detached {
-                await self.updateContent()
+                // await self.updateContent()
             }
         }
     }
     
-    func updateContent() async {
-        let splittedText = await RendererProcessor.main.splitText(code)
-        await MainActor.run {
-            subText = splittedText
-        }
-    }
+    // Deprecated
+//    func updateContent() async {
+//        let splittedText = await RendererProcessor.main.splitText(code)
+//        await MainActor.run {
+//            subText = splittedText
+//        }
+//    }
 }
 
 // MARK: - Code Block
 
 extension Renderer {
-    mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> AnyView {
-        AnyView(
-            HighlightedCodeBlock(
-                language: codeBlock.language,
-                code: codeBlock.code,
-                theme: configuration.codeBlockTheme
-            )
+    mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> Result {
+        let block = HighlightedCodeBlock(
+            language: codeBlock.language,
+            code: codeBlock.code,
+            theme: configuration.codeBlockTheme
         )
+        return Result(AnyView(block))
     }
     
-    func visitHTMLBlock(_ html: HTMLBlock) -> AnyView {
-        AnyView(SwiftUI.Text(html.rawHTML))
+    func visitHTMLBlock(_ html: HTMLBlock) -> Result {
+        Result(AnyView(SwiftUI.Text(html.rawHTML)))
     }
 }
 
@@ -139,39 +140,5 @@ struct HighlightedCodeBlock: View {
                 attributedCode = AttributedString(highlightedCode)
             }
         }
-    }
-}
-
-/// The configuration for code blocks.
-///
-/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
-public struct CodeBlockTheme: Equatable {
-    /// The theme name in Light Mode.
-    var lightModeThemeName: String
-    
-    /// The theme name in Dark Mode.
-    var darkModeThemeName: String
-    
-    /// Creates a single theme for the Code Block.
-    ///
-    /// - Parameter themeName: the name of the theme to use in both Light Mode and Dark Mode.
-    ///
-    /// - warning: You should test the visibility of the code in Light Mode and Dark Mode first.
-    public init(themeName: String) {
-        lightModeThemeName = themeName
-        darkModeThemeName = themeName
-    }
-    
-    /// Creates a combination of two themes that will perfectly adapt both Light Mode and Dark Mode.
-    ///
-    /// - Parameters:
-    ///   - lightModeThemeName: the name of the theme to use in Light Mode.
-    ///   - darkModeThemeName: the name of the theme to use in Dark Mode.
-    ///
-    ///  If you want to use the same theme on both Dark Mode and Light Mode,
-    ///  you should use ``init(themeName:)``.
-    public init(lightModeThemeName: String, darkModeThemeName: String) {
-        self.lightModeThemeName = lightModeThemeName
-        self.darkModeThemeName = darkModeThemeName
     }
 }

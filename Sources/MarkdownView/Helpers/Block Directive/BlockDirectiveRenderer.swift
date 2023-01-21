@@ -21,7 +21,7 @@ class BlockDirectiveRenderer {
         if let handler {
             return AnyView(handler.makeView(arguments: args, innerMarkdownView: innerMarkdownView))
         } else {
-            return AnyView(EmptyView())
+            return innerMarkdownView
         }
     }
 }

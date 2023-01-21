@@ -8,21 +8,18 @@ Here is a preview :)
 
 ![](Images/overall.jpeg)
 
-> `MarkdownView` Package is still in beta. 
-> 
+> `MarkdownView` is still in beta. 
 > There might have some API changes in the future.
+> 
+> Note: `MarkdownView` doesn’t support Tables on iOS 15, macOS 12 and tvOS 15. This capability will be added in the future.
 
 ## Supported Platforms
 
 You can use MarkdownView in the following platforms:
 
-* macOS 13.0+
-* iOS 16.0+
-* tvOS 16.0+
-
-Sadly, the system requirements is relatively high because we need to use the Layout Protocal that only supports in the new Operating Systems to automatically position elements.  
-
-If you still want to support older operating systems, there is a similar package [gonzalezreal/MarkdownUI](https://github.com/gonzalezreal/MarkdownUI.git).
+* macOS 12.0+
+* iOS 15.0+
+* tvOS 15.0+
 
 ## Advantage
 
@@ -42,20 +39,62 @@ You can create a `Markdown` view by providing a Markdown-formatted string.
 MarkdownView(text: "This is the Apple's **newly published** [swift-markdown](https://github.com/apple/swift-markdown)")
 ```
 
-![](Images/bold_and_links.png)
+![](Images/bold_and_links.jpeg)
 
-If your `Markdown` have CheckBoxes, you can provide a Binding string.
+If your `Markdown` have check boxes, you can provide a Binding string.
 
 ```swift
-@State var text = "- [x] Buy some eggs"
+@State var text = """
+- [x] Write the press release
+- [ ] Update the website
+- [ ] Contact the media
+"""
 ```
 
 ```swift
 MarkdownView(text: $text)
 ```   
-![](Images/checkbox.png)
+![](Images/checkbox.jpeg)
 
 > For more information, Check out [MarkdownView's Documentation](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
+
+## Add Custom Handlers
+
+You can add your custom image handlers and block directive handlers to display your content.
+
+To do that, first create your handler.
+
+```swift
+struct CustomImageHandler: ImageDisplayable {
+    func makeImage(url: URL, alt: String?) -> some View {
+        AsyncImage(url: url) {
+            switch $0 {
+            case .empty: ProgressView()
+            case .success(let image): image.resizable()
+            case .failure(let error): Text(error.localizedDescription)
+            @unknown default: Text("Unknown situation")
+            }
+        }
+    }
+}
+```
+
+Then apply your handler to `MarkdownView`.
+
+```swift
+MarkdownView(text: markdownText)
+    .imageHandler(CustomImageHandler(), forURLScheme: "my-image")
+```
+
+The implementation of the block directive is exactly the same way.
+
+## Todos
+
+- [ ] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
+- [ ] watchOS support. (specifically watchOS 7.0+)
+- [ ] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
+- [ ] Built-in image handlers improvements.
+- [ ] Add capability to override default image handlers.
 
 ## Swift Package Manager
 
@@ -72,8 +111,10 @@ Add the dependency to any targets you've declared in your manifest:
 ```
 
 ## Similar Projects
+
 - [MarkdownUI](https://github.com/gonzalezreal/MarkdownUI)
 
 ## Dependencies
+
 - [apple/swift-markdown](https://github.com/apple/swift-markdown): Parse documents
 - [SVGKit/SVGKit](https://github.com/SVGKit/SVGKit): Convert SVG to UIImage/NSImage

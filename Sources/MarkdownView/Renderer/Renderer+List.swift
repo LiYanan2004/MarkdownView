@@ -3,19 +3,20 @@ import SwiftUI
 
 extension Renderer {
     /// List row which contains inner items.
-    mutating func visitListItem(_ listItem: ListItem) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitListItem(_ listItem: ListItem) -> Result {
+        var contents = [Result]()
         for child in listItem.children {
-            subviews.append(visit(child))
+            contents.append(visit(child))
         }
-        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
+        let item = AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+            ForEach(contents.indices, id: \.self) { index in
+                contents[index].content
             }
         })
+        return Result(item)
     }
     
-    mutating func visitOrderedList(_ orderedList: OrderedList) -> AnyView {
+    mutating func visitOrderedList(_ orderedList: OrderedList) -> Result {
         var subviews = [AnyView]()
         for (index, listItem) in orderedList.listItems.enumerated() {
             let row = HStack(alignment: .firstTextBaseline) {
@@ -25,19 +26,20 @@ extension Renderer {
                     SwiftUI.Text("\(index + 1).")
                         .padding(.leading, orderedList.listDepth == 0 ? 12 : 0)
                 }
-                visit(listItem)
+                visit(listItem).content
             }
             subviews.append(AnyView(row))
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+        let list = AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
         })
+        return Result(list)
     }
     
-    mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> AnyView {
+    mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> Result {
         var subviews = [AnyView]()
         for listItem in unorderedList.listItems {
             let listRow = HStack(alignment: .firstTextBaseline) {
@@ -49,16 +51,17 @@ extension Renderer {
                         .fontWeight(.black)
                         .padding(.leading, unorderedList.listDepth == 0 ? 12 : 0)
                 }
-                visit(listItem)
+                visit(listItem).content
             }
             subviews.append(AnyView(listRow))
         }
         
-        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+        let list = AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(subviews.indices, id: \.self) { index in
                 subviews[index]
             }
         })
+        return Result(list)
     }
 }
 

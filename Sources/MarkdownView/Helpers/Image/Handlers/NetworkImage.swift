@@ -1,5 +1,7 @@
 import SwiftUI
+#if !os(watchOS)
 import SVGKit
+#endif
 
 struct NetworkImage: View {
     var url: URL
@@ -79,7 +81,9 @@ struct NetworkImage: View {
                 return
             }
             #endif
+            #if !os(watchOS)
             try await loadAsSVG(data: data)
+            #endif
         } catch {
             localizedError = error.localizedDescription
             print(error.localizedDescription)
@@ -88,11 +92,11 @@ struct NetworkImage: View {
     
     func showImage() {
         guard let image = cacheController.image(from: url) else { return }
-#if os(iOS) || os(tvOS)
+        #if os(iOS) || os(tvOS)
         self.image = Image(uiImage: image)
-#else
+        #else
         self.image = Image(nsImage: image)
-#endif
+        #endif
     }
     
     var isCached: Bool {
@@ -108,7 +112,7 @@ extension NetworkImage {
         return data
     }
     
-#if os(iOS) || os(tvOS)
+    #if os(iOS) || os(tvOS)
     private func prepareThumbnailAndDisplay(for image: UIImage, size: CGSize) async throws {
         if size.width >= image.size.width {
             cacheController.cacheImage(image, url: url)
@@ -116,7 +120,7 @@ extension NetworkImage {
         }
         let thumbnailSize = thumbnailSize(for: image, byReferencing: size)
         if let thumbnail = await image.byPreparingThumbnail(ofSize: thumbnailSize) {
-            showImage(thumbnail)
+            cacheController.cacheImage(thumbnail, url: url)
         } else {
             throw ImageError.thumbnailError
         }
@@ -128,10 +132,10 @@ extension NetworkImage {
         
         return CGSize(width: size.width * scale, height: thumbnailHeight * scale)
     }
-#endif
+    #endif
     
     func loadAsSVG(data: Data) async throws {
-        guard String(data: data, encoding: .utf8)?.contains("<svg") ?? false else {
+        guard String(data: data, encoding: .utf8)?.starts(with: "<svg") ?? false else {
             throw ImageError.formatError
         }
         let source = SVGKSource(inputSteam: InputStream(data: data))

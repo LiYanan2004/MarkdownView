@@ -2,7 +2,7 @@ import Markdown
 import SwiftUI
 
 extension Renderer {
-    mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> AnyView {
+    mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> Result {
         let renderer = BlockDirectiveRenderer.shared
         
         var handler: (any BlockDirectiveDisplayable)?
@@ -19,17 +19,19 @@ extension Renderer {
                 BlockDirectiveArgument($0)
             }
         
-        var subviews = [AnyView]()
+        // TODO: Research the structure of the block directive.
+        var contents = [Result]()
         for child in blockDirective.children {
-            subviews.append(AnyView(visit(child)))
+            contents.append(visit(child))
         }
         let innerMarkdownView = AnyView(
-            FlexibleStack {
-                ForEach(subviews.indices, id: \.self) {
-                    subviews[$0]
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(contents.indices, id: \.self) {
+                    contents[$0].content
                 }
             }
         )
-        return renderer.loadBlockDirective(handler: handler, args: args, innerMarkdownView: innerMarkdownView)
+        let BDView = renderer.loadBlockDirective(handler: handler, args: args, innerMarkdownView: innerMarkdownView)
+        return Result(BDView)
     }
 }

@@ -46,7 +46,7 @@ public enum BuiltInImageHandler {
 /// Load Network Images.
 struct NetworkImageDisplayable: ImageDisplayable {
     func makeImage(url: URL, alt: String?) -> some View {
-        NetworkImage(url: url)
+        NetworkImage(url: url, alt: alt)
     }
 }
 

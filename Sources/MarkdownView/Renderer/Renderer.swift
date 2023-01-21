@@ -2,6 +2,8 @@ import SwiftUI
 import Markdown
 
 struct Renderer: MarkupVisitor {
+    typealias Result = ViewContent
+    
     var text: String
     var configuration: RendererConfiguration
     // Handle text changes when toggle checkmarks.
@@ -9,112 +11,124 @@ struct Renderer: MarkupVisitor {
     
     mutating func representedView(parseBlockDirectives: Bool) -> AnyView {
         let options: ParseOptions = parseBlockDirectives ? [.parseBlockDirectives] : []
-
-        switch configuration.role {
-        case .normal: return visit(Document(parsing: text, options: options))
-        case .editor:
-            return AnyView(
-                visit(Document(parsing: text, options: options))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            )
-        }
+        return visit(Document(parsing: text, options: options)).view
     }
     
-    mutating func visitDocument(_ document: Document) -> AnyView {
-        var subviews = [AnyView]()
-        
+    mutating func visitDocument(_ document: Document) -> Result {
+        var contents = [Result]()
         for child in document.children {
-            subviews.append(visit(child))
+            contents.append(visit(child))
         }
-        
-        return AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
+        let documentView = VStack(
+            alignment: .leading, spacing: configuration.componentSpacing
+        ) {
+            ForEach(contents.indices, id: \.self) { index in
+                contents[index].content
             }
-        })
+        }
+        return Result(AnyView(documentView))
     }
     
-    mutating func defaultVisit(_ markup: Markdown.Markup) -> AnyView {
-        var subviews = [AnyView]()
-        
+    mutating func defaultVisit(_ markup: Markdown.Markup) -> Result {
+        var contents = [Result]()
         for child in markup.children {
-            subviews.append(visit(child))
+            contents.append(visit(child))
         }
-        
-        return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index]
+        let content = AnyView(ForEach(contents.indices, id: \.self) { index in
+            contents[index].content
         })
+        return Result(content)
     }
     
-    mutating func visitText(_ text: Markdown.Text) -> AnyView {
-        Task {
-            await RendererProcessor.main.addTextCounter()
-        }
-        return AnyView(TextView(text: text.plainText))
+    mutating func visitText(_ text: Markdown.Text) -> Result {
+        Result(SwiftUI.Text(text.plainText))
     }
     
-    mutating func visitParagraph(_ paragraph: Paragraph) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitParagraph(_ paragraph: Paragraph) -> Result {
+        var contents = [Result]()
+        var text = [SwiftUI.Text]()
         for child in paragraph.children {
-            subviews.append(visit(child))
-        }
-        return AnyView(FlexibleStack(verticleSpacing: configuration.lineSpacing) {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
-            }
-        })
-    }
-    
-    mutating func visitLink(_ link: Markdown.Link) -> AnyView {
-        var subviews = [AnyView]()
-        for child in link.children {
-            subviews.append(visit(child))
-        }
-        if let destination = URL(string: link.destination ?? "") {
-            return AnyView(SwiftUI.Link(destination: destination) {
-                FlexibleStack {
-                    ForEach(subviews.indices, id: \.self) { index in
-                        subviews[index]
-                    }
+            let content = visit(child)
+            if content.type == .text {
+                text.append(content.text)
+            } else {
+                if !text.isEmpty {
+                    contents.append(Result(text))
+                    text.removeAll()
                 }
-            })
+                contents.append(Result(content.view))
+            }
+        }
+        if !text.isEmpty {
+            contents.append(Result(text))
+        }
+        let paragraph = contents.map { AnyView($0.content) }
+        return Result(paragraph)
+    }
+
+    mutating func visitLink(_ link: Markdown.Link) -> Result {
+        var contents = [Result]()
+        for child in link.children {
+            contents.append(visit(child))
+        }
+        if contents.allSatisfy ({
+            $0.type == .text
+        }) {
+            var attributer = LinkAttributer(tint: configuration.tintColor)
+            let link = attributer.visit(link)
+            return Result(SwiftUI.Text(link))
         } else {
-            return AnyView(SwiftUI.Text(link.plainText))
+            var composedContent = [Result]()
+            var text = [SwiftUI.Text]()
+            for content in contents {
+                if content.type == .text {
+                    text.append(content.text)
+                } else {
+                    if !text.isEmpty {
+                        composedContent.append(Result(text))
+                        text.removeAll()
+                    }
+                    composedContent.append(Result(content.content))
+                }
+            }
+            if !text.isEmpty {
+                composedContent.append(Result(text))
+            }
+            let link = composedContent.map { AnyView($0.content) }
+            return Result(link)
         }
     }
 
-    mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> AnyView {
-        var subviews = [AnyView]()
-        
+    mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Result {
+        var contents = [Result]()
         for child in blockQuote.children {
-            subviews.append(visit(child))
+            contents.append(visit(child))
         }
+        let blockQuote = VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+            ForEach(contents.indices, id: \.self) { index in
+                contents[index].content
+            }
+        }
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .font(.system(.body, design: .serif))
+        .padding(.horizontal, 20)
+        .background(.quaternary)
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .foregroundStyle(.tertiary).frame(width: 4)
+        }
+        .cornerRadius(3)
         
-        return AnyView(
-            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-                ForEach(subviews.indices, id: \.self) { index in
-                    subviews[index]
-                }
-            }
-            .padding(.vertical, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .font(.system(.body, design: .serif))
-            .padding(.leading, 20)
-            .background(.quaternary)
-            .overlay(alignment: .leading) {
-                Rectangle()
-                    .foregroundStyle(.secondary).frame(width: 4)
-            }
-            .cornerRadius(3)
-        )
+        return Result(AnyView(blockQuote))
     }
-    
-    mutating func visitImage(_ image: Markdown.Image) -> AnyView {
+
+    mutating func visitImage(_ image: Markdown.Image) -> Result {
         let renderer = ImageRenderer.shared
         guard let source = URL(string: image.source ?? "") else {
-            return AnyView(SwiftUI.Text(image.plainText))
+            return Result(SwiftUI.Text(image.plainText))
         }
-        
+
         let alt: String?
         if let title = image.title, !title.isEmpty {
             alt = title
@@ -131,11 +145,8 @@ struct Renderer: MarkupVisitor {
                 }
             }
         }
-
-        return AnyView(
-            renderer.loadImage(handler: handler, url: source, alt: alt)
-                .environmentObject(self.configuration.imageCacheController)
-        )
+        
+        return Result(AnyView(renderer.loadImage(handler: handler, url: source, alt: alt).environmentObject(configuration.imageCacheController)))
     }
 }
 

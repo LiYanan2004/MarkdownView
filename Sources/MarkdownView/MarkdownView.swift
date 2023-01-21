@@ -7,9 +7,8 @@ import Combine
 /// - note: If you want to change font size, you shoud use ``environment(_:_:)`` to modify the `dynamicTypeSize` instead of using ``font(_:)`` to maintain a natural layout.
 public struct MarkdownView: View {
     @Binding private var text: String
-    
+
     @Environment(\.lineSpacing) private var lineSpacing
-    @State private var containerSize = CGSize.zero
     @StateObject var imageCacheController = ImageCacheController()
     var codeBlockTheme = CodeBlockTheme(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
@@ -21,6 +20,7 @@ public struct MarkdownView: View {
     @State private var renderComplete = false
     
     var role: MarkdownViewRole = .normal
+    var tintColor = Color.accentColor
     
     /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
@@ -46,26 +46,14 @@ public struct MarkdownView: View {
     
     public var body: some View {
         ZStack {
-            if role == .editor {
+            switch configuration.role {
+            case .normal: representedView
+            case .editor:
                 representedView
-                    .opacity(renderComplete ? 1 : 0.001)
-                    .onReceive(_markdownRenderComplete) {
-                        withAnimation {
-                            renderComplete = true
-                        }
-                    }
-            } else {
-                representedView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
-        .environment(\.containerSize, containerSize)
-        .overlay {
-            GeometryReader { proxy in
-                Color.clear
-                    .preference(key: ContainerMeasurement.self, value: proxy.size)
-            }
-        }
-        .onPreferenceChange(ContainerMeasurement.self) { containerSize = $0 }
+        .readViewSize()
         // Push current text, waiting for next update.
         .onChange(of: text, perform: contentUpdater.push(_:))
         // Load view immediately after the first launch.
@@ -78,12 +66,18 @@ public struct MarkdownView: View {
     private func makeView(text: String) {
         Task.detached {
             let config = await self.configuration
-            let view = RendererProcessor.main.renderMarkdownView(text: text, config: config) { text in
-                Task { @MainActor in
-                    self.text = text
-                    self.makeView(text: text)
+            var renderer = Renderer(
+                text: text,
+                configuration: config,
+                interactiveEditHandler: { text in
+                    Task { @MainActor in
+                        self.text = text
+                        self.makeView(text: text)
+                    }
                 }
-            }
+            )
+            let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveHandlers.isEmpty
+            let view = renderer.representedView(parseBlockDirectives: parseBD)
             Task { @MainActor in
                 representedView = view
             }
@@ -96,6 +90,7 @@ extension MarkdownView {
         RendererConfiguration(
             role: role,
             lineSpacing: lineSpacing,
+            tintColor: tintColor,
             codeBlockTheme: codeBlockTheme,
             imageCacheController: imageCacheController
         )
@@ -132,7 +127,8 @@ struct RendererConfiguration: Equatable {
     ///     MarkdownView(...)
     ///         .lineSpacing(10)
     var lineSpacing: CGFloat
-    var componentSpacing: CGFloat = 12
+    var componentSpacing: CGFloat = 8
+    var tintColor: Color
     
     /// Sets the theme of the code block.
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .

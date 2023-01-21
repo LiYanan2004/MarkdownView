@@ -2,65 +2,51 @@ import Markdown
 import SwiftUI
 
 extension Renderer {
-    mutating func visitEmphasis(_ emphasis: Markdown.Emphasis) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitEmphasis(_ emphasis: Markdown.Emphasis) -> Result {
+        var text = [SwiftUI.Text]()
         for child in emphasis.children {
-            subviews.append(visit(child))
+            text.append(visit(child).text.italic())
         }
-        return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index].italic()
-        })
+        return Result(text)
     }
     
-    mutating func visitStrong(_ strong: Strong) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitStrong(_ strong: Strong) -> Result {
+        var text = [SwiftUI.Text]()
         for child in strong.children {
-            subviews.append(visit(child))
+            text.append(visit(child).text.bold())
         }
-        return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index].bold()
-        })
+        return Result(text)
     }
     
-    mutating func visitStrikethrough(_ strikethrough: Strikethrough) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitStrikethrough(_ strikethrough: Strikethrough) -> Result {
+        var text = [SwiftUI.Text]()
         for child in strikethrough.children {
-            subviews.append(visit(child))
+            text.append(visit(child).text.strikethrough())
         }
-        return AnyView(ForEach(subviews.indices, id: \.self) { index in
-            subviews[index].strikethrough()
-        })
+        return Result(text)
     }
     
-    mutating func visitHeading(_ heading: Heading) -> AnyView {
-        var subviews = [AnyView]()
-        for child in heading.children {
-            subviews.append(visit(child))
-        }
-        let fontStyle: Font.TextStyle
+    mutating func visitHeading(_ heading: Heading) -> Result {
+        let font: Font
         switch heading.level {
-        case 1: fontStyle = .largeTitle
-        case 2: fontStyle = .title
-        case 3: fontStyle = .title2
-        case 4: fontStyle = .title3
-        case 5: fontStyle = .headline
-        case 6: fontStyle = .body
-        default: fontStyle = .body
+        case 1: font = .largeTitle
+        case 2: font = .title
+        case 3: font = .title2
+        case 4: font = .title3
+        case 5: font = .headline
+        case 6: font = .body
+        default: font = .body
         }
         
-        let headingView: some View = {
-            VStack {
-                if heading.level == 1 {
-                    NewLine()
-                }
-                FlexibleStack {
-                    ForEach(subviews.indices, id: \.self) { index in
-                        subviews[index].font(.system(fontStyle, weight: .bold))
-                    }
-                }
-            }
-        }()
-        
-        return AnyView(headingView)
+        var text = [SwiftUI.Text]()
+        if !heading.root.children.starts(with: [heading], by: { markup, heading in
+            markup.isIdentical(to: heading)
+        }) {
+            text.append(SwiftUI.Text("\n"))
+        }
+        for child in heading.children {
+            text.append(visit(child).text.font(font))
+        }
+        return Result(text)
     }
 }

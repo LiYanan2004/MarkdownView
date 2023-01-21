@@ -1,66 +1,67 @@
 import SwiftUI
 import Markdown
 
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 extension Renderer {
-    mutating func visitTable(_ table: Markdown.Table) -> AnyView {
-        AnyView(
+    mutating func visitTable(_ table: Markdown.Table) -> Result {
+        let table = AnyView(
             Grid(horizontalSpacing: 8, verticalSpacing: 8) {
-                GridRow { visitTableHead(table.head) }
-                visitTableBody(table.body)
+                GridRow { visitTableHead(table.head).view }
+                visitTableBody(table.body).view
             }
                 .padding(16)
                 .border(.tertiary)
         )
+        return Result(table)
     }
     
-    mutating func visitTableHead(_ head: Markdown.Table.Head) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitTableHead(_ head: Markdown.Table.Head) -> Result {
+        var contents = [AnyView]()
         for tableCell in head.cells {
-            subviews.append(visitTableCell(tableCell))
+            contents.append(visitTableCell(tableCell).view)
         }
         
-        return AnyView(ForEach(subviews.indices, id: \.self) {
-            subviews[$0].font(.headline)
+        let head = AnyView(ForEach(contents.indices, id: \.self) {
+            contents[$0].font(.headline)
         })
+        return Result(head)
     }
     
-    mutating func visitTableBody(_ body: Markdown.Table.Body) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitTableBody(_ body: Markdown.Table.Body) -> Result {
+        var contents = [AnyView]()
         for tableRow in body.rows {
-            subviews.append(visitTableRow(tableRow))
+            contents.append(visitTableRow(tableRow).view)
         }
         
-        return AnyView(ForEach(subviews.indices, id: \.self) {
+        let body = AnyView(ForEach(contents.indices, id: \.self) {
             Divider()
-            subviews[$0]
+            contents[$0]
         })
+        return Result(body)
     }
     
-    mutating func visitTableRow(_ row: Markdown.Table.Row) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitTableRow(_ row: Markdown.Table.Row) -> Result {
+        var contents = [AnyView]()
         for tableCell in row.cells {
-            let cell = visitTableCell(tableCell).gridColumnAlignment(tableCell.alignment)
-            subviews.append(AnyView(cell.gridCellColumns(Int(tableCell.colspan))))
+            let cell = visitTableCell(tableCell).text.gridColumnAlignment(tableCell.alignment)
+            contents.append(AnyView(cell.gridCellColumns(Int(tableCell.colspan))))
         }
         
-        return AnyView(GridRow {
-            ForEach(subviews.indices, id: \.self) {
-                subviews[$0]
+        let row = AnyView(GridRow {
+            ForEach(contents.indices, id: \.self) {
+                contents[$0]
             }
         })
+        return Result(row)
     }
     
-    mutating func visitTableCell(_ cell: Markdown.Table.Cell) -> AnyView {
-        var subviews = [AnyView]()
+    mutating func visitTableCell(_ cell: Markdown.Table.Cell) -> Result {
+        var text = [SwiftUI.Text]()
         for child in cell.children {
-            subviews.append(visit(child))
+            text.append(visit(child).text)
         }
         
-        return AnyView(FlexibleStack {
-            ForEach(subviews.indices, id: \.self) {
-                subviews[$0]
-            }
-        })
+        return Result(text)
     }
 }
 

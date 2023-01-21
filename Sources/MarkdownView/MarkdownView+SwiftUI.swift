@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Display Images
+
 extension MarkdownView {
     /// Adds a built-in handler to render images.
     ///
@@ -36,12 +37,13 @@ extension MarkdownView {
 }
 
 // MARK: - Display Directive Blocks
+
 extension MarkdownView {
     /// Adds your custom block directive handler.
     ///
     /// - parameters:
-    ///     - handler: the handler you have created to handle block displaying.
-    ///     - name: specify which kind of Directive Block will use your own handler.
+    ///     - handler: The handler you have created to handle block displaying.
+    ///     - name: The name of the  block directive.
     /// - Returns: `MarkdownView` with custom directive block loading behavior.
     ///
     /// You can set this handler multiple times if you have multiple handlers.
@@ -53,31 +55,38 @@ extension MarkdownView {
     }
 }
 
-// MARK: - Code Block Theme
+// MARK: - Code Blocks
+
 extension MarkdownView {
-    /// Sets the theme of the Code Blocks.
+    /// Sets the theme of code blocks.
     /// 
-    /// - Parameter theme: Theme configuration of the Code Block, see ``CodeBlockTheme``.
-    /// - Returns: `MarkdownView` with custom Code Block theme.
-    public func codeBlockTheme(
-        using theme: CodeBlockTheme
-    ) -> MarkdownView {
+    /// - Parameter theme: Theme configuration of the code block, see ``CodeBlockTheme``.
+    /// - Returns: `MarkdownView` with custom code block theme.
+    public func codeBlockTheme(_ theme: CodeBlockTheme) -> MarkdownView {
         var result = self
         result.codeBlockTheme = theme
-        
+        return result
+    }
+    
+    /// Sets the tint color for inline blocks.
+    ///
+    /// - Parameter color: The tint Color to apply.
+    public func inlineCodeBlockTint(_ color: Color) -> MarkdownView {
+        var result = self
+        result.tintColor = color
         return result
     }
 }
 
 // MARK: - MarkdownView Role
+
 extension MarkdownView {
-    ///  Configures the role of the markdown text.
+    ///  Configures the role of the markdown view.
     /// - Parameter role: A role to tell MarkdownView how to render its content.
     /// - Returns: A rendered MarkdownView using the role you specified.
     public func markdownViewRole(_ role: MarkdownViewRole) -> MarkdownView {
         var result = self
         result.role = role
-        
         return result
     }
     

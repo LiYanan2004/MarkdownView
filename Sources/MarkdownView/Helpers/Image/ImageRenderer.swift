@@ -5,7 +5,18 @@ class ImageRenderer {
     var baseURL: URL
     
     /// Create a Configuration for image handling.
-    init(baseURL: URL = .documentsDirectory) {
+    init(baseURL: URL? = nil) {
+        guard baseURL == nil else {
+            self.baseURL = baseURL!
+            return
+        }
+        
+        let baseURL: URL
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+            baseURL = .documentsDirectory
+        } else {
+            baseURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        }
         self.baseURL = baseURL
     }
     
