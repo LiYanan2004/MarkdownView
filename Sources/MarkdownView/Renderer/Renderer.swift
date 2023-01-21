@@ -146,7 +146,7 @@ struct Renderer: MarkupVisitor {
             }
         }
         
-        return Result(AnyView(renderer.loadImage(handler: handler, url: source, alt: alt).environmentObject(configuration.imageCacheController)))
+        return Result(renderer.loadImage(handler: handler, url: source, alt: alt))
     }
 }
 

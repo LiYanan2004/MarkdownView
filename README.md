@@ -11,7 +11,8 @@ Here is a preview :)
 > `MarkdownView` is still in beta. 
 > There might have some API changes in the future.
 > 
-> Note: `MarkdownView` doesn’t support Tables on iOS 15, macOS 12 and tvOS 15. This capability will be added in the future.
+> Note: Tables are currently not supported in iOS 15, macOS 12 and tvOS 15. 
+> This capability will be added in the future.
 
 ## Supported Platforms
 
@@ -41,7 +42,7 @@ MarkdownView(text: "This is the Apple's **newly published** [swift-markdown](htt
 
 ![](Images/bold_and_links.jpeg)
 
-If your `Markdown` have check boxes, you can provide a Binding string.
+If your `Markdown` have check boxes, you can provide a `Binding` string.
 
 ```swift
 @State var text = """
@@ -93,8 +94,8 @@ The implementation of the block directive is exactly the same way.
 - [ ] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
 - [ ] watchOS support. (specifically watchOS 7.0+)
 - [ ] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
-- [ ] Built-in image handlers improvements.
 - [ ] Add capability to override default image handlers.
+- [x] Built-in image handlers improvements.
 
 ## Swift Package Manager
 

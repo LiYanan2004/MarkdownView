@@ -9,7 +9,6 @@ public struct MarkdownView: View {
     @Binding private var text: String
 
     @Environment(\.lineSpacing) private var lineSpacing
-    @StateObject var imageCacheController = ImageCacheController()
     var codeBlockTheme = CodeBlockTheme(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
@@ -91,8 +90,7 @@ extension MarkdownView {
             role: role,
             lineSpacing: lineSpacing,
             tintColor: tintColor,
-            codeBlockTheme: codeBlockTheme,
-            imageCacheController: imageCacheController
+            codeBlockTheme: codeBlockTheme
         )
     }
 }
@@ -133,6 +131,4 @@ struct RendererConfiguration: Equatable {
     /// Sets the theme of the code block.
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
     var codeBlockTheme: CodeBlockTheme
-
-    var imageCacheController: ImageCacheController
 }
