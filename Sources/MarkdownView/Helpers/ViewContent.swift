@@ -11,7 +11,10 @@ struct ViewContent {
     
     @ViewBuilder var content: some View {
         switch self.type {
-        case .text: self.text
+        case .text:
+            self.text
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         case .view: self.view
         }
     }
@@ -56,26 +59,6 @@ extension ViewContent {
         view = AnyView(content())
         type = .view
     }
-    
-    /// Composes a sequence of views.
-    /// - Parameter contents: A set of views to combine together and apply to the descriptor.
-    init(_ contents: [AnyView]) {
-        text = Text("")
-        type = .view
-        if #available(iOS 16.0, macOS 13.0, watchOS 9.0, *) {
-            let composedView = FlowLayout(verticleSpacing: 10) {
-                ForEach(contents.indices, id: \.self) {
-                    contents[$0]
-                }
-            }
-            view = AnyView(composedView)
-        } else {
-            let composedView = ForEach(contents.indices, id: \.self) {
-                contents[$0]
-            }
-            view = AnyView(composedView)
-        }
-    }
 }
 
 extension ViewContent {
@@ -100,13 +83,23 @@ extension ViewContent {
             composedContents.append(ViewContent(text))
         }
         
-        let composedView = VStack(alignment: alignment, spacing: 10) {
-            ForEach(composedContents.indices, id: \.self) {
-                composedContents[$0].content
+//        // TODO: Fix Crash when loading images.
+//        if #available(iOS 16.0, macOS 13.0, watchOS 9.0, *) {
+//            let composedView = FlowLayout(verticleSpacing: 8) {
+//                ForEach(composedContents.indices, id: \.self) {
+//                    composedContents[$0].content
+//                }
+//            }
+//            view = AnyView(composedView)
+//        } else {
+            let composedView = VStack(alignment: alignment, spacing: 8) {
+                ForEach(composedContents.indices, id: \.self) {
+                    composedContents[$0].content
+                }
             }
-        }
+            view = AnyView(composedView)
+//        }
         type = .view
         self.text = Text(verbatim: "")
-        view = AnyView(composedView)
     }
 }
