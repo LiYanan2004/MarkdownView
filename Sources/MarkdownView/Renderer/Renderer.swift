@@ -34,10 +34,11 @@ struct Renderer: MarkupVisitor {
         for child in markup.children {
             contents.append(visit(child))
         }
-        let content = AnyView(ForEach(contents.indices, id: \.self) { index in
-            contents[index].content
-        })
-        return Result(content)
+        return Result {
+            ForEach(contents.indices, id: \.self) { index in
+                contents[index].content
+            }
+        }
     }
     
     mutating func visitText(_ text: Markdown.Text) -> Result {

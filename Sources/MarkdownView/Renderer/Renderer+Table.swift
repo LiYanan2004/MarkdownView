@@ -1,18 +1,18 @@
 import SwiftUI
 import Markdown
 
-@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 extension Renderer {
     mutating func visitTable(_ table: Markdown.Table) -> Result {
-        let table = AnyView(
-            Grid(horizontalSpacing: 8, verticalSpacing: 8) {
-                GridRow { visitTableHead(table.head).view }
-                visitTableBody(table.body).view
-            }
+        return Result {
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+                Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+                    GridRow { visitTableHead(table.head).content }
+                    visitTableBody(table.body).content
+                }
                 .padding(16)
                 .border(.tertiary)
-        )
-        return Result(table)
+            }
+        }
     }
     
     mutating func visitTableHead(_ head: Markdown.Table.Head) -> Result {
@@ -21,10 +21,11 @@ extension Renderer {
             contents.append(visitTableCell(tableCell).view)
         }
         
-        let head = AnyView(ForEach(contents.indices, id: \.self) {
-            contents[$0].font(.headline)
-        })
-        return Result(head)
+        return Result {
+            ForEach(contents.indices, id: \.self) {
+                contents[$0].font(.headline)
+            }
+        }
     }
     
     mutating func visitTableBody(_ body: Markdown.Table.Body) -> Result {
@@ -33,35 +34,36 @@ extension Renderer {
             contents.append(visitTableRow(tableRow).view)
         }
         
-        let body = AnyView(ForEach(contents.indices, id: \.self) {
-            Divider()
-            contents[$0]
-        })
-        return Result(body)
+        return Result {
+            ForEach(contents.indices, id: \.self) {
+                Divider()
+                contents[$0]
+            }
+        }
     }
     
     mutating func visitTableRow(_ row: Markdown.Table.Row) -> Result {
-        var contents = [AnyView]()
-        for tableCell in row.cells {
-            let cell = visitTableCell(tableCell).text.gridColumnAlignment(tableCell.alignment)
-            contents.append(AnyView(cell.gridCellColumns(Int(tableCell.colspan))))
-        }
-        
-        let row = AnyView(GridRow {
-            ForEach(contents.indices, id: \.self) {
-                contents[$0]
+        Result {
+            let cells = row.children.map { $0 as! Markdown.Table.Cell }
+            let contents: [Result] = cells.map { visitTableCell($0) }
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+                GridRow {
+                    ForEach(contents.indices, id: \.self) { index in
+                        let tableCell = cells[index]
+                        contents[index].content
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .gridColumnAlignment(tableCell.alignment)
+                            .gridCellColumns(Int(tableCell.colspan))
+                    }
+                }
             }
-        })
-        return Result(row)
+        }
     }
     
     mutating func visitTableCell(_ cell: Markdown.Table.Cell) -> Result {
-        var text = [SwiftUI.Text]()
-        for child in cell.children {
-            text.append(visit(child).text)
-        }
-        
-        return Result(text)
+        print("\n", cell.debugDescription())
+        return Result(cell.children.map { visit($0) })
     }
 }
 
@@ -78,7 +80,7 @@ extension BasicInlineContainer {
                 case .center: return .center
                 case .left: return .leading
                 case .right: return .trailing
-                case .none: return .center
+                case .none: return .leading
                 }
             }
 
