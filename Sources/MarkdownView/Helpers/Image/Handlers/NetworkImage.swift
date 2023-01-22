@@ -17,8 +17,8 @@ struct NetworkImage: View {
             if let image {
                 image
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: imageSize.width)
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: max(imageSize.width, imageSize.height))
             } else if let localizedError {
                 Text(localizedError + "\n" + "Tap to reload.")
                     .textSelection(.disabled)

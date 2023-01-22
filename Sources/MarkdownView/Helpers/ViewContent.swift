@@ -11,10 +11,7 @@ struct ViewContent {
     
     @ViewBuilder var content: some View {
         switch self.type {
-        case .text:
-            self.text
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
+        case .text: self.text
         case .view: self.view
         }
     }

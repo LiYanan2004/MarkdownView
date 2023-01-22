@@ -17,9 +17,7 @@ struct Renderer: MarkupVisitor {
     mutating func visitDocument(_ document: Document) -> Result {
         Result {
             let contents = contents(of: document)
-            VStack(
-                alignment: .leading, spacing: configuration.componentSpacing
-            ) {
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(contents.indices, id: \.self) { index in
                     contents[index].content
                 }
