@@ -3,41 +3,36 @@ import Markdown
 
 extension Renderer {
     mutating func visitTable(_ table: Markdown.Table) -> Result {
-        return Result {
+        Result {
             if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 Grid(horizontalSpacing: 8, verticalSpacing: 8) {
                     GridRow { visitTableHead(table.head).content }
                     visitTableBody(table.body).content
                 }
                 .padding(16)
-                .border(.tertiary)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(.quaternary, lineWidth: 2)
+                }
             }
         }
     }
     
     mutating func visitTableHead(_ head: Markdown.Table.Head) -> Result {
-        var contents = [AnyView]()
-        for tableCell in head.cells {
-            contents.append(visitTableCell(tableCell).view)
-        }
-        
-        return Result {
+        Result {
+            let contents = contents(of: head)
             ForEach(contents.indices, id: \.self) {
-                contents[$0].font(.headline)
+                contents[$0].content.font(.headline)
             }
         }
     }
     
     mutating func visitTableBody(_ body: Markdown.Table.Body) -> Result {
-        var contents = [AnyView]()
-        for tableRow in body.rows {
-            contents.append(visitTableRow(tableRow).view)
-        }
-        
-        return Result {
+        Result {
+            let contents = contents(of: body)
             ForEach(contents.indices, id: \.self) {
                 Divider()
-                contents[$0]
+                contents[$0].content
             }
         }
     }
@@ -45,14 +40,12 @@ extension Renderer {
     mutating func visitTableRow(_ row: Markdown.Table.Row) -> Result {
         Result {
             let cells = row.children.map { $0 as! Markdown.Table.Cell }
-            let contents: [Result] = cells.map { visitTableCell($0) }
+            let contents = cells.map { visitTableCell($0) }
             if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 GridRow {
                     ForEach(contents.indices, id: \.self) { index in
                         let tableCell = cells[index]
                         contents[index].content
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
                             .gridColumnAlignment(tableCell.alignment)
                             .gridCellColumns(Int(tableCell.colspan))
                     }
@@ -62,8 +55,7 @@ extension Renderer {
     }
     
     mutating func visitTableCell(_ cell: Markdown.Table.Cell) -> Result {
-        print("\n", cell.debugDescription())
-        return Result(cell.children.map { visit($0) })
+        Result(contents(of: cell), alignment: cell.alignment)
     }
 }
 

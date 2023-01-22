@@ -15,30 +15,20 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitDocument(_ document: Document) -> Result {
-        var contents = [Result]()
-        for child in document.children {
-            contents.append(visit(child))
-        }
-        let documentView = VStack(
-            alignment: .leading, spacing: configuration.componentSpacing
-        ) {
-            ForEach(contents.indices, id: \.self) { index in
-                contents[index].content
+        Result {
+            let contents = contents(of: document)
+            VStack(
+                alignment: .leading, spacing: configuration.componentSpacing
+            ) {
+                ForEach(contents.indices, id: \.self) { index in
+                    contents[index].content
+                }
             }
         }
-        return Result(AnyView(documentView))
     }
     
     mutating func defaultVisit(_ markup: Markdown.Markup) -> Result {
-        var contents = [Result]()
-        for child in markup.children {
-            contents.append(visit(child))
-        }
-        return Result {
-            ForEach(contents.indices, id: \.self) { index in
-                contents[index].content
-            }
-        }
+        Result(contents(of: markup))
     }
     
     mutating func visitText(_ text: Markdown.Text) -> Result {
@@ -46,82 +36,47 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitParagraph(_ paragraph: Paragraph) -> Result {
-        var contents = [Result]()
-        var text = [SwiftUI.Text]()
-        for child in paragraph.children {
-            let content = visit(child)
-            if content.type == .text {
-                text.append(content.text)
-            } else {
-                if !text.isEmpty {
-                    contents.append(Result(text))
-                    text.removeAll()
-                }
-                contents.append(Result(content.view))
-            }
-        }
-        if !text.isEmpty {
-            contents.append(Result(text))
-        }
-        let paragraph = contents.map { AnyView($0.content) }
-        return Result(paragraph)
+        Result(contents(of: paragraph))
     }
 
     mutating func visitLink(_ link: Markdown.Link) -> Result {
         var contents = [Result]()
+        var isText = true
         for child in link.children {
-            contents.append(visit(child))
+            let content = visit(child)
+            contents.append(content)
+            if content.type == .view {
+                isText = false
+            }
         }
-        if contents.allSatisfy ({
-            $0.type == .text
-        }) {
+        if isText {
             var attributer = LinkAttributer(tint: configuration.tintColor)
             let link = attributer.visit(link)
             return Result(SwiftUI.Text(link))
         } else {
-            var composedContent = [Result]()
-            var text = [SwiftUI.Text]()
-            for content in contents {
-                if content.type == .text {
-                    text.append(content.text)
-                } else {
-                    if !text.isEmpty {
-                        composedContent.append(Result(text))
-                        text.removeAll()
-                    }
-                    composedContent.append(Result(content.content))
-                }
-            }
-            if !text.isEmpty {
-                composedContent.append(Result(text))
-            }
-            let link = composedContent.map { AnyView($0.content) }
-            return Result(link)
+            return Result(contents)
         }
     }
 
     mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Result {
-        var contents = [Result]()
-        for child in blockQuote.children {
-            contents.append(visit(child))
-        }
-        let blockQuote = VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(contents.indices, id: \.self) { index in
-                contents[index].content
+        Result {
+            let contents = contents(of: blockQuote)
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(contents.indices, id: \.self) { index in
+                    contents[index].content
+                }
             }
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .font(.system(.body, design: .serif))
+            .padding(.horizontal, 20)
+            .background(.quaternary)
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .foregroundStyle(.tertiary).frame(width: 4)
+            }
+            .cornerRadius(3)
         }
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .font(.system(.body, design: .serif))
-        .padding(.horizontal, 20)
-        .background(.quaternary)
-        .overlay(alignment: .leading) {
-            Rectangle()
-                .foregroundStyle(.tertiary).frame(width: 4)
-        }
-        .cornerRadius(3)
-        
-        return Result(AnyView(blockQuote))
     }
 
     mutating func visitImage(_ image: Markdown.Image) -> Result {
@@ -210,5 +165,11 @@ extension Markup {
         }
         
         return false
+    }
+}
+
+extension Renderer {
+    mutating func contents(of markup: Markup) -> [Result] {
+        markup.children.map { visit($0) }
     }
 }

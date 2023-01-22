@@ -81,16 +81,18 @@ struct InlineCodeView: View {
 
 extension Renderer {
     mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> Result {
-        let block = HighlightedCodeBlock(
-            language: codeBlock.language,
-            code: codeBlock.code,
-            theme: configuration.codeBlockTheme
-        )
-        return Result(AnyView(block))
+        Result {
+            HighlightedCodeBlock(
+                language: codeBlock.language,
+                code: codeBlock.code,
+                theme: configuration.codeBlockTheme
+            )
+        }
     }
     
     func visitHTMLBlock(_ html: HTMLBlock) -> Result {
-        Result(AnyView(SwiftUI.Text(html.rawHTML)))
+        // Forced conversion of text to view
+        Result { SwiftUI.Text(html.rawHTML) }
     }
 }
 

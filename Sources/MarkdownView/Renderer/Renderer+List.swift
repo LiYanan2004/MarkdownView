@@ -2,66 +2,66 @@ import Markdown
 import SwiftUI
 
 extension Renderer {
-    /// List row which contains inner items.
+    // List row which contains inner items.
     mutating func visitListItem(_ listItem: ListItem) -> Result {
-        var contents = [Result]()
-        for child in listItem.children {
-            contents.append(visit(child))
-        }
-        let item = AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(contents.indices, id: \.self) { index in
-                contents[index].content
+        Result {
+            let contents = contents(of: listItem)
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(contents.indices, id: \.self) { index in
+                    contents[index].content
+                }
             }
-        })
-        return Result(item)
+        }
     }
     
     mutating func visitOrderedList(_ orderedList: OrderedList) -> Result {
-        var subviews = [AnyView]()
-        for (index, listItem) in orderedList.listItems.enumerated() {
-            let row = HStack(alignment: .firstTextBaseline) {
-                if listItem.checkbox != nil {
-                    CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
-                } else {
-                    SwiftUI.Text("\(index + 1).")
-                        .padding(.leading, orderedList.listDepth == 0 ? 12 : 0)
+        Result {
+            let listItems = orderedList.children.map { $0 as! ListItem }
+            let itemContent = listItems.map { visit($0).content }
+            let depth = orderedList.listDepth
+            let handler = interactiveEditHandler
+            let rawText = text
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(listItems.indices, id: \.self) { index in
+                    let listItem = listItems[index]
+                    HStack(alignment: .firstTextBaseline) {
+                        if listItem.checkbox != nil {
+                            CheckboxView(listItem: listItem, text: rawText, handler: handler)
+                        } else {
+                            SwiftUI.Text("\(index + 1).")
+                                .padding(.leading, depth == 0 ? 12 : 0)
+                        }
+                        itemContent[index]
+                    }
                 }
-                visit(listItem).content
             }
-            subviews.append(AnyView(row))
         }
-        
-        let list = AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
-            }
-        })
-        return Result(list)
     }
     
     mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> Result {
-        var subviews = [AnyView]()
-        for listItem in unorderedList.listItems {
-            let listRow = HStack(alignment: .firstTextBaseline) {
-                if listItem.checkbox != nil {
-                    CheckBox(listItem: listItem, text: text, handler: interactiveEditHandler)
-                } else {
-                    SwiftUI.Text("•")
-                        .font(.title2)
-                        .fontWeight(.black)
-                        .padding(.leading, unorderedList.listDepth == 0 ? 12 : 0)
+        Result {
+            let listItems = unorderedList.children.map { $0 as! ListItem }
+            let itemContent = listItems.map { visit($0).content }
+            let depth = unorderedList.listDepth
+            let handler = interactiveEditHandler
+            let rawText = text
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(itemContent.indices, id: \.self) { index in
+                    let listItem = listItems[index]
+                    HStack(alignment: .firstTextBaseline) {
+                        if listItem.checkbox != nil {
+                            CheckboxView(listItem: listItem, text: rawText, handler: handler)
+                        } else {
+                            SwiftUI.Text("•")
+                                .font(.title2)
+                                .fontWeight(.black)
+                                .padding(.leading, depth == 0 ? 12 : 0)
+                        }
+                        itemContent[index]
+                    }
                 }
-                visit(listItem).content
             }
-            subviews.append(AnyView(listRow))
         }
-        
-        let list = AnyView(VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(subviews.indices, id: \.self) { index in
-                subviews[index]
-            }
-        })
-        return Result(list)
     }
 }
 
@@ -73,7 +73,7 @@ struct CheckBoxRewriter: MarkupRewriter {
     }
 }
 
-struct CheckBox: View {
+struct CheckboxView: View {
     var listItem: ListItem
     var text: String
     var handler: (String) -> Void

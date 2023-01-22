@@ -39,6 +39,7 @@ extension Renderer {
         }
         
         var text = [SwiftUI.Text]()
+        // Append newline based on whether it's the beginning of the text.
         if !heading.root.children.starts(with: [heading], by: { markup, heading in
             markup.isIdentical(to: heading)
         }) {

@@ -7,10 +7,10 @@ extension Renderer {
     }
     
     func visitThematicBreak(_ thematicBreak: ThematicBreak) -> Result {
-        Result(AnyView(Divider()))
+        Result(Divider())
     }
 
-    func visitLineBreak(_ lineBreak: LineBreak) -> Result {
+    func visitLineBreak(_ lineBreak: LineBreak) -> Result {     
         Result(SwiftUI.Text("\n"))
     }
 }
