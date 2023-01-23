@@ -69,12 +69,15 @@ struct Renderer: MarkupVisitor {
             }
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .font(.system(.body, design: .serif))
+            .font(configuration.fontProvider.blockQuote)
             .padding(.horizontal, 20)
-            .background(.quaternary)
+            .background {
+                configuration.blockQuoteTintColor
+                    .opacity(0.1)
+            }
             .overlay(alignment: .leading) {
-                Rectangle()
-                    .foregroundStyle(.tertiary).frame(width: 4)
+                configuration.blockQuoteTintColor
+                    .frame(width: 4)
             }
             .cornerRadius(3)
         }
@@ -98,17 +101,17 @@ struct Renderer: MarkupVisitor {
             alt = nil
         }
         
-        var handler: (any ImageDisplayable)?
+        var provider: (any ImageDisplayable)?
         if let scheme = source.scheme {
-            renderer.imageHandlers.forEach { key, value in
+            renderer.imageProviders.forEach { key, value in
                 if scheme.lowercased() == key.lowercased() {
-                    handler = value
+                    provider = value
                     return
                 }
             }
         }
         
-        return Result(renderer.loadImage(handler: handler, url: source, alt: alt))
+        return Result(renderer.loadImage(provider, url: source, alt: alt))
     }
 }
 

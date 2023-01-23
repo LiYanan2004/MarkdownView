@@ -1,16 +1,16 @@
-import Foundation
+import SwiftUI
 
-/// The configuration for Code Blocks.
+/// The theme of code highlighter.
 ///
-/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
-public struct CodeBlockThemeConfiguration: Equatable {
+/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
+public struct CodeHighlighterTheme: Equatable {
     /// The theme name in Light Mode.
     var lightModeThemeName: String
     
     /// The theme name in Dark Mode.
     var darkModeThemeName: String
     
-    /// Creates a single theme for the Code Block.
+    /// Creates a single theme for both light and dark mode.
     ///
     /// - Parameter themeName: the name of the theme to use in both Light Mode and Dark Mode.
     ///
@@ -31,5 +31,29 @@ public struct CodeBlockThemeConfiguration: Equatable {
     public init(lightModeThemeName: String, darkModeThemeName: String) {
         self.lightModeThemeName = lightModeThemeName
         self.darkModeThemeName = darkModeThemeName
+    }
+}
+
+struct CodeHighlighterThemeKey: EnvironmentKey {
+    static var defaultValue: CodeHighlighterTheme = CodeHighlighterTheme(
+        lightModeThemeName: "xcode", darkModeThemeName: "dark"
+    )
+}
+
+extension EnvironmentValues {
+    var codeHighlighterTheme: CodeHighlighterTheme {
+        get { self[CodeHighlighterThemeKey.self] }
+        set { self[CodeHighlighterThemeKey.self] = newValue }
+    }
+}
+
+extension View {
+    /// Sets the theme of the code highlighter.
+    ///
+    /// For more information of available themes, see ``CodeHighlighterTheme``.
+    ///
+    /// - Parameter theme: The theme for highlighter.
+    public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
+        environment(\.codeHighlighterTheme, theme)
     }
 }

@@ -5,10 +5,10 @@ extension Renderer {
     mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> Result {
         let renderer = BlockDirectiveRenderer.shared
         
-        var handler: (any BlockDirectiveDisplayable)?
-        renderer.blockDirectiveHandlers.forEach { name, value in
+        var provider: (any BlockDirectiveDisplayable)?
+        renderer.blockDirectiveProviders.forEach { name, value in
             if name.lowercased() == blockDirective.name.lowercased() {
-                handler = value
+                provider = value
             }
         }
         
@@ -31,7 +31,7 @@ extension Renderer {
                 }
             }
         )
-        let BDView = renderer.loadBlockDirective(handler: handler, args: args, innerMarkdownView: innerMarkdownView)
+        let BDView = renderer.loadBlockDirective(provider: provider, args: args, innerMarkdownView: innerMarkdownView)
         return Result(BDView)
     }
 }

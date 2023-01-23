@@ -108,8 +108,9 @@ extension Renderer {
 struct HighlightedCodeBlock: View {
     var language: String?
     var code: String
-    var theme: CodeBlockTheme
+    var theme: CodeHighlighterTheme
     
+    @Environment(\.markdownFont) private var font
     @Environment(\.colorScheme) private var colorScheme
     @State private var attributedCode: AttributedString?
     
@@ -128,7 +129,7 @@ struct HighlightedCodeBlock: View {
         }
         .task(id: id, highlight)
         .lineSpacing(5)
-        .font(.system(.callout, design: .monospaced))
+        .font(font.codeBlock)
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))

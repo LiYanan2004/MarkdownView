@@ -7,18 +7,15 @@ public struct MarkdownView: View {
     @Binding private var text: String
 
     @Environment(\.lineSpacing) private var lineSpacing
-    internal var codeBlockTheme = CodeBlockTheme(
-        lightModeThemeName: "xcode", darkModeThemeName: "dark"
-    )
+    @Environment(\.markdownFont) private var fontProvider
+    @Environment(\.markdownViewRole) private var role
+    @Environment(\.codeHighlighterTheme) private var codeHighlighterTheme
+    @Environment(\.inlineCodeBlockTint) private var inlineTintColor
+    @Environment(\.blockQuoteTint) private var blockQuoteTintColor
     
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
-    @Environment(\.markdownFont) internal var fontProvider
     @State private var representedView = AnyView(Color.black.opacity(0.001)) // RenderedView
-    @State private var renderComplete = false
-    
-    internal var role: MarkdownViewRole = .normal
-    internal var tintColor = Color.accentColor
     
     /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
@@ -75,7 +72,7 @@ public struct MarkdownView: View {
                     }
                 }
             )
-            let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveHandlers.isEmpty
+            let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveProviders.isEmpty
             let view = renderer.representedView(parseBlockDirectives: parseBD)
             Task { @MainActor in
                 representedView = view
@@ -89,11 +86,10 @@ extension MarkdownView {
         RendererConfiguration(
             role: role,
             lineSpacing: lineSpacing,
-            inlineCodeTintColor: tintColor,
+            inlineCodeTintColor: inlineTintColor,
+            blockQuoteTintColor: blockQuoteTintColor,
             fontProvider: fontProvider,
-            codeBlockTheme: codeBlockTheme
+            codeBlockTheme: codeHighlighterTheme
         )
     }
 }
-
-

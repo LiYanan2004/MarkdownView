@@ -1,6 +1,6 @@
 # MarkdownView
 
-MarkdownView is a Swift Package for rendering Markdown text natively in SwiftUI.
+MarkdownView is a Swift Package for rendering Markdown natively in SwiftUI.
 
 Thanks to [apple/swift-markdown](https://github.com/apple/swift-markdown), it can fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
 
@@ -14,7 +14,7 @@ Here is a preview :)
 > Note: Tables are currently not supported in iOS 15, macOS 12 and tvOS 15. 
 > This capability will be added in the future.
 
-## Supported Platforms
+# Supported Platforms
 
 You can use MarkdownView in the following platforms:
 
@@ -22,19 +22,19 @@ You can use MarkdownView in the following platforms:
 * iOS 15.0+
 * tvOS 15.0+
 
-## Features
+# Features
 
 - Fully compliant with CommonMark
 - **SVG rendering** support
 -  Highly **Customizable** and **Extensible**
-    - Supports almost all the **built-in modifiers**
-    - Supports Directive Block Rendering
-    - Supports custom image loading
+    - Customizable font for all components.
+    - Customizable theme for code highlighter
+    - Customizable tint color
+    - Supports block directive rendering
+    - Supports custom image rendering
 -  Fully Native SwiftUI code
 
 # Getting started
-
-## Basic Usage
 
 You can create a `Markdown` view by providing a Markdown-formatted string.
 
@@ -44,7 +44,7 @@ MarkdownView(text: "This is the Apple's **newly published** [swift-markdown](htt
 
 ![](Images/bold_and_links.jpeg)
 
-If your `Markdown` have check boxes, you can provide a `Binding` string.
+If your Markdown have check boxes, you can provide a `Binding` string.
 
 ```swift
 @State var text = """
@@ -59,25 +59,41 @@ MarkdownView(text: $text)
 ```   
 ![](Images/checkbox.jpeg)
 
-> For more information, Check out [MarkdownView's Documentation](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
+> For more information, Check out [Documentation](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
 
-## Font Customization
+# Further Customization
+
+## Font
 
 You can set custom fonts or change text styles.
 
 ```swift
 MarkdownView(text: "# H1 title")
-    .font(for: .h1, font: .largeTitle.weight(.black))
+    .font(.largeTitle.weight(.black), for: .h1)
 ```
 
-## Add Custom Handlers
+![](/Images/font.jpeg)
 
-You can add your custom image handlers and block directive handlers to display your content.
+## Tint
 
-To do that, first create your handler.
+Default tint color for code blocks and block quotes is the accent color.
+
+You can customize them explicitly.
 
 ```swift
-struct CustomImageHandler: ImageDisplayable {
+MarkdownView(text: "> Quote and `inline code`")
+    .tint(.pink, for: .inlineCodeBlock)
+```
+![](/Images/tint.jpeg)
+
+# Add Custom Providers
+
+You can add your custom image providers and block directive providers to display your content.
+
+To do that, first create your provider.
+
+```swift
+struct CustomImageProvider: ImageDisplayable {
     func makeImage(url: URL, alt: String?) -> some View {
         AsyncImage(url: url) {
             switch $0 {
@@ -91,24 +107,23 @@ struct CustomImageHandler: ImageDisplayable {
 }
 ```
 
-Then apply your handler to `MarkdownView`.
+Then apply your provider to `MarkdownView`.
 
 ```swift
 MarkdownView(text: markdownText)
-    .imageHandler(CustomImageHandler(), forURLScheme: "my-image")
+    .imageProvider(CustomImageProvider(), forURLScheme: "my-image")
 ```
 
 The implementation of the block directive is exactly the same way.
 
-## Todos
+# Todos
 
 - [ ] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
 - [ ] watchOS support. (specifically watchOS 7.0+)
 - [x] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
-- [ ] Add capability to override default image handlers.
-- [x] Built-in image handlers improvements.
+- [x] Built-in image providers improvements.
 
-## Swift Package Manager
+# Swift Package Manager
 
 In your `Package.swift` Swift Package Manager manifest, add the following dependency to your `dependencies` argument:
 
@@ -122,11 +137,11 @@ Add the dependency to any targets you've declared in your manifest:
 .target(name: "MyTarget", dependencies: ["MarkdownView"]),
 ```
 
-## Similar Projects
+# Similar Projects
 
 - [MarkdownUI](https://github.com/gonzalezreal/MarkdownUI)
 
-## Dependencies
+# Dependencies
 
 - [apple/swift-markdown](https://github.com/apple/swift-markdown): Parse documents
 - [SVGKit/SVGKit](https://github.com/SVGKit/SVGKit): Convert SVG to UIImage/NSImage

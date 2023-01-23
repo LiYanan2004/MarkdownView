@@ -2,24 +2,24 @@ import SwiftUI
 import Markdown
 
 class BlockDirectiveRenderer {
-    /// All handlers which have been added.
-    var blockDirectiveHandlers: [String : any BlockDirectiveDisplayable] = [:]
+    /// All providers which have been added.
+    var blockDirectiveProviders: [String : any BlockDirectiveDisplayable] = [:]
     
-    /// Add custom handler for block directive .
+    /// Add custom provider for block directive .
     /// - Parameters:
-    ///   - handler: Represention of the block directive.
+    ///   - provider: Represention of the block directive.
     ///   - name: The name of wrapper.
-    func addHandler(_ handler: some BlockDirectiveDisplayable, for name: String) {
-        blockDirectiveHandlers[name] = handler
+    func addProvider(_ provider: some BlockDirectiveDisplayable, for name: String) {
+        blockDirectiveProviders[name] = provider
     }
     
     func loadBlockDirective(
-        handler: (any BlockDirectiveDisplayable)?,
+        provider: (any BlockDirectiveDisplayable)?,
         args: [BlockDirectiveArgument],
         innerMarkdownView: AnyView
     ) -> AnyView {
-        if let handler {
-            return AnyView(handler.makeView(arguments: args, innerMarkdownView: innerMarkdownView))
+        if let provider {
+            return AnyView(provider.makeView(arguments: args, innerMarkdownView: innerMarkdownView))
         } else {
             return innerMarkdownView
         }
@@ -28,4 +28,23 @@ class BlockDirectiveRenderer {
 
 extension BlockDirectiveRenderer {
     static var shared: BlockDirectiveRenderer = BlockDirectiveRenderer()
+}
+
+// MARK: - Display Directive Blocks
+
+extension MarkdownView {
+    /// Adds your custom block directive provider.
+    ///
+    /// - parameters:
+    ///     - provider: The provider you have created to handle block displaying.
+    ///     - name: The name of the  block directive.
+    /// - Returns: `MarkdownView` with custom directive block loading behavior.
+    ///
+    /// You can set this provider multiple times if you have multiple providers.
+    public func blockDirectiveProvider(
+        _ provider: some BlockDirectiveDisplayable, for name: String
+    ) -> MarkdownView {
+        BlockDirectiveRenderer.shared.addProvider(provider, for: name)
+        return self
+    }
 }

@@ -23,9 +23,9 @@ struct AnyImageDisplayable: ImageDisplayable {
     }
 }
 
-// MARK: - Built-in handlers
-/// Some Built-in handlers for developers to choose from.
-public enum BuiltInImageHandler {
+// MARK: - Built-in providers
+/// Some Built-in providers for developers to choose from.
+public enum BuiltInImageProvider {
     
     /// Load Images from a relative path.
     case relativePathImage(url: URL)

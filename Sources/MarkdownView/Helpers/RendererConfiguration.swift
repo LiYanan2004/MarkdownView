@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RendererConfiguration: Equatable {
-    var role: MarkdownView.MarkdownViewRole
+    var role: MarkdownViewRole
     
     /// Sets the amount of space between lines in a paragraph in this view.
     ///
@@ -13,9 +13,10 @@ struct RendererConfiguration: Equatable {
     var lineSpacing: CGFloat
     var componentSpacing: CGFloat = 8
     var inlineCodeTintColor: Color
+    var blockQuoteTintColor: Color
     var fontProvider: MarkdownFontProvider
     
     /// Sets the theme of the code block.
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
-    var codeBlockTheme: CodeBlockTheme
+    var codeBlockTheme: CodeHighlighterTheme
 }

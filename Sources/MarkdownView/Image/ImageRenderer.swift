@@ -20,30 +20,30 @@ class ImageRenderer {
         self.baseURL = baseURL
     }
     
-    /// All the handlers that have been added.
-    var imageHandlers: [String: any ImageDisplayable] = [
+    /// All the providers that have been added.
+    var imageProviders: [String: any ImageDisplayable] = [
         "http": NetworkImageDisplayable(),
         "https": NetworkImageDisplayable(),
     ]
     
-    /// Add custom handler for Image Handling.
+    /// Add custom provider for images rendering.
     /// - Parameters:
-    ///   - handler: Represention of the Image.
-    ///   - urlScheme: The url scheme to use the handler.
-    func addHandler(
-        _ handler: some ImageDisplayable, forURLScheme urlScheme: String
+    ///   - provider: An image provider to make image using a url and an alternative text.
+    ///   - urlScheme: The url scheme to use the provider.
+    func addProvider(
+        _ provider: some ImageDisplayable, forURLScheme urlScheme: String
     ) {
-        self.imageHandlers[urlScheme] = handler
+        self.imageProviders[urlScheme] = provider
     }
     
     func loadImage(
-        handler: (any ImageDisplayable)?, url: URL, alt: String?
+        _ provider: (any ImageDisplayable)?, url: URL, alt: String?
     ) -> AnyView {
-        if let handler {
-            // Found a specific handler.
-            return AnyView(handler.makeImage(url: url, alt: alt))
+        if let provider {
+            // Found a specific provider.
+            return AnyView(provider.makeImage(url: url, alt: alt))
         } else {
-            // No specific handler.
+            // No specific provider.
             // Try to load the image from the Base URL.
             return AnyView(RelativePathImageDisplayable(baseURL: baseURL).makeImage(url: url, alt: alt))
         }
@@ -52,4 +52,40 @@ class ImageRenderer {
 
 extension ImageRenderer {
     static var shared: ImageRenderer = ImageRenderer()
+}
+
+// MARK: - Display Images
+
+extension MarkdownView {
+    /// Adds a built-in provider to render images.
+    ///
+    /// Built-in providers helps you quickly add image rendering from your assets or from a relative path.
+    ///
+    /// - parameters
+    ///     - provider: One of built-in providers.
+    ///     - urlScheme: A scheme for the renderer to determine when to use the provider.
+    /// - Returns: A `MarkdownView` that can render the image with a specific scheme.
+    ///
+    /// You can set the provider multiple times if you want to add multiple schemes.
+    public func imageProvider(
+        _ provider: BuiltInImageProvider, forURLScheme urlScheme: String
+    ) -> MarkdownView {
+        ImageRenderer.shared.addProvider(provider.displayable, forURLScheme: urlScheme)
+        return self
+    }
+    
+    /// Adds your own providers to render images.
+    ///
+    /// - parameters
+    ///     - provider: The provider you created to handle image loading and displaying.
+    ///     - urlScheme: A scheme for the renderer to determine when to use the provider.
+    /// - Returns: A `MarkdownView` that can render the image with a specific scheme.
+    ///
+    /// You can set the provider multiple times if you want to add multiple schemes.
+    public func imageProvider(
+        _ provider: some ImageDisplayable, forURLScheme urlScheme: String
+    ) -> MarkdownView {
+        ImageRenderer.shared.addProvider(provider, forURLScheme: urlScheme)
+        return self
+    }
 }
