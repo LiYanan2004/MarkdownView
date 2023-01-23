@@ -21,8 +21,9 @@ extension Renderer {
     mutating func visitTableHead(_ head: Markdown.Table.Head) -> Result {
         Result {
             let contents = contents(of: head)
+            let font = configuration.fontProvider.tableHeader
             ForEach(contents.indices, id: \.self) {
-                contents[$0].content.font(.headline)
+                contents[$0].content.font(font)
             }
         }
     }
@@ -30,9 +31,10 @@ extension Renderer {
     mutating func visitTableBody(_ body: Markdown.Table.Body) -> Result {
         Result {
             let contents = contents(of: body)
+            let font = configuration.fontProvider.tableBody
             ForEach(contents.indices, id: \.self) {
                 Divider()
-                contents[$0].content
+                contents[$0].content.font(font)
             }
         }
     }

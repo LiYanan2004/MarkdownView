@@ -10,7 +10,6 @@ struct NetworkImage: View {
     @State private var imageSize = CGSize.zero
     @State private var localizedError: String?
     @Environment(\.displayScale) private var scale
-    @Environment(\.containerSize) private var containerSize
     
     var body: some View {
         VStack {

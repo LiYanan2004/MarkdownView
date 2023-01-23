@@ -22,7 +22,7 @@ You can use MarkdownView in the following platforms:
 * iOS 15.0+
 * tvOS 15.0+
 
-## Advantage
+## Features
 
 - Fully compliant with CommonMark
 - **SVG rendering** support
@@ -32,7 +32,9 @@ You can use MarkdownView in the following platforms:
     - Supports custom image loading
 -  Fully Native SwiftUI code
 
-## Usage
+# Getting started
+
+## Basic Usage
 
 You can create a `Markdown` view by providing a Markdown-formatted string.
 
@@ -58,6 +60,15 @@ MarkdownView(text: $text)
 ![](Images/checkbox.jpeg)
 
 > For more information, Check out [MarkdownView's Documentation](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
+
+## Font Customization
+
+You can set custom fonts or change text styles.
+
+```swift
+MarkdownView(text: "# H1 title")
+    .font(for: .h1, font: .largeTitle.weight(.black))
+```
 
 ## Add Custom Handlers
 
@@ -93,7 +104,7 @@ The implementation of the block directive is exactly the same way.
 
 - [ ] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
 - [ ] watchOS support. (specifically watchOS 7.0+)
-- [ ] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
+- [x] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
 - [ ] Add capability to override default image handlers.
 - [x] Built-in image handlers improvements.
 

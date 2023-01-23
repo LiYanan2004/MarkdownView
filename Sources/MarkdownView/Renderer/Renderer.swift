@@ -48,7 +48,10 @@ struct Renderer: MarkupVisitor {
             }
         }
         if isText {
-            var attributer = LinkAttributer(tint: configuration.tintColor)
+            var attributer = LinkAttributer(
+                tint: configuration.inlineCodeTintColor,
+                font: configuration.fontProvider.body
+            )
             let link = attributer.visit(link)
             return Result(SwiftUI.Text(link))
         } else {
