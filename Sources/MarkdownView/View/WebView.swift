@@ -8,13 +8,13 @@ struct WebView: NSViewRepresentable {
     func makeNSView(context: Context) -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
         let webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        webView.loadHTMLString(html, baseURL: nil)
-        
         return webView
     }
     
     func updateNSView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(html, baseURL: nil)
+        DispatchQueue.main.async {
+            webView.loadHTMLString(html, baseURL: nil)
+        }
     }
 }
 #else

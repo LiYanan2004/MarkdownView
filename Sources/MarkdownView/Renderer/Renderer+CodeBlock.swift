@@ -92,7 +92,16 @@ extension Renderer {
     
     func visitHTMLBlock(_ html: HTMLBlock) -> Result {
         // Forced conversion of text to view
-        Result { SwiftUI.Text(html.rawHTML) }
+        Result {
+            let html = """
+            <!DOCTYPE html>
+            <html>
+                <head></head>
+                <body>\(html.rawHTML)</body>
+            </html>
+            """
+            WebView(html: html)
+        }
     }
 }
 

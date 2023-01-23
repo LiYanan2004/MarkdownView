@@ -10,10 +10,14 @@ struct ViewContent {
     }
     
     @ViewBuilder var content: some View {
-        switch self.type {
-        case .text: self.text
-        case .view: self.view
+        Group {
+            switch self.type {
+            case .text: self.text
+            case .view: self.view
+            }
         }
+        .lineLimit(nil)
+        .fixedSize(horizontal: false, vertical: true)
     }
     
     /// Create a content descriptor.
@@ -62,7 +66,7 @@ extension ViewContent {
     /// Combine adjacent views of the same type.
     /// - Parameter contents: A set of contents to combine together.
     /// - Parameter alignment: The alignment in relation to these contents.
-    init(_ contents: [ViewContent], alignment: HorizontalAlignment = .leading) {
+    init(_ contents: [ViewContent], alignment: HorizontalAlignment = .leading, autoLayout: Bool = true) {
         var composedContents = [ViewContent]()
         var text = [Text]()
         for content in contents {
@@ -80,23 +84,28 @@ extension ViewContent {
             composedContents.append(ViewContent(text))
         }
         
-//        // TODO: Fix Crash when loading images.
-//        if #available(iOS 16.0, macOS 13.0, watchOS 9.0, *) {
-//            let composedView = FlowLayout(verticleSpacing: 8) {
-//                ForEach(composedContents.indices, id: \.self) {
-//                    composedContents[$0].content
-//                }
-//            }
-//            view = AnyView(composedView)
-//        } else {
-            let composedView = VStack(alignment: alignment, spacing: 8) {
-                ForEach(composedContents.indices, id: \.self) {
-                    composedContents[$0].content
+        // Only contains text
+        if composedContents.count == 1 {
+            self = composedContents[0]
+        } else {
+            // TODO: Fix Crash when loading images. (Ramdomly appear)
+            if #available(iOS 16.0, macOS 13.0, watchOS 9.0, *), autoLayout {
+                let composedView = FlowLayout(verticleSpacing: 8) {
+                    ForEach(composedContents.indices, id: \.self) {
+                        composedContents[$0].content
+                    }
                 }
+                view = AnyView(composedView)
+            } else {
+                let composedView = VStack(alignment: alignment, spacing: 8) {
+                    ForEach(composedContents.indices, id: \.self) {
+                        composedContents[$0].content
+                    }
+                }
+                view = AnyView(composedView)
             }
-            view = AnyView(composedView)
-//        }
-        type = .view
-        self.text = Text(verbatim: "")
+            type = .view
+            self.text = Text(verbatim: "")
+        }
     }
 }

@@ -46,7 +46,6 @@ extension Renderer {
                     ForEach(contents.indices, id: \.self) { index in
                         let tableCell = cells[index]
                         contents[index].content
-                            .fixedSize(horizontal: false, vertical: true)
                             .gridColumnAlignment(tableCell.alignment)
                             .gridCellColumns(Int(tableCell.colspan))
                     }

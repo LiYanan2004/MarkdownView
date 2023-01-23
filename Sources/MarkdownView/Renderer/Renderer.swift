@@ -84,10 +84,15 @@ struct Renderer: MarkupVisitor {
         }
 
         let alt: String?
-        if let title = image.title, !title.isEmpty {
-            alt = title
+        if !(image.parent is Markdown.Link) {
+            if let title = image.title, !title.isEmpty {
+                alt = title
+            } else {
+                alt = image.plainText.isEmpty ? nil : image.plainText
+            }
         } else {
-            alt = image.plainText.isEmpty ? nil : image.plainText
+            // If the image is inside a link, then ignore the alternative text
+            alt = nil
         }
         
         var handler: (any ImageDisplayable)?
