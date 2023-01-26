@@ -177,6 +177,30 @@ extension Markup {
     }
 }
 
+extension BasicInlineContainer {
+    var alignment: HorizontalAlignment {
+        guard parent is any TableCellContainer else { return .center }
+        
+        let columnIdx = self.indexInParent
+        var currentElement = parent
+        while currentElement != nil {
+            if currentElement is Markdown.Table {
+                let alignment = (currentElement as! Markdown.Table).columnAlignments[columnIdx]
+                switch alignment {
+                case .center: return .center
+                case .left: return .leading
+                case .right: return .trailing
+                case .none: return .leading
+                }
+            }
+
+            currentElement = currentElement?.parent
+        }
+        return .center
+    }
+}
+
+
 extension Renderer {
     mutating func contents(of markup: Markup) -> [Result] {
         markup.children.map { visit($0) }

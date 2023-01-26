@@ -1,10 +1,3 @@
-//
-//  ViewModifiers.swift
-//  
-//
-//  Created by LiYanan2004 on 2022/8/13.
-//
-
 import SwiftUI
 
 struct WithRoundedCorner: ViewModifier {

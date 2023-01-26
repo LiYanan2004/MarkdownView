@@ -3,17 +3,41 @@ import Markdown
 
 extension Renderer {
     mutating func visitTable(_ table: Markdown.Table) -> Result {
-        Result {
-            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+            return Result {
                 Grid(horizontalSpacing: 8, verticalSpacing: 8) {
                     GridRow { visitTableHead(table.head).content }
                     visitTableBody(table.body).content
                 }
-                .padding(16)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(.quaternary, lineWidth: 2)
+                .modifier(_TableViewModifier())
+            }
+        } else {
+            let headRow = GridRowContainer {
+                table.head.children.map { cell in
+                    GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
+                        visit(cell).content
+                            .font(configuration.fontProvider.tableHeader)
+                    }
                 }
+            }
+            let bodyRows = table.body.children.map { row in
+                GridRowContainer {
+                    row.children.map { cell in
+                        GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
+                            visit(cell).content
+                                .font(configuration.fontProvider.tableBody)
+                        }
+                    }
+                }
+            }
+            return Result {
+                AdaptiveGrid(showDivider: true) {
+                    headRow
+                    for bodyRow in bodyRows {
+                        bodyRow
+                    }
+                }
+                .modifier(_TableViewModifier())
             }
         }
     }
@@ -61,25 +85,16 @@ extension Renderer {
     }
 }
 
-extension BasicInlineContainer {
-    var alignment: HorizontalAlignment {
-        guard parent is any TableCellContainer else { return .center }
-        
-        let columnIdx = self.indexInParent
-        var currentElement = parent
-        while currentElement != nil {
-            if currentElement is Markdown.Table {
-                let alignment = (currentElement as! Markdown.Table).columnAlignments[columnIdx]
-                switch alignment {
-                case .center: return .center
-                case .left: return .leading
-                case .right: return .trailing
-                case .none: return .leading
-                }
-            }
+// MARK: - Table Style
 
-            currentElement = currentElement?.parent
-        }
-        return .center
+fileprivate struct _TableViewModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .scenePadding()
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(.quaternary, lineWidth: 2)
+            }
     }
 }
+

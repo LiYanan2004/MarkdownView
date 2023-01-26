@@ -10,9 +10,6 @@ Here is a preview :)
 
 > `MarkdownView` is still in beta. 
 > There might have some API changes in the future.
-> 
-> Note: Tables are currently not supported in iOS 15, macOS 12 and tvOS 15. 
-> This capability will be added in the future.
 
 # Supported Platforms
 
@@ -27,12 +24,12 @@ You can use MarkdownView in the following platforms:
 - Fully compliant with CommonMark
 - **SVG rendering** support
 -  Highly **Customizable** and **Extensible**
-    - Customizable font for all components.
-    - Customizable theme for code highlighter
-    - Customizable tint color
-    - Supports block directive rendering
-    - Supports custom image rendering
--  Fully Native SwiftUI code
+    - Fonts
+    - Code Highlighter Themes
+    - Tint Colors
+    - Block Directives
+    - Custom Images
+-  Fully Native SwiftUI implementations
 
 # Getting started
 
@@ -118,8 +115,8 @@ The implementation of the block directive is exactly the same way.
 
 # Todos
 
-- [ ] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
 - [ ] watchOS support. (specifically watchOS 7.0+)
+- [x] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
 - [x] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
 - [x] Built-in image providers improvements.
 
