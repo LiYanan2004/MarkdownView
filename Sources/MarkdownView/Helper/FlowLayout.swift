@@ -34,12 +34,15 @@ struct FlowLayout: Layout {
                 rowHeight = subviewSize.height
             }
             
-            let viewRect = ViewRect(
-                element: subviews[$0],
-                leadingPoint: CGPoint(x: x, y: y),
-                size: subviewSize
-            )
-            rects.append(viewRect)
+            if containerWidth.isNormal {
+                // Prepare ViewRects and cache them when we are getting the ideal width
+                let viewRect = ViewRect(
+                    element: subviews[$0],
+                    leadingPoint: CGPoint(x: x, y: y),
+                    size: subviewSize
+                )
+                rects.append(viewRect)
+            }
             
             rowHeight = max(subviewSize.height, rowHeight)
             x += subviewSize.width
@@ -93,3 +96,4 @@ extension FlowLayout {
         var size: CGSize
     }
 }
+
