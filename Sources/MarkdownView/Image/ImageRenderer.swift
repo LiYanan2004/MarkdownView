@@ -57,23 +57,6 @@ extension ImageRenderer {
 // MARK: - Display Images
 
 extension MarkdownView {
-    /// Adds a built-in provider to render images.
-    ///
-    /// Built-in providers helps you quickly add image rendering from your assets or from a relative path.
-    ///
-    /// - parameters
-    ///     - provider: One of built-in providers.
-    ///     - urlScheme: A scheme for the renderer to determine when to use the provider.
-    /// - Returns: A `MarkdownView` that can render the image with a specific scheme.
-    ///
-    /// You can set the provider multiple times if you want to add multiple schemes.
-    public func imageProvider(
-        _ provider: BuiltInImageProvider, forURLScheme urlScheme: String
-    ) -> MarkdownView {
-        ImageRenderer.shared.addProvider(provider.displayable, forURLScheme: urlScheme)
-        return self
-    }
-    
     /// Adds your own providers to render images.
     ///
     /// - parameters

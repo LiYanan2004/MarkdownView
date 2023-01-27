@@ -24,24 +24,6 @@ struct AnyImageDisplayable: ImageDisplayable {
 }
 
 // MARK: - Built-in providers
-/// Some Built-in providers for developers to choose from.
-public enum BuiltInImageProvider {
-    
-    /// Load Images from a relative path.
-    case relativePathImage(url: URL)
-    
-    /// Load images from your Assets Catalog.
-    case assetImage(name: (URL) -> String = \.lastPathComponent, bundle: Bundle? = nil)
-    
-    var displayable: some ImageDisplayable {
-        switch self {
-        case .relativePathImage(let baseURL):
-            return AnyImageDisplayable(erasing: RelativePathImageDisplayable(baseURL: baseURL))
-        case .assetImage(let name, let bundle):
-            return AnyImageDisplayable(erasing: AssetImageDisplayable(name: name, bundle: bundle))
-        }
-    }
-}
 
 /// Load Network Images.
 struct NetworkImageDisplayable: ImageDisplayable {
@@ -57,6 +39,12 @@ struct RelativePathImageDisplayable: ImageDisplayable {
     func makeImage(url: URL, alt: String?) -> some View {
         let completeURL = baseURL.appendingPathComponent(url.absoluteString)
         NetworkImage(url: completeURL, alt: alt)
+    }
+}
+
+extension ImageDisplayable where Self == RelativePathImageDisplayable {
+    static func relativePathImage(baseURL: URL) -> RelativePathImageDisplayable {
+        RelativePathImageDisplayable(baseURL: baseURL)
     }
 }
 
@@ -82,5 +70,11 @@ struct AssetImageDisplayable: ImageDisplayable {
         }
         #endif
         return AssetImage(image: nil, alt: nil)
+    }
+}
+
+extension ImageDisplayable where Self == AssetImageDisplayable {
+    static func assetImage(name: @escaping (URL) -> String = \.lastPathComponent, bundle: Bundle? = nil) -> AssetImageDisplayable {
+        AssetImageDisplayable(name: name, bundle: bundle)
     }
 }
