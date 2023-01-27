@@ -114,7 +114,6 @@ struct HighlightedCodeBlock: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var attributedCode: AttributedString?
     
-    var highlighter: Highlightr? = Highlightr()
     private var id: String {
         "\(colorScheme) mode: " + (language ?? "No Language Name") + code
     }
@@ -144,7 +143,7 @@ struct HighlightedCodeBlock: View {
     }
     
     @Sendable private func highlight() {
-        guard let highlighter else { return }
+        guard let highlighter = Highlightr.shared else { return }
         highlighter.setTheme(to: colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName)
         let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language?.lowercased() })
         if let highlightedCode = highlighter.highlight(code, as: language) {
@@ -153,4 +152,8 @@ struct HighlightedCodeBlock: View {
             }
         }
     }
+}
+
+extension Highlightr {
+    static var shared: Highlightr? = Highlightr()
 }
