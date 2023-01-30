@@ -2,12 +2,14 @@ import SwiftUI
 import WebKit
 
 #if os(macOS)
-struct WebView: NSViewRepresentable {
+struct SVGView: NSViewRepresentable {
     var html: String
     
     func makeNSView(context: Context) -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
         let webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        // MARK: Not sure if `drawsBackground` is private API.
+        webView.setValue(false, forKey: "drawsBackground")
         return webView
     }
     
@@ -18,19 +20,25 @@ struct WebView: NSViewRepresentable {
     }
 }
 #else
-struct WebView: UIViewRepresentable {
+struct SVGView: UIViewRepresentable {
     var html: String
-    
+
     func makeUIView(context: Context) -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
         let webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        webView.loadHTMLString(html, baseURL: nil)
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
         
         return webView
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(html, baseURL: nil)
+        DispatchQueue.main.async {
+            webView.loadHTMLString(html, baseURL: nil)
+            // Scale a little bit to fit the size.
+            webView.pageZoom = 4
+        }
     }
 }
 #endif

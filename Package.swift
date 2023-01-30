@@ -16,7 +16,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-markdown.git", branch: "main"),
-        .package(url: "https://github.com/SVGKit/SVGKit.git", revision: "3.0.0"),
         .package(url: "https://github.com/raspu/Highlightr.git", from: "2.1.2"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
@@ -25,7 +24,6 @@ let package = Package(
             name: "MarkdownView",
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
-                "SVGKit",
                 "Highlightr",
             ]),
     ]

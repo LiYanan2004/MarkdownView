@@ -88,7 +88,6 @@ extension ViewContent {
         if composedContents.count == 1 {
             self = composedContents[0]
         } else {
-            // TODO: Fix Crash when loading images. (Ramdomly appear)
             if #available(iOS 16.0, macOS 13.0, watchOS 9.0, *), autoLayout {
                 let composedView = FlowLayout(verticleSpacing: 8) {
                     ForEach(composedContents.indices, id: \.self) {

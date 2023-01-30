@@ -100,7 +100,7 @@ extension Renderer {
                 <body>\(html.rawHTML)</body>
             </html>
             """
-            WebView(html: html)
+            SVGView(html: html)
         }
     }
 }
