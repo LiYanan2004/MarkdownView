@@ -63,8 +63,6 @@ struct FlowLayout: Layout {
             let proposal = ProposedViewSize(rect.size)
             let position = CGPoint(x: rect.leadingPoint.x + bounds.minX,
                                    y: rect.leadingPoint.y + bounds.minY)
-            guard position.x.isNormal else { return }
-            guard position.y.isNormal else { return }
             rect.element.place(at: position, anchor: .leading, proposal: proposal)
         }
     }
