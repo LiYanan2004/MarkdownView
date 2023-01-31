@@ -7,6 +7,7 @@ struct NetworkImage: View {
     @State private var imageSize = CGSize.zero
     @State private var localizedError: String?
     @State private var svg: SVGInfo?
+    @State private var isSupported = true
     @Environment(\.displayScale) private var scale
     
     var body: some View {
@@ -17,43 +18,56 @@ struct NetworkImage: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: max(imageSize.width, imageSize.height))
             } else if let svg {
+                #if !os(watchOS)
                 SVGView(html: svg.html)
                     .disabled(true) // Disable bounces
                     .frame(width: svg.size.width, height: svg.size.height)
+                #endif
             } else if let localizedError {
                 Text(localizedError + "\n" + "Tap to reload.")
+                    #if !os(watchOS)
                     .textSelection(.disabled)
+                    #endif
                     .multilineTextAlignment(.center)
                     .padding(.vertical)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
                     .containerShape(Rectangle())
                     .onTapGesture(perform: reloadImage)
+            } else if !isSupported {
+                EmptyView().frame(width: 0, height: 0)
             } else {
-                ProgressView()
-                    .controlSize(.small)
-                    .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
+                if #available(watchOS 9.0, macOS 12.0, iOS 15.0, *) {
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
+                }
             }
-
+            
             if let alt {
                 Text(alt)
                     .foregroundStyle(.secondary)
                     .font(.callout)
             }
         }
-        .overlay {
-            GeometryReader { proxy in
-                Color.black.opacity(0.001)
-                    .allowsHitTesting(false)
-                    .task(id: url) {
-                        do {
-                            try await loadContent(size: proxy.size)
-                        } catch {
-                            localizedError = error.localizedDescription
-                            print(error.localizedDescription)
-                        }
+        .overlay(contentLoader)
+    }
+    
+    private var contentLoader: some View {
+        GeometryReader { proxy in
+            Color.black.opacity(0.001)
+                .allowsHitTesting(false)
+                .task(id: url) {
+                    do {
+                         try await loadContent(size: proxy.size)
+                    } catch {
+                        localizedError = error.localizedDescription
+                        print(error.localizedDescription)
                     }
-            }
+                }
         }
     }
     
@@ -68,25 +82,22 @@ struct NetworkImage: View {
         
         do {
             // First, we look at if we can load data as SVG content.
-            #if !os(watchOS)
             try await loadAsSVG(data: data)
-            #else
-            // For watchOS, throw an error.
-            throw ImageError.notSVG
-            #endif
         } catch {
-            // If the content is not SVG, then load it as Native Image.
+            // If the content is not SVG, then try to load it as Native Image.
             #if os(macOS)
             if let image = NSImage(data: data) {
-                self.image = Image(nsImage: image)
+                self.image = Image(platformImage: image)
                 self.imageSize = image.size
-                return
             }
-            #elseif os(iOS) || os(tvOS)
+            #else
             if let image = UIImage(data: data) {
+                #if !os(watchOS)
                 try await prepareThumbnailAndDisplay(for: image, size: size)
+                #else
+                self.image = Image(platformImage: image)
+                #endif
                 self.imageSize = image.size
-                return
             }
             #endif
         }
@@ -104,7 +115,7 @@ extension NetworkImage {
     private func prepareThumbnailAndDisplay(for image: UIImage, size: CGSize) async throws {
         let thumbnailSize = thumbnailSize(for: image, byReferencing: size)
         if let thumbnail = await image.byPreparingThumbnail(ofSize: thumbnailSize) {
-            self.image = Image(uiImage: thumbnail)
+            self.image = Image(platformImage: thumbnail)
         } else {
             throw ImageError.thumbnailError
         }
@@ -124,6 +135,11 @@ extension NetworkImage {
             throw ImageError.notSVG
         }
         
+        #if os(watchOS) || os(tvOS)
+        // This is an SVG content,
+        // but this platform doesn't support WKWebView.
+        isSupported = false
+        #else
         guard let widthRegex = try? NSRegularExpression(pattern: "width[ ]?=[ ]?\"([0-9]+)\"", options: NSRegularExpression.Options.caseInsensitive),
               let widthMatch = widthRegex.firstMatch(in: svg, options: [], range: NSRange(location: 0, length: svg.count)),
               let widthRange = Range(widthMatch.range(at: 1), in: svg),
@@ -138,6 +154,7 @@ extension NetworkImage {
         
         let html = "<body style='margin:0;padding:0;background-color:transparent;'>\(svg)</body>"
         self.svg = SVGInfo(html: html, size: CGSize(width: width, height: height))
+        #endif
     }
 }
 

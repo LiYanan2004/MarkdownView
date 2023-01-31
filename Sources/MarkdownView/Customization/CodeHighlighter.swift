@@ -53,6 +53,8 @@ extension View {
     /// For more information of available themes, see ``CodeHighlighterTheme``.
     ///
     /// - Parameter theme: The theme for highlighter.
+    ///
+    /// - note: Code highlighting is not available on watchOS.
     public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
         environment(\.codeHighlighterTheme, theme)
     }

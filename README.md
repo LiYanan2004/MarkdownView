@@ -17,6 +17,7 @@ You can use MarkdownView in the following platforms:
 
 * macOS 12.0+
 * iOS 15.0+
+* watchOS 8.0+
 * tvOS 15.0+
 
 # Features
@@ -115,7 +116,7 @@ The implementation of the block directive is exactly the same way.
 
 # Todos
 
-- [ ] watchOS support. (specifically watchOS 7.0+)
+- [x] watchOS support. (specifically watchOS 8.0+)
 - [x] Table support for iOS 15.0, macOS 12.0 and tvOS 15.0.
 - [x] Add support for font size adjustments using SwiftUI built-in `.font(_:)` modifier.
 - [x] Built-in image providers improvements.

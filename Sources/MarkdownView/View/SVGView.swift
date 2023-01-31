@@ -1,5 +1,7 @@
 import SwiftUI
+#if canImport(WebKit)
 import WebKit
+#endif
 
 #if os(macOS)
 struct SVGView: NSViewRepresentable {
@@ -19,7 +21,7 @@ struct SVGView: NSViewRepresentable {
         }
     }
 }
-#else
+#elseif os(iOS)
 struct SVGView: UIViewRepresentable {
     var html: String
 

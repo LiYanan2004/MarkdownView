@@ -28,8 +28,10 @@ struct LinkAttributer: MarkupVisitor {
         } else {
             #if os(macOS)
             attributedString.foregroundColor = .linkColor
-            #else
+            #elseif os(iOS)
             attributedString.foregroundColor = .link
+            #elseif os(watchOS)
+            attributedString.foregroundColor = .blue
             #endif
         }
         return attributedString

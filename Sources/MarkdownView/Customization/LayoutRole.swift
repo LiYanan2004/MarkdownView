@@ -12,6 +12,8 @@ public enum MarkdownViewRole {
     /// and align its content in the top-leading, just like an editor.
     ///
     /// A Markdown Editor typically use this mode to provide a Live Preview.
+    ///
+    /// - note: Editor mode is unsupported on watchOS.
     case editor
 }
 
@@ -32,6 +34,10 @@ extension View {
     ///  Configures the role of the markdown view.
     /// - Parameter role: A role to tell MarkdownView how to render its content.
     public func markdownViewRole(_ role: MarkdownViewRole) -> some View {
+        #if os(watchOS)
+        environment(\.markdownViewRole, .normal)
+        #else
         environment(\.markdownViewRole, role)
+        #endif
     }
 }

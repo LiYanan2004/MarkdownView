@@ -1,6 +1,8 @@
 import Markdown
 import SwiftUI
+#if !os(watchOS)
 import Highlightr
+#endif
 
 // MARK: - Inline Code Block
 extension Renderer {
@@ -82,29 +84,27 @@ struct InlineCodeView: View {
 extension Renderer {
     mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> Result {
         Result {
+            #if os(watchOS) || os(tvOS)
+            SwiftUI.Text(codeBlock.code)
+            #else
             HighlightedCodeBlock(
                 language: codeBlock.language,
                 code: codeBlock.code,
                 theme: configuration.codeBlockTheme
             )
+            #endif
         }
     }
     
     func visitHTMLBlock(_ html: HTMLBlock) -> Result {
         // Forced conversion of text to view
         Result {
-            let html = """
-            <!DOCTYPE html>
-            <html>
-                <head></head>
-                <body>\(html.rawHTML)</body>
-            </html>
-            """
-            SVGView(html: html)
+            SwiftUI.Text(html.rawHTML)
         }
     }
 }
 
+#if !os(watchOS)
 struct HighlightedCodeBlock: View {
     var language: String?
     var code: String
@@ -157,3 +157,4 @@ struct HighlightedCodeBlock: View {
 extension Highlightr {
     static var shared: Highlightr? = Highlightr()
 }
+#endif

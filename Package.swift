@@ -9,7 +9,7 @@ let package = Package(
       .macOS(.v12),
       .iOS(.v15),
       .tvOS(.v15),
-      // .watchOS(.v7),
+      .watchOS(.v8),
     ],
     products: [
         .library(name: "MarkdownView", targets: ["MarkdownView"]),
@@ -24,7 +24,12 @@ let package = Package(
             name: "MarkdownView",
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
-                "Highlightr",
-            ]),
+                .product(
+                    name: "Highlightr",
+                    package: "Highlightr",
+                    condition: .when(platforms: [.iOS, .macOS])
+                ),
+            ]
+        ),
     ]
 )
