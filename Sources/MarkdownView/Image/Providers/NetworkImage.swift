@@ -18,29 +18,33 @@ struct NetworkImage: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: max(imageSize.width, imageSize.height))
             } else if let svg {
-                #if !os(watchOS)
+                #if os(iOS) || os(macOS)
                 SVGView(html: svg.html)
                     .disabled(true) // Disable bounces
                     .frame(width: svg.size.width, height: svg.size.height)
                 #endif
             } else if let localizedError {
+                #if os(iOS) || os(macOS)
                 Text(localizedError + "\n" + "Tap to reload.")
-                    #if !os(watchOS)
                     .textSelection(.disabled)
-                    #endif
                     .multilineTextAlignment(.center)
                     .padding(.vertical)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
                     .containerShape(Rectangle())
                     .onTapGesture(perform: reloadImage)
+                #else
+                Text(localizedError)
+                #endif
             } else if !isSupported {
                 EmptyView().frame(width: 0, height: 0)
             } else {
                 if #available(watchOS 9.0, macOS 12.0, iOS 15.0, *) {
+                    #if !os(tvOS)
                     ProgressView()
                         .controlSize(.small)
                         .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
+                    #endif
                 } else {
                     ProgressView()
                         .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
@@ -89,6 +93,8 @@ struct NetworkImage: View {
             if let image = NSImage(data: data) {
                 self.image = Image(platformImage: image)
                 self.imageSize = image.size
+            } else {
+                throw ImageError.formatError
             }
             #else
             if let image = UIImage(data: data) {
@@ -98,6 +104,8 @@ struct NetworkImage: View {
                 self.image = Image(platformImage: image)
                 #endif
                 self.imageSize = image.size
+            } else {
+                throw ImageError.formatError
             }
             #endif
         }

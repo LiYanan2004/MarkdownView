@@ -84,11 +84,15 @@ struct CheckboxView: View {
             case .checked:
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.accentColor)
+                    #if !os(tvOS)
                     .onTapGesture(perform: toggleStatus)
+                    #endif
             case .unchecked:
                 Image(systemName: "circle")
                     .foregroundStyle(.secondary)
+                    #if !os(tvOS)
                     .onTapGesture(perform: toggleStatus)
+                    #endif
             }
         }
     }

@@ -1,6 +1,6 @@
 import Markdown
 import SwiftUI
-#if !os(watchOS)
+#if os(iOS) || os(macOS)
 import Highlightr
 #endif
 
@@ -104,7 +104,7 @@ extension Renderer {
     }
 }
 
-#if !os(watchOS)
+#if os(iOS) || os(macOS)
 struct HighlightedCodeBlock: View {
     var language: String?
     var code: String
