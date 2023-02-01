@@ -5,7 +5,6 @@ struct NetworkImage: View {
     var alt: String?
     @State private var image: Image?
     @State private var imageSize = CGSize.zero
-    @State private var localizedError: String?
     @State private var svg: SVGInfo?
     @State private var isSupported = true
     @Environment(\.displayScale) private var scale
@@ -23,65 +22,44 @@ struct NetworkImage: View {
                     .disabled(true) // Disable bounces
                     .frame(width: svg.size.width, height: svg.size.height)
                 #endif
-            } else if let localizedError {
-                #if os(iOS) || os(macOS)
-                Text(localizedError + "\n" + "Tap to reload.")
-                    .textSelection(.disabled)
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .containerShape(Rectangle())
-                    .onTapGesture(perform: reloadImage)
-                #else
-                Text(localizedError)
-                #endif
             } else if !isSupported {
-                EmptyView().frame(width: 0, height: 0)
+                ImagePlaceholder()
             } else {
-                if #available(watchOS 9.0, macOS 12.0, iOS 15.0, *) {
-                    #if !os(tvOS)
-                    ProgressView()
-                        .controlSize(.small)
-                        .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
+                ProgressView()
+                    #if os(macOS)
+                    .controlSize(.small)
                     #endif
-                } else {
-                    ProgressView()
-                        .frame(maxWidth: imageSize == .zero ? .infinity : imageSize.width)
-                }
+                    .frame(maxWidth: 50)
+                    .task(id: url) {
+                        do {
+                            try await loadContent()
+                        } catch {
+                            isSupported = false
+                            print(error.localizedDescription)
+                        }
+                    }
             }
             
-            if let alt {
+            let isLoaded = imageSize != .zero || !isSupported
+            if isLoaded, let alt {
                 Text(alt)
                     .foregroundStyle(.secondary)
                     .font(.callout)
             }
         }
-        .overlay(contentLoader)
-    }
-    
-    private var contentLoader: some View {
-        GeometryReader { proxy in
-            Color.black.opacity(0.001)
-                .allowsHitTesting(false)
-                .task(id: url) {
-                    do {
-                         try await loadContent(size: proxy.size)
-                    } catch {
-                        localizedError = error.localizedDescription
-                        print(error.localizedDescription)
-                    }
-                }
-        }
+        #if os(iOS) || os(macOS)
+        .onTapGesture(perform: reloadImage)
+        #endif
     }
     
     private func reloadImage() {
+        guard !isSupported else { return }
+        isSupported = true
         image = nil
-        localizedError = nil
         imageSize = CGSize.zero
     }
     
-    private func loadContent(size: CGSize) async throws {
+    private func loadContent() async throws {
         let data = try await loadResource()
         
         do {
@@ -98,11 +76,7 @@ struct NetworkImage: View {
             }
             #else
             if let image = UIImage(data: data) {
-                #if !os(watchOS)
-                try await prepareThumbnailAndDisplay(for: image, size: size)
-                #else
                 self.image = Image(platformImage: image)
-                #endif
                 self.imageSize = image.size
             } else {
                 throw ImageError.formatError
@@ -112,30 +86,13 @@ struct NetworkImage: View {
     }
 }
 
-// MARK: - Helper
+// MARK: - Helpers
+
 extension NetworkImage {
     private func loadResource() async throws -> Data {
         let (data, _) = try await URLSession.shared.data(from: url)
         return data
     }
-    
-    #if os(iOS) || os(tvOS)
-    private func prepareThumbnailAndDisplay(for image: UIImage, size: CGSize) async throws {
-        let thumbnailSize = thumbnailSize(for: image, byReferencing: size)
-        if let thumbnail = await image.byPreparingThumbnail(ofSize: thumbnailSize) {
-            self.image = Image(platformImage: thumbnail)
-        } else {
-            throw ImageError.thumbnailError
-        }
-    }
-    
-    private func thumbnailSize(for image: UIImage, byReferencing size: CGSize) -> CGSize {
-        let aspectRatio = image.size.width / image.size.height
-        let thumbnailHeight = size.width / aspectRatio
-        
-        return CGSize(width: size.width * scale, height: thumbnailHeight * scale)
-    }
-    #endif
     
     func loadAsSVG(data: Data) async throws {
         guard let svg = String(data: data, encoding: .utf8) else { throw ImageError.notSVG }
@@ -167,6 +124,7 @@ extension NetworkImage {
 }
 
 // MARK: - Errors
+
 extension NetworkImage {
     private enum ImageError: String, LocalizedError, CustomStringConvertible {
         case thumbnailError = "Failed to prepare a thumbnail"
