@@ -5,7 +5,7 @@ struct NetworkImage: View {
     var alt: String?
     @State private var image: Image?
     @State private var imageSize = CGSize.zero
-    @State private var svg: SVGInfo?
+    @State private var svg: SVG?
     @State private var isSupported = true
     @Environment(\.displayScale) private var scale
     
@@ -18,9 +18,7 @@ struct NetworkImage: View {
                     .frame(maxWidth: max(imageSize.width, imageSize.height))
             } else if let svg {
                 #if os(iOS) || os(macOS)
-                SVGView(html: svg.html)
-                    .disabled(true) // Disable bounces
-                    .frame(width: svg.size.width, height: svg.size.height)
+                SVGView(svg: svg)
                 #endif
             } else if !isSupported {
                 ImagePlaceholder()
@@ -29,15 +27,7 @@ struct NetworkImage: View {
                     #if os(macOS)
                     .controlSize(.small)
                     #endif
-                    .frame(maxWidth: 50)
-                    .task(id: url) {
-                        do {
-                            try await loadContent()
-                        } catch {
-                            isSupported = false
-                            print(error.localizedDescription)
-                        }
-                    }
+                    .frame(maxWidth: 50, alignment: .leading)
             }
             
             let isLoaded = imageSize != .zero || !isSupported
@@ -46,6 +36,14 @@ struct NetworkImage: View {
                     .foregroundStyle(.secondary)
                     .font(.callout)
             }
+        }
+        .task(id: url) {
+            do {
+                try await loadContent()
+            } catch where error is ImageError {
+                isSupported = false
+                print(error.localizedDescription)
+            } catch { }
         }
         #if os(iOS) || os(macOS)
         .onTapGesture(perform: reloadImage)
@@ -95,30 +93,15 @@ extension NetworkImage {
     }
     
     func loadAsSVG(data: Data) async throws {
-        guard let svg = String(data: data, encoding: .utf8) else { throw ImageError.notSVG }
-        guard svg.starts(with: "<svg") else {
-            throw ImageError.notSVG
-        }
-        
+        guard let text = String(data: data, encoding: .utf8),
+              let svg = SVG(from: text) else { throw ImageError.notSVG }
+
         #if os(watchOS) || os(tvOS)
         // This is an SVG content,
         // but this platform doesn't support WKWebView.
         isSupported = false
         #else
-        guard let widthRegex = try? NSRegularExpression(pattern: "width[ ]?=[ ]?\"([0-9]+)\"", options: NSRegularExpression.Options.caseInsensitive),
-              let widthMatch = widthRegex.firstMatch(in: svg, options: [], range: NSRange(location: 0, length: svg.count)),
-              let widthRange = Range(widthMatch.range(at: 1), in: svg),
-              let width = Double(String(svg[widthRange]))
-        else { throw ImageError.svgMissingMeta }
-        
-        guard let heightRegex = try? NSRegularExpression(pattern: "height[ ]?=[ ]?\"([0-9]+)\"", options: NSRegularExpression.Options.caseInsensitive),
-              let heightMatch = heightRegex.firstMatch(in: svg, options: [], range: NSRange(location: 0, length: svg.count)),
-              let heightRange = Range(heightMatch.range(at: 1), in: svg),
-              let height = Double(String(svg[heightRange]))
-        else { throw ImageError.svgMissingMeta }
-        
-        let html = "<body style='margin:0;padding:0;background-color:transparent;'>\(svg)</body>"
-        self.svg = SVGInfo(html: html, size: CGSize(width: width, height: height))
+        self.svg = svg
         #endif
     }
 }
@@ -161,9 +144,4 @@ extension Image {
         self.init(uiImage: platformImage)
         #endif
     }
-}
-
-fileprivate struct SVGInfo {
-    var html: String
-    var size: CGSize
 }

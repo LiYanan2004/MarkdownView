@@ -6,6 +6,8 @@ import Combine
 public struct MarkdownView: View {
     @Binding private var text: String
 
+    @State private var viewSize = CGSize.zero
+    
     @Environment(\.lineSpacing) private var lineSpacing
     @Environment(\.markdownFont) private var fontProvider
     @Environment(\.markdownViewRole) private var role
@@ -48,6 +50,8 @@ public struct MarkdownView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
+        .sizeOfView($viewSize)
+        .containerSize(viewSize)
         // Set default font.
         .font(fontProvider.body)
         // Push current text, waiting for next update.
