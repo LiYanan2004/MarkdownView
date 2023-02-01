@@ -39,16 +39,17 @@ extension Renderer {
         default: font = provider.body
         }
         
-        var text = [SwiftUI.Text]()
-        // Append newline based on whether it's the beginning of the text.
-        if !heading.root.children.starts(with: [heading], by: { markup, heading in
-            markup.isIdentical(to: heading)
-        }) {
-            text.append(SwiftUI.Text("\n").font(font))
-        }
+        var text = SwiftUI.Text("")
         for child in heading.children {
-            text.append(visit(child).text.font(font))
+            text = text + visit(child).text.font(font)
         }
-        return Result(text)
+        let index = heading.indexInParent
+        if index - 1 >= 0,
+           heading.parent?.child(at: index - 1) is Heading {
+            // If the previous markup is `Heading`, do not add spacing to the top.
+            return Result(text)
+        }
+        // Otherwise, add spacing to the top of the text to make the heading text stand out.
+        return Result(text.padding(.top))
     }
 }
