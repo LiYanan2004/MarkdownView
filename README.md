@@ -1,12 +1,15 @@
 # MarkdownView
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FLiYanan2004%2FMarkdownView%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/LiYanan2004/MarkdownView)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FLiYanan2004%2FMarkdownView%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/LiYanan2004/MarkdownView)
+
 MarkdownView is a Swift Package for rendering Markdown natively in SwiftUI.
 
 Thanks to [apple/swift-markdown](https://github.com/apple/swift-markdown), it can fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
 
 Here is a preview :)
 
-![](Images/overall.jpeg)
+![](Images/preview.png)
 
 > `MarkdownView` is still in beta. 
 > There might have some API changes in the future.
@@ -20,11 +23,11 @@ You can use MarkdownView in the following platforms:
 * watchOS 8.0+
 * tvOS 15.0+
 
-# Features
+# Highlighted Features
 
 - Fully compliant with CommonMark
-- **SVG rendering** support
--  Highly **Customizable** and **Extensible**
+- SVG rendering support
+-  Highly Customizable and Extensible
     - Fonts
     - Code Highlighter Themes
     - Tint Colors
@@ -135,11 +138,7 @@ Add the dependency to any targets you've declared in your manifest:
 .target(name: "MyTarget", dependencies: ["MarkdownView"]),
 ```
 
-# Similar Projects
-
-- [MarkdownUI](https://github.com/gonzalezreal/MarkdownUI)
-
 # Dependencies
 
 - [apple/swift-markdown](https://github.com/apple/swift-markdown): Parse documents
-- [SVGKit/SVGKit](https://github.com/SVGKit/SVGKit): Convert SVG to UIImage/NSImage
+- [raspu/Highlightr](https://github.com/raspu/Highlightr.git): Highlight code on iOS and macOS.
