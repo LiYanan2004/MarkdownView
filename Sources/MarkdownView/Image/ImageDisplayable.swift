@@ -68,6 +68,10 @@ struct AssetImageDisplayable: ImageDisplayable {
         if let uiImage = UIImage(named: name(url), in: bundle, compatibleWith: nil) {
             return AssetImage(image: uiImage, alt: alt)
         }
+        #elseif os(watchOS)
+        if let uiImage = UIImage(named: name(url), in: bundle, with: nil) {
+            return AssetImage(image: uiImage, alt: alt)
+        }
         #endif
         return AssetImage(image: nil, alt: nil)
     }
