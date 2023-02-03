@@ -30,7 +30,7 @@ struct NetworkImage: View {
                     .frame(maxWidth: 50, alignment: .leading)
             }
             
-            let isLoaded = imageSize != .zero || !isSupported
+            let isLoaded = image != nil || svg != nil
             if isLoaded, let alt {
                 Text(alt)
                     .foregroundStyle(.secondary)
