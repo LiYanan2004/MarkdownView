@@ -15,16 +15,7 @@
       "location" : "https://github.com/apple/swift-cmark.git",
       "state" : {
         "branch" : "gfm",
-        "revision" : "bfdc057b5a02fc65af20771a7ba08f9c944eb117"
-      }
-    },
-    {
-      "identity" : "swift-docc-plugin",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-docc-plugin",
-      "state" : {
-        "revision" : "3303b164430d9a7055ba484c8ead67a52f7b74f6",
-        "version" : "1.0.0"
+        "revision" : "86aeb491675de6f077a3a6df6cbcac1a25dcbee1"
       }
     },
     {
@@ -33,7 +24,7 @@
       "location" : "https://github.com/apple/swift-markdown.git",
       "state" : {
         "branch" : "main",
-        "revision" : "d491147940587dbadfb3472354f4d0c6e063e061"
+        "revision" : "3b0f6f9b6bf591652fab8345559eacbbc8f9a5b1"
       }
     }
   ],
