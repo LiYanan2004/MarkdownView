@@ -26,7 +26,7 @@ struct AdaptiveGridRow: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .overlay { sizeDetector }
+        ._overlay { sizeDetector }
     }
     
     private var columnsCount: Int { columnWidth.count }
