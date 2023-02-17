@@ -19,3 +19,8 @@ class ContentUpdater: ObservableObject {
         relay.send(text)
     }
 }
+
+class MarkdownTextStorage: ObservableObject {
+    static var `default` = MarkdownTextStorage()
+    @Published var text: String? = nil
+}

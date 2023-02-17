@@ -7,6 +7,7 @@ public struct MarkdownView: View {
     @Binding private var text: String
 
     @State private var viewSize = CGSize.zero
+    @State private var scrollViewRef = ScrollProxyRef.shared
     
     @Environment(\.lineSpacing) private var lineSpacing
     @Environment(\.markdownFont) private var fontProvider
@@ -42,13 +43,16 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        ZStack {
-            switch configuration.role {
-            case .normal: representedView
-            case .editor:
-                representedView
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        ScrollViewReader { scrollProxy in
+            ZStack {
+                switch configuration.role {
+                case .normal: representedView
+                case .editor:
+                    representedView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
             }
+            .onAppear { scrollViewRef.proxy = scrollProxy }
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
@@ -80,6 +84,7 @@ public struct MarkdownView: View {
             let view = renderer.representedView(parseBlockDirectives: parseBD)
             Task { @MainActor in
                 representedView = view
+                MarkdownTextStorage.default.text = text
             }
         }
     }
