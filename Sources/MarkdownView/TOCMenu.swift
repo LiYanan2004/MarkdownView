@@ -20,9 +20,9 @@ public struct TOCMenu<Label: View>: View {
     /// - Parameters:
     ///   - markdown: Markdown text, this is needed when MarkdownView hasn't appear.
     ///   - animated: `true` to animate scrolling or false to scroll content without animations.
-    public init(markdown: String? = nil, animated: Bool = false) where Label == SwiftUI.Image {
+    public init(markdown: String? = nil, animated: Bool = false) where Label == SwiftUI.Label<SwiftUI.Text, SwiftUI.Image> {
         self.animation = animated
-        self.label = { SwiftUI.Image(systemName: "filemenu.and.selection") }
+        self.label = { SwiftUI.Label("TOC", systemImage: "filemenu.and.selection") }
         if let markdown {
             Task { @MainActor in
                 MarkdownTextStorage.default.text = markdown
