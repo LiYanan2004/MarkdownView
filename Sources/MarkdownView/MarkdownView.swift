@@ -68,11 +68,10 @@ public struct MarkdownView: View {
     }
     
     private func makeView(text: String) {
-        Task.detached {
-            let config = await self.configuration
+        func view() -> AnyView {
             var renderer = Renderer(
                 text: text,
-                configuration: config,
+                configuration: configuration,
                 interactiveEditHandler: { text in
                     Task { @MainActor in
                         self.text = text
@@ -81,12 +80,11 @@ public struct MarkdownView: View {
                 }
             )
             let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveProviders.isEmpty
-            let view = renderer.representedView(parseBlockDirectives: parseBD)
-            Task { @MainActor in
-                representedView = view
-                MarkdownTextStorage.default.text = text
-            }
+            return renderer.representedView(parseBlockDirectives: parseBD)
         }
+        
+        representedView = view()
+        MarkdownTextStorage.default.text = text
     }
 }
 
