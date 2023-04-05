@@ -15,14 +15,18 @@ struct Renderer: MarkupVisitor {
     }
     
     mutating func visitDocument(_ document: Document) -> Result {
-        Result {
-            let contents = contents(of: document)
-            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-                ForEach(contents.indices, id: \.self) { index in
-                    contents[index].content
-                }
+        let contents = contents(of: document)
+        var paras = [Result]()
+        var index = 0
+        while index < contents.count {
+            if contents[index].type == .text && paras.last?.type == .text {
+                paras.append(Result(Text("\n\n") + contents[index].text))
+            } else {
+                paras.append(contents[index])
             }
+            index += 1
         }
+        return Result(paras, autoLayout: false)
     }
     
     mutating func defaultVisit(_ markup: Markdown.Markup) -> Result {

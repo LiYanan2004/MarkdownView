@@ -58,7 +58,7 @@ struct AdaptiveGrid: View {
         GeometryReader { geometryProxy in
             tableBody
                 .heightOfView($height)
-                .task(id: geometryProxy.size) {
+                ._task(id: geometryProxy.size) {
                     _width = geometryProxy.size.width
                     updateLayout()
                 }

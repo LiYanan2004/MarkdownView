@@ -44,12 +44,13 @@ extension Renderer {
             text = text + visit(child).text.font(font)
         }
         let index = heading.indexInParent
+        let id = heading.range?.description ?? "Unknown Range"
         if index - 1 >= 0,
            heading.parent?.child(at: index - 1) is Heading {
             // If the previous markup is `Heading`, do not add spacing to the top.
-            return Result(text)
+            return Result(text.id(id))
         }
         // Otherwise, add spacing to the top of the text to make the heading text stand out.
-        return Result(text.padding(.top))
+        return Result(text.id(id).padding(.top))
     }
 }

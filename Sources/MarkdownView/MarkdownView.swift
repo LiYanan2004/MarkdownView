@@ -7,6 +7,7 @@ public struct MarkdownView: View {
     @Binding private var text: String
 
     @State private var viewSize = CGSize.zero
+    @State private var scrollViewRef = ScrollProxyRef.shared
     
     @Environment(\.lineSpacing) private var lineSpacing
     @Environment(\.markdownFont) private var fontProvider
@@ -42,13 +43,16 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        ZStack {
-            switch configuration.role {
-            case .normal: representedView
-            case .editor:
-                representedView
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        ScrollViewReader { scrollProxy in
+            ZStack {
+                switch configuration.role {
+                case .normal: representedView
+                case .editor:
+                    representedView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
             }
+            .onAppear { scrollViewRef.proxy = scrollProxy }
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
@@ -64,11 +68,10 @@ public struct MarkdownView: View {
     }
     
     private func makeView(text: String) {
-        Task.detached {
-            let config = await self.configuration
+        func view() -> AnyView {
             var renderer = Renderer(
                 text: text,
-                configuration: config,
+                configuration: configuration,
                 interactiveEditHandler: { text in
                     Task { @MainActor in
                         self.text = text
@@ -77,11 +80,11 @@ public struct MarkdownView: View {
                 }
             )
             let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveProviders.isEmpty
-            let view = renderer.representedView(parseBlockDirectives: parseBD)
-            Task { @MainActor in
-                representedView = view
-            }
+            return renderer.representedView(parseBlockDirectives: parseBD)
         }
+        
+        representedView = view()
+        MarkdownTextStorage.default.text = text
     }
 }
 
