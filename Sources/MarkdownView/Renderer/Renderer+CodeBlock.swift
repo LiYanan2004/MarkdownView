@@ -52,6 +52,7 @@ struct HighlightedCodeBlock: View {
     @Environment(\.markdownFont) private var font
     @Environment(\.colorScheme) private var colorScheme
     @State private var attributedCode: AttributedString?
+    @State private var showCopyButton = false
     
     private var id: String {
         "\(colorScheme) mode: " + (language ?? "No Language Name") + code
@@ -71,13 +72,26 @@ struct HighlightedCodeBlock: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(alignment: .bottomTrailing) {
-            if let language {
-                SwiftUI.Text(language.uppercased())
-                    .font(.callout)
+        .overlay(alignment: .topTrailing) {
+            if showCopyButton {
+                CopyButton(content: code)
                     .padding(8)
-                    .foregroundStyle(.secondary)
+                    .transition(.opacity.animation(.easeInOut))
             }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            codeLanguage
+        }
+        .onHover { showCopyButton = $0 }
+    }
+    
+    @ViewBuilder
+    private var codeLanguage: some View {
+        if let language {
+            SwiftUI.Text(language.uppercased())
+                .font(.callout)
+                .padding(8)
+                .foregroundStyle(.secondary)
         }
     }
     
@@ -95,5 +109,61 @@ struct HighlightedCodeBlock: View {
 
 extension Highlightr {
     static var shared: Highlightr? = Highlightr()
+}
+
+struct CopyButton: View {
+    var content: String
+    @State private var copied = false
+    @ScaledMetric private var size = 12
+    @State private var isHovering = false
+    
+    var body: some View {
+        Button(action: copy) {
+            Group {
+                if copied {
+                    Image(systemName: "checkmark")
+                        .transition(.opacity.combined(with: .scale))
+                } else {
+                    Image(systemName: "doc.on.clipboard")
+                        .transition(.opacity.combined(with: .scale))
+                }
+            }
+            .font(.system(size: size))
+            .frame(width: size, height: size)
+            .padding(8)
+            .contentShape(Rectangle())
+        }
+        .foregroundStyle(.primary)
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: 5, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .stroke(.tertiary, lineWidth: 1)
+        }
+        .brightness(isHovering ? 0.1 : 0)
+        .animation(.easeInOut, value: isHovering)
+        .buttonStyle(.borderless) // Only use `.borderless` can behave correctly when text selection is enabled.
+        .onHover { isHovering = $0 }
+    }
+    
+    private func copy() {
+        #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(content, forType: .string)
+        #else
+        UIPasteboard.general.string = content
+        #endif
+        Task {
+            withAnimation(.spring()) {
+                copied = true
+            }
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+            withAnimation(.spring()) {
+                copied = false
+            }
+        }
+    }
 }
 #endif
