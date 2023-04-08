@@ -72,6 +72,10 @@ struct HighlightedCodeBlock: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+        .gesture(
+            TapGesture()
+                .onEnded { _ in showCopyButton.toggle() }
+        )
         .overlay(alignment: .topTrailing) {
             if showCopyButton {
                 CopyButton(content: code)
@@ -114,7 +118,11 @@ extension Highlightr {
 struct CopyButton: View {
     var content: String
     @State private var copied = false
+    #if os(macOS)
     @ScaledMetric private var size = 12
+    #else
+    @ScaledMetric private var size = 18
+    #endif
     @State private var isHovering = false
     
     var body: some View {
@@ -135,15 +143,14 @@ struct CopyButton: View {
         }
         .foregroundStyle(.primary)
         .background(
-            .ultraThinMaterial,
+            .quaternary.opacity(0.2),
             in: RoundedRectangle(cornerRadius: 5, style: .continuous)
         )
         .overlay {
             RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .stroke(.tertiary, lineWidth: 1)
+                .stroke(.quaternary, lineWidth: 1)
         }
-        .brightness(isHovering ? 0.1 : 0)
-        .animation(.easeInOut, value: isHovering)
+        .brightness(isHovering ? 0.3 : 0)
         .buttonStyle(.borderless) // Only use `.borderless` can behave correctly when text selection is enabled.
         .onHover { isHovering = $0 }
     }
