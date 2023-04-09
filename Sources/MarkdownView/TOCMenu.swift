@@ -1,3 +1,4 @@
+#if os(macOS) || os(iOS)
 import SwiftUI
 import Markdown
 
@@ -66,7 +67,6 @@ public struct TOCMenu<Label: View>: View {
         } label: {
             label()
         }
-        .menuIndicator(.visible)
     }
 }
 
@@ -102,3 +102,4 @@ struct TOCExtractor: MarkupWalker {
         }
     }
 }
+#endif
