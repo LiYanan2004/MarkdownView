@@ -108,3 +108,9 @@ extension ViewContent {
         }
     }
 }
+
+extension View {
+    func eraseToAnyView() -> AnyView {
+        AnyView(self)
+    }
+}

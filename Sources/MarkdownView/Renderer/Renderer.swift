@@ -11,7 +11,7 @@ struct Renderer: MarkupVisitor {
     
     mutating func representedView(parseBlockDirectives: Bool) -> AnyView {
         let options: ParseOptions = parseBlockDirectives ? [.parseBlockDirectives] : []
-        return visit(Document(parsing: text, options: options)).view
+        return visit(Document(parsing: text, options: options)).content.eraseToAnyView()
     }
     
     mutating func visitDocument(_ document: Document) -> Result {
