@@ -11,9 +11,6 @@ Here is a preview :)
 
 ![](Images/preview.png)
 
-> `MarkdownView` is still in beta. 
-> There might have some API changes in the future.
-
 # Supported Platforms
 
 You can use MarkdownView in the following platforms:
