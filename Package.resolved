@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-markdown.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "3b0f6f9b6bf591652fab8345559eacbbc8f9a5b1"
+        "branch" : "release/5.8",
+        "revision" : "87ae1a8fa9180b85630c7b41ddd5aa40ffc87ce3"
       }
     }
   ],
