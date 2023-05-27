@@ -15,7 +15,7 @@ let package = Package(
         .library(name: "MarkdownView", targets: ["MarkdownView"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-markdown.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-markdown.git", from: "0.2.0"),
         .package(url: "https://github.com/raspu/Highlightr.git", from: "2.1.2"),
     ],
     targets: [
