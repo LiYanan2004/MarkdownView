@@ -1,4 +1,6 @@
 import SwiftUI
+#if canImport(_Concurrency)
+import _Concurrency
 
 // MARK: - Task
 
@@ -10,7 +12,7 @@ extension View {
     ///   - priority: The task priority to use when creating the asynchronous task. The default priority is `userInitiated`.
     ///   - action: A closure that SwiftUI calls as an asynchronous task before the view appears. SwiftUI can automatically cancel the task after the view disappears before the action completes. If the id value changes, SwiftUI cancels and restarts the task.
     /// - Returns: A view that runs the specified action asynchronously before the view appears, or restarts the task with the id value changes.
-    func _task<E: Equatable>(id: E, priority: TaskPriority = .userInitiated, _ action: @escaping @Sendable () async -> Void) -> some View {
+    func _task<E: Equatable>(id: E, priority: TaskPriority = .userInitiated, @_inheritActorContext _ action: @escaping @Sendable () async -> Void) -> some View {
         modifier(_TaskModifier(id: id, priority: priority, action: action))
     }
 }
@@ -18,8 +20,9 @@ extension View {
 fileprivate struct _TaskModifier<E: Equatable>: ViewModifier {
     var id: E
     var priority: TaskPriority
-    var action: () async -> Void
-    
+    var action: @Sendable () async -> Void
+    @State private var currentTask: Task<Void, Never>?
+
     func body(content: Content) -> some View {
         if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, macCatalyst 15.0, *) {
             content.task(id: id, priority: priority) {
@@ -27,15 +30,16 @@ fileprivate struct _TaskModifier<E: Equatable>: ViewModifier {
             }
         } else {
             content
-                .onAppear { Task { await action() } }
+                .onAppear { currentTask = Task(priority: priority, operation: action) }
+                .onDisappear { currentTask?.cancel() }
                 .onChange(of: id) { _ in
-                    Task {
-                        await action()
-                    }
+                    currentTask?.cancel()
+                    currentTask = Task(priority: priority, operation: action)
                 }
         }
     }
 }
+#endif
 
 
 // MARK: - Overlay
