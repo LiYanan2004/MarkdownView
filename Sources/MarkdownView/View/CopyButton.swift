@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if os(macOS) || os(iOS)
 struct CopyButton: View {
     var content: String
     @State private var copied = false
@@ -58,3 +59,4 @@ struct CopyButton: View {
         }
     }
 }
+#endif
