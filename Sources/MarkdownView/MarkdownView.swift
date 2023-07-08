@@ -56,6 +56,7 @@ public struct MarkdownView: View {
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
+        .updateCodeBlocksWhenColorSchemeChanges()
         // Set default font.
         .font(fontProvider.body)
         // Push current text, waiting for next update.
