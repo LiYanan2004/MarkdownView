@@ -9,6 +9,7 @@ public struct MarkdownView: View {
     @State private var viewSize = CGSize.zero
     @State private var scrollViewRef = ScrollProxyRef.shared
     
+    @Environment(\.markdownRenderingMode) private var renderingMode
     @Environment(\.lineSpacing) private var lineSpacing
     @Environment(\.markdownFont) private var fontProvider
     @Environment(\.markdownViewRole) private var role
@@ -59,13 +60,21 @@ public struct MarkdownView: View {
         .updateCodeBlocksWhenColorSchemeChanges()
         // Set default font.
         .font(fontProvider.body)
-        // Push current text, waiting for next update.
-        .onChange(of: text, perform: contentUpdater.push(_:))
+        .if(renderingMode == .optimized) { content in
+            content
+                // Received a debouncedText, we need to reload MarkdownView.
+                .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
+                // Push current text, waiting for next update.
+                .onChange(of: text, perform: contentUpdater.push(_:))
+        }
+        .if(renderingMode == .immediate) { content in
+            content
+                // Immediately update MarkdownView when text changes.
+                .onChange(of: text, perform: makeView(text:))
+        }
         // Load view immediately after the first launch.
         // Receive configuration changes and reload MarkdownView to fit.
         .task(id: configuration) { makeView(text: text) }
-        // Received a debouncedText, we need to reload MarkdownView.
-        .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
     }
     
     private func makeView(text: String) {
