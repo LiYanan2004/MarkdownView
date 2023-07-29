@@ -27,16 +27,28 @@ extension Renderer {
     }
     
     mutating func visitHeading(_ heading: Heading) -> Result {
-        let provider = configuration.fontProvider
+        let fontProvider = configuration.fontProvider
         let font: Font
         switch heading.level {
-        case 1: font = provider.h1
-        case 2: font = provider.h2
-        case 3: font = provider.h3
-        case 4: font = provider.h4
-        case 5: font = provider.h5
-        case 6: font = provider.h6
-        default: font = provider.body
+        case 1: font = fontProvider.h1
+        case 2: font = fontProvider.h2
+        case 3: font = fontProvider.h3
+        case 4: font = fontProvider.h4
+        case 5: font = fontProvider.h5
+        case 6: font = fontProvider.h6
+        default: font = fontProvider.body
+        }
+        
+        let styleProvider = configuration.foregroundStyles
+        let foregroundStyle: AnyShapeStyle
+        switch heading.level {
+        case 1: foregroundStyle = styleProvider.h1
+        case 2: foregroundStyle = styleProvider.h2
+        case 3: foregroundStyle = styleProvider.h3
+        case 4: foregroundStyle = styleProvider.h4
+        case 5: foregroundStyle = styleProvider.h5
+        case 6: foregroundStyle = styleProvider.h6
+        default: foregroundStyle = AnyShapeStyle(.foreground)
         }
         
         var text = SwiftUI.Text("")
@@ -48,9 +60,11 @@ extension Renderer {
         if index - 1 >= 0,
            heading.parent?.child(at: index - 1) is Heading {
             // If the previous markup is `Heading`, do not add spacing to the top.
-            return Result(text.id(id))
+            return Result(text.id(id).foregroundStyle(foregroundStyle))
         }
         // Otherwise, add spacing to the top of the text to make the heading text stand out.
-        return Result(text.id(id).padding(.top))
+        return Result(
+            text.id(id).padding(.top).foregroundStyle(foregroundStyle)
+        )
     }
 }
