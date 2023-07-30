@@ -149,7 +149,7 @@ public extension View {
         transformEnvironment(\.foregroundStyleManager) { manager in
             let oldValue = manager.provider.value(of: component)
             let oldBuffer = withUnsafeBytes(of: oldValue) { $0 }
-            let newBuffer = withUnsafeBytes(of: style) { $0 }
+            let newBuffer = withUnsafeBytes(of: AnyShapeStyle(style)) { $0 }
             
             // Update ID to re-render the content of MarkdownView.
             var needUpdateID = true
