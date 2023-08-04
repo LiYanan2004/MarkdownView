@@ -16,6 +16,7 @@ public struct MarkdownView: View {
     @Environment(\.codeHighlighterTheme) private var codeHighlighterTheme
     @Environment(\.inlineCodeBlockTint) private var inlineTintColor
     @Environment(\.blockQuoteTint) private var blockQuoteTintColor
+    @Environment(\.foregroundStyleGroup) private var foregroundStyleGroup
     
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
@@ -58,8 +59,7 @@ public struct MarkdownView: View {
         .sizeOfView($viewSize)
         .containerSize(viewSize)
         .updateCodeBlocksWhenColorSchemeChanges()
-        // Set default font.
-        .font(fontProvider.body)
+        .font(fontProvider.body) // Default font
         .if(renderingMode == .optimized) { content in
             content
                 // Received a debouncedText, we need to reload MarkdownView.
@@ -106,7 +106,8 @@ extension MarkdownView {
             inlineCodeTintColor: inlineTintColor,
             blockQuoteTintColor: blockQuoteTintColor,
             fontProvider: fontProvider,
-            codeBlockTheme: codeHighlighterTheme
+            codeBlockTheme: codeHighlighterTheme,
+            foregroundStyleGroup: foregroundStyleGroup
         )
     }
 }

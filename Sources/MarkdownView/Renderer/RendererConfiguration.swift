@@ -19,4 +19,6 @@ struct RendererConfiguration: Equatable {
     /// Sets the theme of the code block.
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
     var codeBlockTheme: CodeHighlighterTheme
+    
+    var foregroundStyleGroup: AnyMarkdownForegroundStyleGroup
 }
