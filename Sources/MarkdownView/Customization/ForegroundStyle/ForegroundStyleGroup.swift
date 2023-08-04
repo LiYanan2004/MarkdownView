@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A type that applies foreground style group to all markdown views within a view hierarchy.
+/// A type that applies foreground style group to all MarkdownViews within a view hierarchy.
 ///
 /// To configure the current foreground style group for a view hierarchy, use the foregroundGroup(_:) modifier. Specify a style group that conforms to MarkdownForegroundStyleGroup when creating a MarkdownVIew.
 public protocol MarkdownForegroundStyleGroup {
