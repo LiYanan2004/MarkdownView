@@ -39,7 +39,7 @@ extension Renderer {
         default: font = fontProvider.body
         }
         
-        let styleProvider = configuration.foregroundStyles
+        let styleProvider = configuration.foregroundStyleGroup
         let foregroundStyle: AnyShapeStyle
         switch heading.level {
         case 1: foregroundStyle = styleProvider.h1

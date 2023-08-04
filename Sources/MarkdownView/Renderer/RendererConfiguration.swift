@@ -20,5 +20,5 @@ struct RendererConfiguration: Equatable {
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
     var codeBlockTheme: CodeHighlighterTheme
     
-    var foregroundStyles: MarkdownForegroundStyleProvider
+    var foregroundStyleGroup: AnyMarkdownForegroundStyleGroup
 }

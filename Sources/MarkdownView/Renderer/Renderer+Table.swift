@@ -17,7 +17,7 @@ extension Renderer {
                     GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
                         visit(cell).content
                             .font(configuration.fontProvider.tableHeader)
-                            .foregroundStyle(configuration.foregroundStyles.tableHeader)
+                            .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                     }
                 }
             }
@@ -27,7 +27,7 @@ extension Renderer {
                         GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
                             visit(cell).content
                                 .font(configuration.fontProvider.tableBody)
-                                .foregroundStyle(configuration.foregroundStyles.tableBody)
+                                .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
                         }
                     }
                 }
@@ -48,7 +48,7 @@ extension Renderer {
         Result {
             let contents = contents(of: head)
             let font = configuration.fontProvider.tableHeader
-            let foregroundStyle = configuration.foregroundStyles.tableHeader
+            let foregroundStyle = configuration.foregroundStyleGroup.tableHeader
             ForEach(contents.indices, id: \.self) {
                 contents[$0].content
                     .font(font)
@@ -61,7 +61,7 @@ extension Renderer {
         Result {
             let contents = contents(of: body)
             let font = configuration.fontProvider.tableBody
-            let foregroundStyle = configuration.foregroundStyles.tableBody
+            let foregroundStyle = configuration.foregroundStyleGroup.tableBody
             ForEach(contents.indices, id: \.self) {
                 Divider()
                 contents[$0].content

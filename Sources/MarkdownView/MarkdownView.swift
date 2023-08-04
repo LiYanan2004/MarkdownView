@@ -16,7 +16,7 @@ public struct MarkdownView: View {
     @Environment(\.codeHighlighterTheme) private var codeHighlighterTheme
     @Environment(\.inlineCodeBlockTint) private var inlineTintColor
     @Environment(\.blockQuoteTint) private var blockQuoteTintColor
-    @Environment(\.foregroundStyleManager) private var foregroundStyleManager
+    @Environment(\.foregroundStyleGroup) private var foregroundStyleGroup
     
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
@@ -107,7 +107,7 @@ extension MarkdownView {
             blockQuoteTintColor: blockQuoteTintColor,
             fontProvider: fontProvider,
             codeBlockTheme: codeHighlighterTheme,
-            foregroundStyles: foregroundStyleManager.provider
+            foregroundStyleGroup: foregroundStyleGroup
         )
     }
 }
