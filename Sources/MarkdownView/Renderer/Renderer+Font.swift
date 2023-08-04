@@ -27,7 +27,7 @@ extension Renderer {
     }
     
     mutating func visitHeading(_ heading: Heading) -> Result {
-        let fontProvider = configuration.fontProvider
+        let fontProvider = configuration.fontGroup
         let font: Font
         switch heading.level {
         case 1: font = fontProvider.h1

@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(*, deprecated, message: "Use MarkdownFontGroup protocol to create your font group.")
 /// A font provider that defines fonts for each type of components.
 public struct MarkdownFontProvider {
     // Headings
@@ -49,6 +50,7 @@ public struct MarkdownFontProvider {
     }
 }
 
+@available(*, deprecated)
 extension MarkdownFontProvider {
     mutating func modify(_ type: TextType, font: Font) {
         switch type {
@@ -75,36 +77,34 @@ extension MarkdownFontProvider {
     }
 }
 
+@available(*, deprecated)
 extension MarkdownFontProvider: Equatable {}
 
-struct MarkdownFontProviderKey: EnvironmentKey {
-    static var defaultValue = MarkdownFontProvider()
-}
-
-public extension EnvironmentValues {
-    var markdownFont: MarkdownFontProvider {
-        get { self[MarkdownFontProviderKey.self] }
-        set { self[MarkdownFontProviderKey.self] = newValue }
-    }
-}
-
-public extension View {
-    /// Sets the font for the specific component in MarkdownView.
-    /// - Parameters:
-    ///   - font: The font to apply to these components.
-    ///   - type: The type of components to apply the font.
-    func font(_ font: Font, for type: MarkdownFontProvider.TextType) -> some View {
-        transformEnvironment(\.markdownFont) { view in
-            view.modify(type, font: font)
-        }
-    }
+@available(*, deprecated, message: "This is a bridge for deprecated MarkdownFontProvider. These APIs will be removed from MarkdownView in the future.")
+struct MarkdownFontProviderWrapper: MarkdownFontGroup {
+    var h1 = Font.largeTitle
+    var h2 = Font.title
+    var h3 = Font.title2
+    var h4 = Font.title3
+    var h5 = Font.headline
+    var h6 = Font.headline.weight(.regular)
+    var body = Font.body
+    var codeBlock = Font.system(.callout, design: .monospaced)
+    var blockQuote = Font.system(.body, design: .serif)
+    var tableHeader = Font.headline
+    var tableBody = Font.body
     
-    /// Apply a font set to MarkdownView.
-    ///
-    /// This is useful when you want to completely customize fonts.
-    /// 
-    /// - Parameter fontProvider: A font set to apply to the MarkdownView.
-    func markdownFont(_ fontProvider: MarkdownFontProvider) -> some View {
-        environment(\.markdownFont, fontProvider)
+    init(_ provider: MarkdownFontProvider) {
+        self.h1 = provider.h1
+        self.h2 = provider.h2
+        self.h3 = provider.h3
+        self.h4 = provider.h4
+        self.h5 = provider.h5
+        self.h6 = provider.h6
+        self.body = provider.body
+        self.codeBlock = provider.codeBlock
+        self.blockQuote = provider.blockQuote
+        self.tableHeader = provider.tableHeader
+        self.tableBody = provider.tableBody
     }
 }

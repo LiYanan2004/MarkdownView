@@ -54,7 +54,7 @@ struct Renderer: MarkupVisitor {
         if isText {
             var attributer = LinkAttributer(
                 tint: configuration.inlineCodeTintColor,
-                font: configuration.fontProvider.body
+                font: configuration.fontGroup.body
             )
             let link = attributer.visit(link)
             return Result(SwiftUI.Text(link))
@@ -73,7 +73,7 @@ struct Renderer: MarkupVisitor {
             }
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .font(configuration.fontProvider.blockQuote)
+            .font(configuration.fontGroup.blockQuote)
             .padding(.horizontal, 20)
             .background {
                 configuration.blockQuoteTintColor

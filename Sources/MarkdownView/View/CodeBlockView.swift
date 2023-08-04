@@ -10,7 +10,7 @@ struct HighlightedCodeBlock: View {
     var code: String
     var theme: CodeHighlighterTheme
     
-    @Environment(\.markdownFont) private var font
+    @Environment(\.fontGroup) private var font
     @Environment(\.colorScheme) private var colorScheme
     @State private var attributedCode: AttributedString?
     @State private var showCopyButton = false

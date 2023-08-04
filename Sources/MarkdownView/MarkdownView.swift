@@ -11,7 +11,7 @@ public struct MarkdownView: View {
     
     @Environment(\.markdownRenderingMode) private var renderingMode
     @Environment(\.lineSpacing) private var lineSpacing
-    @Environment(\.markdownFont) private var fontProvider
+    @Environment(\.fontGroup) private var fontGroup
     @Environment(\.markdownViewRole) private var role
     @Environment(\.codeHighlighterTheme) private var codeHighlighterTheme
     @Environment(\.inlineCodeBlockTint) private var inlineTintColor
@@ -59,7 +59,7 @@ public struct MarkdownView: View {
         .sizeOfView($viewSize)
         .containerSize(viewSize)
         .updateCodeBlocksWhenColorSchemeChanges()
-        .font(fontProvider.body) // Default font
+        .font(fontGroup.body) // Default font
         .if(renderingMode == .optimized) { content in
             content
                 // Received a debouncedText, we need to reload MarkdownView.
@@ -105,7 +105,7 @@ extension MarkdownView {
             lineSpacing: lineSpacing,
             inlineCodeTintColor: inlineTintColor,
             blockQuoteTintColor: blockQuoteTintColor,
-            fontProvider: fontProvider,
+            fontGroup: fontGroup,
             codeBlockTheme: codeHighlighterTheme,
             foregroundStyleGroup: foregroundStyleGroup
         )
