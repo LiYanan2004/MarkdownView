@@ -16,7 +16,7 @@ extension Renderer {
                 table.head.children.map { cell in
                     GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
                         visit(cell).content
-                            .font(configuration.fontProvider.tableHeader)
+                            .font(configuration.fontGroup.tableHeader)
                             .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                     }
                 }
@@ -26,7 +26,7 @@ extension Renderer {
                     row.children.map { cell in
                         GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
                             visit(cell).content
-                                .font(configuration.fontProvider.tableBody)
+                                .font(configuration.fontGroup.tableBody)
                                 .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
                         }
                     }
@@ -47,7 +47,7 @@ extension Renderer {
     mutating func visitTableHead(_ head: Markdown.Table.Head) -> Result {
         Result {
             let contents = contents(of: head)
-            let font = configuration.fontProvider.tableHeader
+            let font = configuration.fontGroup.tableHeader
             let foregroundStyle = configuration.foregroundStyleGroup.tableHeader
             ForEach(contents.indices, id: \.self) {
                 contents[$0].content
@@ -60,7 +60,7 @@ extension Renderer {
     mutating func visitTableBody(_ body: Markdown.Table.Body) -> Result {
         Result {
             let contents = contents(of: body)
-            let font = configuration.fontProvider.tableBody
+            let font = configuration.fontGroup.tableBody
             let foregroundStyle = configuration.foregroundStyleGroup.tableBody
             ForEach(contents.indices, id: \.self) {
                 Divider()
