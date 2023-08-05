@@ -9,6 +9,8 @@ struct Renderer: MarkupVisitor {
     // Handle text changes when toggle checkmarks.
     var interactiveEditHandler: (String) -> Void
     
+    var blockDirectiveRenderer: BlockDirectiveRenderer
+    
     mutating func representedView(parseBlockDirectives: Bool) -> AnyView {
         let options: ParseOptions = parseBlockDirectives ? [.parseBlockDirectives] : []
         return visit(Document(parsing: text, options: options)).content.eraseToAnyView()
