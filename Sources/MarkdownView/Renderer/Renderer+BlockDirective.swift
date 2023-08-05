@@ -20,7 +20,7 @@ extension Renderer {
         if let range = blockDirective.range {
             let bdBound = text.index(text.startIndex, offsetBy: range.lowerBound.offset(in: text)) ..< text.index(text.startIndex, offsetBy: range.upperBound.offset(in: text))
             var textInside = String(text[bdBound])
-            let (lowerBound, upperBound) = (textInside.firstIndex(of: "{")!, textInside.lastIndex(of: "}")!)
+            let (lowerBound, upperBound) = (textInside.firstIndex(of: "{") ?? textInside.startIndex, textInside.lastIndex(of: "}") ?? textInside.endIndex)
             textInside = String(textInside[lowerBound..<upperBound].dropFirst())
             if let customImplementation = blockDirectiveRenderer.loadBlockDirective(provider: provider, args: args, text: textInside) {
                 return Result { customImplementation }

@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// A type-erased BlockDirectiveDisplayable value.
-struct AnyBlockDirectiveDisplayable: BlockDirectiveDisplayable {
-    typealias BlockDirectiveView = AnyView
+public struct AnyBlockDirectiveDisplayable: BlockDirectiveDisplayable {
+    public typealias BlockDirectiveView = AnyView
 
     @ViewBuilder private let displayableClosure: ([BlockDirectiveArgument], String) -> AnyView
 
@@ -12,7 +12,7 @@ struct AnyBlockDirectiveDisplayable: BlockDirectiveDisplayable {
         }
     }
 
-    func makeView(arguments: [BlockDirectiveArgument], text: String) -> AnyView {
+    public func makeView(arguments: [BlockDirectiveArgument], text: String) -> AnyView {
         displayableClosure(arguments, text)
     }
 }

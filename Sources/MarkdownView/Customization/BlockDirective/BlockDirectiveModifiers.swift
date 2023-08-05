@@ -23,7 +23,7 @@ extension View {
 // MARK: - Environment Values
 
 struct MarkdownBlockDirectiveKey: EnvironmentKey {
-    static var defaultValue = BlockDirectiveRenderer.shared
+    static var defaultValue = BlockDirectiveRenderer()
 }
 
 extension EnvironmentValues {

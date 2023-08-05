@@ -24,7 +24,3 @@ class BlockDirectiveRenderer {
         return nil
     }
 }
-
-extension BlockDirectiveRenderer {
-    static var shared = BlockDirectiveRenderer()
-}
