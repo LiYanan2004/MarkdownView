@@ -5,31 +5,15 @@ import Markdown
 public protocol BlockDirectiveDisplayable {
     associatedtype BlockDirectiveView: View
     
-    /// Make the Directive Block View.
+    /// Create your own custom view with the directive argument.
     /// - Parameters:
     ///   - arguments: A directive argument, parsed from the form name: value or name: "value".
-    ///   - innerMarkdownView: A sub-MarkdownView inside curly braces.
-    /// - Returns: A rendered block directive View.
+    ///   - text: Text inside the block.
+    /// - Returns: A custom block view within MarkdownView.
     @ViewBuilder func makeView(
         arguments: [BlockDirectiveArgument],
-        innerMarkdownView: AnyView
+        text: String
     ) -> BlockDirectiveView
-}
-
-struct AnyBlockDirectiveDisplayable: BlockDirectiveDisplayable {
-    typealias BlockDirectiveView = AnyView
-
-    @ViewBuilder private let displayableClosure: ([BlockDirectiveArgument], AnyView) -> AnyView
-
-    init<D: BlockDirectiveDisplayable>(erasing blockDisplayable: D) {
-        displayableClosure = { args, innerView in
-            AnyView(blockDisplayable.makeView(arguments: args, innerMarkdownView: innerView))
-        }
-    }
-
-    func makeView(arguments: [BlockDirectiveArgument], innerMarkdownView: AnyView) -> AnyView {
-        displayableClosure(arguments, innerMarkdownView)
-    }
 }
 
 /// Directive Block arguments represented from `swift-markdown/DirectiveArgument`.

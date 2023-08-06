@@ -17,6 +17,7 @@ public struct MarkdownView: View {
     @Environment(\.inlineCodeBlockTint) private var inlineTintColor
     @Environment(\.blockQuoteTint) private var blockQuoteTintColor
     @Environment(\.foregroundStyleGroup) private var foregroundStyleGroup
+    @Environment(\.blockDirectiveRenderer) private var blockDirectiveRenderer
     
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
@@ -87,9 +88,10 @@ public struct MarkdownView: View {
                         self.text = text
                         self.makeView(text: text)
                     }
-                }
+                },
+                blockDirectiveRenderer: blockDirectiveRenderer
             )
-            let parseBD = !BlockDirectiveRenderer.shared.blockDirectiveProviders.isEmpty
+            let parseBD = !blockDirectiveRenderer.providers.isEmpty
             return renderer.representedView(parseBlockDirectives: parseBD)
         }
         
@@ -106,8 +108,8 @@ extension MarkdownView {
             inlineCodeTintColor: inlineTintColor,
             blockQuoteTintColor: blockQuoteTintColor,
             fontGroup: fontGroup,
-            codeBlockTheme: codeHighlighterTheme,
-            foregroundStyleGroup: foregroundStyleGroup
+            foregroundStyleGroup: foregroundStyleGroup,
+            codeBlockTheme: codeHighlighterTheme
         )
     }
 }
