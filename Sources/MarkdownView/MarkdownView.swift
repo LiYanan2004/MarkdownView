@@ -5,6 +5,7 @@ import Combine
 /// A view to render markdown text.
 public struct MarkdownView: View {
     @Binding private var text: String
+    var baseURL: URL?
 
     @State private var viewSize = CGSize.zero
     @State private var scrollViewRef = ScrollProxyRef.shared
@@ -18,6 +19,7 @@ public struct MarkdownView: View {
     @Environment(\.blockQuoteTint) private var blockQuoteTintColor
     @Environment(\.foregroundStyleGroup) private var foregroundStyleGroup
     @Environment(\.blockDirectiveRenderer) private var blockDirectiveRenderer
+    @Environment(\.imageRenderer) private var imageRenderer
     
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
@@ -30,7 +32,7 @@ public struct MarkdownView: View {
     public init(text: Binding<String>, baseURL: URL? = nil) {
         _text = text
         if let baseURL {
-            ImageRenderer.shared.baseURL = baseURL
+            self.baseURL = baseURL
         }
     }
     
@@ -41,7 +43,7 @@ public struct MarkdownView: View {
     public init(text: String, baseURL: URL? = nil) {
         _text = .constant(text)
         if let baseURL {
-            ImageRenderer.shared.baseURL = baseURL
+            self.baseURL = baseURL
         }
     }
     
@@ -76,6 +78,7 @@ public struct MarkdownView: View {
         // Load view immediately after the first launch.
         // Receive configuration changes and reload MarkdownView to fit.
         .task(id: configuration) { makeView(text: text) }
+        .task(id: baseURL) { imageRenderer.baseURL = baseURL ?? imageRenderer.baseURL }
     }
     
     private func makeView(text: String) {
@@ -89,7 +92,8 @@ public struct MarkdownView: View {
                         self.makeView(text: text)
                     }
                 },
-                blockDirectiveRenderer: blockDirectiveRenderer
+                blockDirectiveRenderer: blockDirectiveRenderer,
+                imageRenderer: imageRenderer
             )
             let parseBD = !blockDirectiveRenderer.providers.isEmpty
             return renderer.representedView(parseBlockDirectives: parseBD)

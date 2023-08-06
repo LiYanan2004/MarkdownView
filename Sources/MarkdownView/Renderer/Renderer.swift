@@ -10,6 +10,7 @@ struct Renderer: MarkupVisitor {
     var interactiveEditHandler: (String) -> Void
     
     var blockDirectiveRenderer: BlockDirectiveRenderer
+    var imageRenderer: ImageRenderer
     
     mutating func representedView(parseBlockDirectives: Bool) -> AnyView {
         let options: ParseOptions = parseBlockDirectives ? [.parseBlockDirectives] : []
@@ -90,7 +91,6 @@ struct Renderer: MarkupVisitor {
     }
 
     mutating func visitImage(_ image: Markdown.Image) -> Result {
-        let renderer = ImageRenderer.shared
         guard let source = URL(string: image.source ?? "") else {
             return Result(SwiftUI.Text(image.plainText))
         }
@@ -109,7 +109,7 @@ struct Renderer: MarkupVisitor {
         
         var provider: (any ImageDisplayable)?
         if let scheme = source.scheme {
-            renderer.imageProviders.forEach { key, value in
+            imageRenderer.imageProviders.forEach { key, value in
                 if scheme.lowercased() == key.lowercased() {
                     provider = value
                     return
@@ -117,7 +117,7 @@ struct Renderer: MarkupVisitor {
             }
         }
         
-        return Result(renderer.loadImage(provider, url: source, alt: alt))
+        return Result(imageRenderer.loadImage(provider, url: source, alt: alt))
     }
 }
 

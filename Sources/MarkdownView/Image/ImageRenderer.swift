@@ -49,26 +49,3 @@ class ImageRenderer {
         }
     }
 }
-
-extension ImageRenderer {
-    static var shared: ImageRenderer = ImageRenderer()
-}
-
-// MARK: - Display Images
-
-extension MarkdownView {
-    /// Adds your own providers to render images.
-    ///
-    /// - parameters
-    ///     - provider: The provider you created to handle image loading and displaying.
-    ///     - urlScheme: A scheme for the renderer to determine when to use the provider.
-    /// - Returns: A `MarkdownView` that can render the image with a specific scheme.
-    ///
-    /// You can set the provider multiple times if you want to add multiple schemes.
-    public func imageProvider(
-        _ provider: some ImageDisplayable, forURLScheme urlScheme: String
-    ) -> MarkdownView {
-        ImageRenderer.shared.addProvider(provider, forURLScheme: urlScheme)
-        return self
-    }
-}
