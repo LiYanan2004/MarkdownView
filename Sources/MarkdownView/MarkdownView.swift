@@ -23,7 +23,7 @@ public struct MarkdownView: View {
     
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
-    @State private var representedView = AnyView(Color.black.opacity(0.001)) // RenderedView
+    @State private var representedView = AnyView(EmptyView()) // RenderedView
     
     /// Parse the Markdown and render it as a single `View`.
     /// - Parameters:
