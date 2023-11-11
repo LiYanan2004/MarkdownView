@@ -20,7 +20,12 @@ public struct MarkdownView: View {
     @Environment(\.foregroundStyleGroup) private var foregroundStyleGroup
     @Environment(\.blockDirectiveRenderer) private var blockDirectiveRenderer
     @Environment(\.imageRenderer) private var imageRenderer
-    
+
+    @Environment(\.componentSpacing) private var componentSpacing
+    @Environment(\.listIndent) private var listIndent
+    @Environment(\.unorderedListBullet) private var unorderedListBullet
+    @Environment(\.unorderedListBulletFont) private var unorderedListBulletFont
+
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
     @State private var representedView = AnyView(EmptyView()) // RenderedView
@@ -109,11 +114,15 @@ extension MarkdownView {
         RendererConfiguration(
             role: role,
             lineSpacing: lineSpacing,
+            componentSpacing: componentSpacing,
             inlineCodeTintColor: inlineTintColor,
             blockQuoteTintColor: blockQuoteTintColor,
             fontGroup: fontGroup,
             foregroundStyleGroup: foregroundStyleGroup,
-            codeBlockTheme: codeHighlighterTheme
+            codeBlockTheme: codeHighlighterTheme,
+            listIndent: listIndent,
+            unorderedListBullet: unorderedListBullet,
+            unorderedListBulletFont: unorderedListBulletFont
         )
     }
 }
