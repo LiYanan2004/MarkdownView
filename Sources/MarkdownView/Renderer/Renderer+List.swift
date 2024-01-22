@@ -55,7 +55,7 @@ extension Renderer {
                             CheckboxView(listItem: listItem, text: rawText, handler: handler)
                         } else {
                             SwiftUI.Text(configuration.unorderedListBullet)
-                                .font(configuration.unorderedListBulletFont)
+                                .font(.title2)
                                 .padding(.leading, depth == 0 ? configuration.listIndent : 0)
                         }
                         itemContent[index]

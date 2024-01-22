@@ -24,7 +24,6 @@ public struct MarkdownView: View {
     @Environment(\.componentSpacing) private var componentSpacing
     @Environment(\.listIndent) private var listIndent
     @Environment(\.unorderedListBullet) private var unorderedListBullet
-    @Environment(\.unorderedListBulletFont) private var unorderedListBulletFont
 
     // Update content 0.3s after the user stops entering.
     @StateObject private var contentUpdater = ContentUpdater()
@@ -121,8 +120,7 @@ extension MarkdownView {
             foregroundStyleGroup: foregroundStyleGroup,
             codeBlockTheme: codeHighlighterTheme,
             listIndent: listIndent,
-            unorderedListBullet: unorderedListBullet,
-            unorderedListBulletFont: unorderedListBulletFont
+            unorderedListBullet: unorderedListBullet
         )
     }
 }

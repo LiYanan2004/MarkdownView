@@ -1,24 +1,5 @@
 import SwiftUI
 
-
-struct ComponentSpacingEnvironmentKey: EnvironmentKey {
-    static var defaultValue: CGFloat = 8
-}
-
-extension EnvironmentValues {
-    var componentSpacing: CGFloat {
-        get { self[ComponentSpacingEnvironmentKey.self] }
-        set { self[ComponentSpacingEnvironmentKey.self] = newValue }
-    }
-}
-
-public extension View {
-    func componentSpacing(_ spacing: CGFloat) -> some View {
-        self.environment(\.componentSpacing, spacing)
-    }
-}
-
-
 struct ListIndentEnvironmentKey: EnvironmentKey {
     static var defaultValue: CGFloat = 12
 }
@@ -31,7 +12,7 @@ extension EnvironmentValues {
 }
 
 public extension View {
-    func listIndent(_ indent: CGFloat) -> some View {
+    func markdownListIndent(_ indent: CGFloat) -> some View {
         self.environment(\.listIndent, indent)
     }
 }
@@ -49,7 +30,7 @@ extension EnvironmentValues {
 }
 
 public extension View {
-    func unorderedListBullet(_ bullet: String) -> some View {
+    func markdownUnorderedListBullet(_ bullet: String) -> some View {
         self.environment(\.unorderedListBullet, bullet)
     }
 }
