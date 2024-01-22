@@ -1,5 +1,7 @@
 import SwiftUI
 
+
+
 struct RendererConfiguration: Equatable {
     var role: MarkdownViewRole
     
@@ -11,7 +13,7 @@ struct RendererConfiguration: Equatable {
     ///     MarkdownView(...)
     ///         .lineSpacing(10)
     var lineSpacing: CGFloat
-    var componentSpacing: CGFloat = 8
+    var componentSpacing: CGFloat
     var inlineCodeTintColor: Color
     var blockQuoteTintColor: Color
     
@@ -21,4 +23,7 @@ struct RendererConfiguration: Equatable {
     /// Sets the theme of the code block.
     /// For more information, please check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
     var codeBlockTheme: CodeHighlighterTheme
+
+    var listIndent: CGFloat
+    var unorderedListBullet: String
 }

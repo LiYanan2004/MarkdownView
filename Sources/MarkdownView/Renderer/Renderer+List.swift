@@ -21,6 +21,7 @@ extension Renderer {
             let depth = orderedList.listDepth
             let handler = interactiveEditHandler
             let rawText = text
+            let configuration = configuration
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(listItems.indices, id: \.self) { index in
                     let listItem = listItems[index]
@@ -29,7 +30,7 @@ extension Renderer {
                             CheckboxView(listItem: listItem, text: rawText, handler: handler)
                         } else {
                             SwiftUI.Text("\(index + 1).")
-                                .padding(.leading, depth == 0 ? 12 : 0)
+                                .padding(.leading, depth == 0 ? configuration.listIndent : 0)
                         }
                         itemContent[index]
                     }
@@ -45,6 +46,7 @@ extension Renderer {
             let depth = unorderedList.listDepth
             let handler = interactiveEditHandler
             let rawText = text
+            let configuration = configuration
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(itemContent.indices, id: \.self) { index in
                     let listItem = listItems[index]
@@ -52,10 +54,9 @@ extension Renderer {
                         if listItem.checkbox != nil {
                             CheckboxView(listItem: listItem, text: rawText, handler: handler)
                         } else {
-                            SwiftUI.Text("•")
+                            SwiftUI.Text(configuration.unorderedListBullet)
                                 .font(.title2)
-                                .fontWeight(.black)
-                                .padding(.leading, depth == 0 ? 12 : 0)
+                                .padding(.leading, depth == 0 ? configuration.listIndent : 0)
                         }
                         itemContent[index]
                     }
