@@ -39,11 +39,29 @@ struct MarkdownRenderingModeKey: EnvironmentKey {
     static var defaultValue: MarkdownRenderingMode = .immediate
 }
 
+/// Thread to render markdown content on.
+public enum MarkdownRenderingThread {
+    /// Render & Update markdown content on main thread.
+    case main
+    /// Render markdown content on background thread, while updating view on main thread.
+    case background
+}
+
+struct MarkdownRenderingThreadKey: EnvironmentKey {
+    static var defaultValue: MarkdownRenderingThread = .background
+}
+
 extension EnvironmentValues {
     /// Markdown rendering mode
     var markdownRenderingMode: MarkdownRenderingMode {
         get { self[MarkdownRenderingModeKey.self] }
         set { self[MarkdownRenderingModeKey.self] = newValue }
+    }
+    
+    /// Markdown rendering thread
+    var markdownRenderingThread: MarkdownRenderingThread {
+        get { self[MarkdownRenderingThreadKey.self] }
+        set { self[MarkdownRenderingThreadKey.self] = newValue }
     }
 }
 
@@ -55,5 +73,12 @@ extension View {
     /// - Parameter renderingMode: Markdown rendering mode.
     public func markdownRenderingMode(_ renderingMode: MarkdownRenderingMode) -> some View {
         environment(\.markdownRenderingMode, renderingMode)
+    }
+    
+    /// The thread to render content.
+    ///
+    /// - Parameter thread: The thread for rendering markdown content on.
+    public func markdownRenderingThread(_ thread: MarkdownRenderingThread) -> some View {
+        environment(\.markdownRenderingThread, thread)
     }
 }

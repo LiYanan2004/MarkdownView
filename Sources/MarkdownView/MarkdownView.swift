@@ -11,6 +11,7 @@ public struct MarkdownView: View {
     @State private var scrollViewRef = ScrollProxyRef.shared
     
     @Environment(\.markdownRenderingMode) private var renderingMode
+    @Environment(\.markdownRenderingThread) private var renderingThread
     @Environment(\.lineSpacing) private var lineSpacing
     @Environment(\.fontGroup) private var fontGroup
     @Environment(\.markdownViewRole) private var role
@@ -53,28 +54,32 @@ public struct MarkdownView: View {
     
     public var body: some View {
         ScrollViewReader { scrollProxy in
-            ZStack {
-                switch configuration.role {
-                case .normal: representedView
-                case .editor:
-                    representedView
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            if renderingThread == .main {
+                _makeView(text: text)
+            } else {
+                ZStack {
+                    switch configuration.role {
+                    case .normal: representedView
+                    case .editor:
+                        representedView
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    }
                 }
+                .onAppear { scrollViewRef.proxy = scrollProxy }
             }
-            .onAppear { scrollViewRef.proxy = scrollProxy }
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
         .updateCodeBlocksWhenColorSchemeChanges()
         .font(fontGroup.body) // Default font
-        .if(renderingMode == .optimized) { content in
+        .if(renderingMode == .optimized && renderingThread == .background) { content in
             content
                 // Received a debouncedText, we need to reload MarkdownView.
                 .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
                 // Push current text, waiting for next update.
                 .onChange(of: text, perform: contentUpdater.push(_:))
         }
-        .if(renderingMode == .immediate) { content in
+        .if(renderingMode == .immediate && renderingThread == .background) { content in
             content
                 // Immediately update MarkdownView when text changes.
                 .onChange(of: text, perform: makeView(text:))
@@ -86,25 +91,25 @@ public struct MarkdownView: View {
     }
     
     private func makeView(text: String) {
-        func view() -> AnyView {
-            var renderer = Renderer(
-                text: text,
-                configuration: configuration,
-                interactiveEditHandler: { text in
-                    Task { @MainActor in
-                        self.text = text
-                        self.makeView(text: text)
-                    }
-                },
-                blockDirectiveRenderer: blockDirectiveRenderer,
-                imageRenderer: imageRenderer
-            )
-            let parseBD = !blockDirectiveRenderer.providers.isEmpty
-            return renderer.representedView(parseBlockDirectives: parseBD)
-        }
-        
-        representedView = view()
+        representedView = _makeView(text: text)
         MarkdownTextStorage.default.text = text
+    }
+    
+    private func _makeView(text: String) -> AnyView {
+        var renderer = Renderer(
+            text: text,
+            configuration: configuration,
+            interactiveEditHandler: { text in
+                Task { @MainActor in
+                    self.text = text
+                    self.makeView(text: text)
+                }
+            },
+            blockDirectiveRenderer: blockDirectiveRenderer,
+            imageRenderer: imageRenderer
+        )
+        let parseBD = !blockDirectiveRenderer.providers.isEmpty
+        return renderer.representedView(parseBlockDirectives: parseBD)
     }
 }
 
