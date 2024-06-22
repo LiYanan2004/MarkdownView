@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ComponentSpacingEnvironmentKey: EnvironmentKey {
-    static var defaultValue: CGFloat = 8
+    static let defaultValue: CGFloat = 8
 }
 
 extension EnvironmentValues {

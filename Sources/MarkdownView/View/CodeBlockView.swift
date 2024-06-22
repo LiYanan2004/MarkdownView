@@ -1,7 +1,7 @@
 import SwiftUI
 
 #if canImport(Highlightr)
-import Highlightr
+@preconcurrency import Highlightr
 #endif
 
 #if canImport(Highlightr)
@@ -60,12 +60,22 @@ struct HighlightedCodeBlock: View {
         }
     }
     
-    @Sendable private func highlight() async {
+    private func highlight() {
         guard let highlighter = Highlightr.shared else { return }
-        let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language?.lowercased() })
-        if let highlightedCode = highlighter.highlight(code, as: language) {
-            withAnimation {
-                attributedCode = AttributedString(highlightedCode)
+        let language = self.language?.lowercased()
+        let originalCode = code
+        
+        Task.detached { [language, highlighter] in
+            let language = highlighter.supportedLanguages()
+                .first(where: { $0.localizedLowercase == language })
+            async let highlight = highlighter.highlight(originalCode, as: language)
+            guard let highlightedCode = await highlight else { return }
+            let attributedCode = AttributedString(highlightedCode)
+            
+            Task { @MainActor in
+                withAnimation {
+                    self.attributedCode = attributedCode
+                }
             }
         }
     }
@@ -76,6 +86,7 @@ struct HighlightedCodeBlock: View {
 
 #if canImport(Highlightr)
 extension Highlightr {
+    @MainActor
     static var shared: Highlightr? = Highlightr()
 }
 #endif

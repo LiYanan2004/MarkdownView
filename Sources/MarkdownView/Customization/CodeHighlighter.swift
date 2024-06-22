@@ -3,7 +3,7 @@ import SwiftUI
 /// The theme of code highlighter.
 ///
 /// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
-public struct CodeHighlighterTheme: Equatable {
+public struct CodeHighlighterTheme: Equatable, Sendable {
     /// The theme name in Light Mode.
     var lightModeThemeName: String
     
@@ -35,7 +35,7 @@ public struct CodeHighlighterTheme: Equatable {
 }
 
 struct CodeHighlighterThemeKey: EnvironmentKey {
-    static var defaultValue: CodeHighlighterTheme = CodeHighlighterTheme(
+    static let defaultValue: CodeHighlighterTheme = CodeHighlighterTheme(
         lightModeThemeName: "xcode", darkModeThemeName: "dark"
     )
 }

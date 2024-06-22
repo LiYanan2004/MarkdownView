@@ -42,7 +42,7 @@ public extension View {
 // MARK: - Environment Values
 
 struct MarkdownForegroundStyleGroupKey: EnvironmentKey {
-    static var defaultValue = AnyMarkdownForegroundStyleGroup(.automatic)
+    static let defaultValue = AnyMarkdownForegroundStyleGroup(.automatic)
 }
 
 extension EnvironmentValues {

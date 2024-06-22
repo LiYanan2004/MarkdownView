@@ -1,6 +1,11 @@
 import SwiftUI
 
+@MainActor
 class ScrollProxyRef {
     static var shared = ScrollProxyRef()
-    var proxy: ScrollViewProxy?
+    private(set) var proxy: ScrollViewProxy?
+    
+    func setProxy(_ proxy: ScrollViewProxy) {
+        self.proxy = proxy
+    }
 }

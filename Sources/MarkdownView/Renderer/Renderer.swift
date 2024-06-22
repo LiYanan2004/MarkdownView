@@ -1,7 +1,7 @@
 import SwiftUI
 import Markdown
 
-struct Renderer: MarkupVisitor {
+struct Renderer: @preconcurrency MarkupVisitor {
     typealias Result = ViewContent
     
     var text: String
@@ -110,7 +110,7 @@ struct Renderer: MarkupVisitor {
         var provider: (any ImageDisplayable)?
         if let scheme = source.scheme {
             imageRenderer.imageProviders.forEach { key, value in
-                if scheme.lowercased() == key.lowercased() {
+                if scheme.localizedLowercase == key.localizedLowercase {
                     provider = value
                     return
                 }
