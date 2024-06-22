@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The role of MarkdownView, which affects how MarkdownView is rendered.
-public enum MarkdownViewRole {
+public enum MarkdownViewRole: Sendable {
     /// The normal role.
     ///
     /// A role that makes the view take the space it needs and center contents, like a normal SwiftUI View.
@@ -18,7 +18,7 @@ public enum MarkdownViewRole {
 }
 
 struct MarkdownViewRoleKey: EnvironmentKey {
-    static var defaultValue = MarkdownViewRole.normal
+    static let defaultValue = MarkdownViewRole.normal
 }
 
 extension EnvironmentValues {

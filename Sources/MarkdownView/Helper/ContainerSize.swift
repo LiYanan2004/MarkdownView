@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContainerSize: EnvironmentKey {
-    static var defaultValue: CGSize = .zero
+    static let defaultValue: CGSize = .zero
 }
 
 extension EnvironmentValues {

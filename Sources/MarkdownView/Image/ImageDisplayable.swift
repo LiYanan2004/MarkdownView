@@ -46,18 +46,26 @@ struct AssetImageDisplayable: ImageDisplayable {
             nsImage = NSImage(named: name(url))
         }
         if let nsImage {
-            return AssetImage(image: nsImage, alt: alt)
+            return MainActor.assumeIsolated {
+                AssetImage(image: nsImage, alt: alt)
+            }
         }
         #elseif os(iOS) || os(tvOS)
         if let uiImage = UIImage(named: name(url), in: bundle, compatibleWith: nil) {
-            return AssetImage(image: uiImage, alt: alt)
+            return MainActor.assumeIsolated {
+                AssetImage(image: uiImage, alt: alt)
+            }
         }
         #elseif os(watchOS)
         if let uiImage = UIImage(named: name(url), in: bundle, with: nil) {
-            return AssetImage(image: uiImage, alt: alt)
+            return MainActor.assumeIsolated {
+                AssetImage(image: uiImage, alt: alt)
+            }
         }
         #endif
-        return AssetImage(image: nil, alt: nil)
+        return MainActor.assumeIsolated {
+            AssetImage(image: nil, alt: nil)
+        }
     }
 }
 

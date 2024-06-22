@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ListIndentEnvironmentKey: EnvironmentKey {
-    static var defaultValue: CGFloat = 12
+    static let defaultValue: CGFloat = 12
 }
 
 extension EnvironmentValues {
@@ -19,7 +19,7 @@ public extension View {
 
 
 struct UnorderedListBulletEnvironmentKey: EnvironmentKey {
-    static var defaultValue: String = "•"
+    static let defaultValue: String = "•"
 }
 
 extension EnvironmentValues {
@@ -37,7 +37,7 @@ public extension View {
 
 
 struct UnorderedListBulletFontEnvironmentKey: EnvironmentKey {
-    static var defaultValue: Font = .title2.weight(.black)
+    static let defaultValue: Font = .title2.weight(.black)
 }
 
 extension EnvironmentValues {

@@ -48,7 +48,7 @@ public extension View {
 // MARK: - Environment Values
 
 struct MarkdownFontGroupKey: EnvironmentKey {
-    static var defaultValue = AnyMarkdownFontGroup(.automatic)
+    static let defaultValue = AnyMarkdownFontGroup(.automatic)
 }
 
 extension EnvironmentValues {

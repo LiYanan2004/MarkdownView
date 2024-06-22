@@ -34,24 +34,26 @@ struct SVGView: View {
 }
 
 // MARK: - WKWebView Delegate
-
-class Coordinator: NSObject, WKNavigationDelegate {
+@MainActor
+fileprivate class WebViewDelegate: NSObject, WKNavigationDelegate {
     var updateSize: ((CGSize) -> Void)?
     
     init(updateSize: ((CGSize) -> Void)?) {
         self.updateSize = updateSize
     }
     
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        // Get SVG size via DIV container.
-        webView.evaluateJavaScript("var style = window.getComputedStyle ? window.getComputedStyle(svg_content,null) : null || svg_content.currentStyle;")
-        webView.evaluateJavaScript("style.width") { width, _ in
-            guard let width = (width as? String)?.htmlSize() else { return }
-            self.updateSize?(CGSize(width: width, height: .zero))
-        }
-        webView.evaluateJavaScript("style.height") { height, _ in
-            guard let height = (height as? String)?.htmlSize() else { return }
-            self.updateSize?(CGSize(width: .zero, height: height))
+    nonisolated func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        MainActor.assumeIsolated {
+            // Get SVG size via DIV container.
+            webView.evaluateJavaScript("var style = window.getComputedStyle ? window.getComputedStyle(svg_content,null) : null || svg_content.currentStyle;")
+            webView.evaluateJavaScript("style.width") { width, _ in
+                guard let width = (width as? String)?.htmlSize() else { return }
+                self.updateSize?(CGSize(width: width, height: .zero))
+            }
+            webView.evaluateJavaScript("style.height") { height, _ in
+                guard let height = (height as? String)?.htmlSize() else { return }
+                self.updateSize?(CGSize(width: .zero, height: height))
+            }
         }
     }
 }
@@ -79,7 +81,7 @@ fileprivate struct _SVGViewBridge: NSViewRepresentable {
         }
     }
     
-    func makeCoordinator() -> Coordinator {
+    func makeCoordinator() -> WebViewDelegate {
         Coordinator(updateSize: updateSize)
     }
 }

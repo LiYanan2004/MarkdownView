@@ -5,7 +5,7 @@ extension Renderer {
     mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> Result {
         var provider: (any BlockDirectiveDisplayable)?
         blockDirectiveRenderer.providers.forEach { name, value in
-            if name.lowercased() == blockDirective.name.lowercased() {
+            if name.localizedLowercase == blockDirective.name.localizedLowercase {
                 provider = value
             }
         }

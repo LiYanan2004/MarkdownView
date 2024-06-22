@@ -21,9 +21,9 @@ extension View {
 }
 
 // MARK: - Environment Values
-
-struct MarkdownBlockDirectiveKey: EnvironmentKey {
-    static var defaultValue = BlockDirectiveRenderer()
+@MainActor
+struct MarkdownBlockDirectiveKey: @preconcurrency EnvironmentKey {
+    static let defaultValue = BlockDirectiveRenderer()
 }
 
 extension EnvironmentValues {

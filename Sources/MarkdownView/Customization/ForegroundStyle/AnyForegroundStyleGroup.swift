@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A type-erased MarkdownForegroundStyleGroup value.
-public struct AnyMarkdownForegroundStyleGroup {
+public struct AnyMarkdownForegroundStyleGroup: Sendable {
     var _h1: AnyShapeStyle
     var _h2: AnyShapeStyle
     var _h3: AnyShapeStyle

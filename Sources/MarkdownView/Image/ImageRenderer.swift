@@ -1,8 +1,8 @@
 import SwiftUI
 
-class ImageRenderer {
+class ImageRenderer: @unchecked Sendable {
     /// The base URL for local images or network images.
-    var baseURL: URL
+    private(set) var baseURL: URL
     
     /// Create a Configuration for image handling.
     init(baseURL: URL? = nil) {
@@ -21,7 +21,7 @@ class ImageRenderer {
     }
     
     /// All the providers that have been added.
-    var imageProviders: [String: any ImageDisplayable] = [
+    private(set) var imageProviders: [String: any ImageDisplayable] = [
         "http": NetworkImageDisplayable(),
         "https": NetworkImageDisplayable(),
     ]
@@ -41,11 +41,19 @@ class ImageRenderer {
     ) -> AnyView {
         if let provider {
             // Found a specific provider.
-            return AnyView(provider.makeImage(url: url, alt: alt))
+            provider.makeImage(url: url, alt: alt)
+                .eraseToAnyView()
         } else {
             // No specific provider.
             // Try to load the image from the Base URL.
-            return AnyView(RelativePathImageDisplayable(baseURL: baseURL).makeImage(url: url, alt: alt))
+            RelativePathImageDisplayable(baseURL: baseURL)
+                .makeImage(url: url, alt: alt)
+                .eraseToAnyView()
         }
+    }
+    
+    func updateBaseURL(_ baseURL: URL?) {
+        guard let baseURL else { return }
+        self.baseURL = baseURL
     }
 }

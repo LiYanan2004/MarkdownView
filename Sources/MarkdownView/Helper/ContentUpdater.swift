@@ -21,12 +21,14 @@ class ContentUpdater: ObservableObject {
 }
 
 class MarkdownTextStorage: ObservableObject {
-    static var `default` = MarkdownTextStorage()
+    @MainActor static let `default` = MarkdownTextStorage()
     @Published var text: String? = nil
+    
+    internal init() { }
 }
 
 /// A Markdown Rendering Mode.
-public enum MarkdownRenderingMode {
+public enum MarkdownRenderingMode: Sendable {
     /// Immediately re-render markdown view when text changes.
     case immediate
     /// Re-render markdown view efficiently by adding a debounce to the pipeline.
@@ -36,11 +38,11 @@ public enum MarkdownRenderingMode {
 }
 
 struct MarkdownRenderingModeKey: EnvironmentKey {
-    static var defaultValue: MarkdownRenderingMode = .immediate
+    static let defaultValue: MarkdownRenderingMode = .immediate
 }
 
 /// Thread to render markdown content on.
-public enum MarkdownRenderingThread {
+public enum MarkdownRenderingThread: Sendable {
     /// Render & Update markdown content on main thread.
     case main
     /// Render markdown content on background thread, while updating view on main thread.
@@ -48,7 +50,7 @@ public enum MarkdownRenderingThread {
 }
 
 struct MarkdownRenderingThreadKey: EnvironmentKey {
-    static var defaultValue: MarkdownRenderingThread = .background
+    static let defaultValue: MarkdownRenderingThread = .background
 }
 
 extension EnvironmentValues {
