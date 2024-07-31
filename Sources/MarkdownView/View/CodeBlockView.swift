@@ -83,22 +83,25 @@ extension Highlightr {
 struct CodeHighlighterUpdator: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.codeHighlighterTheme) private var theme: CodeHighlighterTheme
-    
+
     func body(content: Content) -> some View {
         content
-            #if canImport(Highlightr)
-            .task(id: colorScheme) {
-                let theme = colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
-                Highlightr.shared?.setTheme(to: theme)
-            }
-            .onChange(of: theme) { newTheme in
-                let theme = colorScheme == .dark ? newTheme.darkModeThemeName : newTheme.lightModeThemeName
-                Highlightr.shared?.setTheme(to: theme)
-            }
-            #endif
+        #if canImport(Highlightr)
+        .task(id: colorScheme) {
+            let theme = colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
+            Highlightr.shared?.setTheme(to: theme)
+        }
+        .onChange(of: theme) { newTheme in
+            let theme = colorScheme == .dark ? newTheme.darkModeThemeName : newTheme.lightModeThemeName
+            Highlightr.shared?.setTheme(to: theme)
+        }
+        .onChange(of: colorScheme) { newColorTheme in
+            let theme = newColorTheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
+            Highlightr.shared?.setTheme(to: theme)
+        }
+        #endif
     }
 }
-
 extension View {
     func updateCodeBlocksWhenColorSchemeChanges() -> some View {
         modifier(CodeHighlighterUpdator())
