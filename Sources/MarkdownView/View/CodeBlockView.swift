@@ -64,9 +64,10 @@ struct HighlightedCodeBlock: View {
         guard let highlighter = Highlightr.shared else { return }
         let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language?.lowercased() })
         if let highlightedCode = highlighter.highlight(code, as: language) {
-            withAnimation {
-                attributedCode = AttributedString(highlightedCode)
-            }
+            let code = NSMutableAttributedString(attributedString: highlightedCode)
+            code.removeAttribute(.font, range: NSMakeRange(0, code.length))
+
+            attributedCode = AttributedString(code)
         }
     }
 }
