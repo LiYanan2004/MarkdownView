@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ViewContent {
+struct ViewContent: @unchecked Sendable {
     var text: Text
     var view: AnyView
     var type: ContentType
@@ -30,6 +30,7 @@ struct ViewContent {
     
     /// Create a content descriptor.
     /// - Parameter content: Any view that comforms to View protocol.
+    
     init(_ content: some View) {
         text = Text("")
         view = AnyView(content)
@@ -110,7 +111,7 @@ extension ViewContent {
 }
 
 extension View {
-    func eraseToAnyView() -> AnyView {
+    nonisolated func eraseToAnyView() -> AnyView {
         AnyView(self)
     }
 }

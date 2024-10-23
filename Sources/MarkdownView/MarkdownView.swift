@@ -1,6 +1,5 @@
 import SwiftUI
 import Markdown
-import Combine
 
 /// A view to render markdown text.
 public struct MarkdownView: View {
@@ -55,7 +54,7 @@ public struct MarkdownView: View {
     public var body: some View {
         ScrollViewReader { scrollProxy in
             if renderingThread == .main {
-                _makeView(text: text)
+                makeView(text: text)
             } else {
                 ZStack {
                     switch configuration.role {
@@ -65,44 +64,42 @@ public struct MarkdownView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
                 }
-                .onAppear { scrollViewRef.proxy = scrollProxy }
+                .onAppear { scrollViewRef.setProxy(scrollProxy) }
             }
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
-        .updateCodeBlocksWhenColorSchemeChanges()
+        .modifier(CodeHighlighterUpdater())
         .font(fontGroup.body) // Default font
         .if(renderingMode == .optimized && renderingThread == .background) { content in
             content
                 // Received a debouncedText, we need to reload MarkdownView.
-                .onReceive(contentUpdater.textUpdater, perform: makeView(text:))
+                .onReceive(contentUpdater.textUpdater, perform: updateView(text:))
                 // Push current text, waiting for next update.
                 .onChange(of: text, perform: contentUpdater.push(_:))
         }
         .if(renderingMode == .immediate && renderingThread == .background) { content in
             content
                 // Immediately update MarkdownView when text changes.
-                .onChange(of: text, perform: makeView(text:))
+                .onChange(of: text, perform: updateView(text:))
         }
         // Load view immediately after the first launch.
         // Receive configuration changes and reload MarkdownView to fit.
-        .task(id: configuration) { makeView(text: text) }
-        .task(id: baseURL) { imageRenderer.baseURL = baseURL ?? imageRenderer.baseURL }
+        .task(id: configuration) { updateView(text: text) }
+        .task(id: baseURL) {
+            guard let baseURL else { return }
+            imageRenderer.updateBaseURL(baseURL)
+        }
     }
     
-    private func makeView(text: String) {
-        representedView = _makeView(text: text)
-        MarkdownTextStorage.default.text = text
-    }
-    
-    private func _makeView(text: String) -> AnyView {
+    private func makeView(text: String) -> AnyView {
         var renderer = Renderer(
             text: text,
             configuration: configuration,
             interactiveEditHandler: { text in
                 Task { @MainActor in
                     self.text = text
-                    self.makeView(text: text)
+                    self.updateView(text: text)
                 }
             },
             blockDirectiveRenderer: blockDirectiveRenderer,
@@ -110,6 +107,11 @@ public struct MarkdownView: View {
         )
         let parseBD = !blockDirectiveRenderer.providers.isEmpty
         return renderer.representedView(parseBlockDirectives: parseBD)
+    }
+    
+    private func updateView(text: String) {
+        representedView = makeView(text: text)
+        MarkdownTextStorage.default.text = text
     }
 }
 

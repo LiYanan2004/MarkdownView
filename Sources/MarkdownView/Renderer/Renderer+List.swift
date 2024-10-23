@@ -14,6 +14,7 @@ extension Renderer {
         }
     }
     
+    @MainActor
     mutating func visitOrderedList(_ orderedList: OrderedList) -> Result {
         Result {
             let listItems = orderedList.children.map { $0 as! ListItem }
@@ -39,6 +40,7 @@ extension Renderer {
         }
     }
     
+    @MainActor
     mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> Result {
         Result {
             let listItems = unorderedList.children.map { $0 as! ListItem }

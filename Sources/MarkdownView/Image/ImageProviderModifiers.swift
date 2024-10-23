@@ -22,8 +22,8 @@ extension View {
 
 
 // MARK: - Environment Values
-
-struct MarkdownImageRendererKey: EnvironmentKey {
+@MainActor
+struct MarkdownImageRendererKey: @preconcurrency EnvironmentKey {
     static var defaultValue = ImageRenderer()
 }
 

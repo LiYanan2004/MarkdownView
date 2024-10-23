@@ -1,7 +1,7 @@
 import SwiftUI
 
 #if canImport(Highlightr)
-import Highlightr
+@preconcurrency import Highlightr
 #endif
 
 #if canImport(Highlightr)
@@ -16,7 +16,7 @@ struct HighlightedCodeBlock: View {
     @State private var showCopyButton = false
     
     private var id: String {
-        "\(colorScheme) mode" + (language ?? "No Language Name") + code
+        "\(colorScheme) mode" + (language ?? "Plain Text") + code
     }
 
     var body: some View {
@@ -60,48 +60,17 @@ struct HighlightedCodeBlock: View {
         }
     }
     
-    @Sendable private func highlight() async {
-        guard let highlighter = Highlightr.shared else { return }
-        let language = highlighter.supportedLanguages().first(where: { $0.lowercased() == self.language?.lowercased() })
+    private func highlight() async {
+        guard let highlighter = await Highlightr.shared.value else { return }
+        let specifiedLanguage = self.language?.lowercased() ?? ""
+        
+        let language = highlighter.supportedLanguages()
+            .first(where: { $0.localizedCaseInsensitiveCompare(specifiedLanguage) == .orderedSame })
         if let highlightedCode = highlighter.highlight(code, as: language) {
             let code = NSMutableAttributedString(attributedString: highlightedCode)
             code.removeAttribute(.font, range: NSMakeRange(0, code.length))
-
             attributedCode = AttributedString(code)
         }
     }
 }
 #endif
-
-// MARK: - Shared Instance
-
-#if canImport(Highlightr)
-extension Highlightr {
-    static var shared: Highlightr? = Highlightr()
-}
-#endif
-
-struct CodeHighlighterUpdator: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.codeHighlighterTheme) private var theme: CodeHighlighterTheme
-    
-    func body(content: Content) -> some View {
-        content
-            #if canImport(Highlightr)
-            .task(id: colorScheme) {
-                let theme = colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
-                Highlightr.shared?.setTheme(to: theme)
-            }
-            .onChange(of: theme) { newTheme in
-                let theme = colorScheme == .dark ? newTheme.darkModeThemeName : newTheme.lightModeThemeName
-                Highlightr.shared?.setTheme(to: theme)
-            }
-            #endif
-    }
-}
-
-extension View {
-    func updateCodeBlocksWhenColorSchemeChanges() -> some View {
-        modifier(CodeHighlighterUpdator())
-    }
-}

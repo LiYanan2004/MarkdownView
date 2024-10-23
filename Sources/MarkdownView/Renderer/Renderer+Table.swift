@@ -2,6 +2,7 @@ import SwiftUI
 import Markdown
 
 extension Renderer {
+    @MainActor
     mutating func visitTable(_ table: Markdown.Table) -> Result {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             return Result {
@@ -71,6 +72,7 @@ extension Renderer {
         }
     }
     
+    @MainActor
     mutating func visitTableRow(_ row: Markdown.Table.Row) -> Result {
         Result {
             let cells = row.children.map { $0 as! Markdown.Table.Cell }

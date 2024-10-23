@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct BlockQuoteTint: EnvironmentKey {
-    static var defaultValue: Color = Color.accentColor
+    static let defaultValue: Color = Color.accentColor
 }
 
 struct InlineCodeBlockTint: EnvironmentKey {
-    static var defaultValue = Color.accentColor
+    static let defaultValue = Color.accentColor
 }
 
 extension EnvironmentValues {

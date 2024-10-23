@@ -1,0 +1,103 @@
+name: Build for Apple Platforms
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  PROJECT_SCHEME: MarkdownView  # Set your project's scheme here
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build for iOS
+        run: |
+          xcodebuild clean build \
+            -scheme ${{ env.PROJECT_SCHEME }} \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build for macOS
+        run: |
+          xcodebuild clean build \
+            -scheme ${{ env.PROJECT_SCHEME }} \
+            -sdk macosx \
+            -destination 'platform=OS X'
+
+  build-tvos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build for tvOS
+        run: |
+          xcodebuild clean build \
+            -scheme ${{ env.PROJECT_SCHEME }} \
+            -sdk appletvsimulator \
+            -destination 'platform=tvOS Simulator,name=Apple TV'
+
+  build-watchos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build for watchOS
+        run: |
+          xcodebuild clean build \
+            -scheme ${{ env.PROJECT_SCHEME }} \
+            -sdk watchsimulator \
+            -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 2 (49mm)'
+
+  build-visionos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build for visionOS
+        run: |
+          xcodebuild clean build \
+            -scheme ${{ env.PROJECT_SCHEME }} \
+            -sdk xros \
+            -destination 'platform=visionOS Simulator,name=Apple Vision Pro'

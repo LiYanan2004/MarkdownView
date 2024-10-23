@@ -1,10 +1,10 @@
 import SwiftUI
 import Markdown
 
-class BlockDirectiveRenderer {
+class BlockDirectiveRenderer: @unchecked Sendable {
     /// All providers which have been added.
     var providers: [String : any BlockDirectiveDisplayable] = [:]
-    
+
     /// Add custom provider for block directive .
     /// - Parameters:
     ///   - provider: Represention of the block directive.
@@ -19,7 +19,9 @@ class BlockDirectiveRenderer {
         text: String
     ) -> AnyView? {
         if let provider {
-            return AnyView(provider.makeView(arguments: args, text: text))
+            return provider.makeView(
+                arguments: args, text: text
+            ).eraseToAnyView()
         }
         return nil
     }
