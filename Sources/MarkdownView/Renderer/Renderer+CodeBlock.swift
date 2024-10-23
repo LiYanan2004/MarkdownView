@@ -20,14 +20,14 @@ extension Renderer {
 extension Renderer {
     mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> Result {
         Result {
-            #if os(watchOS) || os(tvOS)
-            SwiftUI.Text(codeBlock.code)
-            #else
+            #if canImport(Highlightr)
             HighlightedCodeBlock(
                 language: codeBlock.language,
                 code: codeBlock.code,
                 theme: configuration.codeBlockTheme
             )
+            #else
+            SwiftUI.Text(codeBlock.code)
             #endif
         }
     }
