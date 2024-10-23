@@ -10,6 +10,7 @@ let package = Package(
       .iOS(.v15),
       .tvOS(.v15),
       .watchOS(.v8),
+      .visionOS(.v1),
     ],
     products: [
         .library(name: "MarkdownView", targets: ["MarkdownView"]),
