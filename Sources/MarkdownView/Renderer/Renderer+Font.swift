@@ -60,11 +60,11 @@ extension Renderer {
         if index - 1 >= 0,
            heading.parent?.child(at: index - 1) is Heading {
             // If the previous markup is `Heading`, do not add spacing to the top.
-            return Result(text.id(id).foregroundStyle(foregroundStyle))
+            return Result(text.id(id).foregroundStyle(foregroundStyle).accessibilityAddTraits(.isHeader))
         }
         // Otherwise, add spacing to the top of the text to make the heading text stand out.
         return Result(
-            text.id(id).padding(.top).foregroundStyle(foregroundStyle)
+            text.id(id).padding(.top).foregroundStyle(foregroundStyle).accessibilityAddTraits(.isHeader)
         )
     }
 }

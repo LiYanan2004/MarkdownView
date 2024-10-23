@@ -60,20 +60,16 @@ struct HighlightedCodeBlock: View {
         }
     }
     
-    nonisolated private func highlight() async {
+    private func highlight() async {
         guard let highlighter = await Highlightr.shared.value else { return }
         let specifiedLanguage = self.language?.lowercased() ?? ""
         
-        let hLang = highlighter.supportedLanguages()
+        let language = highlighter.supportedLanguages()
             .first(where: { $0.localizedCaseInsensitiveCompare(specifiedLanguage) == .orderedSame })
-        async let highlight = highlighter.highlight(code, as: hLang)
-        guard let highlightedCode = await highlight else { return }
-        let attributedCode = AttributedString(highlightedCode)
-        
-        await MainActor.run {
-            withAnimation {
-                self.attributedCode = attributedCode
-            }
+        if let highlightedCode = highlighter.highlight(code, as: language) {
+            let code = NSMutableAttributedString(attributedString: highlightedCode)
+            code.removeAttribute(.font, range: NSMakeRange(0, code.length))
+            attributedCode = AttributedString(code)
         }
     }
 }
