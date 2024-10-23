@@ -28,8 +28,7 @@ let package = Package(
                     package: "Highlightr",
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
-            ],
-            swiftSettings: [.swiftLanguageMode(.v6)]
+            ]
         ),
     ]
 )
