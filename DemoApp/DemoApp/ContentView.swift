@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MarkdownView
 
 struct ContentView: View {
     @State private var selection: Tab = .overview

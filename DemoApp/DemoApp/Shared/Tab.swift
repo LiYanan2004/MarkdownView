@@ -9,12 +9,14 @@ import Foundation
 import SwiftUI
 
 enum Tab: String, CaseIterable {
-    case overview
+    case overview, image, table, text
     
     var name: String {
         switch self {
-        case .overview:
-            return "Overview"
+        case .overview: "Overview"
+        case .image: "Images"
+        case .table: "Table"
+        case .text: "Text"
         }
     }
 }
@@ -40,10 +42,15 @@ extension Tab {
         let tab: Tab
         var body: some View {
             ScrollView {
-                switch tab {
-                case .overview:
-                    OverviewDestination()
+                Group {
+                    switch tab {
+                    case .overview: OverviewDestination()
+                    case .image: ImageDestination()
+                    case .table: TableDestination()
+                    case .text: TextDestination()
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
         }
     }

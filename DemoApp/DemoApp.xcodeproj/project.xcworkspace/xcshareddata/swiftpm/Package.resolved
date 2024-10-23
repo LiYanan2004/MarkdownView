@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LiYanan2004/markdownview",
       "state" : {
-        "revision" : "8b746c5146b7842e9547b4d60adb2f1712cebb33",
-        "version" : "1.7.0"
+        "branch" : "main",
+        "revision" : "6158dfa554ebeaa1a50cfb0a0ef53700db0f5c21"
       }
     },
     {
@@ -31,7 +31,7 @@
     {
       "identity" : "swift-markdown",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-markdown.git",
+      "location" : "https://github.com/swiftlang/swift-markdown.git",
       "state" : {
         "revision" : "8f79cb175981458a0a27e76cb42fee8e17b1a993",
         "version" : "0.5.0"

@@ -29,7 +29,6 @@ struct OverviewDestination: View {
         - Image, including SVG-based content
         - Table
         """)
-        .markdownRenderingThread(.main)
         .scenePadding()
     }
 }
