@@ -1,6 +1,6 @@
 import SwiftUI
 
-extension AnyShapeStyle: Equatable {
+extension AnyShapeStyle: @retroactive Equatable {
     public static func == (lhs: AnyShapeStyle, rhs: AnyShapeStyle) -> Bool {
         let oldBuffer = withUnsafeBytes(of: lhs) { $0 }
         let newBuffer = withUnsafeBytes(of: rhs) { $0 }

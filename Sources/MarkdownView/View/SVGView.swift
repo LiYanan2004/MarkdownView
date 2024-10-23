@@ -34,6 +34,7 @@ struct SVGView: View {
 }
 
 // MARK: - WKWebView Delegate
+
 @MainActor
 fileprivate class WebViewDelegate: NSObject, WKNavigationDelegate {
     var updateSize: ((CGSize) -> Void)?
@@ -108,8 +109,8 @@ fileprivate struct _SVGViewBridge: UIViewRepresentable {
         }
     }
     
-    func makeCoordinator() -> Coordinator {
-        Coordinator(updateSize: updateSize)
+    func makeCoordinator() -> WebViewDelegate {
+        WebViewDelegate(updateSize: updateSize)
     }
 }
 #endif

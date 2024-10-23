@@ -69,7 +69,7 @@ public struct MarkdownView: View {
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
-        .updateCodeBlocksWhenColorSchemeChanges()
+        .modifier(CodeHighlighterUpdater())
         .font(fontGroup.body) // Default font
         .if(renderingMode == .optimized && renderingThread == .background) { content in
             content
