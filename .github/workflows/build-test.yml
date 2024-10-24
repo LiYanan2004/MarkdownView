@@ -22,13 +22,18 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest
+          
+      - name: Download iOS Simulator
+        run: |
+          xcodebuild -downloadPlatform "iOS Simulator"
 
       - name: Build for iOS
         run: |
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            -quiet
 
   build-macos:
     runs-on: macos-latest
@@ -46,7 +51,8 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk macosx \
-            -destination 'platform=OS X'
+            -destination 'platform=OS X' \
+            -quiet
 
   build-tvos:
     runs-on: macos-latest
@@ -58,13 +64,18 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest
-
+          
+      - name: Download tvOS Simulator
+        run: |
+          xcodebuild -downloadPlatform "tvOS Simulator"
+          
       - name: Build for tvOS
         run: |
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk appletvsimulator \
-            -destination 'platform=tvOS Simulator,name=Apple TV'
+            -destination 'platform=tvOS Simulator,name=Apple TV' \
+            -quiet
 
   build-watchos:
     runs-on: macos-latest
@@ -76,13 +87,18 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest
+          
+      - name: Download watchOS Simulator
+        run: |
+          xcodebuild -downloadPlatform "watchOS Simulator"
 
       - name: Build for watchOS
         run: |
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk watchsimulator \
-            -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 2 (49mm)'
+            -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 2 (49mm)' \
+            -quiet
 
   build-visionos:
     runs-on: macos-latest
@@ -94,10 +110,15 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest
+          
+      - name: Download visionOS Simulator
+        run: |
+          xcodebuild -downloadPlatform "visionOS Simulator"
 
       - name: Build for visionOS
         run: |
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk xros \
-            -destination 'platform=visionOS Simulator,name=Apple Vision Pro'
+            -destination 'platform=visionOS Simulator,name=Apple Vision Pro' \
+            -quiet

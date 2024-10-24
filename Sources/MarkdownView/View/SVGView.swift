@@ -86,7 +86,7 @@ fileprivate struct _SVGViewBridge: NSViewRepresentable {
         Coordinator(updateSize: updateSize)
     }
 }
-#elseif os(iOS)
+#elseif os(iOS) || os(visionOS)
 fileprivate struct _SVGViewBridge: UIViewRepresentable {
     var html: String
     var updateSize: (CGSize) -> Void

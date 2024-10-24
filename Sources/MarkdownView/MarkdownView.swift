@@ -76,12 +76,12 @@ public struct MarkdownView: View {
                 // Received a debouncedText, we need to reload MarkdownView.
                 .onReceive(contentUpdater.textUpdater, perform: updateView(text:))
                 // Push current text, waiting for next update.
-                .onChange(of: text, perform: contentUpdater.push(_:))
+                .onChange(of: text) { contentUpdater.push(text) }
         }
         .if(renderingMode == .immediate && renderingThread == .background) { content in
             content
                 // Immediately update MarkdownView when text changes.
-                .onChange(of: text, perform: updateView(text:))
+                .onChange(of: text) { updateView(text: text) }
         }
         // Load view immediately after the first launch.
         // Receive configuration changes and reload MarkdownView to fit.
