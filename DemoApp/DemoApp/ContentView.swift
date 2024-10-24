@@ -14,8 +14,14 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $selection) {
-                ForEach(Tab.allCases) { tab in
-                    tab.link
+                ForEach(TabGroup.allCases) { group in
+                    Section {
+                        ForEach(group.tabs) { tab in
+                            tab.link
+                        }
+                    } header: {
+                        Text(group.rawValue)
+                    }
                 }
             }
             .listStyle(.sidebar)
