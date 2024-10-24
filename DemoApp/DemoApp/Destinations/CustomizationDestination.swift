@@ -11,14 +11,14 @@ import MarkdownView
 struct CustomizationDestination: View {
     @State private var quoteTint = Color.accentColor
     @State private var inlineCodeTint = Color.accentColor
-    @State private var hiraricalTint = false
+    @State private var hirarchicalTint = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 20) {
                 ColorPicker("Quote Block Tint", selection: $quoteTint)
                 ColorPicker("Inline Code Tint", selection: $inlineCodeTint)
-                Toggle("Hirarical Tint", isOn: $hiraricalTint)
+                Toggle("Hirarchical Tint", isOn: $hirarchicalTint)
             }
             
             MarkdownView(text: """
@@ -70,13 +70,13 @@ struct CustomizationDestination: View {
             | Layout Containers| Structures like `VStack`, `HStack`, `ZStack`.|
             | Modifiers        | Chainable functions to style or configure views.|
             """)
-            .foregroundStyle(hiraricalTint ? .tertiary : .primary)
+            .foregroundStyle(hirarchicalTint ? .tertiary : .primary)
         }
         .tint(quoteTint, for: .blockQuote)
         .tint(inlineCodeTint, for: .inlineCodeBlock)
-        .foregroundStyle(hiraricalTint ? .secondary : .primary, for: .h2)
-        .foregroundStyle(hiraricalTint ? .tertiary : .primary, for: .h3)
-        .foregroundStyle(hiraricalTint ? .tertiary : .primary, for: .h4)
+        .foregroundStyle(hirarchicalTint ? .secondary : .primary, for: .h2)
+        .foregroundStyle(hirarchicalTint ? .tertiary : .primary, for: .h3)
+        .foregroundStyle(hirarchicalTint ? .tertiary : .primary, for: .h4)
     }
 }
 
