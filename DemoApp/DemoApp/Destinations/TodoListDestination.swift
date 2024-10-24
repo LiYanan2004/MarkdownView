@@ -44,7 +44,6 @@ struct TodoListDestination: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .scenePadding()
     }
 }
 

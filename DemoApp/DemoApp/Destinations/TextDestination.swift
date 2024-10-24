@@ -20,7 +20,6 @@ struct TextDestination: View {
         
         It supports _SVG Rendering_, which is pretty great.
         """)
-        .scenePadding()
     }
 }
 

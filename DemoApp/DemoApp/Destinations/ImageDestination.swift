@@ -22,7 +22,6 @@ struct ImageDestination: View {
             ![](https://avatars.githubusercontent.com/u/37542129?s=400&u=ad6b55151a424db26e94b3b9ba3c57e69f62b56b&v=4)
             """)
         }
-        .scenePadding()
     }
 }
 

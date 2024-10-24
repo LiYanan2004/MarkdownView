@@ -21,7 +21,6 @@ struct TableDestination: View {
         | Ruby                 | 1995         | Yukihiro Matsumoto| Ruby on Rails, Sinatra       |
         | Go                   | 2009         | Robert Griesemer, Rob Pike, and Ken Thompson | Gin, Echo |
         """)
-        .scenePadding()
     }
 }
 
