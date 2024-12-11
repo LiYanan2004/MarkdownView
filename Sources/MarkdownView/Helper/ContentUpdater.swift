@@ -1,22 +1,54 @@
 import Combine
 import SwiftUI
+import Markdown
 
-/// Update content 0.3s after the user stops entering.
-class ContentUpdater: ObservableObject {
-    /// Send all the changes from raw text
-    private var relay = PassthroughSubject<String, Never>()
+@MainActor
+class MarkdownViewProvider: ObservableObject {
+    var configuration = MarkdownView.RendererConfiguration()
+    @Published var content: AnyView = AnyView(EmptyView())
+    @Environment(\.lineSpacing) private var lineSpacing
     
-    /// A publisher to notify MarkdownView to update its content.
-    var textUpdater: AnyPublisher<String, Never>
+    private var relay = PassthroughSubject<String, Never>()
+    private var cancallables: Set<AnyCancellable> = []
     
     init() {
-        textUpdater = relay
-            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
-            .eraseToAnyPublisher()
+        setUpTextUpdater()
     }
     
-    func push(_ text: String) {
-        relay.send(text)
+    private func setUpTextUpdater() {
+        let debounce = configuration.renderingMode == .immediate ? 0.0 : 0.3
+        relay
+            .debounce(for: .seconds(debounce), scheduler: RunLoop.main)
+            .sink { rawMarkdown in
+                self.renderContent(markdown: rawMarkdown)
+            }
+            .store(in: &cancallables)
+    }
+    
+    private func renderContent(markdown: String) {
+        configuration.withLineSpacing(lineSpacing)
+        
+        var renderer = Renderer(
+            text: markdown,
+            configuration: configuration,
+            interactiveEditHandler: { text in },
+            blockDirectiveRenderer: configuration.blockDirectiveRenderer,
+            imageRenderer: configuration.imageRenderer
+        )
+        var options = ParseOptions()
+        if configuration.blockDirectiveRenderer.isEmpty {
+            options.insert(.parseBlockDirectives)
+        }
+        self.content = renderer.representedView(options: options)
+    }
+    
+    func updateRenderConfiguration(_ configuration: MarkdownView.RendererConfiguration) {
+        self.configuration = configuration
+    }
+    
+    func updateMarkdownView(markdown: String) {
+        relay.send(markdown)
+        MarkdownTextStorage.default.text = markdown
     }
 }
 

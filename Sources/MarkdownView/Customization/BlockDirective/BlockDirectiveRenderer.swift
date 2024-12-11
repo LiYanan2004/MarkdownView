@@ -1,6 +1,7 @@
 import SwiftUI
 import Markdown
 
+@dynamicMemberLookup
 class BlockDirectiveRenderer: @unchecked Sendable {
     /// All providers which have been added.
     var providers: [String : any BlockDirectiveDisplayable] = [:]
@@ -24,5 +25,19 @@ class BlockDirectiveRenderer: @unchecked Sendable {
             ).eraseToAnyView()
         }
         return nil
+    }
+    
+    subscript<T>(dynamicMember keyPath: KeyPath<[String : any BlockDirectiveDisplayable], T>) -> T {
+        providers[keyPath: keyPath]
+    }
+}
+
+extension BlockDirectiveRenderer: Hashable, Equatable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(providers.keys.map(\.self))
+    }
+    
+    static func == (lhs: BlockDirectiveRenderer, rhs: BlockDirectiveRenderer) -> Bool {
+        lhs.providers.keys == rhs.providers.keys
     }
 }

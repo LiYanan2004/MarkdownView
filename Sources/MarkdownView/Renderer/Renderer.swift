@@ -5,16 +5,15 @@ struct Renderer: @preconcurrency MarkupVisitor {
     typealias Result = ViewContent
     
     var text: String
-    var configuration: RendererConfiguration
+    var configuration: MarkdownView.RendererConfiguration
     // Handle text changes when toggle checkmarks.
     var interactiveEditHandler: (String) -> Void
     
     var blockDirectiveRenderer: BlockDirectiveRenderer
     var imageRenderer: ImageRenderer
     
-    mutating func representedView(parseBlockDirectives: Bool) -> AnyView {
-        let options: ParseOptions = parseBlockDirectives ? [.parseBlockDirectives] : []
-        return visit(Document(parsing: text, options: options)).content.eraseToAnyView()
+    mutating func representedView(options: ParseOptions) -> AnyView {
+        visit(Document(parsing: text, options: options)).content.eraseToAnyView()
     }
     
     mutating func visitDocument(_ document: Document) -> Result {

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A type-erased MarkdownFontGroup value.
-public struct AnyMarkdownFontGroup: Sendable {
+public struct AnyMarkdownFontGroup: Sendable, Hashable {
     var _h1: Font
     var _h2: Font
     var _h3: Font

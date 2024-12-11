@@ -57,3 +57,14 @@ class ImageRenderer: @unchecked Sendable {
         self.baseURL = baseURL
     }
 }
+
+extension ImageRenderer: Hashable, Equatable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(baseURL)
+        hasher.combine(imageProviders.keys.map(\.self))
+    }
+    
+    static func == (lhs: ImageRenderer, rhs: ImageRenderer) -> Bool {
+        lhs.baseURL == rhs.baseURL && lhs.imageProviders.keys == rhs.imageProviders.keys
+    }
+}

@@ -31,7 +31,7 @@ extension Renderer {
                             CheckboxView(listItem: listItem, text: rawText, handler: handler)
                         } else {
                             SwiftUI.Text("\(index + 1).")
-                                .padding(.leading, depth == 0 ? configuration.listIndent : 0)
+                                .padding(.leading, depth == 0 ? configuration.listConfiguration.listIndent : 0)
                         }
                         itemContent[index]
                     }
@@ -56,9 +56,9 @@ extension Renderer {
                         if listItem.checkbox != nil {
                             CheckboxView(listItem: listItem, text: rawText, handler: handler)
                         } else {
-                            SwiftUI.Text(configuration.unorderedListBullet)
+                            SwiftUI.Text(configuration.listConfiguration.unorderedListBullet)
                                 .font(.title2)
-                                .padding(.leading, depth == 0 ? configuration.listIndent : 0)
+                                .padding(.leading, depth == 0 ? configuration.listConfiguration.listIndent : 0)
                         }
                         itemContent[index]
                     }
