@@ -33,29 +33,3 @@ public struct CodeHighlighterTheme: Equatable, Sendable {
         self.darkModeThemeName = darkModeThemeName
     }
 }
-
-struct CodeHighlighterThemeKey: EnvironmentKey {
-    static let defaultValue: CodeHighlighterTheme = CodeHighlighterTheme(
-        lightModeThemeName: "xcode", darkModeThemeName: "dark"
-    )
-}
-
-extension EnvironmentValues {
-    var codeHighlighterTheme: CodeHighlighterTheme {
-        get { self[CodeHighlighterThemeKey.self] }
-        set { self[CodeHighlighterThemeKey.self] = newValue }
-    }
-}
-
-extension View {
-    /// Sets the theme of the code highlighter.
-    ///
-    /// For more information of available themes, see ``CodeHighlighterTheme``.
-    ///
-    /// - Parameter theme: The theme for highlighter.
-    ///
-    /// - note: Code highlighting is not available on watchOS.
-    public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
-        environment(\.codeHighlighterTheme, theme)
-    }
-}

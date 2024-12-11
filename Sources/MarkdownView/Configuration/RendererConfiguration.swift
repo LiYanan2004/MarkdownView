@@ -1,5 +1,5 @@
 //
-//  MarkdownView.RendererConfiguration.swift
+//  RendererConfiguration.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2024/12/11.

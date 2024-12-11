@@ -98,21 +98,3 @@ extension EnvironmentValues {
         set { self[MarkdownRenderingThreadKey.self] = newValue }
     }
 }
-
-// MARK: - Markdown Rendering Mode
-
-extension View {
-    /// MarkdownView rendering mode.
-    ///
-    /// - Parameter renderingMode: Markdown rendering mode.
-    public func markdownRenderingMode(_ renderingMode: MarkdownRenderingMode) -> some View {
-        environment(\.markdownRenderingMode, renderingMode)
-    }
-    
-    /// The thread to render content.
-    ///
-    /// - Parameter thread: The thread for rendering markdown content on.
-    public func markdownRenderingThread(_ thread: MarkdownRenderingThread) -> some View {
-        environment(\.markdownRenderingThread, thread)
-    }
-}

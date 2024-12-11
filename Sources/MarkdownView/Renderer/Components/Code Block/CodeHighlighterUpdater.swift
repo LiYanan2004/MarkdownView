@@ -6,7 +6,7 @@ import SwiftUI
 /// A responder that update the theme of highlightr when environment value changes.
 struct CodeHighlighterUpdater: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.codeHighlighterTheme) private var theme: CodeHighlighterTheme
+    @Environment(\.markdownRendererConfiguration) private var configuration
     
     @State private var highlightrUpdateTaskCache: Task<Void, Error>?
     
@@ -16,13 +16,13 @@ struct CodeHighlighterUpdater: ViewModifier {
             .onChange(of: colorScheme) { colorScheme in
                 highlightrUpdateTaskCache?.cancel()
                 highlightrUpdateTaskCache = Task {
-                    let theme = colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
+                    let theme = colorScheme == .dark ? configuration.codeBlockTheme.darkModeThemeName : configuration.codeBlockTheme.lightModeThemeName
                     let highlighr = await Highlightr.shared.value
                     try Task.checkCancellation()
                     highlighr?.setTheme(to: theme)
                 }
             }
-            .onChange(of: theme) { newTheme in
+            .onChange(of: configuration.codeBlockTheme) { newTheme in
                 highlightrUpdateTaskCache?.cancel()
                 highlightrUpdateTaskCache = Task {
                     let theme = colorScheme == .dark ? newTheme.darkModeThemeName : newTheme.lightModeThemeName

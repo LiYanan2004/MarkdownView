@@ -1,36 +1,11 @@
+//
+//  AssetImageDisplayable.swift
+//  MarkdownView
+//
+//  Created by LiYanan2004 on 2024/12/11.
+//
+
 import SwiftUI
-
-public protocol ImageDisplayable {
-    associatedtype ImageView: View
-    
-    /// Make the Image View.
-    @ViewBuilder func makeImage(url: URL, alt: String?) -> ImageView
-}
-
-// MARK: - Built-in providers
-
-/// Load Network Images.
-struct NetworkImageDisplayable: ImageDisplayable {
-    func makeImage(url: URL, alt: String?) -> some View {
-        NetworkImage(url: url, alt: alt)
-    }
-}
-
-/// Load Images from relative path urls.
-struct RelativePathImageDisplayable: ImageDisplayable {
-    var baseURL: URL
-    
-    func makeImage(url: URL, alt: String?) -> some View {
-        let completeURL = baseURL.appendingPathComponent(url.absoluteString)
-        NetworkImage(url: completeURL, alt: alt)
-    }
-}
-
-extension ImageDisplayable where Self == RelativePathImageDisplayable {
-    static func relativePathImage(baseURL: URL) -> RelativePathImageDisplayable {
-        RelativePathImageDisplayable(baseURL: baseURL)
-    }
-}
 
 /// Load images from your Assets Catalog.
 struct AssetImageDisplayable: ImageDisplayable {

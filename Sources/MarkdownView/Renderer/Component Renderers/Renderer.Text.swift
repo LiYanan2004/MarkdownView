@@ -2,28 +2,12 @@ import Markdown
 import SwiftUI
 
 extension Renderer {
-    mutating func visitEmphasis(_ emphasis: Markdown.Emphasis) -> Result {
-        var text = [SwiftUI.Text]()
-        for child in emphasis.children {
-            text.append(visit(child).text.italic())
-        }
-        return Result(text)
+    mutating func visitText(_ text: Markdown.Text) -> Result {
+        Result(SwiftUI.Text(text.plainText))
     }
     
-    mutating func visitStrong(_ strong: Strong) -> Result {
-        var text = [SwiftUI.Text]()
-        for child in strong.children {
-            text.append(visit(child).text.bold())
-        }
-        return Result(text)
-    }
-    
-    mutating func visitStrikethrough(_ strikethrough: Strikethrough) -> Result {
-        var text = [SwiftUI.Text]()
-        for child in strikethrough.children {
-            text.append(visit(child).text.strikethrough())
-        }
-        return Result(text)
+    mutating func visitParagraph(_ paragraph: Paragraph) -> Result {
+        Result(contents(of: paragraph))
     }
     
     mutating func visitHeading(_ heading: Heading) -> Result {
@@ -66,5 +50,51 @@ extension Renderer {
         return Result(
             text.id(id).padding(.top).foregroundStyle(foregroundStyle).accessibilityAddTraits(.isHeader)
         )
+    }
+    
+    mutating func visitEmphasis(_ emphasis: Markdown.Emphasis) -> Result {
+        var text = [SwiftUI.Text]()
+        for child in emphasis.children {
+            text.append(visit(child).text.italic())
+        }
+        return Result(text)
+    }
+    
+    mutating func visitStrong(_ strong: Strong) -> Result {
+        var text = [SwiftUI.Text]()
+        for child in strong.children {
+            text.append(visit(child).text.bold())
+        }
+        return Result(text)
+    }
+    
+    mutating func visitStrikethrough(_ strikethrough: Strikethrough) -> Result {
+        var text = [SwiftUI.Text]()
+        for child in strikethrough.children {
+            text.append(visit(child).text.strikethrough())
+        }
+        return Result(text)
+    }
+    
+    mutating func visitLink(_ link: Markdown.Link) -> Result {
+        var contents = [Result]()
+        var isText = true
+        for child in link.children {
+            let content = visit(child)
+            contents.append(content)
+            if content.type == .view {
+                isText = false
+            }
+        }
+        if isText {
+            var attributer = LinkAttributer(
+                tint: configuration.inlineCodeTintColor,
+                font: configuration.fontGroup.body
+            )
+            let link = attributer.visit(link)
+            return Result(SwiftUI.Text(link))
+        } else {
+            return Result(contents)
+        }
     }
 }
