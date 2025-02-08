@@ -43,7 +43,6 @@ public struct MarkdownView: View {
         }
         .sizeOfView($viewSize)
         .containerSize(viewSize)
-        .modifier(CodeHighlighterUpdater())
         .font(configuration.fontGroup.body)
         .task(id: text) {
             viewProvider.updateMarkdownView(markdown: text)

@@ -6,8 +6,6 @@ struct Renderer: @preconcurrency MarkupVisitor {
     
     var text: String
     var configuration: MarkdownView.RendererConfiguration
-    // Handle text changes when toggle checkmarks.
-    var interactiveEditHandler: (String) -> Void
     
     var blockDirectiveRenderer: BlockDirectiveRenderer
     var imageRenderer: ImageRenderer

@@ -31,7 +31,6 @@ class MarkdownViewProvider: ObservableObject {
         var renderer = Renderer(
             text: markdown,
             configuration: configuration,
-            interactiveEditHandler: { text in },
             blockDirectiveRenderer: configuration.blockDirectiveRenderer,
             imageRenderer: configuration.imageRenderer
         )

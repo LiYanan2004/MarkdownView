@@ -20,7 +20,6 @@ extension Renderer {
             let listItems = orderedList.children.map { $0 as! ListItem }
             let itemContent = listItems.map { visit($0).content }
             let depth = orderedList.listDepth
-            let handler = interactiveEditHandler
             let rawText = text
             let configuration = configuration
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
@@ -28,7 +27,7 @@ extension Renderer {
                     let listItem = listItems[index]
                     HStack(alignment: .firstTextBaseline) {
                         if listItem.checkbox != nil {
-                            CheckboxView(listItem: listItem, text: rawText, handler: handler)
+                            CheckboxView(listItem: listItem, text: rawText)
                         } else {
                             SwiftUI.Text("\(index + 1).")
                                 .padding(.leading, depth == 0 ? configuration.listConfiguration.listIndent : 0)
@@ -46,7 +45,6 @@ extension Renderer {
             let listItems = unorderedList.children.map { $0 as! ListItem }
             let itemContent = listItems.map { visit($0).content }
             let depth = unorderedList.listDepth
-            let handler = interactiveEditHandler
             let rawText = text
             let configuration = configuration
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
@@ -54,7 +52,7 @@ extension Renderer {
                     let listItem = listItems[index]
                     HStack(alignment: .firstTextBaseline) {
                         if listItem.checkbox != nil {
-                            CheckboxView(listItem: listItem, text: rawText, handler: handler)
+                            CheckboxView(listItem: listItem, text: rawText)
                         } else {
                             SwiftUI.Text(configuration.listConfiguration.unorderedListBullet)
                                 .font(.title2)
@@ -68,18 +66,9 @@ extension Renderer {
     }
 }
 
-struct CheckBoxRewriter: MarkupRewriter {
-    func visitListItem(_ listItem: ListItem) -> Markup? {
-        var listItem = listItem
-        listItem.checkbox = listItem.checkbox == .checked ? .unchecked : .checked
-        return listItem
-    }
-}
-
 struct CheckboxView: View {
     var listItem: ListItem
     var text: String
-    var handler: (String) -> Void
     
     var body: some View {
         if let checkbox = listItem.checkbox {
@@ -87,27 +76,10 @@ struct CheckboxView: View {
             case .checked:
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.accentColor)
-                    #if !os(tvOS)
-                    .onTapGesture(perform: toggleStatus)
-                    #endif
             case .unchecked:
                 Image(systemName: "circle")
                     .foregroundStyle(.secondary)
-                    #if !os(tvOS)
-                    .onTapGesture(perform: toggleStatus)
-                    #endif
             }
         }
-    }
-    
-    func toggleStatus() {
-        guard let sourceRange = listItem.range else { return }
-        let rewriter = CheckBoxRewriter()
-        let newNode = rewriter.visitListItem(listItem) as! ListItem
-        let newMarkdownText = newNode.format().trimmingCharacters(in: .newlines)
-        
-        var separatedText = text.split(separator: "\n", omittingEmptySubsequences: false)
-        separatedText[sourceRange.lowerBound.line - 1] = Substring(stringLiteral: newMarkdownText)
-        handler(separatedText.joined(separator: "\n"))
     }
 }
