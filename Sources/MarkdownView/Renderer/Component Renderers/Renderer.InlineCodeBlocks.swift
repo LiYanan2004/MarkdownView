@@ -3,7 +3,7 @@ import SwiftUI
 
 // MARK: - Inline Code Block
 
-extension Renderer {
+extension MarkdownViewRenderer {
     mutating func visitInlineCode(_ inlineCode: InlineCode) -> Result {
         var attributedString = AttributedString(stringLiteral: inlineCode.code)
         attributedString.foregroundColor = configuration.inlineCodeTintColor

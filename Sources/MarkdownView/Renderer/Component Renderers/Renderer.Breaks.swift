@@ -1,7 +1,7 @@
 import SwiftUI
 import Markdown
 
-extension Renderer {
+extension MarkdownViewRenderer {
     func visitSoftBreak(_ softBreak: SoftBreak) -> Result {
         Result(SwiftUI.Text(" "))
     }

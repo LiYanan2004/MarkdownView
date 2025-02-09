@@ -1,3 +1,10 @@
+//
+//  Markdown+Sendable.swift
+//  MarkdownView
+//
+//  Created by Yanan Li on 2025/2/9.
+//
+
 import Markdown
 
 // TODO: Remove these when swift-markdown adapted for swift 6.0

@@ -5,18 +5,15 @@ import Markdown
 /// A TOC Menu that shows all headings.
 ///
 /// Extracts the TOC from text and scroll to selected heading.
+@available(iOS, unavailable)
+@available(macOS, unavailable)
+@available(visionOS, unavailable)
+@available(watchOS, unavailable)
+@available(macCatalyst, unavailable)
 public struct TOCMenu<Label: View>: View {
     private var animation = false
     @ViewBuilder private var label: () -> Label
-    
-    /// Stored markdown text.
-    ///
-    /// The value is only available after `MarkdownView` has been initialized.
-    ///
-    /// - note: If you still want to show TOC Menu, you should manually set `markdown` when you initiate a TOCMenu.
-    @StateObject private var textStorage = MarkdownTextStorage.default
-    private var proxyRef = ScrollProxyRef.shared
-    
+
     /// Initiate a TOC Menu.
     /// - Parameters:
     ///   - markdown: Markdown text, this is needed when MarkdownView hasn't appear.
@@ -25,9 +22,9 @@ public struct TOCMenu<Label: View>: View {
         self.animation = animated
         self.label = { SwiftUI.Label("TOC", systemImage: "filemenu.and.selection") }
         if let markdown {
-            Task { @MainActor in
-                MarkdownTextStorage.default.text = markdown
-            }
+//            Task { @MainActor in
+//                MarkdownTextStorage.default.text = markdown
+//            }
         }
     }
     
@@ -40,33 +37,34 @@ public struct TOCMenu<Label: View>: View {
         self.animation = animated
         self.label = label
         if let markdown {
-            Task { @MainActor in
-                MarkdownTextStorage.default.text = markdown
-            }
+//            Task { @MainActor in
+//                MarkdownTextStorage.default.text = markdown
+//            }
         }
     }
     
     public var body: some View {
-        Menu {
-            if let text = textStorage.text {
-                var extractor = TOCExtractor()
-                let sections = extractor.extract(from: text)
-                ForEach(sections, id: \.self) { section in
-                    Button {
-                        let id = section.range?.description ?? "Unknown Range"
-                        withAnimation(self.animation ? .default : nil) {
-                            proxyRef.proxy?.scrollTo(id, anchor: UnitPoint(x: 0, y: 0.15))
-                        }
-                    } label: {
-                        Text(section.markdown)
-                    }
-                    Divider()
-                }
-                .buttonStyle(.borderless)
-            }
-        } label: {
-            label()
-        }
+        fatalError("Unimplemented")
+//        Menu {
+//            if let text = textStorage.text {
+//                var extractor = TOCExtractor()
+//                let sections = extractor.extract(from: text)
+//                ForEach(sections, id: \.self) { section in
+//                    Button {
+//                        let id = section.range?.description ?? "Unknown Range"
+//                        withAnimation(self.animation ? .default : nil) {
+//                            proxyRef.proxy?.scrollTo(id, anchor: UnitPoint(x: 0, y: 0.15))
+//                        }
+//                    } label: {
+//                        Text(section.markdown)
+//                    }
+//                    Divider()
+//                }
+//                .buttonStyle(.borderless)
+//            }
+//        } label: {
+//            label()
+//        }
     }
 }
 

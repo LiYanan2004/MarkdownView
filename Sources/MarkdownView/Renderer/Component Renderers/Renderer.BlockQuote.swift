@@ -1,5 +1,5 @@
 //
-//  Renderer.BlockQuote.swift
+//  MarkdownViewRenderer.BlockQuote.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2024/12/11.
@@ -8,7 +8,7 @@
 import SwiftUI
 import Markdown
 
-extension Renderer {
+extension MarkdownViewRenderer {
     mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Result {
         Result {
             let contents = contents(of: blockQuote)

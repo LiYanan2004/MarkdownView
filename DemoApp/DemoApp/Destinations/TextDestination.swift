@@ -10,7 +10,7 @@ import MarkdownView
 
 struct TextDestination: View {
     var body: some View {
-        MarkdownView(text: """
+        MarkdownView("""
         # MarkdownView
         ## Heading 2
         ### Heading 3

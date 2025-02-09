@@ -1,7 +1,7 @@
 import Markdown
 import SwiftUI
 
-extension Renderer {
+extension MarkdownViewRenderer {
     mutating func visitText(_ text: Markdown.Text) -> Result {
         Result(SwiftUI.Text(text.plainText))
     }

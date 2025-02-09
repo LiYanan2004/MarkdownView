@@ -35,7 +35,7 @@ struct BlockDirectiveDestination: View {
             Divider()
             
             Section {
-                MarkdownView(text: text)
+                MarkdownView(text)
                     .blockDirectiveProvider(.note, for: "note")
             } header: {
                 Text("MarkdownView")

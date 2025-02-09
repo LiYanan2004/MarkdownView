@@ -32,7 +32,7 @@ struct InteractDestination: View {
             Divider()
             
             Section {
-                MarkdownView(text: $text)
+                MarkdownView($text)
             } header: {
                 Text("MarkdownView")
                     .font(.headline)

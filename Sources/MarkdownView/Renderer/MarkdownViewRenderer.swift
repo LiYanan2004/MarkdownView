@@ -1,17 +1,14 @@
 import SwiftUI
 import Markdown
 
-struct Renderer: @preconcurrency MarkupVisitor {
+struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     typealias Result = ViewContent
     
-    var text: String
     var configuration: MarkdownView.RendererConfiguration
     
-    var blockDirectiveRenderer: BlockDirectiveRenderer
-    var imageRenderer: ImageRenderer
-    
-    mutating func representedView(options: ParseOptions) -> AnyView {
-        visit(Document(parsing: text, options: options)).content.eraseToAnyView()
+    func representedView(for document: Document) -> some View {
+        var renderer = self
+        return renderer.visit(document).content
     }
     
     mutating func visitDocument(_ document: Document) -> Result {

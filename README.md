@@ -38,7 +38,7 @@ You can use MarkdownView in the following platforms:
 You can create a `Markdown` view by providing a Markdown-formatted string.
 
 ```swift
-MarkdownView(text: "This is the Apple's **newly published** [swift-markdown](https://github.com/apple/swift-markdown)")
+MarkdownView("This is the Apple's **newly published** [swift-markdown](https://github.com/apple/swift-markdown)")
 ```
 
 ![](Images/bold_and_links.jpeg)
@@ -54,7 +54,7 @@ If your Markdown have check boxes, you can provide a `Binding` string.
 ```
 
 ```swift
-MarkdownView(text: $text)
+MarkdownView($text)
 ```   
 ![](Images/checkbox.jpeg)
 
@@ -67,7 +67,7 @@ MarkdownView(text: $text)
 You can set custom fonts or change text styles.
 
 ```swift
-MarkdownView(text: "# H1 title")
+MarkdownView("# H1 title")
     .font(.largeTitle.weight(.black), for: .h1)
 ```
 
@@ -80,7 +80,7 @@ Default tint color for code blocks and block quotes is the accent color.
 You can customize them explicitly.
 
 ```swift
-MarkdownView(text: "> Quote and `inline code`")
+MarkdownView("> Quote and `inline code`")
     .tint(.pink, for: .inlineCodeBlock)
 ```
 ![](/Images/tint.jpeg)
@@ -109,7 +109,7 @@ struct CustomImageProvider: ImageDisplayable {
 Then apply your provider to `MarkdownView`.
 
 ```swift
-MarkdownView(text: markdownText)
+MarkdownView(markdownText)
     .imageProvider(CustomImageProvider(), forURLScheme: "my-image")
 ```
 

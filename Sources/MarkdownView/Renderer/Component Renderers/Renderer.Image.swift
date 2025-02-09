@@ -1,5 +1,5 @@
 //
-//  Renderer.Image.swift
+//  MarkdownViewRenderer.Image.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2024/12/11.
@@ -8,7 +8,7 @@
 import SwiftUI
 import Markdown
 
-extension Renderer {
+extension MarkdownViewRenderer {
     mutating func visitImage(_ image: Markdown.Image) -> Result {
         guard let source = URL(string: image.source ?? "") else {
             return Result(SwiftUI.Text(image.plainText))
@@ -28,7 +28,7 @@ extension Renderer {
         
         var provider: (any ImageDisplayable)?
         if let scheme = source.scheme {
-            imageRenderer.imageProviders.forEach { key, value in
+            configuration.imageRenderer.imageProviders.forEach { key, value in
                 if scheme.localizedLowercase == key.localizedLowercase {
                     provider = value
                     return
@@ -36,6 +36,6 @@ extension Renderer {
             }
         }
         
-        return Result(imageRenderer.loadImage(provider, url: source, alt: alt))
+        return Result(configuration.imageRenderer.loadImage(provider, url: source, alt: alt))
     }
 }

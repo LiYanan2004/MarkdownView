@@ -12,8 +12,12 @@ struct RelativePathImageDisplayable: ImageDisplayable {
     var baseURL: URL
     
     func makeImage(url: URL, alt: String?) -> some View {
-        let completeURL = baseURL.appendingPathComponent(url.absoluteString)
-        NetworkImage(url: completeURL, alt: alt)
+        let resolvedPath = URL(
+            string: url.absoluteString,
+            relativeTo: baseURL
+        )?.standardized.resolvingSymlinksInPath()
+        
+        return NetworkImage(url: resolvedPath ?? url, alt: alt)
     }
 }
 

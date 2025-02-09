@@ -1,7 +1,7 @@
 import SwiftUI
 import Markdown
 
-extension Renderer {
+extension MarkdownViewRenderer {
     @MainActor
     mutating func visitTable(_ table: Markdown.Table) -> Result {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {

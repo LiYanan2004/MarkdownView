@@ -10,7 +10,7 @@ import MarkdownView
 
 struct OverviewDestination: View {
     var body: some View {
-        MarkdownView(text: """
+        MarkdownView("""
         # MarkdownView
         
         Welcome to MarkdownView Demo App.

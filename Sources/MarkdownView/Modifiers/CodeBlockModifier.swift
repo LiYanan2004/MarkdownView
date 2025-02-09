@@ -1,4 +1,25 @@
+//
+//  CodeBlockModifier.swift
+//  MarkdownView
+//
+//  Created by Yanan Li on 2025/2/9.
+//
+
 import SwiftUI
+
+extension View {
+    /// Sets the theme of the code highlighter.
+    ///
+    /// For more information of available themes, see ``CodeHighlighterTheme``.
+    ///
+    /// - Parameter theme: The theme for highlighter.
+    ///
+    /// - note: Code highlighting is not available on watchOS.
+    public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
+        environment(\.markdownRendererConfiguration.codeBlockTheme, theme)
+    }
+}
+
 
 /// The theme of code highlighter.
 ///

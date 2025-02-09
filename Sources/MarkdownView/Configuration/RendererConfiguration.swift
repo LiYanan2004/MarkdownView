@@ -9,9 +9,13 @@ import Foundation
 import SwiftUI
 
 extension MarkdownView {
-    struct RendererConfiguration: Equatable {
+    struct RendererConfiguration: Equatable, AllowingModifyThroughKeyPath {
         var role: MarkdownView.Role = .normal
-        var renderingMode: MarkdownRenderingMode = .immediate
+        var preferredBaseURL: URL? {
+            willSet {
+                imageRenderer.updateBaseURL(newValue)
+            }
+        }
         
         // Spacing
         var lineSpacing: CGFloat? = nil
@@ -40,5 +44,7 @@ extension MarkdownView {
         // Renderer
         var blockDirectiveRenderer: BlockDirectiveRenderer = .init()
         var imageRenderer: ImageRenderer = .init()
+        
+        
     }
 }

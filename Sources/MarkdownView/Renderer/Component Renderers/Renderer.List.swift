@@ -1,7 +1,7 @@
 import Markdown
 import SwiftUI
 
-extension Renderer {
+extension MarkdownViewRenderer {
     // List row which contains inner items.
     mutating func visitListItem(_ listItem: ListItem) -> Result {
         Result {
@@ -20,14 +20,13 @@ extension Renderer {
             let listItems = orderedList.children.map { $0 as! ListItem }
             let itemContent = listItems.map { visit($0).content }
             let depth = orderedList.listDepth
-            let rawText = text
             let configuration = configuration
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(listItems.indices, id: \.self) { index in
                     let listItem = listItems[index]
                     HStack(alignment: .firstTextBaseline) {
                         if listItem.checkbox != nil {
-                            CheckboxView(listItem: listItem, text: rawText)
+                            CheckboxView(listItem: listItem)
                         } else {
                             SwiftUI.Text("\(index + 1).")
                                 .padding(.leading, depth == 0 ? configuration.listConfiguration.listIndent : 0)
@@ -45,14 +44,13 @@ extension Renderer {
             let listItems = unorderedList.children.map { $0 as! ListItem }
             let itemContent = listItems.map { visit($0).content }
             let depth = unorderedList.listDepth
-            let rawText = text
             let configuration = configuration
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(itemContent.indices, id: \.self) { index in
                     let listItem = listItems[index]
                     HStack(alignment: .firstTextBaseline) {
                         if listItem.checkbox != nil {
-                            CheckboxView(listItem: listItem, text: rawText)
+                            CheckboxView(listItem: listItem)
                         } else {
                             SwiftUI.Text(configuration.listConfiguration.unorderedListBullet)
                                 .font(.title2)
@@ -68,7 +66,6 @@ extension Renderer {
 
 struct CheckboxView: View {
     var listItem: ListItem
-    var text: String
     
     var body: some View {
         if let checkbox = listItem.checkbox {
