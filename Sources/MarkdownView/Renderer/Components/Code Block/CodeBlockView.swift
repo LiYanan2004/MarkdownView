@@ -8,17 +8,39 @@ import SwiftUI
 struct HighlightedCodeBlock: View {
     var language: String?
     var code: String
-    var theme: CodeHighlighterTheme
     
-    @Environment(\.markdownRendererConfiguration.fontGroup) private var font
-    @Environment(\.colorScheme) private var colorScheme
-    @State private var attributedCode: AttributedString?
     @State private var showCopyButton = false
+    @State private var attributedCode: AttributedString?
     
-    private var id: String {
-        "\(colorScheme) mode" + (language ?? "Plain Text") + code
+    @Environment(\.markdownRendererConfiguration) private var configuration
+    private var font: Font {
+        configuration.fontGroup.codeBlock
     }
-
+    
+    @Environment(\.colorScheme) private var colorScheme
+    private var codeBlockTheme: CodeHighlighterTheme {
+        configuration.codeBlockTheme
+    }
+    
+    struct CodeBlockStorage: Equatable, Sendable {
+        var rawCode: String
+        var language: String?
+        var theme: CodeHighlighterTheme
+        var colorScheme: ColorScheme
+        
+        var currentThemeName: String {
+            colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
+        }
+    }
+    private var codeBlockStorage: CodeBlockStorage {
+        CodeBlockStorage(
+            rawCode: code,
+            language: language,
+            theme: codeBlockTheme,
+            colorScheme: colorScheme
+        )
+    }
+    
     var body: some View {
         Group {
             if let attributedCode {
@@ -27,9 +49,15 @@ struct HighlightedCodeBlock: View {
                 SwiftUI.Text(code)
             }
         }
-        .task(id: id, highlight)
+        .task(id: codeBlockStorage) {
+            highlight(
+                code: code,
+                language: language,
+                configuration: codeBlockStorage
+            )
+        }
         .lineSpacing(5)
-        .font(font.codeBlock)
+        .font(font)
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
@@ -60,17 +88,25 @@ struct HighlightedCodeBlock: View {
         }
     }
     
-    private func highlight() async {
-        guard let highlighter = await Highlightr.shared.value else { return }
-        let specifiedLanguage = self.language?.lowercased() ?? ""
+    private func highlight(
+        code: String,
+        language: String?,
+        configuration: CodeBlockStorage
+    ) {
+        let highlightr = Highlightr()!
+        highlightr.setTheme(to: configuration.currentThemeName)
         
-        let language = highlighter.supportedLanguages()
+        let specifiedLanguage = language?.lowercased() ?? ""
+        let language = highlightr.supportedLanguages()
             .first(where: { $0.localizedCaseInsensitiveCompare(specifiedLanguage) == .orderedSame })
-        if let highlightedCode = highlighter.highlight(code, as: language) {
-            let code = NSMutableAttributedString(attributedString: highlightedCode)
-            code.removeAttribute(.font, range: NSMakeRange(0, code.length))
-            attributedCode = AttributedString(code)
-        }
+        
+        guard let highlightedCode = highlightr.highlight(code, as: language) else { return }
+        let code = NSMutableAttributedString(
+            attributedString: highlightedCode
+        )
+        code.removeAttribute(.font, range: NSMakeRange(0, code.length))
+        
+        attributedCode = AttributedString(code)
     }
 }
 #endif

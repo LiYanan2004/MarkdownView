@@ -1,5 +1,5 @@
 //
-//  CodeBlockModifier.swift
+//  CodeBlock.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2025/2/9.

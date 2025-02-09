@@ -13,3 +13,5 @@ extension Markdown.Table.Row: @retroactive @unchecked Sendable { }
 extension Markdown.OrderedList: @retroactive @unchecked Sendable { }
 extension Markdown.UnorderedList: @retroactive @unchecked Sendable { }
 extension Markdown.ParseOptions: @retroactive @unchecked Sendable { }
+extension Markdown.SourceRange: @retroactive @unchecked Sendable { }
+extension Markdown.Heading: @retroactive @unchecked Sendable { }

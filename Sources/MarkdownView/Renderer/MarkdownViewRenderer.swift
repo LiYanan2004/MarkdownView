@@ -1,10 +1,16 @@
 import SwiftUI
 import Markdown
+#if canImport(Highlightr)
+import Highlightr
+#endif
 
 struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     typealias Result = ViewContent
     
     var configuration: MarkdownView.RendererConfiguration
+    #if canImport(Highlightr)
+    var highlightr: Highlightr?
+    #endif
     
     func representedView(for document: Document) -> some View {
         var renderer = self
