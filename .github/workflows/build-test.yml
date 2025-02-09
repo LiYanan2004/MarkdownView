@@ -32,7 +32,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -quiet
 
   build-macos:
