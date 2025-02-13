@@ -12,10 +12,10 @@ import Highlightr
 
 struct CodeBlockTextRenderer: MarkdownNode2TextRenderer {
     func body(context: Context) -> Text {
-        BreakTextRenderer(breakType: .hard)
-            .body(context: context)
-        BreakTextRenderer(breakType: .hard)
-            .body(context: context)
+        if context.node.index != 0 {
+            BreakTextRenderer(breakType: .hard)
+                .body(context: context)
+        }
         
         let language = if case let .codeLanguage(language) = context.node.content! {
             language
@@ -47,9 +47,6 @@ struct CodeBlockTextRenderer: MarkdownNode2TextRenderer {
             Text(processedCode)
                 .font(.callout.monospaced())
         }
-        
-        BreakTextRenderer(breakType: .hard)
-            .body(context: context)
     }
 }
 

@@ -18,26 +18,38 @@ struct MarkdownListConfiguration: Hashable, @unchecked Sendable {
 
 public protocol OrderedListMarkerProtocol: Hashable {
     /// Returns a marker for a specific index of ordered list item. Index starting from 0.
-    func marker(at index: Int) -> String
+    func marker(at index: Int, listDepth: Int) -> String
+    
+    var monospaced: Bool { get }
+}
+
+extension OrderedListMarkerProtocol {
+    public var monospaced: Bool {
+        true
+    }
 }
 
 struct AnyOrderedListMarkerProtocol: OrderedListMarkerProtocol {
     private var _marker: AnyHashable
+    var monospaced: Bool {
+        (_marker as! (any OrderedListMarkerProtocol)).monospaced
+    }
     
-    init(_ marker: some OrderedListMarkerProtocol) {
+    init<T: OrderedListMarkerProtocol>(_ marker: T) {
         self._marker = AnyHashable(marker)
     }
     
-    public func marker(at index: Int) -> String {
-        (_marker as! (any OrderedListMarkerProtocol)).marker(at: index)
+    public func marker(at index: Int, listDepth: Int) -> String {
+        (_marker as! (any OrderedListMarkerProtocol)).marker(at: index, listDepth: listDepth)
     }
 }
 
-
 public struct OrderedListIncreasingDigitsMarker: OrderedListMarkerProtocol {
-    public func marker(at index: Int) -> String {
-        String(index + 1)
+    public func marker(at index: Int, listDepth: Int) -> String {
+        String(index + 1) + "."
     }
+    
+    public var monospaced: Bool { false }
 }
 
 extension OrderedListMarkerProtocol where Self == OrderedListIncreasingDigitsMarker {
@@ -45,7 +57,7 @@ extension OrderedListMarkerProtocol where Self == OrderedListIncreasingDigitsMar
 }
 
 public struct OrderedListIncreasingLettersMarker: OrderedListMarkerProtocol {
-    public func marker(at index: Int) -> String {
+    public func marker(at index: Int, listDepth: Int) -> String {
         let base = 26
         var index = index
         var result = ""
@@ -63,8 +75,10 @@ public struct OrderedListIncreasingLettersMarker: OrderedListMarkerProtocol {
             result.append(Character(secondLetter))
         }
         
-        return result
+        return result + "."
     }
+    
+    public var monospaced: Bool { false }
 }
 
 extension OrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMarker {
@@ -75,23 +89,34 @@ extension OrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMa
 
 public protocol UnorderedListMarkerProtocol: Hashable {
     /// Returns a marker for a specific indentation level of unordered list item. indentationLevel starting from 0.
-    func marker(at indentationLevel: Int) -> String
+    func marker(listDepth: Int) -> String
+    
+    var monospaced: Bool { get }
+}
+
+extension UnorderedListMarkerProtocol {
+    public var monospaced: Bool {
+        true
+    }
 }
 
 struct AnyUnorderedListMarkerProtocol: UnorderedListMarkerProtocol {
     private var _marker: AnyHashable
+    var monospaced: Bool {
+        (_marker as! (any UnorderedListMarkerProtocol)).monospaced
+    }
     
-    init(_ marker: some UnorderedListMarkerProtocol) {
+    init<T: UnorderedListMarkerProtocol>(_ marker: T) {
         self._marker = AnyHashable(marker)
     }
     
-    public func marker(at indentationLevel: Int) -> String {
-        (_marker as! (any UnorderedListMarkerProtocol)).marker(at: indentationLevel)
+    public func marker(listDepth: Int) -> String {
+        (_marker as! (any UnorderedListMarkerProtocol)).marker(listDepth: listDepth)
     }
 }
 
 public struct UnorderedListDashMarker: UnorderedListMarkerProtocol {
-    public func marker(at indentationLevel: Int) -> String {
+    public func marker(listDepth: Int) -> String {
         "-"
     }
 }
@@ -101,7 +126,7 @@ extension UnorderedListMarkerProtocol where Self == UnorderedListDashMarker {
 }
 
 public struct UnorderedListBulletMarker: UnorderedListMarkerProtocol {
-    public func marker(at indentationLevel: Int) -> String {
+    public func marker(listDepth: Int) -> String {
         "•"
     }
 }

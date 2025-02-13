@@ -15,7 +15,13 @@ struct MarkdownTextRenderer: MarkupVisitor {
     }
     
     mutating func defaultVisit(_ markup: any Markdown.Markup) -> MarkdownTextNode {
-        MarkdownTextNode(kind: .placeholder(UUID()), children: [])
+        MarkdownTextNode(
+            kind: .unknown,
+            children: markup.children.enumerated().map {
+                visit($0.element)
+                    .with(\.index, $0.offset)
+            }
+        )
     }
     
     mutating func visitDocument(_ document: Document) -> MarkdownTextNode {

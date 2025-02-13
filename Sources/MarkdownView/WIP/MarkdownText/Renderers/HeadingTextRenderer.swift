@@ -9,9 +9,6 @@ import SwiftUI
 
 struct HeadingTextRenderer: MarkdownNode2TextRenderer {
     func body(context: Context) -> Text {
-        BreakTextRenderer(breakType: .hard)
-            .body(context: context)
-        
         let level = if case let .heading(level) = context.node.content {
             level
         } else {
@@ -50,5 +47,8 @@ struct HeadingTextRenderer: MarkdownNode2TextRenderer {
                 .reduce(Text(""), +)
                 .font(font)
         }
+        
+        BreakTextRenderer(breakType: .hard)
+            .body(context: context)
     }
 }

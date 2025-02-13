@@ -52,7 +52,7 @@ extension MarkdownViewRenderer {
                         if listItem.checkbox != nil {
                             CheckboxView(listItem: listItem)
                         } else {
-                            SwiftUI.Text(configuration.listConfiguration.unorderedListMarker.marker(at: unorderedList.listDepth))
+                            SwiftUI.Text(configuration.listConfiguration.unorderedListMarker.marker(listDepth: unorderedList.listDepth))
                                 .font(.title2)
                                 .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndent : 0)
                         }

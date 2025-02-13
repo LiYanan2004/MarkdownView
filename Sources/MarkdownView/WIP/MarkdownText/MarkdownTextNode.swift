@@ -103,20 +103,6 @@ enum MarkdownTextKind: Sendable, Equatable {
     
     case placeholder(UUID) // A placeholder to enable async resources loading, e.g. image loading
     case image(Image)
-}
-
-
-fileprivate extension Font {
-    static func heading(level: Int) -> Font {
-        @Environment(\.markdownRendererConfiguration.fontGroup) var fontGroup
-        return switch level {
-        case 1: fontGroup.h1
-        case 2: fontGroup.h2
-        case 3: fontGroup.h3
-        case 4: fontGroup.h4
-        case 5: fontGroup.h5
-        case 6: fontGroup.h6
-        default: fontGroup.body
-        }
-    }
+    
+    case unknown
 }
