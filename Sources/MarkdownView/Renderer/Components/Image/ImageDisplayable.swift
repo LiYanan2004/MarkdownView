@@ -6,10 +6,3 @@ public protocol ImageDisplayable {
     /// Make the Image View.
     @ViewBuilder func makeImage(url: URL, alt: String?) -> ImageView
 }
-
-// MARK: - Built-in providers
-
-
-
-
-

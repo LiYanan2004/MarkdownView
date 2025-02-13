@@ -29,7 +29,7 @@ extension MarkdownViewRenderer {
                             CheckboxView(listItem: listItem)
                         } else {
                             SwiftUI.Text("\(index + 1).")
-                                .padding(.leading, depth == 0 ? configuration.listConfiguration.listIndent : 0)
+                                .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndent : 0)
                         }
                         itemContent[index]
                     }
@@ -52,9 +52,9 @@ extension MarkdownViewRenderer {
                         if listItem.checkbox != nil {
                             CheckboxView(listItem: listItem)
                         } else {
-                            SwiftUI.Text(configuration.listConfiguration.unorderedListBullet)
+                            SwiftUI.Text(configuration.listConfiguration.unorderedListMarker.marker(at: unorderedList.listDepth))
                                 .font(.title2)
-                                .padding(.leading, depth == 0 ? configuration.listConfiguration.listIndent : 0)
+                                .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndent : 0)
                         }
                         itemContent[index]
                     }

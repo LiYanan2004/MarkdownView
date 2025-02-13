@@ -20,16 +20,11 @@ struct ViewContent: @unchecked Sendable {
         .fixedSize(horizontal: false, vertical: true)
     }
     
-    /// Create a content descriptor.
-    /// - Parameter content: A SwiftUI Text.
     init(_ content: Text) {
         text = content
         view = AnyView(EmptyView())
         type = .text
     }
-    
-    /// Create a content descriptor.
-    /// - Parameter content: Any view that comforms to View protocol.
     
     init(_ content: some View) {
         text = Text("")

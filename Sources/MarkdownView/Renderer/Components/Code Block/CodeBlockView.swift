@@ -17,30 +17,6 @@ struct HighlightedCodeBlock: View {
         configuration.fontGroup.codeBlock
     }
     
-    @Environment(\.colorScheme) private var colorScheme
-    private var codeBlockTheme: CodeHighlighterTheme {
-        configuration.codeBlockTheme
-    }
-    
-    struct CodeBlockStorage: Equatable, Sendable {
-        var rawCode: String
-        var language: String?
-        var theme: CodeHighlighterTheme
-        var colorScheme: ColorScheme
-        
-        var currentThemeName: String {
-            colorScheme == .dark ? theme.darkModeThemeName : theme.lightModeThemeName
-        }
-    }
-    private var codeBlockStorage: CodeBlockStorage {
-        CodeBlockStorage(
-            rawCode: code,
-            language: language,
-            theme: codeBlockTheme,
-            colorScheme: colorScheme
-        )
-    }
-    
     var body: some View {
         Group {
             if let attributedCode {
@@ -49,11 +25,11 @@ struct HighlightedCodeBlock: View {
                 SwiftUI.Text(code)
             }
         }
-        .task(id: codeBlockStorage) {
+        .task {
             highlight(
                 code: code,
                 language: language,
-                configuration: codeBlockStorage
+                configuration: configuration
             )
         }
         .lineSpacing(5)
@@ -91,10 +67,10 @@ struct HighlightedCodeBlock: View {
     private func highlight(
         code: String,
         language: String?,
-        configuration: CodeBlockStorage
+        configuration: MarkdownRenderConfiguration
     ) {
         let highlightr = Highlightr()!
-        highlightr.setTheme(to: configuration.currentThemeName)
+        highlightr.setTheme(to: configuration.currentCodeHighlightTheme)
         
         let specifiedLanguage = language?.lowercased() ?? ""
         let language = highlightr.supportedLanguages()

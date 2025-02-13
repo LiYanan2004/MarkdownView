@@ -6,7 +6,14 @@ public struct MarkdownView: View {
     private var _parsedContent: ParsedMarkdownContent
     
     @State private var viewSize = CGSize.zero
-    @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.colorScheme) private var colorScheme
+    
+    @Environment(\.markdownRendererConfiguration) private var _configuration
+    private var configuration: MarkdownRenderConfiguration {
+        _configuration
+            .with(\.colorScheme, colorScheme)
+            .with(\.preferredBaseURL, _configuration.preferredBaseURL ?? _parsedContent.raw.source)
+    }
     
     public init(_ text: String) {
         self._parsedContent = ParsedMarkdownContent(
@@ -25,9 +32,6 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        let configuration = configuration
-            .with(\.preferredBaseURL, configuration.preferredBaseURL ?? _parsedContent.raw.source)
-        
         MarkdownViewRenderer(configuration: configuration)
             .representedView(for: _parsedContent.document)
             .markdownViewLayout(role: configuration.role)

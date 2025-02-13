@@ -9,11 +9,11 @@ import Foundation
 import SwiftUI
 
 struct MarkdownRendererConfigurationKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: MarkdownView.RendererConfiguration = .init()
+    @MainActor static var defaultValue: MarkdownRenderConfiguration = .init()
 }
 
 extension EnvironmentValues {
-    var markdownRendererConfiguration: MarkdownView.RendererConfiguration {
+    var markdownRendererConfiguration: MarkdownRenderConfiguration {
         get { self[MarkdownRendererConfigurationKey.self] }
         set { self[MarkdownRendererConfigurationKey.self] = newValue }
     }

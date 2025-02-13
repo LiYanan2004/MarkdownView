@@ -7,7 +7,7 @@ import Highlightr
 struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     typealias Result = ViewContent
     
-    var configuration: MarkdownView.RendererConfiguration
+    var configuration: MarkdownRenderConfiguration
     #if canImport(Highlightr)
     var highlightr: Highlightr?
     #endif
