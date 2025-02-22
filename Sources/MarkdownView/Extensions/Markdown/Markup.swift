@@ -8,7 +8,6 @@
 import Markdown
 
 extension Markup {
-    /// Returns true if this element has sibling elements after it.
     var hasSuccessor: Bool {
         guard let childCount = parent?.childCount else { return false }
         return indexInParent < childCount - 1

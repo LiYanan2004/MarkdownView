@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+extension View {
+    func markdownViewLayout(role: MarkdownView.Role) -> some View {
+        modifier(MarkdownViewLayoutViewModifier(role: role))
+    }
+}
+
 struct MarkdownViewLayoutViewModifier: ViewModifier {
     var role: MarkdownView.Role
     
@@ -17,11 +23,5 @@ struct MarkdownViewLayoutViewModifier: ViewModifier {
                 maxHeight: role == .editor ? .infinity : nil,
                 alignment: role == .editor ? .topLeading : .center
             )
-    }
-}
-
-extension View {
-    func markdownViewLayout(role: MarkdownView.Role) -> some View {
-        modifier(MarkdownViewLayoutViewModifier(role: role))
     }
 }

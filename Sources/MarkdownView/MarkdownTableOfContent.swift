@@ -24,42 +24,45 @@ public struct MarkdownTableOfContent<Content: View>: View {
     }
 }
 
-public struct MarkdownHeading: Hashable, Sendable {
-    private var heading: Markdown.Heading
+extension MarkdownTableOfContent {
+    public struct MarkdownHeading: Hashable, Sendable {
+        private var heading: Markdown.Heading
+        
+        /// Heading level, starting from 1.
+        public var level: Int {
+            heading.level
+        }
+        /// The range of the heading in the raw Markdown.
+        public var range: SourceRange? {
+            heading.range
+        }
+        /// The content text of the heading.
+        public var plainText: String {
+            heading.plainText
+        }
+        
+        init(heading: Heading) {
+            self.heading = heading
+        }
+        
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(level)
+            hasher.combine(range)
+            hasher.combine(plainText)
+        }
+        
+        public static func == (lhs: MarkdownHeading, rhs: MarkdownHeading) -> Bool {
+            lhs.heading.isIdentical(to: rhs.heading)
+        }
+    }
     
-    /// Heading level, starting from 1.
-    public var level: Int {
-        heading.level
-    }
-    /// The range of the heading in the raw Markdown.
-    public var range: SourceRange? {
-        heading.range
-    }
-    /// The content text of the heading.
-    public var plainText: String {
-        heading.plainText
-    }
-    
-    init(heading: Heading) {
-        self.heading = heading
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(level)
-        hasher.combine(range)
-        hasher.combine(plainText)
-    }
-    
-    public static func == (lhs: MarkdownHeading, rhs: MarkdownHeading) -> Bool {
-        lhs.heading.isIdentical(to: rhs.heading)
+    struct TableOfContentVisitor: MarkupWalker {
+        private(set) var headings: [MarkdownHeading] = []
+        
+        mutating func visitHeading(_ heading: Markdown.Heading) {
+            headings.append(MarkdownHeading(heading: heading))
+            descendInto(heading)
+        }
     }
 }
 
-struct TableOfContentVisitor: MarkupWalker {
-    private(set) var headings: [MarkdownHeading] = []
-    
-    mutating func visitHeading(_ heading: Markdown.Heading) {
-        headings.append(MarkdownHeading(heading: heading))
-        descendInto(heading)
-    }
-}

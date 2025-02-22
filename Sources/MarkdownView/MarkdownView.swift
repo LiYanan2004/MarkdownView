@@ -33,10 +33,13 @@ public struct MarkdownView: View {
     
     public var body: some View {
         MarkdownViewRenderer(configuration: configuration)
-            .representedView(for: _parsedContent.document)
+            .render(_parsedContent.document)
             .markdownViewLayout(role: configuration.role)
             .sizeOfView($viewSize)
             .containerSize(viewSize)
             .font(configuration.fontGroup.body)
+            .transformEnvironment(\.markdownRendererConfiguration) { configuration in
+                configuration.colorScheme = colorScheme
+            }
     }
 }

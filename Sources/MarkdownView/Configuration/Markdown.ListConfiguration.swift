@@ -9,7 +9,7 @@ import Markdown
 import Foundation
 
 struct MarkdownListConfiguration: Hashable, @unchecked Sendable {
-    var leadingIndent: CGFloat = 12
+    var leadingIndentation: CGFloat = 12
     var unorderedListMarker = AnyUnorderedListMarkerProtocol(.bullet)
     var orderedListMarker = AnyOrderedListMarkerProtocol(.increasingDigits)
 }

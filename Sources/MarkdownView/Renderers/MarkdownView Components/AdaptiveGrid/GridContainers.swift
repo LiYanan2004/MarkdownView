@@ -64,15 +64,19 @@ extension GridRowContainer {
         }
         return container
     }
+    
     static func buildExpression(_ cell: GridCellContainer) -> GridRowContainer {
         GridRowContainer(cells: [cell])
     }
+    
     static func buildExpression(_ cells: [GridCellContainer]) -> GridRowContainer {
         GridRowContainer(cells: cells)
     }
+    
     static func buildArray(_ components: [GridRowContainer]) -> GridRowContainer {
         GridRowContainer(cells: components.flatMap { $0.cells })
     }
+    
     static func buildExpression(_ expression: some View) -> GridRowContainer {
         GridRowContainer(cells: [GridCellContainer(content: expression)])
     }

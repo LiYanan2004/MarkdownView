@@ -1,25 +1,29 @@
 //
-//  MarkdownNode2TextRenderer.swift
+//  TextFactory.swift
 //  MarkdownView
 //
-//  Created by Yanan Li on 2025/2/12.
+//  Created by Yanan Li on 2025/2/22.
 //
 
-import Foundation
 import SwiftUI
 
-protocol MarkdownNode2TextRenderer: DynamicProperty {
-    typealias Context = MarkdownNode2TextRendererContext
+struct TextFactory {
+    private(set) var text: Text
+    private(set) var hasText: Bool = false
     
-    @TextBuilder func body(context: Context) -> Text
+    init(@TextBuilder text: @escaping () -> Text) {
+        self.text = text()
+    }
+    
+    init() {
+        self.text = Text("")
+    }
+    
+    mutating func append(_ text: Text) {
+        hasText = true
+        self.text = self.text + text
+    }
 }
-
-struct MarkdownNode2TextRendererContext: Sendable {
-    var node: MarkdownTextNode
-    var renderConfiguration: MarkdownRenderConfiguration
-}
-
-// MARK: - Auxiliary
 
 @resultBuilder
 struct TextBuilder {

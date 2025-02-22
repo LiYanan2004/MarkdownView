@@ -10,7 +10,7 @@ import SwiftUI
 extension View {
     public func markdownListIndent(_ indent: CGFloat) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            configuration.listConfiguration.leadingIndent = indent
+            configuration.listConfiguration.leadingIndentation = indent
         }
     }
     
