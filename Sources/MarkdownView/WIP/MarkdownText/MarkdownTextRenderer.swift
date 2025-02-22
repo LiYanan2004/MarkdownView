@@ -7,6 +7,7 @@
 
 import Markdown
 import Foundation
+import CoreGraphics
 
 struct MarkdownTextRenderer: MarkupVisitor {
     static func walkDocument(_ document: Document) -> MarkdownTextNode {
@@ -198,6 +199,31 @@ struct MarkdownTextRenderer: MarkupVisitor {
                         .with(\.index, $0.offset)
                 },
                 content: nil
+            )
+        }
+    }
+    
+    mutating func visitImage(_ image: Image) -> MarkdownTextNode {
+        if let source = image.source, let sourceURL = URL(string: source) {
+            let task = Task.detached(priority: .background) {
+                (try await ImageLoader.load(sourceURL)) as (any Sendable)
+            }
+            return MarkdownTextNode(
+                kind: .placeholder,
+                children: [
+                    MarkdownTextNode(
+                        kind: .plainText,
+                        children: [],
+                        content: .text(image.title ?? image.plainText)
+                    )
+                ],
+                content: .task(task)
+            )
+        } else {
+            return MarkdownTextNode(
+                kind: .plainText,
+                children: [],
+                content: .text(image.plainText)
             )
         }
     }

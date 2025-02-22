@@ -16,11 +16,20 @@ struct MarkdownTextNode: Sendable, AllowingModifyThroughKeyPath {
     var index: Int?
     var depth: Int?
     
-    enum Content: Sendable, Hashable {
+    enum Content: Sendable {
         case text(String)
         case heading(Int)
         case codeLanguage(String)
         case link(String, URL)
+        case image(Image)
+        case task(Task<Sendable, Error>)
+    }
+    
+    mutating func modifyOverIteration(_ body: (inout Self) async throws -> Void) async rethrows {
+        try await body(&self)
+        for index in children.indices {
+            try await children[index].modifyOverIteration(body)
+        }
     }
 }
 
@@ -42,7 +51,7 @@ extension MarkdownTextNode {
         case .softBreak:
             return BreakTextRenderer()
                 .body(context: BreakTextRenderer.Context(node: self, renderConfiguration: configuration))
-        case .placeholder(_):
+        case .placeholder:
             return Text(" ")
         case .paragraph:
             return ParagraphTextRenderer()
@@ -56,6 +65,9 @@ extension MarkdownTextNode {
         case .link:
             return LinkTextRenderer()
                 .body(context: LinkTextRenderer.Context(node: self, renderConfiguration: configuration))
+        case .image:
+            return ImageTextRenderer()
+                .body(context: ImageTextRenderer.Context(node: self, renderConfiguration: configuration))
             
         case .codeBlock:
             return CodeBlockTextRenderer()
@@ -101,8 +113,8 @@ enum MarkdownTextKind: Sendable, Equatable {
     case unorderedList
     case listItem
     
-    case placeholder(UUID) // A placeholder to enable async resources loading, e.g. image loading
-    case image(Image)
+    case placeholder
+    case image
     
     case unknown
 }
