@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Highlightr
 
 struct MarkdownTextNode: Sendable, AllowingModifyThroughKeyPath {
     var kind: MarkdownTextKind

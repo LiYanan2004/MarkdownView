@@ -32,7 +32,7 @@ enum ImageLoader {
             throw LoadError.invalidData
         }
         
-        Image(platformImage: uiImage)
+        return Image(platformImage: uiImage)
         #endif
     }
     
