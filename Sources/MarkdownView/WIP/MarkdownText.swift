@@ -53,16 +53,21 @@ public struct MarkdownText: View {
     }
 }
 
+// MARK: - Preview
+
 #Preview {
-    MarkdownText("""
+    let markdown = #"""
+    ## Apple
     
-    ## Hello World 
+    Here is the [Apple](https://www.apple.com) *website*.
     
-    Here is the [apple](https://www.apple.com) **website**.
+    ### SwiftUI
     
-    We are thril to introduce a new App called ***invites***.
+    `SwiftUI` is Apple's **declaritive**, **cross-platform** UI framework.
     
-    It uses `SwiftUI` framework.
+    Here is a basic example, it shows:
+    - how to create a simple view
+      - The body is an opaque type of `View`
     
     ```swift
     import SwiftUI
@@ -73,11 +78,20 @@ public struct MarkdownText: View {
         }
     }
     ```
-    
-    Hello
-    
-    """)
-    .textSelection(.enabled)
-    .padding()
-    .lineSpacing(8)
+    """#
+    MarkdownText(markdown)
+        .textSelectionEnabledIfPossible()
+        .padding()
+        .lineSpacing(8)
+}
+
+fileprivate extension View {
+    @ViewBuilder
+    func textSelectionEnabledIfPossible(_ enabled: Bool = true) -> some View {
+        if #available(iOS 15.0, macOS 12.0, *), enabled {
+            textSelection(.enabled)
+        } else {
+            self
+        }
+    }
 }
