@@ -88,10 +88,14 @@ public struct MarkdownText: View {
 fileprivate extension View {
     @ViewBuilder
     func textSelectionEnabledIfPossible(_ enabled: Bool = true) -> some View {
+        #if os(macOS) || os(iOS)
         if #available(iOS 15.0, macOS 12.0, *), enabled {
             textSelection(.enabled)
         } else {
             self
         }
+        #else
+        self
+        #endif
     }
 }

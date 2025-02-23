@@ -5,7 +5,6 @@
 //  Created by Yanan Li on 2025/2/22.
 //
 
-
 import SwiftUI
 
 #if canImport(Highlightr)
@@ -44,11 +43,11 @@ struct MarkdownCodeBlock: View {
                     .transition(.opacity.animation(.easeInOut))
             }
         }
+        .onHover { showCopyButton = $0 }
         #endif
         .overlay(alignment: .bottomTrailing) {
             codeLanguage
         }
-        .onHover { showCopyButton = $0 }
     }
     
     @ViewBuilder
