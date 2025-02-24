@@ -1,5 +1,6 @@
 import SwiftUI
 import Markdown
+import RegexBuilder
 #if canImport(Highlightr)
 import Highlightr
 #endif
@@ -39,6 +40,16 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
             nodeViews.append(nodeView)
         }
         return MarkdownNodeView(nodeViews)
+    }
+    
+    func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
+        if configuration.rendersInlineMathIfPossible {
+            MarkdownMath.mixedNodeView(text: text.plainText)
+        } else {
+            MarkdownNodeView {
+                Text(text.plainText)
+            }
+        }
     }
     
     func visitBlockDirective(_ blockDirective: BlockDirective) -> MarkdownNodeView {
@@ -157,12 +168,6 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
             cellViews.append(cellView)
         }
         return MarkdownNodeView(cellViews, alignment: cell.alignment)
-    }
-    
-    func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
-        MarkdownNodeView {
-            Text(text.plainText)
-        }
     }
     
     func visitParagraph(_ paragraph: Paragraph) -> MarkdownNodeView {

@@ -6,11 +6,11 @@ import PackageDescription
 let package = Package(
     name: "MarkdownView",
     platforms: [
-      .macOS(.v12),
-      .iOS(.v15),
-      .tvOS(.v15),
-      .watchOS(.v8),
-      .visionOS(.v1),
+        .macOS(.v13),
+        .iOS(.v16),
+        .tvOS(.v16),
+        .watchOS(.v9),
+        .visionOS(.v1),
     ],
     products: [
         .library(name: "MarkdownView", targets: ["MarkdownView"]),
@@ -18,6 +18,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
         .package(url: "https://github.com/raspu/Highlightr.git", from: "2.1.2"),
+        .package(url: "https://github.com/colinc86/LaTeXSwiftUI.git", from: "1.3.2"),
     ],
     targets: [
         .target(
@@ -25,8 +26,11 @@ let package = Package(
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(
-                    name: "Highlightr",
-                    package: "Highlightr",
+                    name: "Highlightr", package: "Highlightr",
+                    condition: .when(platforms: [.iOS, .macOS])
+                ),
+                .product(
+                    name: "LaTeXSwiftUI", package: "LaTeXSwiftUI",
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
             ],

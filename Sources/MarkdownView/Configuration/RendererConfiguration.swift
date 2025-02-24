@@ -17,6 +17,8 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
         }
     }
     
+    var rendersInlineMathIfPossible = false
+    
     // Spacing
     var lineSpacing: CGFloat? = nil
     var componentSpacing: CGFloat = 8

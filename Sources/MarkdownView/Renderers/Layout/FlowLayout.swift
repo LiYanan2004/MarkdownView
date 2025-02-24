@@ -6,8 +6,12 @@ struct FlowLayout: Layout {
     
     var verticleSpacing: CGFloat = 0
     
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
-        guard subviews.count != 0 else { return .zero }
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Cache
+    ) -> CGSize {
+        guard subviews.count > 0 else { return .zero }
         guard let containerWidth = proposal.width else { return .zero }
 
         let proposal = ProposedViewSize(width: containerWidth, height: nil)
@@ -19,13 +23,13 @@ struct FlowLayout: Layout {
         var rects = [ViewRect]()
         var startIndex = 0
         
-        subviews.indices.forEach {
-            let subviewSize = subviews[$0].sizeThatFits(proposal)
+        for (index, subview) in subviews.enumerated() {
+            let subviewSize = subview.sizeThatFits(proposal)
 
             if x + subviewSize.width > containerWidth {
                 // Adjust the y position of subviews and cache them
                 adjustAndCache(&rects, rowHeight: rowHeight, to: &cache, startIndex: startIndex)
-                startIndex = $0
+                startIndex = index
                 
                 // This element cannot be accommodated horizontally
                 // Increase the height
@@ -37,7 +41,7 @@ struct FlowLayout: Layout {
             if containerWidth.isNormal {
                 // Prepare ViewRects and cache them when we are getting the ideal width
                 let viewRect = ViewRect(
-                    element: subviews[$0],
+                    element: subview,
                     leadingPoint: CGPoint(x: x, y: y),
                     size: subviewSize
                 )
@@ -58,7 +62,12 @@ struct FlowLayout: Layout {
         return size
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Cache
+    ) {
         for rect in cache {
             let proposal = ProposedViewSize(rect.size)
             let position = CGPoint(x: rect.leadingPoint.x + bounds.minX,
@@ -69,7 +78,10 @@ struct FlowLayout: Layout {
     
     func makeCache(subviews: Subviews) -> Cache {
         guard let firstSubview = subviews.first else { return [] }
-        return [ViewRect](repeating: ViewRect(element: firstSubview, leadingPoint: .zero, size: .zero), count: subviews.count)
+        return [ViewRect](
+            repeating: ViewRect(element: firstSubview, leadingPoint: .zero, size: .zero),
+            count: subviews.count
+        )
     }
     
     private func adjustAndCache(
