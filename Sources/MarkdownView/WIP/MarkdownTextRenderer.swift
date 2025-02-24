@@ -182,7 +182,7 @@ struct MarkdownTextRenderer: MarkupVisitor {
     }
     
     mutating func visitListItem(_ listItem: ListItem) -> MarkdownTextNode {
-        if let checkbox = listItem.checkbox {
+        if let _ = listItem.checkbox {
             MarkdownTextNode(
                 kind: .listItem,
                 children: listItem.children.enumerated().map {

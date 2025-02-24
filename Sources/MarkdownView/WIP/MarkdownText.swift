@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct MarkdownText: View {
+internal struct MarkdownText: View {
     private var _parsedContent: ParsedMarkdownContent
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.colorScheme) private var colorScheme
