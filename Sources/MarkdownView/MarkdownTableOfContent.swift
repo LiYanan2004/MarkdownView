@@ -1,9 +1,11 @@
 import SwiftUI
 import Markdown
 
-/// A customized view that defines its content as a function of a set of headings
+/// A customized view that defines its content as a function of a set of headings.
+///
+/// You should use ``MarkdownView/MarkdownReader`` to provide single source-of-truth for MarkdownView and table of content.
 public struct MarkdownTableOfContent<Content: View>: View {
-    var markdownContent: MarkdownContent
+    private var markdownContent: MarkdownContent
     private var contents: (_ headings: [MarkdownHeading]) -> Content
 
     public init(

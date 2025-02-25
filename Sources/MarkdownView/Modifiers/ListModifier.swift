@@ -14,12 +14,6 @@ extension View {
         }
     }
     
-    @available(*, deprecated, renamed: "markdownUnorderedListMarker", message: "Use `markdownUnorderedListMarker` instead.")
-    @_documentation(visibility: internal)
-    nonisolated public func markdownUnorderedListBullet(_ bullet: String) -> some View {
-        self
-    }
-    
     nonisolated public func markdownUnorderedListMarker(_ marker: some UnorderedListMarkerProtocol) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.listConfiguration.unorderedListMarker = AnyUnorderedListMarkerProtocol(marker)

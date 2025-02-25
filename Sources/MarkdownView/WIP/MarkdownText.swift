@@ -19,6 +19,7 @@ internal struct MarkdownText: View {
         content = MarkdownContent(raw: .plainText(text))
     }
     
+    @_spi(WIP)
     public init(_ url: URL) {
         content = MarkdownContent(raw: .url(url))
     }

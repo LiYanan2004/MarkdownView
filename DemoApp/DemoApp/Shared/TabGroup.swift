@@ -16,7 +16,7 @@ enum TabGroup: String, Codable, CaseIterable {
         switch self {
         case .intro:       [.overview]
         case .interactive: [.interact]
-        case .usage:       [.text, .image, .todoList, .table, .customization, .blockDirective, .math]
+        case .usage:       [.text, .image, .list, .table, .customization, .blockDirective, .math]
         }
     }
 }

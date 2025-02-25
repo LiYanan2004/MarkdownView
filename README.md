@@ -47,12 +47,14 @@ let markdownText = """
 This is [MarkdownView](https://github.com/liyanan2004/MarkdownView).
 
 MarkdownView offers a super easy and highly customizable way to display markdown content in your app. It leverages swift-markdown to parse markdown content, fully compliant with the CommonMark Spec.
-MarkdownView supports adavanced rendering features like SVG, Inline Math, as well as code highlighting.
 
+MarkdownView supports adavanced rendering features like SVG, Inline Math, as well as code highlighting.
 """
 
 MarkdownView(markdownText)
 ```
+
+![](/Images/simple-rendering.png)
 
 ## Customizing Appearance
 

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A reader that provides a unified parsed markdown document for use across multiple views.
+/// A reader that provides a markdown content to use across multiple views.
 ///
 /// This reader offers a single source-of-truth for its child markdown views, and ensures the input is only parsed once.
 ///
@@ -28,6 +28,7 @@ public struct MarkdownReader<Content: View>: View {
         self.contents = contents
     }
     
+    @_spi(WIP)
     public init(_ url: URL, @ViewBuilder contents: @escaping (MarkdownContent) -> Content) {
         self.markdownContent =  MarkdownContent(raw: .url(url))
         self.contents = contents

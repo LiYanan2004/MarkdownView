@@ -22,6 +22,7 @@ public struct MarkdownView: View {
         )
     }
     
+    @_spi(WIP)
     public init(_ url: URL) {
         self.content = MarkdownContent(
             raw: .url(url)
