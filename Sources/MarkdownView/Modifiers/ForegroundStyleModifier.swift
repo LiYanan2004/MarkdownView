@@ -13,8 +13,9 @@ extension View {
     /// This is useful when you want to completely customize foreground styles.
     ///
     /// - Parameter foregroundStyleGroup: A style set to apply to the MarkdownView.
-    @ViewBuilder
-    public func foregroundStyleGroup(_ foregroundStyleGroup: some MarkdownForegroundStyleGroup) -> some View {
+    nonisolated public func foregroundStyleGroup(
+        _ foregroundStyleGroup: some MarkdownForegroundStyleGroup
+    ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.foregroundStyleGroup = AnyMarkdownForegroundStyleGroup(
                 foregroundStyleGroup
@@ -27,8 +28,10 @@ extension View {
     /// - Parameters:
     ///   - style: The style to apply to this type of components.
     ///   - component: The type of components to apply the foreground style.
-    @ViewBuilder
-    public func foregroundStyle(_ style: some ShapeStyle, for component: ColorableComponent) -> some View {
+    nonisolated public func foregroundStyle(
+        _ style: some ShapeStyle,
+        for component: MarkdownStyleTarget
+    ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration.foregroundStyleGroup) { foregroundStyleGroup in
             let erasedShapeStyle = AnyShapeStyle(style)
             switch component {

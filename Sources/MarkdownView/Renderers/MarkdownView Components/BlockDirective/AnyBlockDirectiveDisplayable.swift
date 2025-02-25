@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A type-erased BlockDirectiveDisplayable value.
+/// A type-erasure for type conforms to `BlockDirectiveDisplayable`.
 public struct AnyBlockDirectiveDisplayable: BlockDirectiveDisplayable {
     public typealias BlockDirectiveView = AnyView
 

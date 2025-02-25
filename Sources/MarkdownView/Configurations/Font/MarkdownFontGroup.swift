@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A type that applies font group to all MarkdownViews within a view hierarchy.
 ///
-/// To configure the current font group for a view hierarchy, use the fontGroup(_:) modifier. Specify a font group that conforms to MarkdownFontGroup when creating a MarkdownVIew.
+/// To configure the current font group for a view hierarchy, use ``MarkdownView/MarkdownView/fontGroup(_:)`` modifier. Specify a font group that conforms to MarkdownFontGroup when creating a MarkdownView.
 public protocol MarkdownFontGroup {
     // Headings
     var h1: Font { get }

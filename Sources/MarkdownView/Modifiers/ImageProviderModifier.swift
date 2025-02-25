@@ -16,7 +16,7 @@ extension View {
     /// - Returns: View that able to render images with specific schemes.
     ///
     /// You can set the provider multiple times if you want to add multiple schemes.
-    public func imageProvider(
+    nonisolated public func imageProvider(
         _ provider: some ImageDisplayable, forURLScheme urlScheme: String
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in

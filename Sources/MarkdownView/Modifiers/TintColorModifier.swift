@@ -14,7 +14,7 @@ extension View {
     ///   - tint: The tint color to apply.
     ///   - component: The tintable component to apply the tint color.
     @ViewBuilder
-    public func tint(
+    nonisolated public func tint(
         _ tint: Color,
         for component: TintableComponent
     ) -> some View {
@@ -28,6 +28,7 @@ extension View {
 }
 
 /// Components that can apply a tint color.
+@_documentation(visibility: internal)
 public enum TintableComponent {
     case blockQuote
     case inlineCodeBlock

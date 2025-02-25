@@ -8,30 +8,31 @@
 import SwiftUI
 
 extension View {
-    public func markdownListIndent(_ indent: CGFloat) -> some View {
+    nonisolated public func markdownListIndent(_ indent: CGFloat) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.listConfiguration.leadingIndentation = indent
         }
     }
     
     @available(*, deprecated, renamed: "markdownUnorderedListMarker", message: "Use `markdownUnorderedListMarker` instead.")
-    public func markdownUnorderedListBullet(_ bullet: String) -> some View {
+    @_documentation(visibility: internal)
+    nonisolated public func markdownUnorderedListBullet(_ bullet: String) -> some View {
         self
     }
     
-    public func markdownUnorderedListMarker(_ marker: some UnorderedListMarkerProtocol) -> some View {
+    nonisolated public func markdownUnorderedListMarker(_ marker: some UnorderedListMarkerProtocol) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.listConfiguration.unorderedListMarker = AnyUnorderedListMarkerProtocol(marker)
         }
     }
     
-    public func markdownOrderedListMarker(_ marker: some OrderedListMarkerProtocol) -> some View {
+    nonisolated public func markdownOrderedListMarker(_ marker: some OrderedListMarkerProtocol) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.listConfiguration.orderedListMarker = AnyOrderedListMarkerProtocol(marker)
         }
     }
     
-    public func markdownComponentSpacing(_ spacing: CGFloat) -> some View {
+    nonisolated public func markdownComponentSpacing(_ spacing: CGFloat) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.componentSpacing = spacing
         }

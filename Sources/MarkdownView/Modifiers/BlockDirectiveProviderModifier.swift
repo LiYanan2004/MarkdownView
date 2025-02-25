@@ -16,7 +16,7 @@ extension View {
     /// - Returns: `MarkdownView` with custom directive block loading behavior.
     ///
     /// You can set this provider multiple times if you have multiple providers.
-    public func blockDirectiveProvider(
+    nonisolated public func blockDirectiveProvider(
         _ provider: some BlockDirectiveDisplayable, for name: String
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in

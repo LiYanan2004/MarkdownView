@@ -31,7 +31,7 @@ extension View {
     @available(visionOS, unavailable)
     @available(macCatalyst, unavailable)
     @available(watchOS, unavailable)
-    public func markdownRenderingMode(_ renderingMode: MarkdownRenderingMode) -> some View {
+    nonisolated public func markdownRenderingMode(_ renderingMode: MarkdownRenderingMode) -> some View {
         fatalError("Rendering Mode unavailable")
     }
 }

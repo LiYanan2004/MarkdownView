@@ -31,9 +31,10 @@ enum RawMarkdownContent: Sendable, Hashable {
     }
 }
 
-// MARK: - Parsed
+// MARK: - Parsed Content
 
-public struct ParsedMarkdownContent: Sendable {
+/// A Sendable markdown content that can be used to render content and supports on-demand parsing.
+public struct MarkdownContent: Sendable {
     var raw: RawMarkdownContent
     
     internal init(raw: RawMarkdownContent) {
@@ -45,6 +46,7 @@ public struct ParsedMarkdownContent: Sendable {
         var document: Document?
     }
     
+    /// Parsed markdown document.
     public var document: Document {
         if let cachedDocument = cache.document {
             return cachedDocument
@@ -64,8 +66,8 @@ public struct ParsedMarkdownContent: Sendable {
     }
 }
 
-extension ParsedMarkdownContent: Hashable {
-    public static func == (lhs: ParsedMarkdownContent, rhs: ParsedMarkdownContent) -> Bool {
+extension MarkdownContent: Hashable {
+    public static func == (lhs: MarkdownContent, rhs: MarkdownContent) -> Bool {
         lhs.raw == rhs.raw
     }
     

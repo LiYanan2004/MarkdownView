@@ -1,16 +1,17 @@
 import SwiftUI
 import Markdown
 
+/// A customized view that defines its content as a function of a set of headings
 public struct MarkdownTableOfContent<Content: View>: View {
-    var markdownContent: ParsedMarkdownContent
-    private var viewContent: (_ headings: [MarkdownHeading]) -> Content
+    var markdownContent: MarkdownContent
+    private var contents: (_ headings: [MarkdownHeading]) -> Content
 
     public init(
-        _ markdownContent: ParsedMarkdownContent,
-        @ViewBuilder viewContent: @escaping ([MarkdownHeading]) -> Content
+        _ markdownContent: MarkdownContent,
+        @ViewBuilder contents: @escaping ([MarkdownHeading]) -> Content
     ) {
         self.markdownContent = markdownContent
-        self.viewContent = viewContent
+        self.contents = contents
     }
     
     private var headings: [MarkdownHeading] {
@@ -20,11 +21,12 @@ public struct MarkdownTableOfContent<Content: View>: View {
     }
     
     public var body: some View {
-        viewContent(headings)
+        contents(headings)
     }
 }
 
 extension MarkdownTableOfContent {
+    /// A representation of a markdown heading.
     public struct MarkdownHeading: Hashable, Sendable {
         private var heading: Markdown.Heading
         

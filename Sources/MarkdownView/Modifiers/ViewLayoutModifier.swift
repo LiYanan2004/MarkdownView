@@ -10,18 +10,11 @@ import SwiftUI
 extension View {
     ///  Configures the role of the markdown view.
     /// - Parameter role: A role to tell MarkdownView how to render its content.
-    public func markdownViewRole(
+    @available(*, deprecated, renamed: "markdownViewStyle", message: "Use markdownViewStyle instead.")
+    @_documentation(visibility: internal)
+    nonisolated public func markdownViewRole(
         _ role: MarkdownView.Role
     ) -> some View {
-        #if os(watchOS)
-        environment(\.markdownRendererConfiguration.role, .normal)
-        #else
-        environment(\.markdownRendererConfiguration.role, role)
-        #endif
-    }
-    
-    @available(macOS, unavailable)
-    public func markdownViewLayout() -> some View {
-        fatalError("Unimplemented")
+        self
     }
 }

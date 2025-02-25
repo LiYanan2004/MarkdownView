@@ -42,13 +42,13 @@ class ImageRenderer: @unchecked Sendable {
         if let provider {
             // Found a specific provider.
             provider.makeImage(url: url, alt: alt)
-                .eraseToAnyView()
+                .erasedToAnyView()
         } else {
             // No specific provider.
             // Try to load the image from the Base URL.
             RelativePathImageDisplayable(baseURL: baseURL)
                 .makeImage(url: url, alt: alt)
-                .eraseToAnyView()
+                .erasedToAnyView()
         }
     }
     

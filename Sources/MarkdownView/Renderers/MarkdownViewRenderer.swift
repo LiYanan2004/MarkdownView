@@ -9,9 +9,9 @@ import Highlightr
 struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {    
     var configuration: MarkdownRenderConfiguration
     
-    func render(_ markup: Markup) -> some View {
+    func render(_ markup: Markup) -> MarkdownNodeView {
         var renderer = self
-        return renderer.visit(markup).body
+        return renderer.visit(markup)
     }
     
     func visitDocument(_ document: Document) -> MarkdownNodeView {

@@ -101,9 +101,3 @@ extension MarkdownNodeView {
         }
     }
 }
-
-extension View {
-    nonisolated func eraseToAnyView() -> AnyView {
-        AnyView(self)
-    }
-}

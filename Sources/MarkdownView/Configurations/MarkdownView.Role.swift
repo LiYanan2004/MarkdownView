@@ -9,6 +9,8 @@ import Foundation
 
 extension MarkdownView {
     /// The role of MarkdownView, which affects how MarkdownView is rendered.
+    @available(*, deprecated, message: "Use MarkdownViewStyle to customize layout.")
+    @_documentation(visibility: internal)
     public enum Role: Sendable, Hashable {
         /// The normal role.
         ///

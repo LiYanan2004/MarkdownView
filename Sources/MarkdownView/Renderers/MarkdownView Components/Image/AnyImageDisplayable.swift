@@ -1,17 +1,21 @@
 import SwiftUI
 
-struct AnyImageDisplayable: ImageDisplayable {
-    typealias ImageView = AnyView
+/// A type-erasure for type conforms to `ImageDisplayable`.
+public struct AnyImageDisplayable: ImageDisplayable {
+    public typealias ImageView = AnyView
 
-    @ViewBuilder private let displayableClosure: (URL, String?) -> AnyView
+    @ViewBuilder private let displayableClosure: (URL, String?) -> ImageView
     
     init<D: ImageDisplayable>(erasing imageDisplayable: D) {
         displayableClosure = { url, alt in
-            AnyView(imageDisplayable.makeImage(url: url, alt: alt))
+            imageDisplayable
+                .makeImage(url: url, alt: alt)
+                .erasedToAnyView()
         }
     }
 
-    func makeImage(url: URL, alt: String?) -> AnyView {
+    /// Creates a view that represents the body of the image
+    public func makeImage(url: URL, alt: String?) -> ImageView {
         displayableClosure(url, alt)
     }
 }

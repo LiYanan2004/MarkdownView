@@ -22,7 +22,7 @@ class BlockDirectiveRenderer: @unchecked Sendable {
         if let provider {
             return provider.makeView(
                 arguments: args, text: text
-            ).eraseToAnyView()
+            ).erasedToAnyView()
         }
         return nil
     }

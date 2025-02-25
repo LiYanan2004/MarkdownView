@@ -15,15 +15,16 @@ extension View {
     /// - Parameter theme: The theme for highlighter.
     ///
     /// - note: Code highlighting is not available on watchOS.
-    public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
+    nonisolated public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
         environment(\.markdownRendererConfiguration.codeBlockTheme, theme)
     }
 }
 
+// MARK: - CodeHighlighterTheme
 
-/// The theme of code highlighter.
+/// Code highlighting themes configuration for both light and dark mode.
 ///
-/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr) .
+/// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
 public struct CodeHighlighterTheme: Equatable, Sendable {
     /// The theme name in Light Mode.
     var lightModeThemeName: String

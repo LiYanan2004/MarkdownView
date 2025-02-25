@@ -1,7 +1,8 @@
 import SwiftUI
 
-@available(*, deprecated, message: "Use MarkdownFontGroup protocol to create your font group.")
 /// A font provider that defines fonts for each type of components.
+@available(*, deprecated, message: "Use MarkdownFontGroup protocol to create your font group.")
+@_documentation(visibility: internal)
 public struct MarkdownFontProvider {
     // Headings
     var h1 = Font.largeTitle
@@ -81,6 +82,7 @@ extension MarkdownFontProvider {
 extension MarkdownFontProvider: Equatable {}
 
 @available(*, deprecated, message: "This is a bridge for deprecated MarkdownFontProvider. These APIs will be removed from MarkdownView in the future.")
+@_documentation(visibility: internal)
 struct MarkdownFontProviderWrapper: MarkdownFontGroup {
     var h1 = Font.largeTitle
     var h2 = Font.title

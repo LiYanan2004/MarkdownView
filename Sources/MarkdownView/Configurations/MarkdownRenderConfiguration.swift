@@ -9,8 +9,6 @@ import Foundation
 import SwiftUI
 
 struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
-    
-    var role: MarkdownView.Role = .normal
     var preferredBaseURL: URL? {
         willSet {
             imageRenderer.updateBaseURL(newValue)
@@ -51,4 +49,17 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     var blockDirectiveRenderer: BlockDirectiveRenderer = .init()
     var imageRenderer: ImageRenderer = .init()
     
+}
+
+// MARK: - SwiftUI Environment
+
+struct MarkdownRendererConfigurationKey: @preconcurrency EnvironmentKey {
+    @MainActor static var defaultValue: MarkdownRenderConfiguration = .init()
+}
+
+extension EnvironmentValues {
+    var markdownRendererConfiguration: MarkdownRenderConfiguration {
+        get { self[MarkdownRendererConfigurationKey.self] }
+        set { self[MarkdownRendererConfigurationKey.self] = newValue }
+    }
 }

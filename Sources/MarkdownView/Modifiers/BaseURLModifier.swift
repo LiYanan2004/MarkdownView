@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension View {
-    public func markdownBaseURL(_ url: URL) -> some View {
+    nonisolated public func markdownBaseURL(_ url: URL) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.preferredBaseURL = url
         }

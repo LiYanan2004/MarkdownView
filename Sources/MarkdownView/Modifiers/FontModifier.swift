@@ -14,7 +14,7 @@ extension View {
     /// Customize fonts for multiple types of text.
     ///
     /// - Parameter fontGroup: A font set to apply to the MarkdownView.
-    public func fontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
+    nonisolated public func fontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
         environment(\.markdownRendererConfiguration.fontGroup, .init(fontGroup))
     }
     
@@ -22,7 +22,7 @@ extension View {
     /// - Parameters:
     ///   - font: The font to apply to these components.
     ///   - type: The type of components to apply the font.
-    public func font(_ font: Font, for type: MarkdownTextType) -> some View {
+    nonisolated public func font(_ font: Font, for type: MarkdownTextType) -> some View {
         transformEnvironment(\.markdownRendererConfiguration.fontGroup) { fontGroup in
             switch type {
             case .h1: fontGroup._h1 = font

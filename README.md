@@ -15,56 +15,48 @@ Here is a preview :)
 
 You can use MarkdownView in the following platforms:
 
-* macOS 12.0+
-* iOS 15.0+
-* watchOS 8.0+
-* tvOS 15.0+
+* macOS 13.0+
+* iOS 16.0+
+* watchOS 9.0+
+* tvOS 16.0+
 * visionOS 1.0+
 
 # Highlighted Features
 
 - Fully compliant with CommonMark
-- SVG rendering support
--  Highly Customizable and Extensible
+- Support SVG rendering
+- Support inline math rendering 
+- Highly Customizable and Extensible
     - Fonts
     - Code Highlighter Themes
     - Tint Colors
     - Block Directives
     - Custom Images
--  Fully Native SwiftUI implementations
+- Fully Native SwiftUI implementations
 
 # Getting started
 
-You can create a `Markdown` view by providing a Markdown-formatted string.
+## Displaying Contents
+
+You can create a `Markdown` view by providing a markdown text.
 
 ```swift
-MarkdownView("This is the Apple's **newly published** [swift-markdown](https://github.com/apple/swift-markdown)")
-```
+let markdownText = """
+# MarkdownView
 
-![](Images/bold_and_links.jpeg)
+This is [MarkdownView](https://github.com/liyanan2004/MarkdownView).
 
-If your Markdown have check boxes, you can provide a `Binding` string.
+MarkdownView offers a super easy and highly customizable way to display markdown content in your app. It leverages swift-markdown to parse markdown content, fully compliant with the CommonMark Spec.
+MarkdownView supports adavanced rendering features like SVG, Inline Math, as well as code highlighting.
 
-```swift
-@State var text = """
-- [x] Write the press release
-- [ ] Update the website
-- [ ] Contact the media
 """
+
+MarkdownView(markdownText)
 ```
 
-```swift
-MarkdownView($text)
-```   
-![](Images/checkbox.jpeg)
+## Customizing Appearance
 
-> For more information, Check out [Documentation](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
-
-# Further Customization
-
-## Font
-
-You can set custom fonts or change text styles.
+You can set custom font group or change font for a specific kind of markdown markup.
 
 ```swift
 MarkdownView("# H1 title")
@@ -73,9 +65,7 @@ MarkdownView("# H1 title")
 
 ![](/Images/font.jpeg)
 
-## Tint
-
-Default tint color for code blocks and block quotes is the accent color.
+Adding tint color for code blocks and quote blocks. Default is the accent color.
 
 You can customize them explicitly.
 
@@ -83,9 +73,10 @@ You can customize them explicitly.
 MarkdownView("> Quote and `inline code`")
     .tint(.pink, for: .inlineCodeBlock)
 ```
+
 ![](/Images/tint.jpeg)
 
-# Add Custom Providers
+## Extend Rendering
 
 You can add your custom image providers and block directive providers to display your content.
 
@@ -115,6 +106,10 @@ MarkdownView(markdownText)
 
 The implementation of the block directive is exactly the same way.
 
+# Documentation
+
+For more detailed documentation, check out the [documentation](https://swiftpackageindex.com/LiYanan2004/MarkdownView/main/documentation/MarkdownView) page hosted on Swift Package Index.
+
 # Swift Package Manager
 
 In your `Package.swift` Swift Package Manager manifest, add the following dependency to your `dependencies` argument:
@@ -131,5 +126,6 @@ Add the dependency to any targets you've declared in your manifest:
 
 # Dependencies
 
-- [apple/swift-markdown](https://github.com/apple/swift-markdown): Parse documents
-- [raspu/Highlightr](https://github.com/raspu/Highlightr.git): Highlight code on iOS and macOS.
+- [apple/swift-markdown](https://github.com/apple/swift-markdown): Parsing & Visiting documents.
+- [raspu/Highlightr](https://github.com/raspu/Highlightr.git): Code Highlighting.
+- [colinc86/LaTeXSwiftUI](https://github.com/colinc86/LaTeXSwiftUI.git): Math Rendering.

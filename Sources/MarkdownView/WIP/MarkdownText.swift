@@ -8,7 +8,7 @@
 import SwiftUI
 
 internal struct MarkdownText: View {
-    private var _parsedContent: ParsedMarkdownContent
+    private var content: MarkdownContent
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.colorScheme) private var colorScheme
     private var renderConfiguration: MarkdownRenderConfiguration {
@@ -16,23 +16,23 @@ internal struct MarkdownText: View {
     }
     
     public init(_ text: String) {
-        _parsedContent = ParsedMarkdownContent(raw: .plainText(text))
+        content = MarkdownContent(raw: .plainText(text))
     }
     
     public init(_ url: URL) {
-        _parsedContent = ParsedMarkdownContent(raw: .url(url))
+        content = MarkdownContent(raw: .url(url))
     }
     
     public var body: some View {
         MarkdownTextRenderer
-            .walkDocument(_parsedContent.document)
+            .walkDocument(content.document)
             .render(configuration: renderConfiguration)
         // TODO: Loading Image async and replace placeholder node.
         /*
-            .onChange(of: _parsedContent, initial: true) {
+            .onChange(of: content, initial: true) {
                 Task.detached {
                     var documentNode = MarkdownTextRenderer
-                        .walkDocument(_parsedContent.document)
+                        .walkDocument(content.document)
                     await documentNode.modifyOverIteration { node in
                         guard node.kind == .placeholder,
                               case let .task(task) = node.content else {

@@ -1,11 +1,11 @@
 import SwiftUI
 import Markdown
 
-/// A type for rendering directive blocks.
+/// A type that  renders block directives.
 public protocol BlockDirectiveDisplayable {
     associatedtype BlockDirectiveView: View
     
-    /// Create your own custom view with the directive argument.
+    /// Creates a view that represents the body of the block directive
     /// - Parameters:
     ///   - arguments: A directive argument, parsed from the form name: value or name: "value".
     ///   - text: Text inside the block.

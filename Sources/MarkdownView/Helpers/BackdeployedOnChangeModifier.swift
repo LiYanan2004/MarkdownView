@@ -40,9 +40,6 @@ extension View {
     ///   - initial: Whether the action should be run when this view initially
     ///     appears.
     ///   - action: A closure to run when the value changes.
-    ///   - oldValue: The old value that failed the comparison check (or the
-    ///     initial value when requested).
-    ///   - newValue: The new value that failed the comparison check.
     ///
     /// - Returns: A view that fires an action when the specified value changes.
     @_disfavoredOverload
