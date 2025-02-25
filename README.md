@@ -11,7 +11,7 @@ Here is a preview :)
 
 ![](Images/preview.png)
 
-# Supported Platforms
+## Supported Platforms
 
 You can use MarkdownView in the following platforms:
 
@@ -21,7 +21,7 @@ You can use MarkdownView in the following platforms:
 * tvOS 16.0+
 * visionOS 1.0+
 
-# Highlighted Features
+## Highlighted Features
 
 - Fully compliant with CommonMark
 - Support SVG rendering
@@ -34,9 +34,9 @@ You can use MarkdownView in the following platforms:
     - Custom Images
 - Fully Native SwiftUI implementations
 
-# Getting started
+## Getting started
 
-## Displaying Contents
+### Displaying Contents
 
 You can create a `Markdown` view by providing a markdown text.
 
@@ -56,7 +56,7 @@ MarkdownView(markdownText)
 
 ![](/Images/simple-rendering.png)
 
-## Customizing Appearance
+### Customizing Appearance
 
 You can set custom font group or change font for a specific kind of markdown markup.
 
@@ -78,7 +78,7 @@ MarkdownView("> Quote and `inline code`")
 
 ![](/Images/tint.jpeg)
 
-## Extend Rendering
+### Extend Rendering
 
 You can add your custom image providers and block directive providers to display your content.
 
@@ -108,11 +108,11 @@ MarkdownView(markdownText)
 
 The implementation of the block directive is exactly the same way.
 
-# Documentation
+## Documentation
 
 For more detailed documentation, check out the [documentation](https://swiftpackageindex.com/LiYanan2004/MarkdownView/main/documentation/MarkdownView) page hosted on Swift Package Index.
 
-# Swift Package Manager
+## Swift Package Manager
 
 In your `Package.swift` Swift Package Manager manifest, add the following dependency to your `dependencies` argument:
 
@@ -126,7 +126,7 @@ Add the dependency to any targets you've declared in your manifest:
 .target(name: "MyTarget", dependencies: ["MarkdownView"]),
 ```
 
-# Dependencies
+## Dependencies
 
 - [apple/swift-markdown](https://github.com/apple/swift-markdown): Parsing & Visiting documents.
 - [raspu/Highlightr](https://github.com/raspu/Highlightr.git): Code Highlighting.
