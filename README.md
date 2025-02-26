@@ -1,15 +1,16 @@
 # MarkdownView
 
+
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FLiYanan2004%2FMarkdownView%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/LiYanan2004/MarkdownView)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FLiYanan2004%2FMarkdownView%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/LiYanan2004/MarkdownView)
 
-MarkdownView is a Swift Package for rendering Markdown natively in SwiftUI.
+Display markdown content with SwiftUI.
 
-Thanks to [apple/swift-markdown](https://github.com/apple/swift-markdown), it can fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
+## Overview
 
-Here is a preview :)
+MarkdownView offers a super easy and highly customizable way to display markdown content in your app. 
 
-![](Images/preview.png)
+It leverages [swift-markdown](https://github.com/swiftlang/swift-markdown) to parse markdown content, fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
 
 ## Supported Platforms
 
