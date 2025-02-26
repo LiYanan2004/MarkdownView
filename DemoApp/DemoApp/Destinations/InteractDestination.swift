@@ -10,6 +10,7 @@ import MarkdownView
 
 struct InteractDestination: View {
     @State private var text = ""
+    @State private var enableMathRendering = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -25,14 +26,19 @@ struct InteractDestination: View {
                         in: .rect(cornerRadius: 12)
                     )
             } header: {
-                Text("Markdown Text")
-                    .font(.headline)
+                HStack {
+                    Text("Markdown Text")
+                        .font(.headline)
+                    Spacer(minLength: 20)
+                    Toggle("Math Rendering", isOn: $enableMathRendering)
+                }
             }
             
             Divider()
             
             Section {
-                MarkdownView(text: $text)
+                MarkdownView(text)
+                    .markdownMathRenderingEnabled(enableMathRendering)
             } header: {
                 Text("MarkdownView")
                     .font(.headline)

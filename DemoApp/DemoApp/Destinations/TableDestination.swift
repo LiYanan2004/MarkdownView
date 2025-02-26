@@ -10,7 +10,7 @@ import MarkdownView
 
 struct TableDestination: View {
     var body: some View {
-        MarkdownView(text: """
+        MarkdownView("""
         | Programming Language | Year Created | Creator           | Popular Frameworks/Libraries |
         |:--------------------:|:------------:|-----------------|------------------------------|
         | Python               | 1991         | Guido van Rossum  | Django, Flask, TensorFlow    |

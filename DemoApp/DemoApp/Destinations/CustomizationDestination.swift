@@ -21,7 +21,7 @@ struct CustomizationDestination: View {
                 Toggle("Hirarchical Tint", isOn: $hirarchicalTint)
             }
             
-            MarkdownView(text: """
+            MarkdownView("""
             # Getting Started with **SwiftUI**
             
             ## SwiftUI Basics
