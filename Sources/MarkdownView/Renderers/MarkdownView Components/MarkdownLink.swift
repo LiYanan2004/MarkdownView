@@ -11,6 +11,7 @@ import Markdown
 struct MarkdownLink: View {
     var link: Markdown.Link
     var configuration: MarkdownRenderConfiguration
+    @Environment(\.openURL) private var openURL
     
     private var attributer: LinkAttributer {
         LinkAttributer(
@@ -19,8 +20,32 @@ struct MarkdownLink: View {
         )
     }
     
-    var body: SwiftUI.Text {
-        attributer.attributed(link)
+    var body: some View {
+        let linkText = attributer.attributed(link)
+        return AnyView(
+            Button(action: {
+                if let destination = link.destination, let url = URL(string: destination) {
+                    openURL(url)
+                }
+            }) {
+                linkText
+                    .scaleEffect(0.8)
+                    .bold()
+                    .tint(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(.quaternary.opacity(0.5))
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(.quinary, lineWidth: 1)
+                    )
+            }
+                .buttonStyle(.plain)
+        )
+        
     }
 }
 
@@ -104,3 +129,7 @@ extension LinkAttributer {
     }
 }
 
+
+#Preview {
+    MarkdownView("Hello [pubmed](https://pubmed.ncbi.nlm.nih.gov/36209676/) [pubmed](https://pubmed.ncbi.nlm.nih.gov/31462385/)")
+}

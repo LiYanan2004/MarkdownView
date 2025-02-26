@@ -50,3 +50,8 @@ public struct MarkdownView: View {
             }
     }
 }
+
+
+#Preview {
+    MarkdownView("Hello [1](https://pubmed.ncbi.nlm.nih.gov/36209676/) [2](https://pubmed.ncbi.nlm.nih.gov/31462385/)")
+}

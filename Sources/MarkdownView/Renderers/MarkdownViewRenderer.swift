@@ -219,14 +219,21 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
-        let nodeView = descendInto(link)
-        switch nodeView.contentType {
-        case .text:
-            return MarkdownNodeView {
+        return MarkdownNodeView {
                 MarkdownLink(link: link, configuration: configuration)
             }
-        case .view:
-            return nodeView
-        }
+//        let nodeView = descendInto(link)
+//        switch nodeView.contentType {
+//        case .text:
+//            return MarkdownNodeView {
+//                MarkdownLink(link: link, configuration: configuration)
+//            }
+//        case .view:
+//            return nodeView
+//        }
     }
+}
+
+#Preview {
+    MarkdownView("Hello [1](https://pubmed.ncbi.nlm.nih.gov/36209676/) [2](https://pubmed.ncbi.nlm.nih.gov/31462385/), <https://pubmed.ncbi.nlm.nih.gov/36209676/>")
 }
