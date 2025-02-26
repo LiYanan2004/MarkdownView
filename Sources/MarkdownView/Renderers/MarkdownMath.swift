@@ -5,15 +5,15 @@
 //  Created by LiYanan2004 on 2025/2/24.
 //
 
-import RegexBuilder
 import SwiftUI
+import RegexBuilder
 #if canImport(LaTeXSwiftUI)
 import LaTeXSwiftUI
 import MathJaxSwift
 #endif
 
+@MainActor
 enum MarkdownMath {
-    @MainActor
     static func mixedNodeView(text: String) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
         let latexPrefixOrSuffix = /[\$]{1,2}/

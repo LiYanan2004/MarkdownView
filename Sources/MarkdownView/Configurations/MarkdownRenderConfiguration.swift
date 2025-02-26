@@ -16,6 +16,7 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     }
     
     var rendersInlineMathIfPossible = false
+    var displayScale: CGFloat = 2
     
     // Spacing
     var lineSpacing: CGFloat? = nil

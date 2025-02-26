@@ -9,10 +9,14 @@ import SwiftUI
 
 internal struct MarkdownText: View {
     private var content: MarkdownContent
-    @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.colorScheme) private var colorScheme
-    private var renderConfiguration: MarkdownRenderConfiguration {
-        configuration.with(\.colorScheme, colorScheme)
+    @Environment(\.displayScale) private var displayScale
+    
+    @Environment(\.markdownRendererConfiguration) private var _configuration
+    private var configuration: MarkdownRenderConfiguration {
+        _configuration
+            .with(\.colorScheme, colorScheme)
+            .with(\.displayScale, displayScale)
     }
     
     public init(_ text: String) {
@@ -27,7 +31,7 @@ internal struct MarkdownText: View {
     public var body: some View {
         MarkdownTextRenderer
             .walkDocument(content.document)
-            .render(configuration: renderConfiguration)
+            .render(configuration: configuration)
         // TODO: Loading Image async and replace placeholder node.
         /*
             .onChange(of: content, initial: true) {

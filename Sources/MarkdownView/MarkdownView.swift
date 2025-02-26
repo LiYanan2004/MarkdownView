@@ -7,12 +7,14 @@ public struct MarkdownView: View {
     
     @State private var viewSize = CGSize.zero
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.displayScale) private var displayScale
     
     @Environment(\.markdownViewStyle) private var markdownViewStyle
     @Environment(\.markdownRendererConfiguration) private var _configuration
     private var configuration: MarkdownRenderConfiguration {
         _configuration
             .with(\.colorScheme, colorScheme)
+            .with(\.displayScale, displayScale)
             .with(\.preferredBaseURL, _configuration.preferredBaseURL ?? content.raw.source)
     }
     

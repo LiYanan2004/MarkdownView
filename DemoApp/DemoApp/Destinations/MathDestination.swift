@@ -11,7 +11,7 @@ import MarkdownView
 struct MathDestination: View {
     var body: some View {
         VStack(alignment: .leading) {
-            MarkdownView("This sentence uses `$` delimiters to show math inline: $\sqrt{3x-1}+(1+x)^2$")
+            MarkdownView(#"This sentence uses `$` delimiters to show math inline: $\sqrt{3x-1}+(1+x)^2$"#)
             
             MarkdownView(#"""
             **The Cauchy-Schwarz Inequality**\
