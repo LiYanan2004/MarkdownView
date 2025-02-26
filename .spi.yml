@@ -1,4 +1,4 @@
 version: 1
 builder:
   configs:
-  - documentation_targets: [MarkdownView]
+    - documentation_targets: [MarkdownView]
