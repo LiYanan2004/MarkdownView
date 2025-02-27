@@ -46,7 +46,8 @@ fileprivate struct LinkAttributer: MarkupVisitor {
     
     func visitText(_ text: Markdown.Text) -> AttributedString {
         var attributedString = AttributedString(stringLiteral: "[" + text.plainText + "]")
-        attributedString.font = font.smallCaps()
+        attributedString.font = font.smallCaps().weight(.medium)
+        
         
         return attributedString
     }
@@ -56,8 +57,6 @@ fileprivate struct LinkAttributer: MarkupVisitor {
         if let destination = link.destination {
             attributedString.link = URL(string: destination)
             attributedString.foregroundColor = tint
-//            attributedString.backgroundColor = tint.opacity(0.1)
-//            attributedString.underlineStyle = .single
             
             
         } else {
