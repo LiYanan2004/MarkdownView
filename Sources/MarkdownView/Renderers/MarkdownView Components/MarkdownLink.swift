@@ -9,9 +9,9 @@ import SwiftUI
 import Markdown
 
 struct MarkdownLink: View {
+    @Environment(\.displayScale) private var scale
     var link: Markdown.Link
     var configuration: MarkdownRenderConfiguration
-    @Environment(\.openURL) private var openURL
     
     private var attributer: LinkAttributer {
         LinkAttributer(
@@ -20,34 +20,36 @@ struct MarkdownLink: View {
         )
     }
     
-    var body: some View {
-        let linkText = attributer.attributed(link)
-        return AnyView(
-            Button(action: {
-                if let destination = link.destination, let url = URL(string: destination) {
-                    openURL(url)
-                }
-            }) {
-                linkText
-                    .scaleEffect(0.8)
-                    .bold()
-                    .tint(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(.quaternary.opacity(0.5))
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(.quinary, lineWidth: 1)
-                    )
-            }
-                .buttonStyle(.plain)
-        )
-        
+    var body: SwiftUI.Text {
+        let textView = createText()
+        let renderer = SwiftUI.ImageRenderer(content: textView)
+//        renderer.scale = scale
+        if let image = renderer.uiImage {
+            return Text(Image(uiImage: image))
+        } else {
+            return attributer.attributed(link)
+        }
+    }
+    
+    private func createText() -> some View {
+        attributer.attributed(link)
+            .bold()
+            .font(.body.smallCaps())
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+//            .frame(minWidth: 15)
+            .background(
+                Capsule()
+                    .fill(.quaternary.opacity(0.5))
+            )
+            .overlay(
+                Capsule()
+                    .stroke(.quinary, lineWidth: 1)
+            )
     }
 }
+
 
 // MARK: - Attributer
 
@@ -78,6 +80,8 @@ fileprivate struct LinkAttributer: MarkupVisitor {
         var attributedString = attributedString(from: link)
         if let destination = link.destination {
             attributedString.link = URL(string: destination)
+            attributedString.foregroundColor = Color.secondary
+            
         } else {
             #if os(macOS)
             attributedString.foregroundColor = .linkColor
@@ -131,5 +135,71 @@ extension LinkAttributer {
 
 
 #Preview {
-    MarkdownView("Hello [pubmed](https://pubmed.ncbi.nlm.nih.gov/36209676/) [pubmed](https://pubmed.ncbi.nlm.nih.gov/31462385/)")
+    MarkdownView("Hello [1](https://pubmed.ncbi.nlm.nih.gov/36209676/) [2](https://pubmed.ncbi.nlm.nih.gov/31462385/) how are you today? I am well thanks for asking. Why does this go to a new line when the text is long?")
+        .padding()
+}
+
+extension NSAttributedString.Key {
+    static let roundedBackgroundColor = NSAttributedString.Key("MyRoundedBackgroundColor")
+}
+class RoundedTextView: UIView {
+    var attributedText: NSAttributedString? {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    
+    override func draw(_ rect: CGRect) {
+        guard let attributedText = attributedText else { return }
+        
+        let context = UIGraphicsGetCurrentContext()!
+        context.textMatrix = .identity
+        context.translateBy(x: 0, y: bounds.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        
+        let path = CGPath(rect: bounds, transform: nil)
+        let framesetter = CTFramesetterCreateWithAttributedString(attributedText)
+        let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: attributedText.length), path, nil)
+        
+        let lines = CTFrameGetLines(frame)
+        let lineCount = CFArrayGetCount(lines)
+        
+        var lineOrigins = [CGPoint](repeating: .zero, count: lineCount)
+        CTFrameGetLineOrigins(frame, CFRange(location: 0, length: lineCount), &lineOrigins)
+        
+        for i in 0..<lineCount {
+            let line = unsafeBitCast(CFArrayGetValueAtIndex(lines, i), to: CTLine.self)
+            let lineOrigin = lineOrigins[i]
+            
+            context.textPosition = lineOrigin
+            
+            let runs = CTLineGetGlyphRuns(line)
+            let runCount = CFArrayGetCount(runs)
+            
+            for j in 0..<runCount {
+                let run = unsafeBitCast(CFArrayGetValueAtIndex(runs, j), to: CTRun.self)
+                let runRange = CTRunGetStringRange(run)
+                
+                var ascent: CGFloat = 0
+                var descent: CGFloat = 0
+                var leading: CGFloat = 0
+                
+                let width = CGFloat(CTRunGetTypographicBounds(run, CFRange(location: 0, length: 0), &ascent, &descent, &leading))
+                let height = ascent + descent
+                
+                let runOffset = CTLineGetOffsetForStringIndex(line, runRange.location, nil)
+                let runBounds = CGRect(x: lineOrigin.x + runOffset, y: lineOrigin.y - descent, width: width, height: height)
+                
+                let attributes = CTRunGetAttributes(run) as NSDictionary
+                if let bgColor = attributes[NSAttributedString.Key.roundedBackgroundColor.rawValue] as? UIColor {
+                    // Draw rounded background
+                    let path = UIBezierPath(roundedRect: runBounds, cornerRadius: 6)
+                    bgColor.setFill()
+                    path.fill()
+                }
+                
+                CTRunDraw(run, context, CFRange(location: 0, length: 0))
+            }
+        }
+    }
 }

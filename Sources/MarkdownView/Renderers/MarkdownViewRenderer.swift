@@ -221,19 +221,11 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
         return MarkdownNodeView {
                 MarkdownLink(link: link, configuration: configuration)
-            }
-//        let nodeView = descendInto(link)
-//        switch nodeView.contentType {
-//        case .text:
-//            return MarkdownNodeView {
-//                MarkdownLink(link: link, configuration: configuration)
-//            }
-//        case .view:
-//            return nodeView
-//        }
+        }
     }
 }
 
 #Preview {
-    MarkdownView("Hello [1](https://pubmed.ncbi.nlm.nih.gov/36209676/) [2](https://pubmed.ncbi.nlm.nih.gov/31462385/), <https://pubmed.ncbi.nlm.nih.gov/36209676/>")
+    MarkdownView("Hello [1](https://pubmed.ncbi.nlm.nih.gov/36209676/) [2](https://pubmed.ncbi.nlm.nih.gov/31462385/) how are you today? I am well thanks for asking. Why does this go to a new line when the text is long?")
+        .padding()
 }
