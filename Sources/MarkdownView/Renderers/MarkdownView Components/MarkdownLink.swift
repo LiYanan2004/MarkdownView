@@ -9,7 +9,6 @@ import SwiftUI
 import Markdown
 
 struct MarkdownLink: View {
-    @Environment(\.displayScale) private var scale
     var link: Markdown.Link
     var configuration: MarkdownRenderConfiguration
     
@@ -21,32 +20,7 @@ struct MarkdownLink: View {
     }
     
     var body: SwiftUI.Text {
-        let textView = createText()
-        let renderer = SwiftUI.ImageRenderer(content: textView)
-//        renderer.scale = scale
-        if let image = renderer.uiImage {
-            return Text(Image(uiImage: image))
-        } else {
-            return attributer.attributed(link)
-        }
-    }
-    
-    private func createText() -> some View {
         attributer.attributed(link)
-            .bold()
-            .font(.body.smallCaps())
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-//            .frame(minWidth: 15)
-            .background(
-                Capsule()
-                    .fill(.quaternary.opacity(0.5))
-            )
-            .overlay(
-                Capsule()
-                    .stroke(.quinary, lineWidth: 1)
-            )
     }
 }
 
@@ -71,8 +45,9 @@ fileprivate struct LinkAttributer: MarkupVisitor {
     }
     
     func visitText(_ text: Markdown.Text) -> AttributedString {
-        var attributedString = AttributedString(stringLiteral: text.plainText)
-        attributedString.font = font
+        var attributedString = AttributedString(stringLiteral: "[" + text.plainText + "]")
+        attributedString.font = font.smallCaps()
+        
         return attributedString
     }
     
@@ -80,7 +55,10 @@ fileprivate struct LinkAttributer: MarkupVisitor {
         var attributedString = attributedString(from: link)
         if let destination = link.destination {
             attributedString.link = URL(string: destination)
-            attributedString.foregroundColor = Color.secondary
+            attributedString.foregroundColor = tint
+//            attributedString.backgroundColor = tint.opacity(0.1)
+//            attributedString.underlineStyle = .single
+            
             
         } else {
             #if os(macOS)
