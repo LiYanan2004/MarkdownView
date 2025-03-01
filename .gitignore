@@ -7,6 +7,3 @@ DerivedData/
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
-
-/Sources/MarkdownView/Documentation.docc
-MarkdownView-Docs/
