@@ -36,6 +36,10 @@ enum RawMarkdownContent: Sendable, Hashable {
 /// A Sendable markdown content that can be used to render content and supports on-demand parsing.
 public struct MarkdownContent: Sendable {
     var raw: RawMarkdownContent
+    private var escapedText: String {
+        raw.text
+            .replacingOccurrences(of: "\\", with: "\\\\")
+    }
     
     internal init(raw: RawMarkdownContent) {
         self.raw = raw
@@ -56,7 +60,7 @@ public struct MarkdownContent: Sendable {
         options.insert(.parseBlockDirectives)
         
         let document = Document(
-            parsing: raw.text,
+            parsing: escapedText,
             source: raw.source,
             options: options
         )
