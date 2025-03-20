@@ -19,6 +19,7 @@
 - ``MarkdownFontGroup/tableHeader-5y44k``
 - ``MarkdownFontGroup/tableBody-5ywif``
 - ``MarkdownFontGroup/body-6f162``
+- ``MarkdownFontGroup/inlineMath``
 
 ### Supporting type
 

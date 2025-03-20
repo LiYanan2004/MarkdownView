@@ -13,8 +13,10 @@ import MathJaxSwift
 #endif
 
 @MainActor
-enum MarkdownMath {
-    static func mixedNodeView(text: String) -> MarkdownNodeView {
+struct MarkdownMathRenderer {
+    var text: String
+    
+    func makeBody(configuration: MarkdownRenderConfiguration) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
         let latexPrefixOrSuffix = /[\$]{1,2}/
         let latexRegex = Regex {
@@ -42,6 +44,7 @@ enum MarkdownMath {
             let latexText = String(text[range])
             nodeViews.append(MarkdownNodeView {
                 LaTeX(latexText)
+                    .font(configuration.fontGroup.inlineMath)
             })
             
             // Update the last processed position

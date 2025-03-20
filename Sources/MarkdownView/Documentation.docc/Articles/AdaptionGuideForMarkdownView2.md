@@ -4,7 +4,7 @@ Learn new features and improvements that you can get by just updating package, a
 
 ## Overview
 
-MarkdownView 2 offers a new set of new customization APIs, adds the most requested rendering capabilities, and refactored rendering code a lot.
+MarkdownView 2 offers a new set of customization APIs, adds the most requested rendering capabilities, and refactored rendering code a lot.
 
 ## Breaking API Changes
 

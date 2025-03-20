@@ -44,7 +44,8 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
         if configuration.rendersInlineMathIfPossible {
-            MarkdownMath.mixedNodeView(text: text.plainText)
+            MarkdownMathRenderer(text: text.plainText)
+                .makeBody(configuration: configuration)
         } else {
             MarkdownNodeView {
                 Text(text.plainText)

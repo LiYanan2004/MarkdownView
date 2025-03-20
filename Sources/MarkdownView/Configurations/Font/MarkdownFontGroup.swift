@@ -22,6 +22,9 @@ public protocol MarkdownFontGroup {
     // Tables
     var tableHeader: Font { get }
     var tableBody: Font { get }
+    
+    // Math
+    var inlineMath: Font { get }
 }
 
 extension MarkdownFontGroup {
@@ -36,10 +39,13 @@ extension MarkdownFontGroup {
     public var body: Font { Font.body }
     
     // Blocks
-    public  var codeBlock: Font { Font.system(.callout, design: .monospaced) }
+    public var codeBlock: Font { Font.system(.callout, design: .monospaced) }
     public var blockQuote: Font { Font.system(.body, design: .serif) }
     
     // Tables
     public var tableHeader: Font { Font.headline }
     public var tableBody: Font { Font.body }
+    
+    // Math
+    public var inlineMath: Font { Font.body }
 }
