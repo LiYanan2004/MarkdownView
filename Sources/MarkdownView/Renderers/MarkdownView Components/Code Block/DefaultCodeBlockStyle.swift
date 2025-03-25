@@ -1,8 +1,8 @@
 //
-//  MarkdownCodeBlock.swift
+//  DefaultCodeBlockStyle.swift
 //  MarkdownView
 //
-//  Created by Yanan Li on 2025/2/22.
+//  Created by LiYanan2004 on 2025/3/25.
 //
 
 import SwiftUI
@@ -11,11 +11,56 @@ import SwiftUI
 @preconcurrency import Highlightr
 #endif
 
-struct MarkdownCodeBlock: View {
+/// Default code block style that applies to a MarkdownView.
+public struct DefaultCodeBlockStyle: CodeBlockStyle {
+    /// Theme configuration in the current context.
+    public var highlighterTheme: CodeHighlighterTheme
+    
+    public init(
+        highlighterTheme: CodeHighlighterTheme = CodeHighlighterTheme(
+            lightModeThemeName: "xcode",
+            darkModeThemeName: "dark"
+        )
+    ) {
+        self.highlighterTheme = highlighterTheme
+    }
+    
+    public func makeBody(configuration: Configuration) -> some View {
+        DefaultMarkdownCodeBlock(
+            language: configuration.language,
+            code: configuration.code,
+            theme: highlighterTheme
+        )
+    }
+}
+
+extension CodeBlockStyle where Self == DefaultCodeBlockStyle {
+    /// Default code block theme with light theme called "xcode" and dark theme called "dark".
+    static public var `default`: DefaultCodeBlockStyle { .init() }
+    
+    /// Default code block theme with customized light & dark themes.
+    static public func `default`(
+        lightTheme: String = "xcode",
+        darkTheme: String = "dark"
+    ) -> DefaultCodeBlockStyle {
+        .init(
+            highlighterTheme: CodeHighlighterTheme(
+                lightModeThemeName: lightTheme,
+                darkModeThemeName: darkTheme
+            )
+        )
+    }
+}
+
+// MARK: - Default View Implementation
+
+struct DefaultMarkdownCodeBlock: View {
     var language: String?
     var code: String
+    var theme: CodeHighlighterTheme
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.colorScheme) private var colorScheme
     @State private var showCopyButton = false
     @State private var attributedCode: AttributedString?
     
@@ -63,7 +108,7 @@ struct MarkdownCodeBlock: View {
     private func highlight() {
         #if canImport(Highlightr)
         let highlightr = Highlightr()!
-        highlightr.setTheme(to: configuration.currentCodeHighlightTheme)
+        highlightr.setTheme(to: theme.themeName(for: colorScheme))
         
         let specifiedLanguage = language?.lowercased() ?? ""
         let language = highlightr.supportedLanguages()
@@ -80,19 +125,19 @@ struct MarkdownCodeBlock: View {
     }
 }
 
-extension MarkdownCodeBlock {
+extension DefaultMarkdownCodeBlock {
     /// A storage that holds the full information about this code block, and refresh the code block if anything has changed.
     struct CodeBlockStorage: Hashable {
         var code: String
         var language: String?
-        var theme: String
+        var colorScheme: ColorScheme
     }
     
     private var codeBlockStorage: CodeBlockStorage {
         CodeBlockStorage(
             code: code,
             language: language,
-            theme: configuration.currentCodeHighlightTheme
+            colorScheme: colorScheme
         )
     }
 }

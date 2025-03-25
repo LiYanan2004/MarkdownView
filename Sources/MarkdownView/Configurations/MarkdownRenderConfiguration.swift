@@ -36,12 +36,6 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     
     // Code Block
     var colorScheme: ColorScheme = .light
-    var codeBlockTheme = CodeHighlighterTheme(
-        lightModeThemeName: "xcode", darkModeThemeName: "dark"
-    )
-    var currentCodeHighlightTheme: String {
-        colorScheme == .dark ? codeBlockTheme.darkModeThemeName : codeBlockTheme.lightModeThemeName
-    }
     
     // List
     var listConfiguration: MarkdownListConfiguration = .init()
