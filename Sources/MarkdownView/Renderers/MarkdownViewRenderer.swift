@@ -1,9 +1,5 @@
 import SwiftUI
 import Markdown
-import RegexBuilder
-#if canImport(Highlightr)
-import Highlightr
-#endif
 
 @MainActor
 struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {    
