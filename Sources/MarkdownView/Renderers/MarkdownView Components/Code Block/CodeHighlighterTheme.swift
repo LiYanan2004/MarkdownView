@@ -11,7 +11,7 @@ import SwiftUI
 /// Code highlighting themes configuration for both light and dark mode.
 ///
 /// - note: For more information, Check out [raspu/Highlightr](https://github.com/raspu/Highlightr).
-public struct CodeHighlighterTheme: Equatable, Sendable {
+public struct CodeHighlighterTheme: Hashable, Sendable {
     var lightModeThemeName: String
     var darkModeThemeName: String
     
@@ -48,4 +48,8 @@ public struct CodeHighlighterTheme: Equatable, Sendable {
             lightModeThemeName
         }
     }
+}
+
+extension CodeHighlighterTheme {
+    static let `default` = CodeHighlighterTheme(lightModeThemeName: "xcode", darkModeThemeName: "dark")
 }

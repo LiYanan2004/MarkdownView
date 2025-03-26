@@ -27,8 +27,7 @@ public struct DefaultCodeBlockStyle: CodeBlockStyle {
     
     public func makeBody(configuration: Configuration) -> some View {
         DefaultMarkdownCodeBlock(
-            language: configuration.language,
-            code: configuration.code,
+            codeBlockConfiguration: configuration,
             theme: highlighterTheme
         )
     }
@@ -55,35 +54,38 @@ extension CodeBlockStyle where Self == DefaultCodeBlockStyle {
 // MARK: - Default View Implementation
 
 struct DefaultMarkdownCodeBlock: View {
-    var language: String?
-    var code: String
-    var theme: CodeHighlighterTheme
+    var codeBlockConfiguration: CodeBlockStyleConfiguration
     
-    @Environment(\.markdownRendererConfiguration) private var configuration
+    var theme: CodeHighlighterTheme
     @Environment(\.colorScheme) private var colorScheme
+    
+    @Environment(\.markdownRendererConfiguration.fontGroup) private var fontGroup
+    
     @State private var showCopyButton = false
     @State private var attributedCode: AttributedString?
+    @State private var codeHighlightTask: Task<Void, Error>?
     
     var body: some View {
         Group {
             if let attributedCode {
                 Text(attributedCode)
             } else {
-                Text(code)
+                Text(codeBlockConfiguration.code)
             }
         }
-        .task(id: codeBlockStorage) {
-            highlight()
+        .task(id: codeHighlightingConfiguration, immediateHighlight)
+        .onChange(of: codeBlockConfiguration) {
+            debouncedHighlight()
         }
         .lineSpacing(5)
-        .font(configuration.fontGroup.codeBlock)
+        .font(fontGroup.codeBlock)
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
         #if os(macOS) || os(iOS)
         .overlay(alignment: .topTrailing) {
             if showCopyButton {
-                CopyButton(content: code)
+                CopyButton(content: codeBlockConfiguration.code)
                     .padding(8)
                     .transition(.opacity.animation(.easeInOut))
             }
@@ -97,46 +99,97 @@ struct DefaultMarkdownCodeBlock: View {
     
     @ViewBuilder
     private var codeLanguage: some View {
-        if let language {
+        if let language = codeBlockConfiguration.language {
             Text(language.uppercased())
                 .font(.callout)
                 .padding(8)
                 .foregroundStyle(.secondary)
         }
     }
-
-    private func highlight() {
-        #if canImport(Highlightr)
-        let highlightr = Highlightr()!
-        highlightr.setTheme(to: theme.themeName(for: colorScheme))
+    
+    private func debouncedHighlight() {
+        codeHighlightTask?.cancel()
+        codeHighlightTask = Task.detached(priority: .background) {
+            try await updateAttributeCode()
+            try await Task.sleep(for: .seconds(0.2))
+            try await highlight()
+        }
+    }
+    
+    private func updateAttributeCode() async throws {
+        guard var attributedCode = attributedCode else { return }
+        let characters = attributedCode.characters
         
-        let specifiedLanguage = language?.lowercased() ?? ""
+        for difference in codeBlockConfiguration.code.difference(from: characters) {
+            try Task.checkCancellation()
+            
+            switch difference {
+            case .insert(let offset, let insertion, _):
+                let insertionPoint = attributedCode.index(
+                    attributedCode.startIndex,
+                    offsetByCharacters: offset
+                )
+                attributedCode.insert(
+                    AttributedString(String(insertion)),
+                    at: insertionPoint
+                )
+            case .remove(let offset, _, _):
+                let removalLowerBound = attributedCode.index(attributedCode.startIndex, offsetByCharacters: offset)
+                let removalUpperBound = attributedCode.index(afterCharacter: removalLowerBound)
+                attributedCode.removeSubrange(removalLowerBound..<removalUpperBound)
+            }
+        }
+        
+        try Task.checkCancellation()
+        await MainActor.run {
+            self.attributedCode = attributedCode
+        }
+    }
+    
+    private func immediateHighlight() async {
+        do {
+            try await highlight()
+        } catch {
+            logger.error("\(String(describing: error), privacy: .public)")
+        }
+    }
+    
+    @Sendable
+    nonisolated private func highlight() async throws {
+        #if canImport(Highlightr)
+        try Task.checkCancellation()
+        let highlightr = Highlightr()!
+        await highlightr.setTheme(to: theme.themeName(for: colorScheme))
+        
+        let specifiedLanguage = codeBlockConfiguration.language?.lowercased() ?? ""
         let language = highlightr.supportedLanguages()
             .first(where: { $0.localizedCaseInsensitiveCompare(specifiedLanguage) == .orderedSame })
         
+        try Task.checkCancellation()
+        let code = codeBlockConfiguration.code
         guard let highlightedCode = highlightr.highlight(code, as: language) else { return }
-        let code = NSMutableAttributedString(
+        let attributedCode = NSMutableAttributedString(
             attributedString: highlightedCode
         )
-        code.removeAttribute(.font, range: NSMakeRange(0, code.length))
+        attributedCode.removeAttribute(.font, range: NSMakeRange(0, attributedCode.length))
         
-        attributedCode = AttributedString(code)
+        try await MainActor.run {
+            try Task.checkCancellation()
+            self.attributedCode = AttributedString(attributedCode)
+        }
         #endif
     }
 }
 
 extension DefaultMarkdownCodeBlock {
-    /// A storage that holds the full information about this code block, and refresh the code block if anything has changed.
-    struct CodeBlockStorage: Hashable {
-        var code: String
-        var language: String?
+    struct CodeHighlightingConfiguration: Hashable, Sendable {
+        var theme: CodeHighlighterTheme
         var colorScheme: ColorScheme
     }
     
-    private var codeBlockStorage: CodeBlockStorage {
-        CodeBlockStorage(
-            code: code,
-            language: language,
+    private var codeHighlightingConfiguration: CodeHighlightingConfiguration {
+        CodeHighlightingConfiguration(
+            theme: theme,
             colorScheme: colorScheme
         )
     }

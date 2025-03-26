@@ -20,11 +20,12 @@ extension View {
     /// - Parameter theme: The theme for highlighter.
     @available(*, deprecated, message: "Use `.codeBlockStyle(.default(lightTheme:darkTheme:))` instead.")
     nonisolated public func codeHighlighterTheme(_ theme: CodeHighlighterTheme) -> some View {
-        codeBlockStyle(
-            .default(
+        let style = MainActor.assumeIsolated {
+            DefaultCodeBlockStyle.default(
                 lightTheme: theme.lightModeThemeName,
                 darkTheme: theme.darkModeThemeName
             )
-        )
+        }
+        return codeBlockStyle(style)
     }
 }
