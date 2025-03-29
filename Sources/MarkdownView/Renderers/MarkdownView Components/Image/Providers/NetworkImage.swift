@@ -16,9 +16,11 @@ struct NetworkImage: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: max(imageSize.width, imageSize.height))
+                    .task { await cacheFetchedImage(image) }
             } else if let svg {
                 #if os(iOS) || os(macOS)
                 SVGView(svg: svg)
+                    .task { await cacheFetchedSVG(svg) }
                 #endif
             } else if !isSupported {
                 ImagePlaceholder()
@@ -37,13 +39,22 @@ struct NetworkImage: View {
                     .font(.callout)
             }
         }
-        .task(id: url) {
-            do {
-                try await loadContent()
-            } catch where error is ImageError {
-                isSupported = false
-                print(error.localizedDescription)
-            } catch { }
+        .onChange(of: url, initial: true) {
+            Task.detached {
+                let loadedFromCache = Task { @MainActor in
+                    await loadFromCache()
+                }
+                guard await !loadedFromCache.value else { return }
+                
+                do {
+                    try await loadContent()
+                } catch where error is ImageError {
+                    await MainActor.run {
+                        isSupported = false
+                    }
+                    print(error.localizedDescription)
+                } catch { }
+            }
         }
         #if os(iOS) || os(macOS)
         .onTapGesture(perform: reloadImage)
@@ -57,7 +68,30 @@ struct NetworkImage: View {
         imageSize = CGSize.zero
     }
     
-    private func loadContent() async throws {
+    private func loadFromCache() async -> Bool {
+        let retrievedFromCache = await CacheStorage.shared.withCacheIfAvailable(url) { cache in
+            if let imageCache = cache as? FetchedImage {
+                Task { @MainActor in
+                    self.imageSize = imageCache.size
+                    self.image = imageCache.image
+                }
+                return true
+            } else if let svgCache = cache as? FetchedSVG {
+                Task { @MainActor in
+                    self.svg = svgCache.svg
+                }
+                return true
+            }
+            return false
+        }
+        
+        if let retrievedFromCache, retrievedFromCache {
+            return true
+        }
+        return false
+    }
+    
+    nonisolated private func loadContent() async throws {
         let data = try await loadResource()
         
         do {
@@ -67,15 +101,19 @@ struct NetworkImage: View {
             // If the content is not SVG, then try to load it as Native Image.
             #if os(macOS)
             if let image = NSImage(data: data) {
-                self.image = Image(platformImage: image)
-                self.imageSize = image.size
+                await MainActor.run {
+                    self.image = Image(platformImage: image)
+                    self.imageSize = image.size
+                }
             } else {
                 throw ImageError.formatError
             }
             #else
             if let image = UIImage(data: data) {
-                self.image = Image(platformImage: image)
-                self.imageSize = image.size
+                await MainActor.run {
+                    self.image = Image(platformImage: image)
+                    self.imageSize = image.size
+                }
             } else {
                 throw ImageError.formatError
             }
@@ -84,7 +122,7 @@ struct NetworkImage: View {
     }
 }
 
-// MARK: - Helpers
+// MARK: - Auxiliary
 
 extension NetworkImage {
     private func loadResource() async throws -> Data {
@@ -95,7 +133,7 @@ extension NetworkImage {
     func loadAsSVG(data: Data) async throws {
         guard let text = String(data: data, encoding: .utf8),
               let svg = SVG(from: text) else { throw ImageError.notSVG }
-
+        
         #if os(watchOS) || os(tvOS)
         // This is an SVG content,
         // but this platform doesn't support WKWebView.
@@ -106,7 +144,26 @@ extension NetworkImage {
     }
 }
 
-// MARK: - Errors
+
+// MARK: - Content Caching
+
+extension NetworkImage {
+    private func cacheFetchedImage(_ image: Image) async {
+        let fetchedImage = FetchedImage(
+            url: url,
+            image: image,
+            size: imageSize
+        )
+        await CacheStorage.shared.addCache(fetchedImage)
+    }
+    
+    private func cacheFetchedSVG(_ svg: SVG) async {
+        let fetchedSVG = FetchedSVG(url: url, svg: svg)
+        await CacheStorage.shared.addCache(fetchedSVG)
+    }
+}
+
+// MARK: - Error Handling
 
 extension NetworkImage {
     private enum ImageError: String, LocalizedError, CustomStringConvertible {

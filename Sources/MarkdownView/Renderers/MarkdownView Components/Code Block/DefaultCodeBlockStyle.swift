@@ -149,6 +149,8 @@ struct DefaultMarkdownCodeBlock: View {
     private func immediateHighlight() async {
         do {
             try await highlight()
+        } catch is CancellationError {
+            // The task has been cancelled
         } catch {
             logger.error("\(String(describing: error), privacy: .public)")
         }
