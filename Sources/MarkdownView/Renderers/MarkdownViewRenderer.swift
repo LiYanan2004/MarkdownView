@@ -1,9 +1,5 @@
 import SwiftUI
 import Markdown
-import RegexBuilder
-#if canImport(Highlightr)
-import Highlightr
-#endif
 
 @MainActor
 struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {    
@@ -106,9 +102,11 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     
     func visitCodeBlock(_ codeBlock: CodeBlock) -> MarkdownNodeView {
         MarkdownNodeView {
-            MarkdownCodeBlock(
-                language: codeBlock.language,
-                code: codeBlock.code
+            StyledCodeBlock(
+                configuration: CodeBlockStyleConfiguration(
+                    language: codeBlock.language,
+                    code: codeBlock.code
+                )
             )
         }
     }

@@ -9,22 +9,27 @@ import SwiftUI
 
 extension View {
     nonisolated public func markdownViewStyle(_ style: some MarkdownViewStyle) -> some View {
-        transformEnvironment(\.markdownViewStyle) { markdownViewStyle in
-            markdownViewStyle = style
-        }
+        environment(\.markdownViewStyle, style)
     }
 }
 
 // MARK: - MarkdownViewStyle
 
 /// The appearance and layout behavior of MarkdownView.
+@MainActor
+@preconcurrency
 public protocol MarkdownViewStyle {
-    /// A view that represents the apperance and layout behavior of a MarkdownView
-    associatedtype Body: View
     /// The properties of a MarkdownView.
     typealias Configuration = MarkdownViewStyleConfiguration
+    
     /// Creates a view that represents the body of a MarkdownView.
+    @MainActor
+    @preconcurrency
+    @ViewBuilder
     func makeBody(configuration: Configuration) -> Body
+    
+    /// A view that represents the apperance and layout behavior of a MarkdownView
+    associatedtype Body: View
 }
 
 /// The properties of a MarkdownView.

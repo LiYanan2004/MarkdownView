@@ -117,7 +117,8 @@ fileprivate struct _SVGViewBridge: UIViewRepresentable {
 
 // MARK: - SVG Helpers
 
-struct SVG: Identifiable {
+struct SVG: Identifiable, Hashable {
+    
     var id = UUID()
     var htmlRepresentation: String
     

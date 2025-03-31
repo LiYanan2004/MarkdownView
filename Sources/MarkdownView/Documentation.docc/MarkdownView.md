@@ -29,9 +29,9 @@ MarkdownView supports adavanced rendering features like SVG, Inline Math, as wel
 - <doc:MarkdownViewStyle>
 - <doc:MarkdownFontGroup>
 - <doc:MarkdownForegroundStyleGroup>
+- <doc:CodeBlockStyle>
 - <doc:OrderedListMarkerProtocol>
 - <doc:UnorderedListMarkerProtocol>
-- ``CodeHighlighterTheme``
 
 ### Extensibility
 
