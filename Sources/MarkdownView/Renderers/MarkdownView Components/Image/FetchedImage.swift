@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct FetchedImage: Cachable {
+struct FetchedImage: Cacheable {
     var url: URL
     var image: Image
     var size: CGSize

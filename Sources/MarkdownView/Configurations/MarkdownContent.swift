@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Markdown
+@preconcurrency import Markdown
 
 // MARK: - Raw
 
@@ -36,37 +36,27 @@ enum RawMarkdownContent: Sendable, Hashable {
 /// A Sendable markdown content that can be used to render content and supports on-demand parsing.
 public struct MarkdownContent: Sendable {
     var raw: RawMarkdownContent
-    private var escapedText: String {
-        raw.text
-            .replacingOccurrences(of: "\\", with: "\\\\")
-    }
+    
+    /// Parsed markdown document.
+    public var document: Document
     
     internal init(raw: RawMarkdownContent) {
         self.raw = raw
-    }
-    
-    private var cache = Cache()
-    private class Cache: @unchecked Sendable {
-        var document: Document?
-    }
-    
-    /// Parsed markdown document.
-    public var document: Document {
-        if let cachedDocument = cache.document {
-            return cachedDocument
+        
+        func parseRawContent() -> Document {
+            let expcapedRawMarkdown = raw.text
+                .replacingOccurrences(of: "\\", with: "\\\\")
+            var options = ParseOptions()
+            options.insert(.parseBlockDirectives)
+            
+            return Document(
+                parsing: expcapedRawMarkdown,
+                source: raw.source,
+                options: options
+            )
         }
         
-        var options = ParseOptions()
-        options.insert(.parseBlockDirectives)
-        
-        let document = Document(
-            parsing: escapedText,
-            source: raw.source,
-            options: options
-        )
-        cache.document = document
-        
-        return document
+        self.document = parseRawContent()
     }
 }
 

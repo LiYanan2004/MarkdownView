@@ -7,30 +7,52 @@
 
 import Foundation
 
-actor CacheStorage: Sendable {
-    static var shared = CacheStorage()
+class CacheStorage: @unchecked Sendable {
+    static let shared = CacheStorage()
+    
+    private var caches: [AnyHashable : any Cacheable] = [:]
+    private var lock: NSLock
     
     private init() {
+        lock = NSLock()
         self.caches = [:]
     }
     
-    private var caches: [AnyHashable : any Cachable] = [:]
-    
-    func addCache(_ cache: some Cachable) {
-        caches[cache.cacheKey] = cache
+    func addCache(_ cache: some Cacheable) {
+        lock.withLock {
+            caches[cache.cacheKey] = cache
+        }
     }
     
-    func withCacheIfAvailable<T>(
+    func removeCache(_ key: AnyHashable) {
+        lock.withLock {
+            caches[key] = nil
+        }
+    }
+    
+    func withCacheIfAvailable<T: Sendable>(
         _ key: AnyHashable,
-        action: @Sendable @escaping (any Cachable) throws -> T
+        action: @Sendable @escaping (any Cacheable) throws -> T
     ) rethrows -> T? {
+        lock.lock()
+        defer { lock.unlock() }
+        
         if let cache = caches[key] {
             return try action(cache)
         }
         return nil
     }
     
-    func removeCache(_ key: AnyHashable) {
-        caches[key] = nil
+    func withCacheIfAvailable<T: Cacheable & Sendable>(
+        _ key: AnyHashable,
+        type: T.Type
+    ) -> T? {
+        lock.lock()
+        defer { lock.unlock() }
+        
+        if let cache = caches[key] {
+            return T(fromCache: cache)
+        }
+        return nil
     }
 }

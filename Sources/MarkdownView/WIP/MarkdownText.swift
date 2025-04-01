@@ -12,12 +12,7 @@ internal struct MarkdownText: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.displayScale) private var displayScale
     
-    @Environment(\.markdownRendererConfiguration) private var _configuration
-    private var configuration: MarkdownRenderConfiguration {
-        _configuration
-            .with(\.colorScheme, colorScheme)
-            .with(\.displayScale, displayScale)
-    }
+    @Environment(\.self) private var environment
     
     public init(_ text: String) {
         content = MarkdownContent(raw: .plainText(text))
@@ -29,9 +24,10 @@ internal struct MarkdownText: View {
     }
     
     public var body: some View {
-        MarkdownTextRenderer
-            .walkDocument(content.document)
-            .render(configuration: configuration)
+        MarkdownTextRenderer(environment: environment)
+            .renderMarkdownContent(content)
+            .render()
+            
         // TODO: Loading Image async and replace placeholder node.
         /*
             .onChange(of: content, initial: true) {
