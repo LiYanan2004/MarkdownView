@@ -2,8 +2,36 @@ import SwiftUI
 import Markdown
 
 @MainActor
-struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {    
+@preconcurrency
+struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRenderConfiguration
+    
+    struct Cache: Cacheable {
+        var markdownContent: MarkdownContent
+        var configuration: MarkdownRenderConfiguration
+        var renderedView: MarkdownNodeView
+        
+        var cacheKey: some Hashable { markdownContent }
+    }
+    
+    func renderMarkdownContent(_ markdownContent: MarkdownContent) -> MarkdownNodeView {
+        if let cached = CacheStorage.shared.withCacheIfAvailable(
+            markdownContent,
+            type: Cache.self
+        ), cached.configuration == self.configuration {
+            return cached.renderedView
+        }
+        
+        let renderedView = render(markdownContent.document)
+        CacheStorage.shared.addCache(
+            Cache(
+                markdownContent: markdownContent,
+                configuration: configuration,
+                renderedView: renderedView
+            )
+        )
+        return renderedView
+    }
     
     func render(_ markup: Markup) -> MarkdownNodeView {
         var renderer = self
@@ -13,8 +41,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     func visitDocument(_ document: Document) -> MarkdownNodeView {
         var nodeViews = [MarkdownNodeView]()
         for markup in document.children {
-            var renderer = self
-            let nodeView = renderer.visit(markup)
+            let nodeView = render(markup)
             if let textOnCurrentNode = nodeView.asText, nodeViews.last?.contentType == .text {
                 nodeViews.append(MarkdownNodeView(Text("\n") + textOnCurrentNode))
             } else {
@@ -31,8 +58,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     func descendInto(_ markup: any Markup) -> MarkdownNodeView {
         var nodeViews = [MarkdownNodeView]()
         for child in markup.children {
-            var renderer = self
-            let nodeView = renderer.visit(child)
+            let nodeView = render(child)
             nodeViews.append(nodeView)
         }
         return MarkdownNodeView(nodeViews)

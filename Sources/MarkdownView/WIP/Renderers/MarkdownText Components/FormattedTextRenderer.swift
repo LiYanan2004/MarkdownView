@@ -10,7 +10,7 @@ import SwiftUI
 struct FormattedTextRenderer: MarkdownNode2TextRenderer {
     func body(context: Context) -> Text {
         let text = context.node.children
-            .map { $0.render(configuration: context.renderConfiguration) }
+            .map { $0.render() }
             .reduce(Text(""), +)
         
         return switch context.node.kind {

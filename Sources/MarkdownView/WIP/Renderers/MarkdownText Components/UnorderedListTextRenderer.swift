@@ -15,7 +15,7 @@ struct UnorderedListTextRenderer: MarkdownNode2TextRenderer {
         }
         
         context.node.children
-            .map { $0.render(configuration: context.renderConfiguration) }
+            .map { $0.render() }
             .reduce(Text("")) { list, listItem in
                 let marker = markerText(context: context)
                 return list + indentation + marker + listItem
@@ -24,10 +24,10 @@ struct UnorderedListTextRenderer: MarkdownNode2TextRenderer {
     
     @TextBuilder
     private func markerText(context: Context) -> Text {
-        let marker = context.renderConfiguration.listConfiguration
+        let marker = context.rendererConfiguration.listConfiguration
             .unorderedListMarker
             .marker(listDepth: context.node.depth ?? 0)
-        if context.renderConfiguration.listConfiguration.unorderedListMarker.monospaced {
+        if context.rendererConfiguration.listConfiguration.unorderedListMarker.monospaced {
             if #available(iOS 16.4, macOS 13.3, tvOS 16.4, watchOS 9.4, *) {
                 Text("\(marker) ")
                     .monospaced()

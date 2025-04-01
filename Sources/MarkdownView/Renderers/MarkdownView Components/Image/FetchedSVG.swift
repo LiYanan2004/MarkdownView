@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FetchedSVG: Cachable {
+struct FetchedSVG: Cacheable {
     var url: URL
     var svg: SVG
     

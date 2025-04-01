@@ -15,7 +15,7 @@ struct OrderedListTextRenderer: MarkdownNode2TextRenderer {
         }
         
         context.node.children
-            .map { $0.render(configuration: context.renderConfiguration) }
+            .map { $0.render() }
             .enumerated()
             .reduce(Text("")) { list, enumeratedItem in
                 let (offset, listItem) = enumeratedItem
@@ -26,10 +26,10 @@ struct OrderedListTextRenderer: MarkdownNode2TextRenderer {
     
     @TextBuilder
     private func markerText(context: Context, index: Int) -> Text {
-        let marker = context.renderConfiguration.listConfiguration
+        let marker = context.rendererConfiguration.listConfiguration
             .orderedListMarker
             .marker(at: index, listDepth: context.node.depth ?? 0)
-        if context.renderConfiguration.listConfiguration.orderedListMarker.monospaced {
+        if context.environment.markdownRendererConfiguration.listConfiguration.orderedListMarker.monospaced {
             if #available(iOS 16.4, macOS 13.3, tvOS 16.4, watchOS 9.4, *) {
                 Text("\(marker) ")
                     .monospaced()

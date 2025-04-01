@@ -8,13 +8,22 @@
 import Foundation
 import SwiftUI
 
+@MainActor
+@preconcurrency
 protocol MarkdownNode2TextRenderer {
     typealias Context = MarkdownNode2TextRendererContext
     
-    @TextBuilder func body(context: Context) -> Text
+    @MainActor
+    @TextBuilder
+    func body(context: Context) -> Text
 }
 
+@MainActor
+@preconcurrency
 struct MarkdownNode2TextRendererContext: Sendable {
     var node: MarkdownTextNode
-    var renderConfiguration: MarkdownRenderConfiguration
+    var environment: EnvironmentValues
+    var rendererConfiguration: MarkdownRenderConfiguration {
+        environment.markdownRendererConfiguration
+    }
 }

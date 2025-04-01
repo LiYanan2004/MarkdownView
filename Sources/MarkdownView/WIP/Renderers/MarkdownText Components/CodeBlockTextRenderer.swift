@@ -31,7 +31,7 @@ struct CodeBlockTextRenderer: MarkdownNode2TextRenderer {
                     lightModeThemeName: "xcode",
                     darkModeThemeName: "dark"
                 )
-                highlighter.setTheme(to: themeConfig.themeName(for: context.renderConfiguration.colorScheme))
+                highlighter.setTheme(to: themeConfig.themeName(for: context.environment.colorScheme))
                 if highlighter.supportedLanguages().contains(language) == true,
                     let highlighted = highlighter.highlight(code, as: language) {
                     let attributedCode = NSMutableAttributedString(

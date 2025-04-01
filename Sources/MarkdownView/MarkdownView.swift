@@ -10,13 +10,7 @@ public struct MarkdownView: View {
     @Environment(\.displayScale) private var displayScale
     
     @Environment(\.markdownViewStyle) private var markdownViewStyle
-    @Environment(\.markdownRendererConfiguration) private var _configuration
-    private var configuration: MarkdownRenderConfiguration {
-        _configuration
-            .with(\.colorScheme, colorScheme)
-            .with(\.displayScale, displayScale)
-            .with(\.preferredBaseURL, _configuration.preferredBaseURL ?? content.raw.source)
-    }
+    @Environment(\.markdownRendererConfiguration) private var configuration
     
     public init(_ text: String) {
         self.content = MarkdownContent(
@@ -39,14 +33,11 @@ public struct MarkdownView: View {
         markdownViewStyle
             .makeBody(configuration: MarkdownViewStyleConfiguration {
                 MarkdownViewRenderer(configuration: configuration)
-                    .render(content.document)
+                    .renderMarkdownContent(content)
             })
             .erasedToAnyView()
             .sizeOfView($viewSize)
             .containerSize(viewSize)
             .font(configuration.fontGroup.body)
-            .transformEnvironment(\.markdownRendererConfiguration) { configuration in
-                configuration.colorScheme = colorScheme
-            }
     }
 }

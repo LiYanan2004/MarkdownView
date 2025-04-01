@@ -8,12 +8,15 @@
 import Foundation
 import SwiftUI
 
+@MainActor
+@preconcurrency
 struct MarkdownTextNode: Sendable, AllowingModifyThroughKeyPath {
     var kind: MarkdownTextKind
     var children: [MarkdownTextNode]
     var content: Content?
     var index: Int?
     var depth: Int?
+    var environment: EnvironmentValues
     
     enum Content: Sendable {
         case text(String)
@@ -33,11 +36,11 @@ struct MarkdownTextNode: Sendable, AllowingModifyThroughKeyPath {
 }
 
 extension MarkdownTextNode {
-    func render(configuration: MarkdownRenderConfiguration) -> Text {
+    func render() -> Text {
         switch kind {
         case .document:
             return children
-                .map { $0.render(configuration: configuration) }
+                .map { $0.render() }
                 .reduce(Text(""), +)
         case .plainText:
             guard case let .text(text) = content! else {
@@ -46,74 +49,104 @@ extension MarkdownTextNode {
             return Text(text)
         case .hardBreak:
             return BreakTextRenderer()
-                .body(context: BreakTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: BreakTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .softBreak:
             return BreakTextRenderer()
-                .body(context: BreakTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: BreakTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .placeholder:
             return Text(" ")
         case .paragraph:
             return ParagraphTextRenderer()
-                .body(context: HeadingTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: HeadingTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .heading:
             return HeadingTextRenderer()
-                .body(context: HeadingTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: HeadingTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .italicText, .boldText, .strikethrough:
             return FormattedTextRenderer()
-                .body(context: FormattedTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: FormattedTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .link:
             return LinkTextRenderer()
-                .body(context: LinkTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: LinkTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .image:
             return ImageTextRenderer()
-                .body(context: ImageTextRenderer.Context(node: self, renderConfiguration: configuration))
-            
+                .body(
+                    context: ImageTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .codeBlock:
             return CodeBlockTextRenderer()
-                .body(context: CodeBlockTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: CodeBlockTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .code:
             return InlineCodeTextRenderer()
-                .body(context: InlineCodeTextRenderer.Context(node: self, renderConfiguration: configuration))
-            
+                .body(
+                    context: InlineCodeTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .orderedList:
             return OrderedListTextRenderer()
-                .body(context: OrderedListTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: OrderedListTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .unorderedList:
             return UnorderedListTextRenderer()
-                .body(context: UnorderedListTextRenderer.Context(node: self, renderConfiguration: configuration))
+                .body(
+                    context: UnorderedListTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         case .listItem:
             return ListItemTextRenderer()
-                .body(context: ListItemTextRenderer.Context(node: self, renderConfiguration: configuration))
-            
+                .body(
+                    context: ListItemTextRenderer.Context(
+                        node: self,
+                        environment: environment
+                    )
+                )
         default:
             return Text("Unimplemented: \(kind)")
         }
     }
-}
-
-enum MarkdownTextKind: Sendable, Equatable {
-    case document
-    
-    case paragraph
-    case heading
-    case plainText
-    case strikethrough
-    case boldText
-    case italicText
-    case link
-    
-    case softBreak
-    case hardBreak
-    
-    case code
-    case codeBlock
-    
-    case orderedList
-    case unorderedList
-    case listItem
-    
-    case placeholder
-    case image
-    
-    case unknown
 }

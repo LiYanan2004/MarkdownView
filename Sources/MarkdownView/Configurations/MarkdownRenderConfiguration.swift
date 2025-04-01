@@ -16,15 +16,9 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     }
     
     var rendersInlineMathIfPossible = false
-    var displayScale: CGFloat = 2
     
     // Spacing
-    var lineSpacing: CGFloat? = nil
     var componentSpacing: CGFloat = 8
-    
-    mutating func withLineSpacing(_ lineSpacing: CGFloat) {
-        self.lineSpacing = lineSpacing
-    }
     
     // Tint
     var inlineCodeTintColor: Color = .accentColor
@@ -33,9 +27,6 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     // Font & Foreground style
     var fontGroup: AnyMarkdownFontGroup = .init(.automatic)
     var foregroundStyleGroup: AnyMarkdownForegroundStyleGroup = .init(.automatic)
-    
-    // Code Block
-    var colorScheme: ColorScheme = .light
     
     // List
     var listConfiguration: MarkdownListConfiguration = .init()
