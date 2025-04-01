@@ -40,7 +40,7 @@ struct MarkdownMathRenderer {
             // Add the current LaTeX node
             nodeViews.append(MarkdownNodeView {
                 LaTeX(latex)
-                    .font(configuration.fontGroup.inlineMath)
+                    .font(.footnote)
             })
             
             // Update the last processed position
@@ -88,65 +88,62 @@ struct MarkdownMathRenderer {
         return matches
     }
     
-    // Process \(...\) delimiters
     private func processParenDelimiters() -> [(Range<String.Index>, String)] {
-        var matches: [(Range<String.Index>, String)] = []
-        
-        // Find all occurrences of \(
-        var searchRange = text.startIndex..<text.endIndex
-        while let openRange = text.range(of: "\\(", range: searchRange) {
-            // Look for the corresponding \) after the \(
-            let afterOpenRange = openRange.upperBound..<text.endIndex
-            if let closeRange = text.range(of: "\\)", range: afterOpenRange) {
-                // Found a pair of \( and \)
-                let fullRange = openRange.lowerBound..<closeRange.upperBound
-                let content = String(text[openRange.upperBound..<closeRange.lowerBound])
-                
-                // Convert to LaTeX format
-                let latex = "$" + content + "$"
-                
-                matches.append((fullRange, latex)) // Inline math
-                
-                // Update search range for next iteration
-                searchRange = closeRange.upperBound..<text.endIndex
-            } else {
-                // No matching \) found, move past this \(
-                searchRange = openRange.upperBound..<text.endIndex
+        let parenRegex = Regex {
+            "\\("
+            Capture {
+                OneOrMore(.anyNonNewline.union(.newlineSequence))
+                ZeroOrMore {
+                    NegativeLookahead {
+                        "\\)"
+                    }
+                    CharacterClass.any
+                }
             }
+            "\\)"
+        }
+        .dotMatchesNewlines()
+        
+        var matches: [(Range<String.Index>, String)] = []
+        for match in text.matches(of: parenRegex) {
+            let range = match.range
+            let content = String(match.output.1)
+            let latex = "$" + content + "$"
+            matches.append((range, latex))
         }
         
         return matches
     }
-    
-    // Process \[...\] delimiters
+
     private func processBracketDelimiters() -> [(Range<String.Index>, String)] {
-        var matches: [(Range<String.Index>, String)] = []
-        
-        // Find all occurrences of \[
-        var searchRange = text.startIndex..<text.endIndex
-        while let openRange = text.range(of: "\\[", range: searchRange) {
-            // Look for the corresponding \] after the \[
-            let afterOpenRange = openRange.upperBound..<text.endIndex
-            if let closeRange = text.range(of: "\\]", range: afterOpenRange) {
-                // Found a pair of \[ and \]
-                let fullRange = openRange.lowerBound..<closeRange.upperBound
-                let content = String(text[openRange.upperBound..<closeRange.lowerBound])
+            let bracketRegex = Regex {
+                "\\["
+                ZeroOrMore(.whitespace)
                 
-                // Convert to LaTeX format
-                let latex = "$$" + content + "$$"
-                
-                matches.append((fullRange, latex)) // Display math
-                
-                // Update search range for next iteration
-                searchRange = closeRange.upperBound..<text.endIndex
-            } else {
-                // No matching \] found, move past this \[
-                searchRange = openRange.upperBound..<text.endIndex
+                Capture {
+                    OneOrMore {
+                        NegativeLookahead {
+                            ZeroOrMore(.whitespace)
+                            "\\]"
+                        }
+                        CharacterClass.any
+                    }
+                }
+                "\\]"
             }
+            .dotMatchesNewlines()
+            
+            var matches: [(Range<String.Index>, String)] = []
+            for match in text.matches(of: bracketRegex) {
+                let range = match.range
+                let content = String(match.output.1)
+                let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+                let latex = "$$" + trimmedContent + "$$"
+                matches.append((range, latex))
+            }
+            
+            return matches
         }
-        
-        return matches
-    }
 }
 
 #Preview {
@@ -161,8 +158,29 @@ struct MarkdownMathRenderer {
         """#)
         
         MarkdownView(#"""
-        **The Cauchy-Schwarz Inequality** with `\[...\]`
-        \[\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)\]
+        Sure! Here’s the calculation presented in LaTeX format:
+
+        \[\text{MME from MS Contin} = \text{Dose of MS Contin per day} = 60 \, \text{mg} \times 2 \, \text{(BID)} = 120 \, \text{mg}\]
+
+        \[\text{MME from MS Contin} = 120 \, \text{MME}\]
+
+        \[
+        \text{Dose of Percocet per day} = 7.5 \, \text{mg} \times 4 \, \text{(QID)} = 30 \, \text{mg}
+        \]
+
+        \[
+        \text{MME from Percocet} = 30 \, \text{mg} \times 1.5 = 45 \, \text{MME}
+        \]
+
+        \[
+        \text{Total MME} = \text{MME from MS Contin} + \text{MME from Percocet} = 120 \, \text{MME} + 45 \, \text{MME} = 165 \, \text{MME}
+        \]
+
+        Therefore, the total MME is 
+
+        \[
+        \boxed{165 \, \text{MME}}.
+        \]
         """#)
     }
     .padding()
