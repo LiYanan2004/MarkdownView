@@ -157,17 +157,31 @@ struct MarkdownMathRenderer {
         """#)
         
         MarkdownView(#"""
-        Sure! Here's the calculation presented in LaTeX:
-        
-        \[ 
-        \text{MME from MS Contin} = 60 \, \text{mg} \times 2 = 120 \, \text{mg of morphine/day} = 120 \, \text{MME} 
+        Sure! Here’s the MME calculation formatted in LaTeX:
+        \[
+        \text{Total MME} = \text{MME from MS Contin} + \text{MME from Percocet}
         \]
-        and this is the reason this works so well
-        \( 
-        \text{MME from MS Contin} = 60 \, \text{mg} \times 2 = 120 \, \text{mg of morphine/day} = 120 \, \text{MME} 
+
+        Step 1: MS Contin (Morphine Sulfate)
+        \(
+        \text{Dose per day} = 60 \text{ mg} \times 2 = 120 \text{ mg}
         \)
-        
-        Thus, the combined total is \( \text{165 MME} \).
+        \(
+        \text{MME} = 120 \text{ mg} \times 1 = 120 \text{ MME}
+        \)
+
+        Step 2: Percocet (Oxycodone 7.5 mg)
+        \(
+        \text{Dose per day} = 7.5 \text{ mg} \times 4 = 30 \text{ mg}
+        \)
+        \(
+        \text{MME} = 30 \text{ mg} \times 1.5 = 45 \text{ MME}
+        \)
+        Final Total MME Calculation:
+        \(
+        \text{Total MME} = 120 + 45 = 165 \text{ MME/day}
+        \)
+        This gives a total daily Morphine Milligram Equivalent (MME) of 165. Let me know if you need any modifications!
         """#)
     }
     .padding()
