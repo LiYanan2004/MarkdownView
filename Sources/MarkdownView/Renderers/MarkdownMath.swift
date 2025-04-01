@@ -233,10 +233,6 @@ extension MarkdownContent {
         }
         
         let result = mutableString as String
-        
-        print("🥩RAW", text)
-        print("🧑🏻‍🍳AFTER PROCESSING", result)
-        
         return result
     }
 }
