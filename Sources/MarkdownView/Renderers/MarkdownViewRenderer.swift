@@ -40,10 +40,10 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
         if configuration.rendersInlineMathIfPossible {
-            MarkdownMathRenderer(text: text.plainText)
+            return MarkdownMathRenderer(text: text.plainText)
                 .makeBody(configuration: configuration)
         } else {
-            MarkdownNodeView {
+            return MarkdownNodeView {
                 Text(text.plainText)
             }
         }
@@ -64,6 +64,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     func visitSoftBreak(_ softBreak: SoftBreak) -> MarkdownNodeView {
         MarkdownNodeView {
             Text(" ")
+//            Text(" ")
         }
     }
     
@@ -225,6 +226,40 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
 }
 
 #Preview {
-    MarkdownView("Hello [1](https://pubmed.ncbi.nlm.nih.gov/36209676/) [2](https://pubmed.ncbi.nlm.nih.gov/31462385/) how are you today? I am well thanks for asking. Why does this go to a new line when the text is long?")
-        .padding()
+    VStack(alignment: .leading, spacing: 20) {
+        ScrollView {
+            Group {
+                MarkdownView(#"Inline math with `$`: $ \sqrt{3x-1}+(1+x)^2 $"#)
+                
+                MarkdownView(#"Inline math with `\(...\)`: \(\sqrt{3x-1}+(1+x)^2\)"#)
+                
+                MarkdownView(#"""
+        **The Cauchy-Schwarz Inequality** with `$$`
+        $$ \left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right) $$
+        """#)
+                
+                MarkdownView(#"""
+        Sure! Here's the calculation presented in LaTeX:
+        
+        \[ \text{MME from MS Contin} = 60 \, \text{mg} \times 2 = 120 \, \text{mg of morphine/day} = 120 \, \text{MME} \]
+        
+        Certainly! Here is the calculation presented in LaTeX without any additional spaces:
+        
+        \[
+        \text{Total MME} = \text{MME from MS Contin} + \text{MME from Percocet}
+        \]
+        \[\text{Total MME} = 120 \, \text{MME} + 45 \, \text{MME}\]
+        \[
+        \text{Total MME} = 165 \, \text{MME}
+        \]
+        \[
+        \text{Converted to MME} = 30 \, \text{mg} \times 1.5 = 45 \, \text{MME}
+        \]
+        \[\text{Total MME} = 120 \, \text{MME (from MS Contin)} + 45 \, \text{MME (from Percocet)} = 165 \, \text{MME}\]
+        Thus, the combined total is \( \text{165 MME} \).
+        """#)
+            }
+        }.padding()
+    }
+    .markdownMathRenderingEnabled()
 }

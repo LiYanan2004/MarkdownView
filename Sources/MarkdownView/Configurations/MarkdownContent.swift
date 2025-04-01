@@ -59,8 +59,9 @@ public struct MarkdownContent: Sendable {
         var options = ParseOptions()
         options.insert(.parseBlockDirectives)
         
+        // Use the preprocessed text instead of raw text
         let document = Document(
-            parsing: escapedText,
+            parsing: preprocessedText,
             source: raw.source,
             options: options
         )
@@ -68,6 +69,24 @@ public struct MarkdownContent: Sendable {
         
         return document
     }
+    // ORIGINAL
+//    public var document: Document {
+//        if let cachedDocument = cache.document {
+//            return cachedDocument
+//        }
+//        
+//        var options = ParseOptions()
+//        options.insert(.parseBlockDirectives)
+//        
+//        let document = Document(
+//            parsing: escapedText,
+//            source: raw.source,
+//            options: options
+//        )
+//        cache.document = document
+//        
+//        return document
+//    }
 }
 
 extension MarkdownContent: Hashable {
