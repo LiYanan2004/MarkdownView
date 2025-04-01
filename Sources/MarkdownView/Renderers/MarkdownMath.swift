@@ -18,22 +18,19 @@ struct MarkdownMathRenderer {
     
     func makeBody(configuration: MarkdownRenderConfiguration) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
-        let latexPrefixOrSuffix = /[\$]{1,2}/
-        let latexRegex = Regex {
-            latexPrefixOrSuffix
-            OneOrMore {
-                CharacterClass.anyOf("$").inverted
-            }
-            latexPrefixOrSuffix
-        }
-        let latexMatches = text.matches(of: latexRegex)
+        // Process different types of LaTeX delimiters
+        let dollarMatches = processDollarDelimiters()
+        let parenMatches = processParenDelimiters()
+        let bracketMatches = processBracketDelimiters()
+        
+        // Combine all matches and sort by position
+        var allMatches = dollarMatches + parenMatches + bracketMatches
+        allMatches.sort { $0.0.lowerBound < $1.0.lowerBound }
         
         var nodeViews: [MarkdownNodeView] = []
         var lastEndIndex = text.startIndex
         
-        for latex in latexMatches {
-            let range = latex.range
-            
+        for (range, latex) in allMatches {
             // Add normal text before the current LaTeX match (if any)
             if lastEndIndex < range.lowerBound {
                 let normalText = String(text[lastEndIndex..<range.lowerBound])
@@ -41,9 +38,8 @@ struct MarkdownMathRenderer {
             }
             
             // Add the current LaTeX node
-            let latexText = String(text[range])
             nodeViews.append(MarkdownNodeView {
-                LaTeX(latexText)
+                LaTeX(latex)
                     .font(configuration.fontGroup.inlineMath)
             })
             
@@ -69,4 +65,106 @@ struct MarkdownMathRenderer {
         return MarkdownNodeView(Text(text))
         #endif
     }
+    
+    // Process $...$ and $$...$$ delimiters (already implemented)
+    private func processDollarDelimiters() -> [(Range<String.Index>, String)] {
+        let latexPrefixOrSuffix = /[\$]{1,2}/
+        let latexRegex = Regex {
+            latexPrefixOrSuffix
+            OneOrMore {
+                CharacterClass.anyOf("$").inverted
+            }
+            latexPrefixOrSuffix
+        }
+        
+        var matches: [(Range<String.Index>, String)] = []
+        for match in text.matches(of: latexRegex) {
+            let range = match.range
+            let latex = String(text[range])
+            
+            matches.append((range, latex))
+        }
+        
+        return matches
+    }
+    
+    // Process \(...\) delimiters
+    private func processParenDelimiters() -> [(Range<String.Index>, String)] {
+        var matches: [(Range<String.Index>, String)] = []
+        
+        // Find all occurrences of \(
+        var searchRange = text.startIndex..<text.endIndex
+        while let openRange = text.range(of: "\\(", range: searchRange) {
+            // Look for the corresponding \) after the \(
+            let afterOpenRange = openRange.upperBound..<text.endIndex
+            if let closeRange = text.range(of: "\\)", range: afterOpenRange) {
+                // Found a pair of \( and \)
+                let fullRange = openRange.lowerBound..<closeRange.upperBound
+                let content = String(text[openRange.upperBound..<closeRange.lowerBound])
+                
+                // Convert to LaTeX format
+                let latex = "$" + content + "$"
+                
+                matches.append((fullRange, latex)) // Inline math
+                
+                // Update search range for next iteration
+                searchRange = closeRange.upperBound..<text.endIndex
+            } else {
+                // No matching \) found, move past this \(
+                searchRange = openRange.upperBound..<text.endIndex
+            }
+        }
+        
+        return matches
+    }
+    
+    // Process \[...\] delimiters
+    private func processBracketDelimiters() -> [(Range<String.Index>, String)] {
+        var matches: [(Range<String.Index>, String)] = []
+        
+        // Find all occurrences of \[
+        var searchRange = text.startIndex..<text.endIndex
+        while let openRange = text.range(of: "\\[", range: searchRange) {
+            // Look for the corresponding \] after the \[
+            let afterOpenRange = openRange.upperBound..<text.endIndex
+            if let closeRange = text.range(of: "\\]", range: afterOpenRange) {
+                // Found a pair of \[ and \]
+                let fullRange = openRange.lowerBound..<closeRange.upperBound
+                let content = String(text[openRange.upperBound..<closeRange.lowerBound])
+                
+                // Convert to LaTeX format
+                let latex = "$$" + content + "$$"
+                
+                matches.append((fullRange, latex)) // Display math
+                
+                // Update search range for next iteration
+                searchRange = closeRange.upperBound..<text.endIndex
+            } else {
+                // No matching \] found, move past this \[
+                searchRange = openRange.upperBound..<text.endIndex
+            }
+        }
+        
+        return matches
+    }
+}
+
+#Preview {
+    VStack(alignment: .leading, spacing: 20) {
+        MarkdownView(#"Inline math with `$`: $\sqrt{3x-1}+(1+x)^2$"#)
+        
+        MarkdownView(#"Inline math with `\(...\)`: \(\sqrt{3x-1}+(1+x)^2\)"#)
+        
+        MarkdownView(#"""
+        **The Cauchy-Schwarz Inequality** with `$$`
+        $$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
+        """#)
+        
+        MarkdownView(#"""
+        **The Cauchy-Schwarz Inequality** with `\[...\]`
+        \[\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)\]
+        """#)
+    }
+    .padding()
+    .markdownMathRenderingEnabled()
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 import MarkdownView
 
-struct MathDestination: View {
+\struct MathDestination: View {
     var body: some View {
         VStack(alignment: .leading) {
             MarkdownView(#"This sentence uses `$` delimiters to show math inline: $\sqrt{3x-1}+(1+x)^2$"#)
