@@ -24,13 +24,18 @@ let package = Package(
         .target(
             name: "MarkdownView",
             dependencies: [
-                .product(name: "Markdown", package: "swift-markdown"),
                 .product(
-                    name: "Highlightr", package: "Highlightr",
+                    name: "Markdown",
+                    package: "swift-markdown"
+                ),
+                .product(
+                    name: "Highlightr",
+                    package: "Highlightr",
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
                 .product(
-                    name: "LaTeXSwiftUI", package: "LaTeXSwiftUI",
+                    name: "LaTeXSwiftUI",
+                    package: "LaTeXSwiftUI",
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
             ],
