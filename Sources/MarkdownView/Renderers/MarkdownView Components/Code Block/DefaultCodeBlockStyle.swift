@@ -111,7 +111,7 @@ struct DefaultMarkdownCodeBlock: View {
         codeHighlightTask?.cancel()
         codeHighlightTask = Task.detached(priority: .background) {
             try await updateAttributeCode()
-            try await Task.sleep(for: .seconds(0.2))
+            try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
             try await highlight()
         }
     }
