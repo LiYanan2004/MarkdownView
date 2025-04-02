@@ -18,21 +18,29 @@ struct MarkdownMathRenderer {
     
     func makeBody(configuration: MarkdownRenderConfiguration) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
-        let latexPrefixOrSuffix = /[\$]{1,2}/
-        let latexRegex = Regex {
-            latexPrefixOrSuffix
-            OneOrMore {
-                CharacterClass.anyOf("$").inverted
+        let ranges: [Range<String.Index>]
+        if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
+            let latexPrefixOrSuffix = /[\$]{1,2}/
+            let latexRegex = Regex {
+                latexPrefixOrSuffix
+                OneOrMore {
+                    CharacterClass.anyOf("$").inverted
+                }
+                latexPrefixOrSuffix
             }
-            latexPrefixOrSuffix
+            ranges = text.matches(of: latexRegex).map(\.range)
+        } else {
+            let pattern = #"(?<!\\)(\${1,2})([^\$]+?)\1"#
+            let regex = try! NSRegularExpression(pattern: pattern)
+            let nsRange = NSRange(text.startIndex..<text.endIndex, in: text)
+            ranges = regex.matches(in: text, range: nsRange)
+                .compactMap({ Range($0.range, in: text) })
         }
-        let latexMatches = text.matches(of: latexRegex)
         
         var nodeViews: [MarkdownNodeView] = []
         var lastEndIndex = text.startIndex
         
-        for latex in latexMatches {
-            let range = latex.range
+        for range in ranges {
             
             // Add normal text before the current LaTeX match (if any)
             if lastEndIndex < range.lowerBound {
