@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		38A580C32CC8D7B1001EDFCA /* MarkdownView in Frameworks */ = {isa = PBXBuildFile; productRef = 38A580C22CC8D7B1001EDFCA /* MarkdownView */; };
+		8C21E5B02D9E7FB20097554E /* MarkdownView in Frameworks */ = {isa = PBXBuildFile; productRef = 8C21E5AF2D9E7FB20097554E /* MarkdownView */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				38A580C32CC8D7B1001EDFCA /* MarkdownView in Frameworks */,
+				8C21E5B02D9E7FB20097554E /* MarkdownView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 			);
 			name = DemoApp;
 			packageProductDependencies = (
-				38A580C22CC8D7B1001EDFCA /* MarkdownView */,
+				8C21E5AF2D9E7FB20097554E /* MarkdownView */,
 			);
 			productName = DemoApp;
 			productReference = 38A580AF2CC8D6D9001EDFCA /* DemoApp.app */;
@@ -101,7 +101,7 @@
 			mainGroup = 38A580A62CC8D6D9001EDFCA;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				38A580C12CC8D7B1001EDFCA /* XCRemoteSwiftPackageReference "markdownview" */,
+				8C21E5AE2D9E7FB20097554E /* XCLocalSwiftPackageReference "../../MarkdownView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 38A580B02CC8D6D9001EDFCA /* Products */;
@@ -349,21 +349,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		38A580C12CC8D7B1001EDFCA /* XCRemoteSwiftPackageReference "markdownview" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/LiYanan2004/markdownview";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		8C21E5AE2D9E7FB20097554E /* XCLocalSwiftPackageReference "../../MarkdownView" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../MarkdownView;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		38A580C22CC8D7B1001EDFCA /* MarkdownView */ = {
+		8C21E5AF2D9E7FB20097554E /* MarkdownView */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 38A580C12CC8D7B1001EDFCA /* XCRemoteSwiftPackageReference "markdownview" */;
 			productName = MarkdownView;
 		};
 /* End XCSwiftPackageProductDependency section */
