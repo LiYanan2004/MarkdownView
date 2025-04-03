@@ -9,10 +9,10 @@ import SwiftUI
 import MarkdownView
 
 struct ContentView: View {
-    @State private var selection: Tab = .overview
+    @State private var selection: Tab? = .overview
     
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
             List(selection: $selection) {
                 ForEach(TabGroup.allCases) { group in
                     Section {
@@ -26,8 +26,11 @@ struct ContentView: View {
             }
             .listStyle(.sidebar)
         } detail: {
-            selection.destination
+            if let selection {
+                selection.destination
+            }
         }
+        .navigationSplitViewStyle(.balanced)
     }
 }
 
