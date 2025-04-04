@@ -192,7 +192,7 @@ struct DefaultMarkdownCodeBlock: View {
             #if os(macOS)
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(codeBlockConfiguration.code, forType: .string)
-            #else
+            #elseif os(iOS) || os(visionOS)
             UIPasteboard.general.string = codeBlockConfiguration.code
             #endif
             Task {
