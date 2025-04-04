@@ -61,9 +61,11 @@ struct DefaultMarkdownCodeBlock: View {
     
     @Environment(\.markdownRendererConfiguration.fontGroup) private var fontGroup
     
-    @State private var showCopyButton = false
     @State private var attributedCode: AttributedString?
     @State private var codeHighlightTask: Task<Void, Error>?
+    
+    @State private var showCopyButton = false
+    @State private var codeCopied = false
     
     var body: some View {
         Group {
@@ -77,23 +79,27 @@ struct DefaultMarkdownCodeBlock: View {
         .onChange(of: codeBlockConfiguration) {
             debouncedHighlight()
         }
-        .lineSpacing(5)
+        .lineSpacing(4)
         .font(fontGroup.codeBlock)
-        .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+        .padding(16)
         #if os(macOS) || os(iOS)
-        .overlay(alignment: .topTrailing) {
-            if showCopyButton {
-                CopyButton(content: codeBlockConfiguration.code)
-                    .padding(8)
-                    .transition(.opacity.animation(.easeInOut))
-            }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            copyButton
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .background(.quaternary.opacity(0.3))
+                .overlay {
+                    Rectangle()
+                        .stroke(.quaternary, lineWidth: 0.5)
+                        .scaleEffect(x: 1.5, y: 1.5, anchor: .bottom)
+                }
         }
-        .onHover { showCopyButton = $0 }
         #endif
-        .overlay(alignment: .bottomTrailing) {
-            codeLanguage
+        .background(.background)
+        .clipShape(.rect(cornerRadius: 12))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.quaternary)
         }
     }
     
@@ -102,7 +108,6 @@ struct DefaultMarkdownCodeBlock: View {
         if let language = codeBlockConfiguration.language {
             Text(language.uppercased())
                 .font(.callout)
-                .padding(8)
                 .foregroundStyle(.secondary)
         }
     }
@@ -181,6 +186,44 @@ struct DefaultMarkdownCodeBlock: View {
         }
         #endif
     }
+    
+    private var copyButton: some View {
+        Button {
+            #if os(macOS)
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(codeBlockConfiguration.code, forType: .string)
+            #elseif os(iOS) || os(visionOS)
+            UIPasteboard.general.string = codeBlockConfiguration.code
+            #endif
+            Task {
+                withAnimation(.spring()) {
+                    codeCopied = true
+                }
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+                withAnimation(.spring()) {
+                    codeCopied = false
+                }
+            }
+        } label: {
+            Group {
+                if codeCopied {
+                    Label("Copied", systemImage: "checkmark")
+                        .transition(.opacity.combined(with: .scale))
+                } else {
+                    Label("Copy", systemImage: "square.on.square")
+                        .transition(.opacity.combined(with: .scale))
+                }
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.accessory)
+        .font(.callout.weight(.medium))
+        #if os(macOS)
+        .padding(8)
+        #else
+        .padding(16)
+        #endif
+    }
 }
 
 extension DefaultMarkdownCodeBlock {
@@ -197,65 +240,39 @@ extension DefaultMarkdownCodeBlock {
     }
 }
 
-// MARK: - Copy Button
+// MARK: - Supplementary
 
-#if os(macOS) || os(iOS)
-struct CopyButton: View {
-    var content: String
-    @State private var copied = false
-    #if os(macOS)
-    @ScaledMetric private var size = 12
-    #else
-    @ScaledMetric private var size = 18
-    #endif
-    @State private var isHovering = false
-    
-    var body: some View {
-        Button(action: copy) {
-            Group {
-                if copied {
-                    Image(systemName: "checkmark")
-                        .transition(.opacity.combined(with: .scale))
-                } else {
-                    Image(systemName: "doc.on.clipboard")
-                        .transition(.opacity.combined(with: .scale))
-                }
-            }
-            .font(.system(size: size))
-            .frame(width: size, height: size)
-            .padding(8)
-            .contentShape(Rectangle())
-        }
-        .foregroundStyle(.primary)
-        .background(
-            .quaternary.opacity(0.2),
-            in: RoundedRectangle(cornerRadius: 5, style: .continuous)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .stroke(.quaternary, lineWidth: 1)
-        }
-        .brightness(isHovering ? 0.3 : 0)
-        .buttonStyle(.borderless) // Only use `.borderless` can behave correctly when text selection is enabled.
-        .onHover { isHovering = $0 }
-    }
-    
-    private func copy() {
+struct AccessoryButtonStyle: PrimitiveButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
         #if os(macOS)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(content, forType: .string)
-        #else
-        UIPasteboard.general.string = content
-        #endif
-        Task {
-            withAnimation(.spring()) {
-                copied = true
+        if #available(macOS 14.0, *) {
+            Button(role: configuration.role) {
+                configuration.trigger()
+            } label: {
+                configuration.label
             }
-            try await Task.sleep(nanoseconds: 2_000_000_000)
-            withAnimation(.spring()) {
-                copied = false
+            .buttonStyle(.accessoryBar)
+        } else {
+            Button(role: configuration.role) {
+                configuration.trigger()
+            } label: {
+                configuration.label
             }
+            .buttonStyle(.plain)
         }
+        #else
+        Button(role: configuration.role) {
+            configuration.trigger()
+        } label: {
+            configuration.label
+        }
+        .buttonStyle(.plain)
+        #endif
     }
 }
-#endif
+
+extension PrimitiveButtonStyle where Self == AccessoryButtonStyle {
+    static var accessory: AccessoryButtonStyle {
+        .init()
+    }
+}
