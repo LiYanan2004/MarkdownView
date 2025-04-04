@@ -8,7 +8,6 @@ public struct AnyMarkdownForegroundStyleGroup: Sendable {
     var _h4: AnyShapeStyle
     var _h5: AnyShapeStyle
     var _h6: AnyShapeStyle
-    var _codeBlock: AnyShapeStyle
     var _blockQuote: AnyShapeStyle
     var _tableHeader: AnyShapeStyle
     var _tableBody: AnyShapeStyle
@@ -20,7 +19,6 @@ public struct AnyMarkdownForegroundStyleGroup: Sendable {
         _h4 = AnyShapeStyle(group.h4)
         _h5 = AnyShapeStyle(group.h5)
         _h6 = AnyShapeStyle(group.h6)
-        _codeBlock = AnyShapeStyle(group.codeBlock)
         _blockQuote = AnyShapeStyle(group.blockQuote)
         _tableHeader = AnyShapeStyle(group.tableHeader)
         _tableBody = AnyShapeStyle(group.tableBody)
@@ -34,7 +32,6 @@ extension AnyMarkdownForegroundStyleGroup: MarkdownForegroundStyleGroup {
     public var h4: AnyShapeStyle { _h4 }
     public var h5: AnyShapeStyle { _h5 }
     public var h6: AnyShapeStyle { _h6 }
-    public var codeBlock: AnyShapeStyle { _codeBlock }
     public var blockQuote: AnyShapeStyle { _blockQuote }
     public var tableHeader: AnyShapeStyle { _tableHeader }
     public var tableBody: AnyShapeStyle { _tableBody }

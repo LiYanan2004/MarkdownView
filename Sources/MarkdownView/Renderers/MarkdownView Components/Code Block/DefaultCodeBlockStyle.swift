@@ -82,15 +82,15 @@ struct DefaultMarkdownCodeBlock: View {
         .lineSpacing(4)
         .font(fontGroup.codeBlock)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(16)
         #if os(macOS) || os(iOS)
         .safeAreaInset(edge: .top, spacing: 0) {
             copyButton
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .background(.regularMaterial)
+                .background(.quaternary.opacity(0.3))
                 .overlay {
                     Rectangle()
-                        .stroke(.quaternary)
+                        .stroke(.quaternary, lineWidth: 0.5)
                         .scaleEffect(x: 1.5, y: 1.5, anchor: .bottom)
                 }
         }
@@ -214,7 +214,7 @@ struct DefaultMarkdownCodeBlock: View {
                         .transition(.opacity.combined(with: .scale))
                 }
             }
-            .contentShape(Rectangle())
+            .contentShape(.rect)
         }
         .buttonStyle(.accessory)
         .font(.callout.weight(.medium))

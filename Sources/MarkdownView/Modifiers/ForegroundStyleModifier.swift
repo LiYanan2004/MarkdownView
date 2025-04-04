@@ -42,7 +42,6 @@ extension View {
             case .h5: foregroundStyleGroup._h5 = erasedShapeStyle
             case .h6: foregroundStyleGroup._h6 = erasedShapeStyle
             case .blockQuote: foregroundStyleGroup._blockQuote = erasedShapeStyle
-            case .codeBlock: foregroundStyleGroup._codeBlock = erasedShapeStyle
             case .tableBody: foregroundStyleGroup._tableBody = erasedShapeStyle
             case .tableHeader: foregroundStyleGroup._tableHeader = erasedShapeStyle
             }
