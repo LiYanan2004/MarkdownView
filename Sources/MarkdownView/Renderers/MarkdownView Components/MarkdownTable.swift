@@ -33,7 +33,7 @@ struct MarkdownTable: View {
                     }
                 }
             }
-            for row in table.head.children {
+            for row in table.body.children {
                 GridRowContainer {
                     for cell in row.children {
                         GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
