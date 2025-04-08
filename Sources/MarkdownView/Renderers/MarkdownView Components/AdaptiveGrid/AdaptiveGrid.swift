@@ -75,7 +75,9 @@ struct AdaptiveGrid: View {
                     spacing: horizontalSpacing
                 ) { col, width in
                     // Update width of cells
-                    cellSize[row * columnsCount + col] = width
+                    if row * columnsCount + col < cellSize.count {
+                        cellSize[row * columnsCount + col] = width
+                    }
                     updateLayout()
                 }
                 if showDivider && rows.count - 1 != row {
