@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AdaptiveGridRow: View {
     var row: GridRowContainer
-    var columnWidth: [CGFloat]
+    var columnWidths: [CGFloat]
     var spacing: CGFloat?
     // Update cell width when detected
     var sizeOnChange: (_ col: Int, _ width: CGFloat) -> Void
@@ -15,12 +15,12 @@ struct AdaptiveGridRow: View {
                 
                 cell.content
                     .id(cell.id)
-                    .frame(maxWidth: columnWidth[col], alignment: alignment)
+                    .frame(maxWidth: columnWidths[col], alignment: alignment)
             }
             if row.count < columnsCount {
                 ForEach(row.count..<columnsCount, id: \.self) { index in
                     Color.clear
-                        .frame(maxWidth: columnWidth[index])
+                        .frame(maxWidth: columnWidths[index])
                         .frame(height: 1)
                 }
             }
@@ -29,7 +29,7 @@ struct AdaptiveGridRow: View {
         ._overlay { sizeDetector }
     }
     
-    private var columnsCount: Int { columnWidth.count }
+    private var columnsCount: Int { columnWidths.count }
     
     private var sizeDetector: some View {
         HStack {

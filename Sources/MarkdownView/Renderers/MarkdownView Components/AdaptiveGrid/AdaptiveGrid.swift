@@ -9,9 +9,9 @@ struct AdaptiveGrid: View {
     
     private var columnsCount: Int
     // The width of each cell.
-    @State private var cellSize: [CGFloat]
+    @State private var cellSizes: [CGFloat]
     // The width of each column
-    @State private var colWidth: [CGFloat]
+    @State private var colWidths: [CGFloat]
     @State private var height = CGFloat.zero
     // The width of the whole table
     @State private var _width = CGFloat.zero
@@ -31,8 +31,8 @@ struct AdaptiveGrid: View {
         columnsCount = self.rows.reduce(0) { max($1.count, $0) }
         let sizes = [CGFloat](repeating: .zero, count: self.rows.count * columnsCount)
         // Save widths of all cells and calculate relative width for each column
-        _cellSize = State(initialValue: sizes)
-        _colWidth = State(initialValue: [CGFloat](repeating: .zero, count: columnsCount))
+        _cellSizes = State(initialValue: sizes)
+        _colWidths = State(initialValue: [CGFloat](repeating: .zero, count: columnsCount))
     }
     
     /// Create an adaptive grid that dynamically adjust column width to best fit the content.
@@ -50,8 +50,8 @@ struct AdaptiveGrid: View {
         columnsCount = self.rows.reduce(0) { max($1.count, $0) }
         let sizes = [CGFloat](repeating: .zero, count: self.rows.count * columnsCount)
         // Save widths of all cells and calculate relative width for each column
-        _cellSize = State(initialValue: sizes)
-        _colWidth = State(initialValue: [CGFloat](repeating: .zero, count: columnsCount))
+        _cellSizes = State(initialValue: sizes)
+        _colWidths = State(initialValue: [CGFloat](repeating: .zero, count: columnsCount))
     }
     
     var body: some View {
@@ -71,12 +71,13 @@ struct AdaptiveGrid: View {
             ForEach(rows.indices, id: \.self) { row in
                 AdaptiveGridRow(
                     row: rows[row],
-                    columnWidth: colWidth,
+                    columnWidths: colWidths,
                     spacing: horizontalSpacing
                 ) { col, width in
                     // Update width of cells
-                    if row * columnsCount + col < cellSize.count {
-                        cellSize[row * columnsCount + col] = width
+                    let updatingIndex = row * columnsCount + col
+                    if updatingIndex < cellSizes.count {
+                        cellSizes[updatingIndex] = width
                     }
                     updateLayout()
                 }
@@ -90,20 +91,16 @@ struct AdaptiveGrid: View {
     // Re-calculate column width for table.
     private func updateLayout() {
         var colWidth = [CGFloat](repeating: .zero, count: columnsCount)
-        for (index, size) in cellSize.enumerated() {
+        for (index, size) in cellSizes.enumerated() {
             let col = index % columnsCount // [0, (columnsCount - 1)] Represents the column index.
             if colWidth[col] < size {
                 colWidth[col] = size
             }
         }
         let spacing = max(0, (_width - colWidth.reduce(0, +)) / CGFloat(columnsCount))
-        self.colWidth = colWidth.map {
+        self.colWidths = colWidth.map {
             $0 + spacing
         }
-//        print("Spacing: \(spacing)")
-//        print("Cell Width: \(colWidth)")
-//        print("Avg spacing: \(spacing)")
-//        print("--------")
     }
 }
 
