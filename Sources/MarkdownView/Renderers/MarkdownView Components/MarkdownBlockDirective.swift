@@ -10,31 +10,25 @@ import Markdown
 
 struct MarkdownBlockDirective: View {
     var blockDirective: BlockDirective
-    private var args: [BlockDirectiveArgument] {
-        blockDirective
-            .argumentText
-            .parseNameValueArguments()
-            .map { BlockDirectiveArgument($0) }
-    }
-    private var provider: (any BlockDirectiveDisplayable)? {
-        for (name, provider) in configuration.blockDirectiveRenderer.providers {
-            if name.localizedLowercase == blockDirective.name.localizedLowercase {
-                return provider
-            }
-        }
-        return nil
+    private var blockDirectiveRendererConfiguration: BlockDirectiveRendererConfiguration {
+        BlockDirectiveRendererConfiguration(
+            text: blockDirective
+                .children
+                .compactMap { $0.format() }
+                .joined(),
+            arguments: blockDirective
+                .argumentText
+                .parseNameValueArguments()
+                .map { BlockDirectiveRendererConfiguration.Argument($0) }
+        )
     }
     
     @Environment(\.markdownRendererConfiguration) private var configuration
     
     var body: some View {
-        let text = blockDirective
-            .children
-            .compactMap { $0.format() }
-            .joined()
-        if let provider {
+        if let provider = BlockDirectiveRenderers.named(blockDirective.name) {
             provider
-                .makeView(arguments: args, text: text)
+                .makeBody(configuration: blockDirectiveRendererConfiguration)
                 .erasedToAnyView()
         } else {
             CmarkNodeVisitor(configuration: configuration)

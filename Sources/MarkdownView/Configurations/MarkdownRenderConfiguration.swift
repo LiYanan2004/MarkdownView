@@ -32,7 +32,6 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     var listConfiguration: MarkdownListConfiguration = .init()
     
     // Renderer
-    var blockDirectiveRenderer: BlockDirectiveRenderer = .init()
     var imageRenderer: ImageRenderer = .init()
     
 }
