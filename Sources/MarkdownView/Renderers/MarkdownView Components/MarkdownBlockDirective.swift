@@ -28,15 +28,17 @@ struct MarkdownBlockDirective: View {
     @Environment(\.markdownRendererConfiguration) private var configuration
     
     var body: some View {
-        if let customView = configuration.blockDirectiveRenderer.loadBlockDirective(
-            provider: provider,
-            args: args,
-            text: blockDirective.format(options: .default)
-        ) {
-            customView
+        let text = blockDirective
+            .children
+            .compactMap { $0.format() }
+            .joined()
+        if let provider {
+            provider
+                .makeView(arguments: args, text: text)
+                .erasedToAnyView()
         } else {
-            MarkdownViewRenderer(configuration: configuration)
-                .defaultVisit(blockDirective)
+            CmarkNodeVisitor(configuration: configuration)
+                .descendInto(blockDirective)
         }
     }
 }

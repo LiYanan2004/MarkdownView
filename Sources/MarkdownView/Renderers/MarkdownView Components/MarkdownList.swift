@@ -27,8 +27,8 @@ struct MarkdownList<List: ListItemContainer>: View {
                 HStack(alignment: .firstTextBaseline) {
                     CheckboxOrMarker(list: self, listItem: listItem, index: index)
                         .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndentation : 0)
-                    MarkdownViewRenderer(configuration: configuration)
-                        .render(listItem)
+                    CmarkNodeVisitor(configuration: configuration)
+                        .makeBody(for: listItem)
                 }
             }
         }
@@ -75,8 +75,8 @@ struct MarkdownListItem: View {
     var body: some View {
         VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(Array(listItem.children.enumerated()), id: \.offset) { (_, child) in
-                MarkdownViewRenderer(configuration: configuration)
-                    .render(child)
+                CmarkNodeVisitor(configuration: configuration)
+                    .makeBody(for: child)
             }
         }
     }

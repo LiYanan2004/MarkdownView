@@ -14,6 +14,7 @@ class BlockDirectiveRenderer: @unchecked Sendable {
         providers[name] = provider
     }
     
+    @MainActor
     func loadBlockDirective(
         provider: (any BlockDirectiveDisplayable)?,
         args: [BlockDirectiveArgument],

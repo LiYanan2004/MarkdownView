@@ -2,6 +2,8 @@ import SwiftUI
 import Markdown
 
 /// A type that  renders block directives.
+@preconcurrency
+@MainActor
 public protocol BlockDirectiveDisplayable {
     associatedtype BlockDirectiveView: View
     
@@ -10,7 +12,10 @@ public protocol BlockDirectiveDisplayable {
     ///   - arguments: A directive argument, parsed from the form name: value or name: "value".
     ///   - text: Text inside the block.
     /// - Returns: A custom block view within MarkdownView.
-    @ViewBuilder func makeView(
+    @preconcurrency
+    @MainActor
+    @ViewBuilder
+    func makeView(
         arguments: [BlockDirectiveArgument],
         text: String
     ) -> BlockDirectiveView

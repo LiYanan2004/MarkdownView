@@ -10,7 +10,8 @@ import SwiftUI
 extension View {
     nonisolated public func markdownMathRenderingEnabled(_ enabled: Bool = true) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            configuration.rendersInlineMathIfPossible = enabled
+            configuration.rendersMathIfPossible = enabled
+            configuration.blockDirectiveRenderer.addProvider(MarkdownMathRenderer(), for: "math")
         }
     }
 }

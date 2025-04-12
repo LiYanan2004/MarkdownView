@@ -24,11 +24,6 @@ struct MarkdownNodeView: View {
         storage = .left(content())
     }
     
-    init<Content: View>(@ViewBuilder _ content: () -> Content) where Content.Body == Text {
-        storage = .left(content().body)
-    }
-
-    @_disfavoredOverload
     init<Content: View>(@ViewBuilder _ content: () -> Content) {
         storage = .right(AnyView(content()))
     }

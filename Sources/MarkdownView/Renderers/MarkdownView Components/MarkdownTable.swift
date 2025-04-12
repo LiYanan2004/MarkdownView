@@ -26,8 +26,8 @@ struct MarkdownTable: View {
             GridRowContainer {
                 for cell in table.head.children {
                     GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
-                        MarkdownViewRenderer(configuration: configuration)
-                            .render(cell)
+                        CmarkNodeVisitor(configuration: configuration)
+                            .makeBody(for: cell)
                             .font(configuration.fontGroup.tableHeader)
                             .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                     }
@@ -37,8 +37,8 @@ struct MarkdownTable: View {
                 GridRowContainer {
                     for cell in row.children {
                         GridCellContainer(alignment: (cell as! Markdown.Table.Cell).alignment) {
-                            MarkdownViewRenderer(configuration: configuration)
-                                .render(cell)
+                            CmarkNodeVisitor(configuration: configuration)
+                                .makeBody(for: cell)
                                 .font(configuration.fontGroup.tableBody)
                                 .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
                         }
@@ -52,11 +52,11 @@ struct MarkdownTable: View {
     private var gridTable: some View {
         Grid(horizontalSpacing: 8, verticalSpacing: 8) {
             GridRow {
-                MarkdownViewRenderer(configuration: configuration)
-                    .render(table.head)
+                CmarkNodeVisitor(configuration: configuration)
+                    .makeBody(for: table.head)
             }
-            MarkdownViewRenderer(configuration: configuration)
-                .render(table.body)
+            CmarkNodeVisitor(configuration: configuration)
+                .makeBody(for: table.body)
         }
     }
 }
@@ -68,8 +68,8 @@ struct MarkdownTableHead: View {
     
     var body: some View {
         ForEach(Array(head.children.enumerated()), id: \.offset) { (_, child) in
-            MarkdownViewRenderer(configuration: configuration)
-                .render(child)
+            CmarkNodeVisitor(configuration: configuration)
+                .makeBody(for: child)
                 .font(configuration.fontGroup.tableHeader)
                 .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
         }
@@ -85,8 +85,8 @@ struct MarkdownTableBody: View {
     var body: some View {
         ForEach(Array(tableBody.children.enumerated()), id: \.offset) { (_, child) in
             Divider()
-            MarkdownViewRenderer(configuration: configuration)
-                .render(child)
+            CmarkNodeVisitor(configuration: configuration)
+                .makeBody(for: child)
                 .font(configuration.fontGroup.tableBody)
                 .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
         }
@@ -102,8 +102,8 @@ struct MarkdownTableRow: View {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             GridRow {
                 ForEach(Array(row.children.enumerated()), id: \.offset) { (_, cell) in
-                    MarkdownViewRenderer(configuration: configuration)
-                        .render(cell as! Markdown.Table.Cell)
+                    CmarkNodeVisitor(configuration: configuration)
+                        .makeBody(for: cell as! Markdown.Table.Cell)
                 }
             }
         }

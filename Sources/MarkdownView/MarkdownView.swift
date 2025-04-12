@@ -31,13 +31,21 @@ public struct MarkdownView: View {
     
     public var body: some View {
         markdownViewStyle
-            .makeBody(configuration: MarkdownViewStyleConfiguration {
-                MarkdownViewRenderer(configuration: configuration)
-                    .renderMarkdownContent(content)
-            })
+            .makeBody(configuration: MarkdownViewStyleConfiguration(body: _renderedBody))
             .erasedToAnyView()
             .sizeOfView($viewSize)
             .containerSize(viewSize)
             .font(configuration.fontGroup.body)
+    }
+    
+    @ViewBuilder
+    private var _renderedBody: some View {
+        if configuration.rendersMathIfPossible {
+            MathFirstMarkdownViewRenderer()
+                .makeBody(content: content, configuration: configuration)
+        } else {
+            CmarkFirstMarkdownViewRenderer()
+                .makeBody(content: content, configuration: configuration)
+        }
     }
 }

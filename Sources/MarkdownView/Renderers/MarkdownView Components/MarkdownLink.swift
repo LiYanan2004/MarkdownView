@@ -8,25 +8,7 @@
 import SwiftUI
 import Markdown
 
-struct MarkdownLink: View {
-    var link: Markdown.Link
-    var configuration: MarkdownRenderConfiguration
-    
-    private var attributer: LinkAttributer {
-        LinkAttributer(
-            tint: configuration.inlineCodeTintColor,
-            font: configuration.fontGroup.body
-        )
-    }
-    
-    var body: SwiftUI.Text {
-        attributer.attributed(link)
-    }
-}
-
-// MARK: - Attributer
-
-fileprivate struct LinkAttributer: MarkupVisitor {
+struct MarkdownLink: MarkupVisitor {
     var tint: Color
     var font: Font
     
@@ -91,7 +73,7 @@ fileprivate struct LinkAttributer: MarkupVisitor {
     }
 }
 
-extension LinkAttributer {
+extension MarkdownLink {
     mutating func attributedString(
         _ text: String = "",
         from markup: some Markup
