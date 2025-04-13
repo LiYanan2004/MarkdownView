@@ -13,7 +13,8 @@ extension View {
     /// - parameter renderer: The renderer you have created to handle block directive rendering.
     /// - parameter name: The name of the block directive.
     nonisolated public func blockDirectiveRenderer(
-        _ renderer: some BlockDirectiveRenderer, for name: String
+        _ renderer: some BlockDirectiveRenderer,
+        for name: String
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             BlockDirectiveRenderers.shared.addRenderer(renderer, for: name)

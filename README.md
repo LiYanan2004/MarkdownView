@@ -87,8 +87,8 @@ To do that, first create your renderer.
 
 ```swift
 struct CustomImageRenderer: MarkdownImageRenderer {
-    func makeImage(url: URL, alt: String?) -> some View {
-        AsyncImage(url: url) {
+    func makeBody(configuration: Configutation) -> some View {
+        AsyncImage(url: configuration.url) {
             switch $0 {
             case .empty: ProgressView()
             case .success(let image): image.resizable()
