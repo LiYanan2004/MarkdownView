@@ -17,6 +17,7 @@ extension View {
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             BlockDirectiveRenderers.shared.addRenderer(rendereer, for: name)
+            configuration.allowedBlockDirectiveRenderers.insert(name)
         }
     }
 }

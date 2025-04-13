@@ -29,6 +29,7 @@ struct MarkdownImage: View {
         }
     }
     @Environment(\.markdownRendererConfiguration.preferredBaseURL) private var baseURL
+    @Environment(\.markdownRendererConfiguration.allowedImageRenderers) private var allowedRenderer
     
     var body: some View {
         if let url {
@@ -36,7 +37,7 @@ struct MarkdownImage: View {
                 url: url,
                 alternativeText: alternativeText
             )
-            if let scheme = url.scheme,
+            if let scheme = url.scheme, allowedRenderer.contains(scheme),
                let renderer = MarkdownImageRenders.named(scheme) {
                 renderer
                     .makeBody(configuration: configuration)

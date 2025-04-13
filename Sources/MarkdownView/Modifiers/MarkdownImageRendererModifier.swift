@@ -18,6 +18,7 @@ extension View {
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             MarkdownImageRenders.shared.addRenderer(renderer, forURLScheme: urlScheme)
+            configuration.allowedImageRenderers.insert(urlScheme)
         }
     }
 }
