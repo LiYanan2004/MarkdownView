@@ -12,13 +12,13 @@ import LaTeXSwiftUI
 #endif
 
 struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
-    @Environment(\.markdownRendererConfiguration.fontGroup.inlineMath) private var font
-    
     func makeBody(configuration: Configuration) -> some View {
         #if canImport(LaTeXSwiftUI)
-        LaTeX(configuration.text)
-            .renderingStyle(.wait)
-            .font(font)
+        LaTeX(configuration.wrappedString)
+            .renderingStyle(.empty)
+            .blockMode(.blockText)
+            .font(configuration.environments.markdownRendererConfiguration.fontGroup.inlineMath)
+            .frame(maxWidth: .infinity)
         #else
         Text(configuration.text)
             .font(font)

@@ -10,27 +10,26 @@ import Markdown
 
 struct MarkdownBlockDirective: View {
     var blockDirective: BlockDirective
-    private var blockDirectiveRendererConfiguration: BlockDirectiveRendererConfiguration {
-        BlockDirectiveRendererConfiguration(
-            text: blockDirective
-                .children
-                .compactMap { $0.format() }
-                .joined(),
-            arguments: blockDirective
-                .argumentText
-                .parseNameValueArguments()
-                .map { BlockDirectiveRendererConfiguration.Argument($0) }
-        )
-    }
-    
-    @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.self) private var environments
     
     var body: some View {
         if let provider = BlockDirectiveRenderers.named(blockDirective.name) {
+            let configuration = BlockDirectiveRendererConfiguration(
+                wrappedString: blockDirective
+                    .children
+                    .compactMap { $0.format() }
+                    .joined(),
+                arguments: blockDirective
+                    .argumentText
+                    .parseNameValueArguments()
+                    .map { BlockDirectiveRendererConfiguration.Argument($0) },
+                environments: environments
+            )
             provider
-                .makeBody(configuration: blockDirectiveRendererConfiguration)
+                .makeBody(configuration: configuration)
                 .erasedToAnyView()
         } else {
+            @Environment(\.markdownRendererConfiguration) var configuration
             CmarkNodeVisitor(configuration: configuration)
                 .descendInto(blockDirective)
         }

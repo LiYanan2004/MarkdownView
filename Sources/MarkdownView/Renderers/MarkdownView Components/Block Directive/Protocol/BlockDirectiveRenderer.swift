@@ -4,6 +4,7 @@ import Markdown
 /// A type that  renders block directives.
 @preconcurrency
 @MainActor
+@_typeEraser(AnyBlockDirectiveRenderer)
 public protocol BlockDirectiveRenderer {
     associatedtype Body: SwiftUI.View
     
@@ -20,12 +21,15 @@ public protocol BlockDirectiveRenderer {
     typealias Configuration = BlockDirectiveRendererConfiguration
 }
 
-public struct BlockDirectiveRendererConfiguration: Sendable, Hashable {
-    public var text: String
+@preconcurrency
+@MainActor
+public struct BlockDirectiveRendererConfiguration: Sendable {
+    public var wrappedString: String
     public var arguments: [Argument]
+    public var environments: EnvironmentValues
     
     /// Directive Block arguments represented from `swift-markdown/DirectiveArgument`.
-    public struct Argument: Sendable, Hashable {
+    public struct Argument {
         /// The name of the argument.
         public var name: String
         
@@ -47,11 +51,17 @@ public struct BlockDirectiveRendererConfiguration: Sendable, Hashable {
 public struct AnyBlockDirectiveRenderer: BlockDirectiveRenderer {
     public typealias Body = AnyView
     
-    @ViewBuilder private let _makeBody: (Configuration) -> AnyView
+    private let _makeBody: (Configuration) -> AnyView
     
-    init<D: BlockDirectiveRenderer>(erasing blockDisplayable: D) {
+    public init<T: BlockDirectiveRenderer>(erasing renderer: T) {
         _makeBody = {
-            AnyView(blockDisplayable.makeBody(configuration: $0))
+            AnyView(renderer.makeBody(configuration: $0))
+        }
+    }
+    
+    public init<T: BlockDirectiveRenderer>(_ renderer: T) {
+        _makeBody = {
+            AnyView(renderer.makeBody(configuration: $0))
         }
     }
     

@@ -35,6 +35,7 @@ struct MarkdownMathOrText {
             let latexText = String(text[range])
             nodeViews.append(MarkdownNodeView {
                 LaTeX(latexText)
+                    .blockMode(.alwaysInline)
                     .font(configuration.fontGroup.inlineMath)
             })
             
