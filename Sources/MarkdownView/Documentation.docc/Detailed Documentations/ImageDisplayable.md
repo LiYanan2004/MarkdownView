@@ -1,12 +1,12 @@
-# ``ImageDisplayable``
+# ``MarkdownImageRenderer``
 
 ## Topics
 
 ### Creating custom renderers
 
-- ``ImageDisplayable/makeImage(url:alt:)``
-- ``ImageDisplayable/ImageView``
+- ``MarkdownImageRenderer/makeImage(url:alt:)``
+- ``MarkdownImageRenderer/ImageView``
 
 ### Substituting renderer
 
-- ``AnyImageDisplayable``
+- ``AnyMarkdownImageRenderer``

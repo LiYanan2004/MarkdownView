@@ -81,12 +81,12 @@ MarkdownView("> Quote and `inline code`")
 
 ### Extend Rendering
 
-You can add your custom image providers and block directive providers to display your content.
+You can add your custom image renderers and block directive renderers to display your content.
 
-To do that, first create your provider.
+To do that, first create your renderer.
 
 ```swift
-struct CustomImageProvider: ImageDisplayable {
+struct CustomImageRenderer: MarkdownImageRenderer {
     func makeImage(url: URL, alt: String?) -> some View {
         AsyncImage(url: url) {
             switch $0 {
@@ -100,11 +100,11 @@ struct CustomImageProvider: ImageDisplayable {
 }
 ```
 
-Then apply your provider to `MarkdownView`.
+Then apply your renderer to `MarkdownView`.
 
 ```swift
 MarkdownView(markdownText)
-    .imageProvider(CustomImageProvider(), forURLScheme: "my-image")
+    .imageRenderer(CustomImageRenderer(), forURLScheme: "my-image")
 ```
 
 The implementation of the block directive is exactly the same way.

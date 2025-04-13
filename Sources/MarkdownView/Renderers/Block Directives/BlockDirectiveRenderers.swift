@@ -7,10 +7,10 @@ class BlockDirectiveRenderers: @unchecked Sendable {
     
     private init() { }
     
-    /// All providers which have been added.
+    /// All renderers which have been added.
     private var renderers: [String : any BlockDirectiveRenderer] = [:]
 
-    /// Add custom provider for block directive .
+    /// Add custom renderer for block directive .
     /// - Parameters:
     ///   - renderer: Represention of the block directive.
     ///   - name: The name of wrapper.

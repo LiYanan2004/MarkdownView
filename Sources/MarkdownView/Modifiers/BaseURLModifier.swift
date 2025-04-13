@@ -13,4 +13,10 @@ extension View {
             configuration.preferredBaseURL = url
         }
     }
+    
+    nonisolated public func markdownBaseURL(_ path: String) -> some View {
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            configuration.preferredBaseURL = URL(string: path)
+        }
+    }
 }

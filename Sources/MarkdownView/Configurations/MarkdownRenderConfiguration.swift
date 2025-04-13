@@ -9,11 +9,7 @@ import Foundation
 import SwiftUI
 
 struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
-    var preferredBaseURL: URL? {
-        willSet {
-            imageRenderer.updateBaseURL(newValue)
-        }
-    }
+    var preferredBaseURL: URL?
     
     var rendersMathIfPossible = false
     
@@ -31,9 +27,8 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     // List
     var listConfiguration: MarkdownListConfiguration = .init()
     
-    // Renderer
-    var imageRenderer: ImageRenderer = .init()
-    
+    var allowedImageRenderers: Set<String> = ["https", "http"]
+    var allowedBlockDirectiveRenderers: Set<String> = ["math"]
 }
 
 // MARK: - SwiftUI Environment
