@@ -28,10 +28,6 @@ public struct BlockDirectiveRendererConfiguration: Sendable {
     public var wrappedString: String
     /// The arguments of a block directive.
     public var arguments: [Argument]
-    /// The current environment.
-    ///
-    /// - note: You should retrieve environment values from here instead of using `@Environment` property wrapper in your custom `BlockDirectiveRenderer`.
-    public var environments: EnvironmentValues
     
     /// Directive Block arguments represented from `swift-markdown/DirectiveArgument`.
     public struct Argument {

@@ -13,18 +13,31 @@ import LaTeXSwiftUI
 
 struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
-        #if canImport(LaTeXSwiftUI)
         if let identifier = UUID(uuidString: configuration.arguments[0].value),
            let mathExpression = MathStorage.lookupTable[identifier] {
-            LaTeX(mathExpression)
-                .renderingStyle(.empty)
-                .ignoreStringFormatting()
-                .blockMode(.blockText)
-                .font(configuration.environments.markdownRendererConfiguration.fontGroup.inlineMath)
-                .frame(maxWidth: .infinity)
+            MathBlockView(mathExpression)
         } else {
             EmptyView()
         }
+    }
+}
+
+fileprivate struct MathBlockView: View {
+    var mathExpression: String
+    @Environment(\.markdownRendererConfiguration.fontGroup.inlineMath) private var font
+    
+    init(_ exp: String) {
+        self.mathExpression = exp
+    }
+    
+    var body: some View {
+        #if canImport(LaTeXSwiftUI)
+        LaTeX(mathExpression)
+            .renderingStyle(.empty)
+            .ignoreStringFormatting()
+            .blockMode(.blockText)
+            .font(font)
+            .frame(maxWidth: .infinity)
         #else
         EmptyView()
         #endif

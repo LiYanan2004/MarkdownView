@@ -10,10 +10,10 @@ import Markdown
 
 struct MarkdownBlockDirective: View {
     var blockDirective: BlockDirective
-    @Environment(\.self) private var environments
+    @Environment(\.markdownRendererConfiguration) private var configuration
     
     var body: some View {
-        if environments.markdownRendererConfiguration.allowedBlockDirectiveRenderers.contains(blockDirective.name),
+        if configuration.allowedBlockDirectiveRenderers.contains(blockDirective.name),
            let renderer = BlockDirectiveRenderers.named(blockDirective.name) {
             let configuration = BlockDirectiveRendererConfiguration(
                 wrappedString: blockDirective
@@ -23,14 +23,13 @@ struct MarkdownBlockDirective: View {
                 arguments: blockDirective
                     .argumentText
                     .parseNameValueArguments()
-                    .map { BlockDirectiveRendererConfiguration.Argument($0) },
-                environments: environments
+                    .map { BlockDirectiveRendererConfiguration.Argument($0) }
             )
             renderer
                 .makeBody(configuration: configuration)
                 .erasedToAnyView()
         } else {
-            CmarkNodeVisitor(configuration: environments.markdownRendererConfiguration)
+            CmarkNodeVisitor(configuration: configuration)
                 .descendInto(blockDirective)
         }
     }
