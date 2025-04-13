@@ -57,7 +57,7 @@ struct BlockDirectiveDestination: View {
 
 struct NoteBlockDirective: BlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
-        Text(configuration.text)
+        Text(configuration.wrappedString)
             .padding(20)
             .background(
                 .yellow.secondary,
