@@ -86,7 +86,7 @@ You can add your custom image providers and block directive providers to display
 To do that, first create your provider.
 
 ```swift
-struct CustomImageProvider: ImageDisplayable {
+struct CustomImageProvider: MarkdownImageRenderer {
     func makeImage(url: URL, alt: String?) -> some View {
         AsyncImage(url: url) {
             switch $0 {

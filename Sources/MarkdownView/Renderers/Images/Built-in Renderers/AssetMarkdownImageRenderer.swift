@@ -1,5 +1,5 @@
 //
-//  AssetImageDisplayable.swift
+//  AssetMarkdownImageRenderer.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2024/12/11.
@@ -7,12 +7,13 @@
 
 import SwiftUI
 
-/// Load images from your Assets Catalog.
-struct AssetImageDisplayable: ImageDisplayable {
+/// A markdown image renderer that loads images from asset catalog.
+struct AssetMarkdownImageRenderer: MarkdownImageRenderer {
     var name: (URL) -> String
     var bundle: Bundle?
     
-    func makeImage(url: URL, alt: String?) -> some View {
+    func makeBody(configuration: Configuration) -> some View {
+        let (url, alt) = (configuration.url, configuration.alternativeText)
         #if os(macOS)
         let nsImage: NSImage?
         if let bundle = bundle, bundle != .main {
@@ -44,8 +45,27 @@ struct AssetImageDisplayable: ImageDisplayable {
     }
 }
 
-extension ImageDisplayable where Self == AssetImageDisplayable {
-    static func assetImage(name: @escaping (URL) -> String = \.lastPathComponent, bundle: Bundle? = nil) -> AssetImageDisplayable {
-        AssetImageDisplayable(name: name, bundle: bundle)
+extension MarkdownImageRenderer where Self == AssetMarkdownImageRenderer {
+    static func assetImage(name: @escaping (URL) -> String = \.lastPathComponent, bundle: Bundle? = nil) -> AssetMarkdownImageRenderer {
+        AssetMarkdownImageRenderer(name: name, bundle: bundle)
+    }
+}
+
+// MARK: - Auxiliary
+
+fileprivate struct AssetImage: View {
+    var image: PlatformImage?
+    var alt: String?
+    
+    var body: some View {
+        if let image {
+            Image(platformImage: image)
+                .resizable().aspectRatio(contentMode: .fit)
+            if let alt {
+                Text(alt).foregroundStyle(.secondary).font(.callout)
+            }
+        } else {
+            ImagePlaceholder()
+        }
     }
 }

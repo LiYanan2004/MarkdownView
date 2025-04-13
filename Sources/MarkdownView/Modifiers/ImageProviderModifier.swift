@@ -8,19 +8,16 @@
 import SwiftUI
 
 extension View {
-    /// Add your own providers to render images.
+    /// Use custom renderer to render images.
     ///
-    /// - parameters
-    ///     - provider: The provider you created to handle image loading and displaying.
-    ///     - urlScheme: A scheme for the renderer to determine when to use the provider.
-    /// - Returns: View that able to render images with specific schemes.
-    ///
-    /// You can set the provider multiple times if you want to add multiple schemes.
+    /// - parameter renderer: The render you created to handle image loading and rendering.
+    /// - parameter urlScheme: A scheme for deciding which renderer to use.
     nonisolated public func imageProvider(
-        _ provider: some ImageDisplayable, forURLScheme urlScheme: String
+        _ renderer: some MarkdownImageRenderer,
+        forURLScheme urlScheme: String
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            configuration.imageRenderer.addProvider(provider, forURLScheme: urlScheme)
+            MarkdownImageRenders.shared.addRenderer(renderer, forURLScheme: urlScheme)
         }
     }
 }

@@ -16,7 +16,7 @@ struct MarkdownImage: View {
         }
         return nil
     }
-    private var alt: String? {
+    private var alternativeText: String? {
         if !(image.parent is Markdown.Link) {
             if let title = image.title, !title.isEmpty {
                 return title
@@ -28,25 +28,34 @@ struct MarkdownImage: View {
             return nil
         }
     }
-    private var provider: (any ImageDisplayable)? {
-        guard let imageScheme = url?.scheme else { return nil }
-        for (scheme, imageProvider) in configuration.imageRenderer.imageProviders {
-            if imageScheme.localizedLowercase == scheme.localizedLowercase {
-                return imageProvider
-            }
-        }
-        return nil
-    }
-    
-    @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownRendererConfiguration.preferredBaseURL) private var baseURL
     
     var body: some View {
         if let url {
-            configuration.imageRenderer.loadImage(provider, url: url, alt: alt)
-        } else {
-            MarkdownNodeView {
-                Text(image.plainText)
+            let configuration = MarkdownImageRendererConfiguration(
+                url: url,
+                alternativeText: alternativeText
+            )
+            if let scheme = url.scheme,
+               let provider = MarkdownImageRenders.named(scheme) {
+                provider
+                    .makeBody(configuration: configuration)
+                    .erasedToAnyView()
+            } else if let baseURL {
+                RelativePathMarkdownImageRenderer(baseURL: baseURL)
+                    .makeBody(configuration: configuration)
+                    .erasedToAnyView()
+            } else {
+                fallbackView
             }
+        } else {
+            fallbackView
+        }
+    }
+    
+    private var fallbackView: some View {
+        MarkdownNodeView {
+            Text(image.plainText)
         }
     }
 }
