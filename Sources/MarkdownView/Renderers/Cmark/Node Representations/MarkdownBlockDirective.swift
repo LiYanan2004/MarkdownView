@@ -13,7 +13,7 @@ struct MarkdownBlockDirective: View {
     @Environment(\.self) private var environments
     
     var body: some View {
-        if let provider = BlockDirectiveRenderers.named(blockDirective.name) {
+        if let renderer = BlockDirectiveRenderers.named(blockDirective.name) {
             let configuration = BlockDirectiveRendererConfiguration(
                 wrappedString: blockDirective
                     .children
@@ -25,7 +25,7 @@ struct MarkdownBlockDirective: View {
                     .map { BlockDirectiveRendererConfiguration.Argument($0) },
                 environments: environments
             )
-            provider
+            renderer
                 .makeBody(configuration: configuration)
                 .erasedToAnyView()
         } else {

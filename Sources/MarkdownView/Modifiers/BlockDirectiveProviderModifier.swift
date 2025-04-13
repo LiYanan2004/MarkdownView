@@ -1,5 +1,5 @@
 //
-//  BlockDirectiveProviderModifier.swift
+//  BlockDirectiveRendererModifier.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2025/2/9.
@@ -8,19 +8,15 @@
 import SwiftUI
 
 extension View {
-    /// Adds your custom block directive provider.
+    /// Adds your custom block directive renderer.
     ///
-    /// - parameters:
-    ///     - provider: The provider you have created to handle block displaying.
-    ///     - name: The name of the  block directive.
-    /// - Returns: `MarkdownView` with custom directive block loading behavior.
-    ///
-    /// You can set this provider multiple times if you have multiple providers.
-    nonisolated public func blockDirectiveProvider(
-        _ provider: some BlockDirectiveRenderer, for name: String
+    /// - parameter renderer: The renderer you have created to handle block directive rendering.
+    /// - parameter name: The name of the block directive.
+    nonisolated public func blockDirectiveRenderer(
+        _ rendereer: some BlockDirectiveRenderer, for name: String
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            BlockDirectiveRenderers.shared.addRenderer(provider, for: name)
+            BlockDirectiveRenderers.shared.addRenderer(rendereer, for: name)
         }
     }
 }

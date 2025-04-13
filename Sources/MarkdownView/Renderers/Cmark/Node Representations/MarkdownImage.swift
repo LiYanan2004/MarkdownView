@@ -37,8 +37,8 @@ struct MarkdownImage: View {
                 alternativeText: alternativeText
             )
             if let scheme = url.scheme,
-               let provider = MarkdownImageRenders.named(scheme) {
-                provider
+               let renderer = MarkdownImageRenders.named(scheme) {
+                renderer
                     .makeBody(configuration: configuration)
                     .erasedToAnyView()
             } else if let baseURL {

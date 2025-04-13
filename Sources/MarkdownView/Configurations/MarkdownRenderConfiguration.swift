@@ -26,6 +26,7 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     
     // List
     var listConfiguration: MarkdownListConfiguration = .init()
+
 }
 
 // MARK: - SwiftUI Environment
