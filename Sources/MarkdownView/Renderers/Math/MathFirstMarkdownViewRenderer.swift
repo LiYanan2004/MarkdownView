@@ -16,10 +16,12 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         let mathParser = MathParser(text: rawText)
     
         for math in mathParser.mathRepresentations.reversed() where !math.kind.inline {
-            let mathBlockRepresentation = """
-            @math{\n\(rawText[math.range])\n}
-            """
-            rawText.replaceSubrange(math.range, with: mathBlockRepresentation)
+            let mathIdentifier = MathStorage
+                .appendMathExpression(rawText[math.range])
+            rawText.replaceSubrange(
+                math.range,
+                with: "@math(uuid:\(mathIdentifier))"
+            )
         }
         
         let _content = MarkdownContent(raw: .plainText(rawText))

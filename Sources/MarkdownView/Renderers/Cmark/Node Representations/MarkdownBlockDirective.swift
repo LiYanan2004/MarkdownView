@@ -18,7 +18,7 @@ struct MarkdownBlockDirective: View {
                 wrappedString: blockDirective
                     .children
                     .compactMap { $0.format() }
-                    .joined(),
+                    .joined(separator: "\n"),
                 arguments: blockDirective
                     .argumentText
                     .parseNameValueArguments()

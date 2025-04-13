@@ -14,15 +14,19 @@ import LaTeXSwiftUI
 struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
         #if canImport(LaTeXSwiftUI)
-        LaTeX(configuration.wrappedString)
-            .renderingStyle(.empty)
-            .blockMode(.blockText)
-            .font(configuration.environments.markdownRendererConfiguration.fontGroup.inlineMath)
-            .frame(maxWidth: .infinity)
+        if let identifier = UUID(uuidString: configuration.arguments[0].value),
+           let mathExpression = MathStorage.lookupTable[identifier] {
+            LaTeX(mathExpression)
+                .renderingStyle(.empty)
+                .ignoreStringFormatting()
+                .blockMode(.blockText)
+                .font(configuration.environments.markdownRendererConfiguration.fontGroup.inlineMath)
+                .frame(maxWidth: .infinity)
+        } else {
+            EmptyView()
+        }
         #else
-        Text(configuration.text)
-            .font(font)
-            .frame(maxWidth: .infinity)
+        EmptyView()
         #endif
     }
 }
