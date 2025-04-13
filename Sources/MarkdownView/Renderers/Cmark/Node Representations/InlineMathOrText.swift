@@ -1,5 +1,5 @@
 //
-//  MarkdownMathOrText.swift
+//  InlineMathOrText.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2025/2/24.
@@ -12,10 +12,13 @@ import LaTeXSwiftUI
 import MathJaxSwift
 #endif
 
+@preconcurrency
 @MainActor
-struct MarkdownMathOrText {
+struct InlineMathOrText {
     var text: String
     
+    @preconcurrency
+    @MainActor
     func makeBody(configuration: MarkdownRenderConfiguration) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
         let mathParser = MathParser(text: text)

@@ -122,12 +122,14 @@ extension View {
     }
 }
 
+// MARK: - Auxiliary
+
 @available(iOS, introduced: 14.0, deprecated: 17.0)
 @available(macOS, introduced: 11.0, deprecated: 14.0)
 @available(tvOS, introduced: 14.0, deprecated: 17.0)
 @available(watchOS, introduced: 7.0, deprecated: 10.0)
 @available(visionOS, unavailable)
-struct OnChangeModifier<E: Equatable>: ViewModifier {
+fileprivate struct OnChangeModifier<E: Equatable>: ViewModifier {
     var value: E
     var initial: Bool
     

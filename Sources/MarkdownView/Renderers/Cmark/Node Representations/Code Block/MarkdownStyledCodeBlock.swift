@@ -1,5 +1,5 @@
 //
-//  StyledCodeBlock.swift
+//  MarkdownStyledCodeBlock.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2025/3/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct StyledCodeBlock: View {
+struct MarkdownStyledCodeBlock: View {
     var configuration: CodeBlockStyleConfiguration
     @Environment(\.codeBlockStyle) private var codeBlockStyle
     

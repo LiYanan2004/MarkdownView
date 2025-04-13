@@ -7,29 +7,28 @@ import WebKit
 struct SVGView: View {
     var svg: SVG
     
-    @State private var SVGSize = CGSize.zero
+    @State private var actualSize = CGSize.zero
     @State private var viewWidth = CGFloat.zero
-    @Environment(\.containerSize) private var containerSize
    
     var body: some View {
         _SVGViewBridge(html: svg.htmlRepresentation) { size in
             if size.width.isNormal {
-                SVGSize.width = size.width
+                actualSize.width = size.width
             }
             if size.height.isNormal {
-                SVGSize.height = size.height
+                actualSize.height = size.height
             }
         }
         .disabled(disableInteractions)
-        .frame(maxWidth: SVGSize.width == .zero ? containerSize.width : SVGSize.width)
-        .frame(height: SVGSize.height)
+        .frame(maxWidth: actualSize.width == .zero ? .infinity : actualSize.width)
+        .frame(height: actualSize.height)
         .widthOfView($viewWidth)
     }
     
     private var disableInteractions: Bool {
         // Disable scrolling and bounces if the width of the SVGView
         // is greater than or equal to the content width.
-        viewWidth >= SVGSize.width
+        viewWidth >= actualSize.width
     }
 }
 

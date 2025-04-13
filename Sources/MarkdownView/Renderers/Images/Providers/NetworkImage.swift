@@ -69,7 +69,7 @@ struct NetworkImage: View {
     }
     
     private func loadFromCache() async -> Bool {
-        let retrievedFromCache = await CacheStorage.shared.withCacheIfAvailable(url) { cache in
+        let retrievedFromCache = CacheStorage.shared.withCacheIfAvailable(url) { cache in
             if let imageCache = cache as? FetchedImage {
                 Task { @MainActor in
                     self.imageSize = imageCache.size
@@ -154,12 +154,12 @@ extension NetworkImage {
             image: image,
             size: imageSize
         )
-        await CacheStorage.shared.addCache(fetchedImage)
+        CacheStorage.shared.addCache(fetchedImage)
     }
     
     private func cacheFetchedSVG(_ svg: SVG) async {
         let fetchedSVG = FetchedSVG(url: url, svg: svg)
-        await CacheStorage.shared.addCache(fetchedSVG)
+        CacheStorage.shared.addCache(fetchedSVG)
     }
 }
 
