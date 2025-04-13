@@ -10,33 +10,28 @@ import Markdown
 
 struct MarkdownBlockDirective: View {
     var blockDirective: BlockDirective
-    private var args: [BlockDirectiveArgument] {
-        blockDirective
-            .argumentText
-            .parseNameValueArguments()
-            .map { BlockDirectiveArgument($0) }
-    }
-    private var provider: (any BlockDirectiveDisplayable)? {
-        for (name, provider) in configuration.blockDirectiveRenderer.providers {
-            if name.localizedLowercase == blockDirective.name.localizedLowercase {
-                return provider
-            }
-        }
-        return nil
-    }
-    
-    @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.self) private var environments
     
     var body: some View {
-        if let customView = configuration.blockDirectiveRenderer.loadBlockDirective(
-            provider: provider,
-            args: args,
-            text: blockDirective.format(options: .default)
-        ) {
-            customView
+        if let provider = BlockDirectiveRenderers.named(blockDirective.name) {
+            let configuration = BlockDirectiveRendererConfiguration(
+                wrappedString: blockDirective
+                    .children
+                    .compactMap { $0.format() }
+                    .joined(separator: "\n"),
+                arguments: blockDirective
+                    .argumentText
+                    .parseNameValueArguments()
+                    .map { BlockDirectiveRendererConfiguration.Argument($0) },
+                environments: environments
+            )
+            provider
+                .makeBody(configuration: configuration)
+                .erasedToAnyView()
         } else {
-            MarkdownViewRenderer(configuration: configuration)
-                .defaultVisit(blockDirective)
+            @Environment(\.markdownRendererConfiguration) var configuration
+            CmarkNodeVisitor(configuration: configuration)
+                .descendInto(blockDirective)
         }
     }
 }

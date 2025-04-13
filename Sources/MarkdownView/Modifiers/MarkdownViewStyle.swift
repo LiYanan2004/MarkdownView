@@ -34,13 +34,13 @@ public protocol MarkdownViewStyle {
 
 /// The properties of a MarkdownView.
 public struct MarkdownViewStyleConfiguration {
-    private var _body: MarkdownNodeView
+    private var _body: AnyView
     public var body: some View {
         _body
     }
     
-    internal init(body: @escaping () -> MarkdownNodeView) {
-        self._body = body()
+    internal init<Content: View>(body: Content) {
+        self._body = body.erasedToAnyView()
     }
 }
 

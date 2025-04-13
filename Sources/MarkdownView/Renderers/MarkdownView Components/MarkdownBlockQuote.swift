@@ -16,8 +16,8 @@ struct MarkdownBlockQuote: View {
     var body: some View {
         VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
-                MarkdownViewRenderer(configuration: configuration)
-                    .render(child)
+                CmarkNodeVisitor(configuration: configuration)
+                    .makeBody(for: child)
             }
         }
         .padding(.vertical, 8)

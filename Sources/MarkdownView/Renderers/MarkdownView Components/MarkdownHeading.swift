@@ -40,7 +40,7 @@ struct MarkdownHeading: View {
     
     var body: some View {
         let id = heading.range?.description ?? "Unknown Range"
-        MarkdownViewRenderer(configuration: configuration)
+        CmarkNodeVisitor(configuration: configuration)
             .descendInto(heading)
             .id(id)
             .padding(.top, shouldAddAdditionalSpacing ? nil : 0)

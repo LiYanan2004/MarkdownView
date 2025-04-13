@@ -15,7 +15,7 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
         }
     }
     
-    var rendersInlineMathIfPossible = false
+    var rendersMathIfPossible = false
     
     // Spacing
     var componentSpacing: CGFloat = 8
@@ -32,7 +32,6 @@ struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
     var listConfiguration: MarkdownListConfiguration = .init()
     
     // Renderer
-    var blockDirectiveRenderer: BlockDirectiveRenderer = .init()
     var imageRenderer: ImageRenderer = .init()
     
 }

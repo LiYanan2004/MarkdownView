@@ -17,10 +17,10 @@ extension View {
     ///
     /// You can set this provider multiple times if you have multiple providers.
     nonisolated public func blockDirectiveProvider(
-        _ provider: some BlockDirectiveDisplayable, for name: String
+        _ provider: some BlockDirectiveRenderer, for name: String
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            configuration.blockDirectiveRenderer.addProvider(provider, for: name)
+            BlockDirectiveRenderers.shared.addRenderer(provider, for: name)
         }
     }
 }

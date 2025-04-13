@@ -55,9 +55,9 @@ struct BlockDirectiveDestination: View {
 
 // MARK: - Custom Note Block Directive Provider
 
-struct NoteBlockDirective: BlockDirectiveDisplayable {
-    func makeView(arguments: [BlockDirectiveArgument], text: String) -> some View {
-        Text(text)
+struct NoteBlockDirective: BlockDirectiveRenderer {
+    func makeBody(configuration: Configuration) -> some View {
+        Text(configuration.text)
             .padding(20)
             .background(
                 .yellow.secondary,
@@ -68,6 +68,6 @@ struct NoteBlockDirective: BlockDirectiveDisplayable {
  
 // MARK: - Convenience
 
-extension BlockDirectiveDisplayable where Self == NoteBlockDirective {
+extension BlockDirectiveRenderer where Self == NoteBlockDirective {
     static var note: NoteBlockDirective { .init() }
 }

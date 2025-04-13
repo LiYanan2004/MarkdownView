@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable @_spi(MarkdownViewTesting) import MarkdownView
+@testable import MarkdownView
 
 @MainActor
 struct MathExtractionTests {
