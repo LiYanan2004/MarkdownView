@@ -41,7 +41,7 @@ struct MathExtractionTests {
     func testMathExtractionCase(
         _ configuration: MathExtractionTestConfiguration
     ) async throws {
-        let mathRenderer = MarkdownMathOrTextRenderer(text: configuration.plainText)
+        let mathRenderer = InlineMathOrTextRenderer(text: configuration.plainText)
         let extractedMath = mathRenderer.mathRanges
             .map { String(configuration.plainText[$0]) }
         #expect(extractedMath == configuration.extractedMath)

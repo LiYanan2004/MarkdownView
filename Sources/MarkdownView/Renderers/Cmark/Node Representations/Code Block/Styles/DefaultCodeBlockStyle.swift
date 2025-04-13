@@ -242,7 +242,7 @@ extension DefaultMarkdownCodeBlock {
 
 // MARK: - Supplementary
 
-struct AccessoryButtonStyle: PrimitiveButtonStyle {
+fileprivate struct AccessoryButtonStyle: PrimitiveButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         #if os(macOS)
         if #available(macOS 14.0, *) {
@@ -272,7 +272,7 @@ struct AccessoryButtonStyle: PrimitiveButtonStyle {
 }
 
 extension PrimitiveButtonStyle where Self == AccessoryButtonStyle {
-    static var accessory: AccessoryButtonStyle {
+    static fileprivate var accessory: AccessoryButtonStyle {
         .init()
     }
 }

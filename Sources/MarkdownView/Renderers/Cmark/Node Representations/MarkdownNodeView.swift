@@ -58,14 +58,14 @@ extension MarkdownNodeView {
         autoLayout: Bool = true
     ) {
         var composedContents = [MarkdownNodeView]()
-        var textStorage = TextFactory()
+        var textStorage = TextComposer()
         for content in contents {
             if case let .left(text) = content.storage {
                 textStorage.append(text)
             } else {
                 if textStorage.hasText {
                     composedContents.append(MarkdownNodeView(textStorage.text))
-                    textStorage = TextFactory()
+                    textStorage = TextComposer()
                 }
                 composedContents.append(content)
             }

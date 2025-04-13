@@ -54,7 +54,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
         if configuration.rendersMathIfPossible {
-            MarkdownMathOrText(text: text.plainText)
+            InlineMathOrText(text: text.plainText)
                 .makeBody(configuration: configuration)
         } else {
             MarkdownNodeView {
@@ -116,7 +116,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitCodeBlock(_ codeBlock: CodeBlock) -> MarkdownNodeView {
         MarkdownNodeView {
-            StyledCodeBlock(
+            MarkdownStyledCodeBlock(
                 configuration: CodeBlockStyleConfiguration(
                     language: codeBlock.language,
                     code: codeBlock.code
@@ -202,7 +202,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitEmphasis(_ emphasis: Markdown.Emphasis) -> MarkdownNodeView {
-        var textStorage = TextFactory()
+        var textStorage = TextComposer()
         for child in emphasis.children {
             var renderer = self
             guard let text = renderer.visit(child).asText else { continue }
@@ -212,7 +212,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitStrong(_ strong: Strong) -> MarkdownNodeView {
-        var textStorage = TextFactory()
+        var textStorage = TextComposer()
         for child in strong.children {
             var renderer = self
             guard let text = renderer.visit(child).asText else { continue }
@@ -222,7 +222,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitStrikethrough(_ strikethrough: Strikethrough) -> MarkdownNodeView {
-        var textStorage = TextFactory()
+        var textStorage = TextComposer()
         for child in strikethrough.children {
             var renderer = self
             guard let text = renderer.visit(child).asText else { continue }

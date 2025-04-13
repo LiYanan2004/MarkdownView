@@ -33,8 +33,6 @@ public struct MarkdownView: View {
         markdownViewStyle
             .makeBody(configuration: MarkdownViewStyleConfiguration(body: _renderedBody))
             .erasedToAnyView()
-            .sizeOfView($viewSize)
-            .containerSize(viewSize)
             .font(configuration.fontGroup.body)
     }
     
