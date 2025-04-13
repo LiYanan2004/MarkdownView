@@ -1,31 +1,36 @@
 import SwiftUI
 import Markdown
 
-/// A type that  renders block directives.
+/// A type that renders block directives.
 @preconcurrency
 @MainActor
 @_typeEraser(AnyBlockDirectiveRenderer)
 public protocol BlockDirectiveRenderer {
+    /// A view that represents the current block directive.
     associatedtype Body: SwiftUI.View
     
-    /// Creates a view that represents the body of the block directive
-    /// - Parameters:
-    ///   - arguments: A directive argument, parsed from the form name: value or name: "value".
-    ///   - text: Text inside the block.
-    /// - Returns: A custom block view within MarkdownView.
+    /// Creates a view that represents the body of the block directive.
+    /// - Parameter configuration: The properties of a block directive.
     @preconcurrency
     @MainActor
     @ViewBuilder
     func makeBody(configuration: Configuration) -> Body
     
+    /// The properties of a block directive.
     typealias Configuration = BlockDirectiveRendererConfiguration
 }
 
+/// The properties of a block directive.
 @preconcurrency
 @MainActor
 public struct BlockDirectiveRendererConfiguration: Sendable {
+    /// The string wrapped in a block directive.
     public var wrappedString: String
+    /// The arguments of a block directive.
     public var arguments: [Argument]
+    /// The current environment.
+    ///
+    /// - note: You should retrieve environment values from here instead of using `@Environment` property wrapper in your custom `BlockDirectiveRenderer`.
     public var environments: EnvironmentValues
     
     /// Directive Block arguments represented from `swift-markdown/DirectiveArgument`.

@@ -1,13 +1,14 @@
-# ``BlockDirectiveDisplayable``
+# ``BlockDirectiveRenderer``
 
 ## Topics
 
 ### Creating custom renderers
 
-- ``BlockDirectiveArgument``
-- ``BlockDirectiveDisplayable/makeView(arguments:text:)``
-- ``BlockDirectiveDisplayable/BlockDirectiveView``
+- ``BlockDirectiveRenderer/makeBody(configuration:)``
+- ``BlockDirectiveRenderer/Body``
+- ``BlockDirectiveRendererConfiguration``
+- ``BlockDirectiveRenderer/Configuration``
 
 ### Substituting renderer
 
-- ``AnyBlockDirectiveDisplayable``
+- ``AnyBlockDirectiveRenderer``

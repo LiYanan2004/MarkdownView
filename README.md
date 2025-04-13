@@ -26,14 +26,14 @@ You can use MarkdownView in the following platforms:
 
 - Fully compliant with CommonMark
 - Support SVG rendering
-- Support inline math rendering 
+- Support LaTeX math rendering
 - Highly Customizable and Extensible
     - Fonts
     - Code Highlighter Themes
     - Tint Colors
     - Block Directives
     - Custom Images
-- Fully Native SwiftUI implementations
+- Fully native SwiftUI implementations
 
 ## Getting started
 
