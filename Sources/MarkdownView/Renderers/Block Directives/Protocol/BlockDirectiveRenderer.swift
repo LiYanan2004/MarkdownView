@@ -2,6 +2,10 @@ import SwiftUI
 import Markdown
 
 /// A type that renders block directives.
+///
+/// Think of this type as a SwiftUI View wrapper.
+///
+/// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
 @preconcurrency
 @MainActor
 @_typeEraser(AnyBlockDirectiveRenderer)
@@ -10,6 +14,7 @@ public protocol BlockDirectiveRenderer {
     associatedtype Body: SwiftUI.View
     
     /// Creates a view that represents the body of the block directive.
+    ///
     /// - Parameter configuration: The properties of a block directive.
     @preconcurrency
     @MainActor

@@ -8,6 +8,10 @@
 import SwiftUI
 
 /// A type that renders images.
+///
+/// Think of this type as a SwiftUI View wrapper.
+///
+/// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
 @preconcurrency
 @MainActor
 public protocol MarkdownImageRenderer {
