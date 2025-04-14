@@ -8,27 +8,47 @@
 import Foundation
 import SwiftUI
 
-struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath {
+struct MarkdownRenderConfiguration: Equatable, AllowingModifyThroughKeyPath, Sendable {
     var preferredBaseURL: URL?
-    
-    var rendersMathIfPossible = false
-    
-    // Spacing
     var componentSpacing: CGFloat = 8
     
-    // Tint
+    var mathRenderingConfiguration: MathRenderingConfiguration = MathRenderingConfiguration()
+    
     var inlineCodeTintColor: Color = .accentColor
     var blockQuoteTintColor: Color = .accentColor
+    var fontGroup: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic)
+    var foregroundStyleGroup: AnyMarkdownForegroundStyleGroup = AnyMarkdownForegroundStyleGroup(.automatic)
     
-    // Font & Foreground style
-    var fontGroup: AnyMarkdownFontGroup = .init(.automatic)
-    var foregroundStyleGroup: AnyMarkdownForegroundStyleGroup = .init(.automatic)
-    
-    // List
-    var listConfiguration: MarkdownListConfiguration = .init()
+    var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
     
     var allowedImageRenderers: Set<String> = ["https", "http"]
     var allowedBlockDirectiveRenderers: Set<String> = ["math"]
+}
+
+extension MarkdownRenderConfiguration {
+    struct MathRenderingConfiguration: Sendable, Hashable {
+        var enabled: Bool {
+            get { displayMathStorage != nil }
+            set(enabled) {
+                if enabled {
+                    displayMathStorage = [:]
+                } else {
+                    displayMathStorage = nil
+                }
+            }
+        }
+        var displayMathStorage: [UUID : String]? = nil
+        
+        mutating func appendDisplayMath(_ displayMath: some StringProtocol) -> UUID {
+            if displayMathStorage == nil {
+                displayMathStorage = [:]
+            }
+            
+            let id = UUID()
+            displayMathStorage![id] = String(displayMath)
+            return id
+        }
+    }
 }
 
 // MARK: - SwiftUI Environment

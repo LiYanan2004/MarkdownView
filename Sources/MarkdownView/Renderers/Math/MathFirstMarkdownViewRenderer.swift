@@ -15,9 +15,12 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         var rawText = content.raw.text
         let mathParser = MathParser(text: rawText)
     
+        var configuration = configuration
         for math in mathParser.mathRepresentations.reversed() where !math.kind.inline {
-            let mathIdentifier = MathStorage
-                .appendMathExpression(rawText[math.range])
+            let mathIdentifier = configuration
+                .mathRenderingConfiguration
+                .appendDisplayMath(rawText[math.range])
+            
             rawText.replaceSubrange(
                 math.range,
                 with: "@math(uuid:\(mathIdentifier))"

@@ -13,31 +13,34 @@ import LaTeXSwiftUI
 
 struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
-        if let identifier = UUID(uuidString: configuration.arguments[0].value),
-           let mathExpression = MathStorage.lookupTable[identifier] {
-            BlockMath(mathExpression)
+        if let identifier = UUID(uuidString: configuration.arguments[0].value) {
+            DisplayMath(mathIdentifier: identifier)
         } else {
             EmptyView()
         }
     }
 }
 
-fileprivate struct BlockMath: View {
-    var mathExpression: String
+fileprivate struct DisplayMath: View {
+    var mathIdentifier: UUID
     @Environment(\.markdownRendererConfiguration.fontGroup.inlineMath) private var font
-    
-    init(_ exp: String) {
-        self.mathExpression = exp
+    @Environment(\.markdownRendererConfiguration.mathRenderingConfiguration) private var math
+    private var latexMath: String? {
+        math.displayMathStorage?[mathIdentifier]
     }
-    
+
     var body: some View {
         #if canImport(LaTeXSwiftUI)
-        LaTeX(mathExpression)
-            .renderingStyle(.empty)
-            .ignoreStringFormatting()
-            .blockMode(.blockText)
-            .font(font)
-            .frame(maxWidth: .infinity)
+        if let latexMath {
+            LaTeX(latexMath)
+                .renderingStyle(.empty)
+                .ignoreStringFormatting()
+                .blockMode(.blockText)
+                .font(font)
+                .frame(maxWidth: .infinity)
+        } else {
+            EmptyView()
+        }
         #else
         EmptyView()
         #endif
