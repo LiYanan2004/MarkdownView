@@ -15,14 +15,14 @@ struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
         if let identifier = UUID(uuidString: configuration.arguments[0].value),
            let mathExpression = MathStorage.lookupTable[identifier] {
-            MathBlockView(mathExpression)
+            BlockMath(mathExpression)
         } else {
             EmptyView()
         }
     }
 }
 
-fileprivate struct MathBlockView: View {
+fileprivate struct BlockMath: View {
     var mathExpression: String
     @Environment(\.markdownRendererConfiguration.fontGroup.inlineMath) private var font
     

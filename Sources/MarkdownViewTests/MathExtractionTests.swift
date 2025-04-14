@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import MarkdownView
+@_spi(MarkdownMath) import MarkdownView
 
 @MainActor
 struct MathExtractionTests {
@@ -41,8 +41,9 @@ struct MathExtractionTests {
     func testMathExtractionCase(
         _ configuration: MathExtractionTestConfiguration
     ) async throws {
-        let mathRenderer = InlineMathOrTextRenderer(text: configuration.plainText)
-        let extractedMath = mathRenderer.mathRanges
+        let parser = MathParser(text: configuration.plainText)
+        let extractedMath = parser.mathRepresentations
+            .map(\.range)
             .map { String(configuration.plainText[$0]) }
         #expect(extractedMath == configuration.extractedMath)
     }
