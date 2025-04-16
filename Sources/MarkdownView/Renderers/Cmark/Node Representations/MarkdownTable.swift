@@ -88,7 +88,7 @@ struct MarkdownTableBody: View {
             CmarkNodeVisitor(configuration: configuration)
                 .makeBody(for: child)
                 .font(configuration.fontGroup.tableBody)
-                .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
+                .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
         }
     }
 }
