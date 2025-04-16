@@ -68,12 +68,15 @@ struct DefaultMarkdownCodeBlock: View {
     @State private var codeCopied = false
     
     var body: some View {
-        Group {
-            if let attributedCode {
-                Text(attributedCode)
-            } else {
-                Text(codeBlockConfiguration.code)
+        ScrollView(.horizontal) {
+            Group {
+                if let attributedCode {
+                    Text(attributedCode)
+                } else {
+                    Text(codeBlockConfiguration.code)
+                }
             }
+            .padding(16)
         }
         .task(id: codeHighlightingConfiguration, immediateHighlight)
         .onChange(of: codeBlockConfiguration) {
@@ -82,17 +85,22 @@ struct DefaultMarkdownCodeBlock: View {
         .lineSpacing(4)
         .font(fontGroup.codeBlock)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
         #if os(macOS) || os(iOS)
         .safeAreaInset(edge: .top, spacing: 0) {
-            copyButton
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .background(.quaternary.opacity(0.3))
-                .overlay {
-                    Rectangle()
-                        .stroke(.quaternary, lineWidth: 0.5)
-                        .scaleEffect(x: 1.5, y: 1.5, anchor: .bottom)
-                }
+            HStack {
+                codeLanguage
+                Spacer(minLength: 10)
+                copyButton
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .background(.quaternary.opacity(0.3))
+            .overlay {
+                Rectangle()
+                    .stroke(.quaternary, lineWidth: 0.5)
+                    .scaleEffect(x: 1.5, y: 1.5, anchor: .bottom)
+            }
         }
         #endif
         .background(.background)
@@ -106,8 +114,7 @@ struct DefaultMarkdownCodeBlock: View {
     @ViewBuilder
     private var codeLanguage: some View {
         if let language = codeBlockConfiguration.language {
-            Text(language.uppercased())
-                .font(.callout)
+            Text(language.localizedLowercase)
                 .foregroundStyle(.secondary)
         }
     }
@@ -218,11 +225,7 @@ struct DefaultMarkdownCodeBlock: View {
         }
         .buttonStyle(.accessory)
         .font(.callout.weight(.medium))
-        #if os(macOS)
-        .padding(8)
-        #else
-        .padding(16)
-        #endif
+        .padding(.horizontal, -4)
     }
 }
 
