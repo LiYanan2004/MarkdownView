@@ -25,6 +25,7 @@ public protocol MarkdownFontGroup {
     
     // Math
     var inlineMath: Font { get }
+    var displayMath: Font { get }
 }
 
 extension MarkdownFontGroup {
@@ -48,4 +49,5 @@ extension MarkdownFontGroup {
     
     // Math
     public var inlineMath: Font { Font.body }
+    public var displayMath: Font { Font.body }
 }
