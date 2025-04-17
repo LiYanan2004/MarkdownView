@@ -240,7 +240,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         case .text:
             return MarkdownNodeView {
                 MarkdownLink(
-                    tint: configuration.inlineCodeTintColor,
+                    tint: configuration.linkTintColor,
                     font: configuration.fontGroup.body
                 ).attributed(link)
             }
