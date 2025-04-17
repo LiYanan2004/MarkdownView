@@ -10,16 +10,16 @@ import SwiftUI
 struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRenderConfiguration
+        configuration: MarkdownRendererConfiguration
     ) -> some View {
         var rawText = content.raw.text
         let mathParser = MathParser(text: rawText)
     
         var configuration = configuration
         for math in mathParser.mathRepresentations.reversed() where !math.kind.inline {
-            let mathIdentifier = configuration
-                .mathRenderingConfiguration
-                .appendDisplayMath(rawText[math.range])
+            let mathIdentifier = configuration.math.appendDisplayMath(
+                rawText[math.range]
+            )
             
             rawText.replaceSubrange(
                 math.range,

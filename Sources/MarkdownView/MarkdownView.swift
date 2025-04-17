@@ -38,7 +38,7 @@ public struct MarkdownView: View {
     
     @ViewBuilder
     private var _renderedBody: some View {
-        if configuration.mathRenderingConfiguration.enabled {
+        if configuration.math.shouldRender {
             MathFirstMarkdownViewRenderer()
                 .makeBody(content: content, configuration: configuration)
         } else {

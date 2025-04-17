@@ -19,7 +19,7 @@ struct InlineMathOrText {
     
     @preconcurrency
     @MainActor
-    func makeBody(configuration: MarkdownRenderConfiguration) -> MarkdownNodeView {
+    func makeBody(configuration: MarkdownRendererConfiguration) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
         let mathParser = MathParser(text: text)
         var nodeViews: [MarkdownNodeView] = []

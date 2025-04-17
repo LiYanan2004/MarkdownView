@@ -1,0 +1,19 @@
+# ``MarkdownTableStyle``
+
+## Topics
+
+### Getting built-in styles
+
+- ``MarkdownTableStyle/default``
+- ``MarkdownTableStyle/default(showsRowSeparators:)``
+
+### Creating custom styles
+
+- ``MarkdownTableStyle/makeBody(configuration:)``
+- ``MarkdownTableStyle/Body``
+- ``MarkdownTableStyleConfiguration``
+- ``MarkdownTableStyle/Configuration``
+
+### Supporting types
+
+- <doc:DefaultMarkdownTableStyle>

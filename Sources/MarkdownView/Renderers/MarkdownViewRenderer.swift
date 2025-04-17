@@ -18,6 +18,6 @@ protocol MarkdownViewRenderer {
     @ViewBuilder
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRenderConfiguration
+        configuration: MarkdownRendererConfiguration
     ) -> Body
 }

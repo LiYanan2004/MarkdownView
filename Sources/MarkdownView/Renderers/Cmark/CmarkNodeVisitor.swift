@@ -11,9 +11,9 @@ import Markdown
 @MainActor
 @preconcurrency
 struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
-    var configuration: MarkdownRenderConfiguration
+    var configuration: MarkdownRendererConfiguration
     
-    init(configuration: MarkdownRenderConfiguration) {
+    init(configuration: MarkdownRendererConfiguration) {
         self.configuration = configuration
     }
     
@@ -53,7 +53,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
-        if configuration.mathRenderingConfiguration.enabled {
+        if configuration.math.shouldRender {
             InlineMathOrText(text: text.plainText)
                 .makeBody(configuration: configuration)
         } else {
@@ -180,7 +180,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
             let cellView = renderer.visit(child)
             cellViews.append(cellView)
         }
-        return MarkdownNodeView(cellViews, alignment: cell.alignment)
+        return MarkdownNodeView(
+            cellViews,
+            alignment: cell.horizontalAlignment
+        )
     }
     
     func visitParagraph(_ paragraph: Paragraph) -> MarkdownNodeView {
