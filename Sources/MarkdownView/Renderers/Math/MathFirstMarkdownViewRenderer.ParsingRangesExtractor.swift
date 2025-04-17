@@ -44,8 +44,7 @@ extension MathFirstMarkdownViewRenderer {
     }
 }
 
-
-extension SourceLocation {
+fileprivate extension SourceLocation {
     func index(in string: String) -> String.Index {
         var idx = string.startIndex
         var currentLine = 1

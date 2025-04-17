@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Markdown
 
 struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
