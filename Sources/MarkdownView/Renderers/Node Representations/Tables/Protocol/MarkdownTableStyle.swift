@@ -9,6 +9,10 @@ import SwiftUI
 import Markdown
 
 /// A type that applies a cutsom appearance to all tables created by MarkdownView within the view hierarchy.
+/// 
+/// Think of this type as a SwiftUI View wrapper.
+///
+/// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
 @preconcurrency
 @MainActor
 public protocol MarkdownTableStyle {

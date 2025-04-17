@@ -8,6 +8,10 @@
 import SwiftUI
 
 /// A type that applies a custom style to all code blocks within a MarkdownView.
+///
+/// Think of this type as a SwiftUI View wrapper.
+///
+/// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
 @preconcurrency
 @MainActor
 public protocol CodeBlockStyle {
