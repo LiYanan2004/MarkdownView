@@ -1,20 +1,21 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest an idea & any improvement for this project
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-**Description**
-A clear and concise description of what you want to happen.
+### Description
+> Describe your feature request in detail.
 
-**Behavior in different OS**
+### Multi-platform behavior
+
 * iOS / iPadOS: 
 * macOS:
 * watchOS: 
 * tvOS:
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+### Additional context
+> Add any other context or screenshots about the feature request here.

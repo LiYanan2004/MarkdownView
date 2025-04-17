@@ -6,27 +6,14 @@ labels: 'bug'
 assignees: ''
 ---
 
-**Describe your issue**
-A clear and concise description of what the bug is.
+### Description
+> Detailed description of the issue you're experiencing.
+>
+> Add screenshots or recordings to help explain your problem.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+#### Screenshots & Recordings
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+### What's Expected
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Environment:**
- - OS and Version:
- - Simulator or Physical Device:
- - Xcode version and build number:
- - Framework version/branch:
-
-**Additional context**
+### Additional context
 Add any other context about the problem here.
