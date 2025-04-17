@@ -16,9 +16,9 @@ import MathJaxSwift
  */
 @_spi(MarkdownMath)
 public struct MathParser {
-    public var text: String
+    public var text: any StringProtocol
     
-    public init(text: String) {
+    public init(text: some StringProtocol) {
         self.text = text
     }
     
