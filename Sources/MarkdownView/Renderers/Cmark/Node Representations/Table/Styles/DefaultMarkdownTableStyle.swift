@@ -7,7 +7,9 @@
 
 import SwiftUI
 
+/// Default markdown table style that applies to a MarkdownView.
 public struct DefaultMarkdownTableStyle: MarkdownTableStyle {
+    /// A boolean value that indicates whether to display separators between rows.
     public var showsRowSeparators: Bool = true
     
     public func makeBody(configuration: Configuration) -> some View {

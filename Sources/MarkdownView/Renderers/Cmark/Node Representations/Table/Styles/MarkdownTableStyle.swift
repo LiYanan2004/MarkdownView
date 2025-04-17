@@ -8,6 +8,7 @@
 import SwiftUI
 import Markdown
 
+/// A type that applies a cutsom appearance to all tables created by MarkdownView within the view hierarchy.
 @preconcurrency
 @MainActor
 public protocol MarkdownTableStyle {
@@ -15,6 +16,8 @@ public protocol MarkdownTableStyle {
     associatedtype Body : SwiftUI.View
     
     /// Creates the view that represents the current markdown table.
+    ///
+    /// It's recommended to use `Grid` to construct a table, but since `Grid` is only available for iOS 16, macOS 13, tvOS 16 and watchOS 9, you will need to use ``MarkdownTableStyleConfiguration/FallbackTable`` on older platforms.
     @preconcurrency
     @MainActor
     @ViewBuilder
@@ -30,7 +33,7 @@ public struct MarkdownTableStyleConfiguration {
     public var header: Header
     /// The rows of a table.
     public var rows: [Row]
-    /// A fallback view that uses `AdaptiveGrid` for older platform support.
+    /// A fallback table view for older platforms.
     ///
     /// You can only customize row separators' visibility and spacings.
     ///
