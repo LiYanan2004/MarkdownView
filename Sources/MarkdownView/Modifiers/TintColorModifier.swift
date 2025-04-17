@@ -23,6 +23,8 @@ extension View {
             environment(\.markdownRendererConfiguration.blockQuoteTintColor, tint)
         case .inlineCodeBlock:
             environment(\.markdownRendererConfiguration.inlineCodeTintColor, tint)
+        case .link:
+            environment(\.markdownRendererConfiguration.linkTintColor, tint)
         }
     }
 }
@@ -32,4 +34,5 @@ extension View {
 public enum TintableComponent {
     case blockQuote
     case inlineCodeBlock
+    case link
 }
