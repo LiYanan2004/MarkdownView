@@ -10,6 +10,12 @@ assignees: ''
 ### Description
 > Describe your feature request in detail.
 
+### Example markdown
+
+````markdown
+
+````
+
 ### Multi-platform behavior
 
 * iOS / iPadOS: 
