@@ -23,7 +23,7 @@ protocol MarkdownNode2TextRenderer {
 struct MarkdownNode2TextRendererContext: Sendable {
     var node: MarkdownTextNode
     var environment: EnvironmentValues
-    var rendererConfiguration: MarkdownRenderConfiguration {
+    var rendererConfiguration: MarkdownRendererConfiguration {
         environment.markdownRendererConfiguration
     }
 }

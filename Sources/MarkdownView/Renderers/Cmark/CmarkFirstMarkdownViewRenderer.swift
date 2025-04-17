@@ -10,7 +10,7 @@ import SwiftUI
 struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {    
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRenderConfiguration
+        configuration: MarkdownRendererConfiguration
     ) -> some View {
         _makeAndCacheBody(
             content: content,
@@ -20,7 +20,7 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
     
     private func _makeAndCacheBody(
         content: MarkdownContent,
-        configuration: MarkdownRenderConfiguration
+        configuration: MarkdownRendererConfiguration
     ) -> some View {
         if let cached = CacheStorage.shared.withCacheIfAvailable(
             content,
@@ -48,7 +48,7 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
 extension CmarkFirstMarkdownViewRenderer {
     struct Cache: Cacheable {
         var markdownContent: MarkdownContent
-        var configuration: MarkdownRenderConfiguration
+        var configuration: MarkdownRendererConfiguration
         var renderedView: any View
         
         var cacheKey: some Hashable { markdownContent }
