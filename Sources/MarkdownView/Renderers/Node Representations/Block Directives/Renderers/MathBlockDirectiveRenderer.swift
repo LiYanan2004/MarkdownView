@@ -1,5 +1,5 @@
 //
-//  MathDirectiveBlockRenderer.swift
+//  MathBlockDirectiveRenderer.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2025/4/12.
@@ -11,7 +11,7 @@ import SwiftUI
 import LaTeXSwiftUI
 #endif
 
-struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
+struct MathBlockDirectiveRenderer: BlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
         if let identifier = UUID(uuidString: configuration.arguments[0].value) {
             DisplayMath(mathIdentifier: identifier)
@@ -23,7 +23,7 @@ struct MathDirectiveBlockRenderer: BlockDirectiveRenderer {
 
 fileprivate struct DisplayMath: View {
     var mathIdentifier: UUID
-    @Environment(\.markdownRendererConfiguration.fontGroup.inlineMath) private var font
+    @Environment(\.markdownRendererConfiguration.fontGroup.displayMath) private var font
     @Environment(\.markdownRendererConfiguration.math) private var math
     private var latexMath: String? {
         math.displayMathStorage?[mathIdentifier]

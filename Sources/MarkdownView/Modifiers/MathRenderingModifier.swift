@@ -15,7 +15,7 @@ extension View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.math.shouldRender = enabled
             BlockDirectiveRenderers.shared.addRenderer(
-                MathDirectiveBlockRenderer(),
+                MathBlockDirectiveRenderer(),
                 for: "math"
             )
         }
