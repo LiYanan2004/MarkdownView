@@ -12,19 +12,23 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         content: MarkdownContent,
         configuration: MarkdownRendererConfiguration
     ) -> some View {
-        var rawText = content.raw.text
-        let mathParser = MathParser(text: rawText)
-    
         var configuration = configuration
-        for math in mathParser.mathRepresentations.reversed() where !math.kind.inline {
-            let mathIdentifier = configuration.math.appendDisplayMath(
-                rawText[math.range]
-            )
-            
-            rawText.replaceSubrange(
-                math.range,
-                with: "@math(uuid:\(mathIdentifier))"
-            )
+        var rawText = content.raw.text
+        
+        var extractor = ParsingRangesExtractor()
+        extractor.visit(content.document)
+        for range in extractor.parsableRanges(in: rawText) {
+            let segment = rawText[range]
+            let segmentParser = MathParser(text: segment)
+            for math in segmentParser.mathRepresentations.reversed() where !math.kind.inline {
+                let mathIdentifier = configuration.math.appendDisplayMath(
+                    rawText[math.range]
+                )
+                rawText.replaceSubrange(
+                    math.range,
+                    with: "@math(uuid:\(mathIdentifier))"
+                )
+            }
         }
         
         let _content = MarkdownContent(raw: .plainText(rawText))
