@@ -7,10 +7,7 @@ assignees: ''
 
 ---
 
-**The feature you want to get in MarkdownView** 
-A clear and simple feature description.
-
-**Describe that feature in detail**
+**Description**
 A clear and concise description of what you want to happen.
 
 **Behavior in different OS**

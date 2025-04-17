@@ -2,12 +2,11 @@
 name: Bug report
 about: Let me know the bug you are experiencing.
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
-
 ---
 
-**Describe the bug**
+**Describe your issue**
 A clear and concise description of what the bug is.
 
 **To Reproduce**
