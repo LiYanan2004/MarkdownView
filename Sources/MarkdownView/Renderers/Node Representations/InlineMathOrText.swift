@@ -37,9 +37,22 @@ struct InlineMathOrText {
             // Add the current LaTeX node
             let latexText = String(text[range])
             nodeViews.append(MarkdownNodeView {
-                LaTeX(latexText)
-                    .blockMode(.alwaysInline)
-                    .font(configuration.fontGroup.inlineMath)
+                if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+                    ViewThatFits(in: .horizontal) {
+                        LaTeX(latexText)
+                            .blockMode(.alwaysInline)
+                            .font(configuration.fontGroup.inlineMath)
+                        ScrollView(.horizontal) {
+                            LaTeX(latexText)
+                                .blockMode(.alwaysInline)
+                                .font(configuration.fontGroup.inlineMath)
+                        }
+                    }
+                } else {
+                    LaTeX(latexText)
+                        .blockMode(.alwaysInline)
+                        .font(configuration.fontGroup.inlineMath)
+                }
             })
             
             processingIndex = range.upperBound
