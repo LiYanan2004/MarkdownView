@@ -56,6 +56,7 @@ fileprivate struct DefaultMarkdownTable: View {
                     .verticalSpacing(spacing)
             }
         }
+        ._markdownTableStylesIgnored()
         .scenePadding()
         .overlay {
             RoundedRectangle(cornerRadius: 8, style: .continuous)

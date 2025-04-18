@@ -93,3 +93,15 @@ fileprivate struct MarkdownTableCellStylingViewModifier: ViewModifier {
         return _openExistential(shape, do: cast(_:))
     }
 }
+
+extension View {
+    nonisolated package func _markdownTableStylesIgnored(_ ignored: Bool = true) -> some View {
+        transformEnvironment(\.self) { environmentValues in
+            if ignored {
+                environmentValues.markdownTableCellBackgroundStyle = nil
+                environmentValues.markdownTableCellOverlayContent = nil
+                environmentValues.markdownTableRowBackgroundStyle = nil
+            }
+        }
+    }
+}
