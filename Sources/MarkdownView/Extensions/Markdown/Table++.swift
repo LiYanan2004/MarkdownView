@@ -10,7 +10,7 @@ import SwiftUI
 
 extension Markdown.Table.Cell {
     private var alignment: CellAlignment {
-        guard parent is any TableCellContainer else { return .center }
+        guard parent is any TableCellContainer else { return .leading }
         
         let columnIdx = self.indexInParent
         var currentElement = parent
@@ -21,14 +21,14 @@ extension Markdown.Table.Cell {
                 case .center: return .center
                 case .left: return .leading
                 case .right: return .trailing
-                case .none: return .center
+                case .none: return .leading
                 }
             }
             
             currentElement = currentElement?.parent
         }
         
-        return .center
+        return .leading
     }
     
     var horizontalAlignment: HorizontalAlignment {
