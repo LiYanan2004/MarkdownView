@@ -12,6 +12,7 @@ struct MarkdownTableHead: View {
     var head: Markdown.Table.Head
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownTableCellPadding) private var padding
     
     var body: some View {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
@@ -20,6 +21,7 @@ struct MarkdownTableHead: View {
                 ForEach(Array(cells.enumerated()), id: \.offset) { (index, cell) in
                     CmarkNodeVisitor(configuration: configuration)
                         .makeBody(for: cell)
+                        ._markdownCellPadding(padding)
                         .font(configuration.fontGroup.tableHeader)
                         .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                         .multilineTextAlignment(cell.textAlignment)
