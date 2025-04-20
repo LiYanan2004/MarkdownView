@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-/// A markdown table style that matches the style of GitHub.
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+/// A markdown table style that matches the style of table in GitHub.
 public struct GithubMarkdownTableStyle: MarkdownTableStyle {
     public func makeBody(configuration: Configuration) -> some View {
         GithubMarkdownTable(
@@ -17,51 +16,73 @@ public struct GithubMarkdownTableStyle: MarkdownTableStyle {
     }
 }
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 extension MarkdownTableStyle where Self == GithubMarkdownTableStyle {
-    /// Default markdown table style.
-    @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+    /// A markdown table style that matches the style of table in GitHub.
     @preconcurrency
     @MainActor
     static public var github: GithubMarkdownTableStyle { .init() }
 }
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 fileprivate struct GithubMarkdownTable: View {
     var configuration: MarkdownTableStyleConfiguration
     
+    init(configuration: MarkdownTableStyleConfiguration) {
+        self.configuration = configuration
+    }
+    
+    @Environment(\.colorScheme) private var colorScheme
+    
     /* Spacing values derived from GitHub's CSS table styles */
-    var horizontalSpacing: CGFloat = 13
-    var verticalSpacing: CGFloat = 6
+    private var horizontalSpacing: CGFloat = 13
+    private var verticalSpacing: CGFloat = 6
+    private var borderColor: Color {
+        if colorScheme == .dark {
+            Color(red: 61 / 255, green: 68 / 255, blue: 67 / 255)
+        } else {
+            Color(red: 209 / 255, green: 217 / 255, blue: 224 / 255)
+        }
+    }
+    private var alternativeRowColor: Color {
+        if colorScheme == .dark {
+            Color(red: 21 / 255, green: 27 / 255, blue: 35 / 255)
+        } else {
+            Color(red: 246 / 255, green: 248 / 255, blue: 250 / 255)
+        }
+    }
     
     var body: some View {
-        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-            configuration.header
-                .safeAreaPadding(.vertical, verticalSpacing)
-                .safeAreaPadding(.horizontal, horizontalSpacing)
-                .markdownTableRowBackgroundStyle(.background)
-                .markdownTableCellOverlay {
-                    Rectangle()
-                        .stroke(.placeholder)
-                        .opacity(0.5)
-                }
-            ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
-                let backgroundStyle = index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary)
-                row
-                    .safeAreaPadding(.vertical, verticalSpacing)
-                    .safeAreaPadding(.horizontal, horizontalSpacing)
-                    .markdownTableRowBackgroundStyle(backgroundStyle)
+        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+            Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+                configuration.header
+                    .markdownTableRowBackgroundStyle(.background)
                     .markdownTableCellOverlay {
                         Rectangle()
-                            .stroke(.placeholder)
+                            .stroke(borderColor)
                             .opacity(0.5)
                     }
+                ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
+                    let backgroundStyle = index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(borderColor)
+                    row
+                        .markdownTableRowBackgroundStyle(backgroundStyle)
+                        .markdownTableCellOverlay {
+                            Rectangle()
+                                .stroke(borderColor)
+                                .opacity(0.5)
+                        }
+                }
             }
-        }
-        .overlay {
-            Rectangle()
-                .stroke(.placeholder)
-                .opacity(0.5)
+            .markdownTableCellPadding(.vertical, verticalSpacing)
+            .markdownTableCellPadding(.horizontal, horizontalSpacing)
+            .overlay {
+                Rectangle()
+                    .stroke(borderColor)
+                    .opacity(0.5)
+            }
+        } else {
+            configuration.fallback
+                .horizontalSpacing(horizontalSpacing)
+                .verticalSpacing(verticalSpacing)
+                .showsRowSeparators()
         }
     }
 }
