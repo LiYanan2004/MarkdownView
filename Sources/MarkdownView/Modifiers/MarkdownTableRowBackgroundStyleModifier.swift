@@ -12,27 +12,20 @@ extension View {
     ///
     /// Use this modifier to layer a type that conforms to `Shape` protocol behind a markdown table row. Specify a `ShapeStyle` to fill the shape.
     ///
-    /// > Important:
-    /// >
-    /// > You should set `horizontalSpacing` and `verticalSpacing` to `0` and add spacing between cells manually.
-    /// >
-    /// > Avoid using `.padding(_:)` to adjust spacing, use `.markdownTableCellPadding(_:)` instead.
-    ///
-    /// Here is an example:
+    /// Here is an example showing how to implement an alternative background table style:
     ///
     /// ```swift
-    /// struct BackgroundAlternativeTableStyle: MarkdownTableStyle {
+    /// struct AlternativeBackgroundTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
     ///             configuration.header
-    ///                 .markdownTableCellPadding(8)
     ///                 .markdownTableCellBackgroundStyle(.background)
     ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
     ///                 row
-    ///                     .markdownTableCellPadding(8)
-    ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary), in: .rect(cornerRadius: 10))
+    ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary))
     ///             }
     ///         }
+    ///         .markdownTableCellPadding(8)
     ///     }
     /// }
     /// ```
@@ -50,27 +43,20 @@ extension View {
     ///
     /// Use this modifier to place a type that conforms to the `ShapeStyle` protocol — like a `Color`, `Material`, or `HierarchicalShapeStyle` — behind a table cell.
     ///
-    /// > Important:
-    /// >
-    /// > You should set `horizontalSpacing` and `verticalSpacing` to `0` and add spacing between cells manually.
-    /// >
-    /// > Avoid using `.padding(_:)` to adjust spacing, use `.markdownTableCellPadding(_:)` instead.
-    ///
-    /// Here is an example:
+    /// Here is an example showing how to implement an alternative background table style:
     ///
     /// ```swift
-    /// struct BackgroundAlternativeTableStyle: MarkdownTableStyle {
+    /// struct AlternativeBackgroundTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
     ///             configuration.header
-    ///                 .markdownTableCellPadding(8)
     ///                 .markdownTableCellBackgroundStyle(.background)
     ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
     ///                 row
-    ///                     .markdownTableCellPadding(8)
     ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary))
     ///             }
     ///         }
+    ///         .markdownTableCellPadding(8)
     ///     }
     /// }
     /// ```
