@@ -16,6 +16,10 @@ struct MarkdownTableCellStyleCollection {
     
     private class CacheBox {
         enum CacheKey: Hashable {
+            case minXs
+            case maxXs
+            case minYs
+            case maxYs
             case widths
             case heights
             case cells
@@ -44,14 +48,70 @@ struct MarkdownTableCellStyleCollection {
         return cells
     }
     
+    var minXs: [CGFloat] {
+        if let cached = cacheBox.caches[.minXs] {
+            return cached as! [CGFloat]
+        }
+        
+        let columns = Set(cells.map(\.position.column)).count
+        let minXs = (0..<columns).map { column in
+            cells.filter { $0.position.column == column }.map(\.rect.minX).min() ?? 0
+        }
+        cacheBox.caches[.minXs] = minXs
+        return minXs
+    }
+    
+    var maxXs: [CGFloat] {
+        if let cached = cacheBox.caches[.maxXs] {
+            return cached as! [CGFloat]
+        }
+        
+        let columns = Set(cells.map(\.position.column)).count
+        let maxXs = (0..<columns).map { column in
+            cells.filter { $0.position.column == column }.map(\.rect.maxX).max() ?? 0
+        }
+        cacheBox.caches[.maxXs] = maxXs
+        return maxXs
+    }
+    
+    var minYs: [CGFloat] {
+        if let cached = cacheBox.caches[.minYs] {
+            return cached as! [CGFloat]
+        }
+        
+        let rows = Set(cells.map(\.position.row)).count
+        let minYs = (0..<rows).map { row in
+            cells.filter { $0.position.row == row }.map(\.rect.minY).min() ?? 0
+        }
+        cacheBox.caches[.minYs] = minYs
+        return minYs
+    }
+    
+    var maxYs: [CGFloat] {
+        if let cached = cacheBox.caches[.maxYs] {
+            return cached as! [CGFloat]
+        }
+        
+        let rows = Set(cells.map(\.position.row)).count
+        let maxYs = (0..<rows).map { row in
+            cells.filter { $0.position.row == row }.map(\.rect.maxY).max() ?? 0
+        }
+        cacheBox.caches[.maxYs] = maxYs
+        return maxYs
+    }
+    
     var widths: [CGFloat] {
         if let cached = cacheBox.caches[.widths] {
             return cached as! [CGFloat]
         }
         
-        let columns = Set(cells.map(\.position.column)).count
-        let widths = (0..<columns).map { column in
-            cells.filter { $0.position.column == column }.map(\.width).max() ?? 0
+        let normalWidths = zip(maxXs, minXs).map(-)
+        
+        var widths = normalWidths
+        let additionalWidths = zip(minXs.dropFirst(), maxXs.dropLast()).map(-)
+        
+        for (index, additionalWidth) in additionalWidths.enumerated() {
+            widths[index] += additionalWidth
         }
         cacheBox.caches[.widths] = widths
         return widths
@@ -62,22 +122,28 @@ struct MarkdownTableCellStyleCollection {
             return cached as! [CGFloat]
         }
         
-        let rows = Set(cells.map(\.position.row)).count
-        let heights = (0..<rows).map { row in
-            cells.filter { $0.position.row == row }.map(\.height).max() ?? 0
+        let normalHeights = zip(maxYs, minYs).map(-)
+        
+        var heights = normalHeights
+        let additionalHeights = zip(minYs.dropFirst(), maxYs.dropLast()).map(-)
+        
+        for (index, additionalHeight) in additionalHeights.enumerated() {
+            heights[index] += additionalHeight
         }
         cacheBox.caches[.heights] = heights
         return heights
     }
     
     func offset(for position: MarkdownTableCellStyle.Position) -> CGSize {
+        guard storage[position] != nil else { return .zero }
+        
         if let cached = cacheBox.caches[.offsets(position)] {
             return cached as! CGSize
         }
         
         let offset = CGSize(
-            width: widths[0..<max(0, position.column)].reduce(0, +),
-            height: heights[0..<max(0, position.row)].reduce(0, +)
+            width: minXs[position.column],
+            height: minYs[position.row]
         )
         cacheBox.caches[.offsets(position)] = offset
         return offset

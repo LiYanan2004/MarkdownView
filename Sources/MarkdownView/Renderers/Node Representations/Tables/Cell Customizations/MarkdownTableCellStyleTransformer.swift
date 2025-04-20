@@ -11,17 +11,19 @@ struct MarkdownTableCellStyleTransformer: ViewModifier {
     var row: Int
     var column: Int
     
-    @Environment(\.markdownTableCellBackgroundStyle) var cellBackgroundStyle
-    @Environment(\.markdownTableCellBackgroundShape) var cellBackgroundShape
-    @Environment(\.markdownTableCellOverlayContent) var overlayContent
+    @Environment(\.markdownTableCellBackgroundStyle) private var cellBackgroundStyle
+    @Environment(\.markdownTableCellBackgroundShape) private var cellBackgroundShape
+    @Environment(\.markdownTableCellOverlayContent) private var overlayContent
     
-    @Environment(\.markdownTableRowBackgroundStyle) var rowBackgroundStyle
-    @Environment(\.markdownTableRowBackgroundShape) var rowBackgroundShape
+    @Environment(\.markdownTableRowBackgroundStyle) private var rowBackgroundStyle
+    @Environment(\.markdownTableRowBackgroundShape) private var rowBackgroundShape
     
     func body(content: Content) -> some View {
         content.overlay {
             GeometryReader { proxy in
-                Color.clear
+                let rect = proxy.frame(in: .named(MarkdownTable.CoordinateSpaceName))
+                Rectangle()
+                    .fill(.clear)
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
                     .transformPreference(
@@ -33,7 +35,8 @@ struct MarkdownTableCellStyleTransformer: ViewModifier {
                         )
                         var tableRowStyle = MarkdownTableRowStyle(
                             position: position,
-                            idealHeight: proxy.size.height
+                            minY: rect.minY,
+                            maxY: rect.maxY
                         )
                         tableRowStyle.backgroundStyle = rowBackgroundStyle
                         tableRowStyle.backgroundShape = rowBackgroundShape
@@ -48,7 +51,7 @@ struct MarkdownTableCellStyleTransformer: ViewModifier {
                         )
                         var tableCellStyle = MarkdownTableCellStyle(
                             position: position,
-                            size: proxy.size
+                            rect: rect
                         )
                         tableCellStyle.backgroundStyle = cellBackgroundStyle
                         tableCellStyle.backgroundShape = cellBackgroundShape
@@ -56,6 +59,7 @@ struct MarkdownTableCellStyleTransformer: ViewModifier {
                         styleCollection[tableCellStyle.position] = tableCellStyle
                     }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
         }
     }

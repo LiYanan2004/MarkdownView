@@ -15,7 +15,12 @@ struct MarkdownTable: View {
             .makeBody(configuration: configuration)
             .erasedToAnyView()
             .markdownTableCellStyleApplied()
+            .coordinateSpace(name: MarkdownTable.CoordinateSpaceName)
     }
+}
+
+extension MarkdownTable {
+    static let CoordinateSpaceName: String = "markdownview-table"
 }
 
 // MARK: - Auxiliary
