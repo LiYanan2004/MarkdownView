@@ -12,20 +12,13 @@ extension View {
     ///
     /// Use this modifier to add overlay decorations (e.g cell borders, etc.) to every cell within a table.
     ///
-    /// > Important:
-    /// >
-    /// > You should set `horizontalSpacing` and `verticalSpacing` to `0` and add spacing between cells manually.
-    /// >
-    /// > Avoid using `.padding(_:)` to adjust spacing, use `.markdownTableCellPadding(_:)` instead.
-    ///
-    /// Here is an example:
+    /// In this example, we add borders to each cell and set cell padding:
     ///
     /// ```swift
-    /// struct MyTableStyle: MarkdownTableStyle {
+    /// struct GridTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
     ///             configuration.header
-    ///                 .markdownTableCellPadding(8)
     ///                 .markdownTableCellOverlay {
     ///                     Rectangle()
     ///                         .stroke()
@@ -33,7 +26,6 @@ extension View {
     ///                 }
     ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (_, row) in
     ///                 row
-    ///                     .markdownTableCellPadding(8)
     ///                     .markdownTableCellOverlay {
     ///                         Rectangle()
     ///                             .stroke()
@@ -41,6 +33,7 @@ extension View {
     ///                     }
     ///             }
     ///         }
+    ///         .markdownTableCellPadding(8)
     ///     }
     /// }
     /// ```

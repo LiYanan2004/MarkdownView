@@ -21,10 +21,10 @@ struct MarkdownTableHead: View {
                 ForEach(Array(cells.enumerated()), id: \.offset) { (index, cell) in
                     CmarkNodeVisitor(configuration: configuration)
                         .makeBody(for: cell)
-                        ._markdownCellPadding(padding)
                         .font(configuration.fontGroup.tableHeader)
                         .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                         .multilineTextAlignment(cell.textAlignment)
+                        ._markdownCellPadding(padding)
                         .modifier(
                             MarkdownTableCellStyleTransformer(
                                 row: 0,

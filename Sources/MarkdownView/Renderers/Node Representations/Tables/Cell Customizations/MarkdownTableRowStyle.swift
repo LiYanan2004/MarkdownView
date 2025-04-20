@@ -15,13 +15,15 @@ struct MarkdownTableRowStyle: Identifiable {
     var position: Position
     var id: Position { position }
     
-    var idealHeight: CGFloat
+    var minY: CGFloat
+    var maxY: CGFloat
     
     var backgroundStyle: AnyShapeStyle? = nil
     var backgroundShape: any Shape = .rect
     
-    init(position: Position, idealHeight: CGFloat) {
+    init(position: Position, minY: CGFloat, maxY: CGFloat) {
         self.position = position
-        self.idealHeight = idealHeight
+        self.minY = minY
+        self.maxY = maxY
     }
 }

@@ -16,7 +16,7 @@ extension View {
 struct MarkdownCellPaddingModifier: ViewModifier {
     var padding: MarkdownTableCellPadding
     
-    package func body(content: Content) -> some View {
+    func body(content: Content) -> some View {
         content
             .contentPadding(.top, padding[.top])
             .contentPadding(.bottom, padding[.bottom])

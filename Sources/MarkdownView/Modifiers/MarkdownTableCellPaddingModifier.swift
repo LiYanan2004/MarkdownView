@@ -10,9 +10,11 @@ import SwiftUI
 extension View {
     /// Sets paddings for individual markdown table cell within the view hierarchy.
     ///
-    /// Make sure to set `horizontalSpacing` & `verticalSpacing` of a Grid or other layout stacks (e.g. `VStack`) to `0` if you use this modifier.
+    /// > tip:
+    /// > Make sure to set `horizontalSpacing` & `verticalSpacing` of a `Grid` or other layout stacks (e.g. `VStack`) to `0` to avoid extra spacings.
     ///
-    /// Here is an example:
+    /// In this example, we add background for header row and set cell padding.
+    ///
     ///
     /// ```swift
     /// struct MyTableStyle: MarkdownTableStyle {
@@ -28,6 +30,8 @@ extension View {
     ///     }
     /// }
     /// ```
+    ///
+    /// You can use `.padding(_:)` for `header` and `row` since this will apply to all cells within the scope, but it's still recomended to use ``SwiftUICore/View/markdownTableCellPadding(_:_:)`` for this purpose.
     nonisolated public func markdownTableCellPadding(
         _ edges: Edge.Set = .all,
         _ amount: CGFloat
