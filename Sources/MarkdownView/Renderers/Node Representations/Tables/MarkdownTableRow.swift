@@ -12,7 +12,7 @@ struct MarkdownTableRow: View {
     var row: Markdown.Table.Row
     
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.markdownTableCellBackgroundStyle) private var backgroundStyle
+    @Environment(\.markdownTableCellPadding) private var padding
     
     var body: some View {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
@@ -21,6 +21,7 @@ struct MarkdownTableRow: View {
                 ForEach(Array(cells.enumerated()), id: \.offset) { (index, cell) in
                     CmarkNodeVisitor(configuration: configuration)
                         .makeBody(for: cell)
+                        ._markdownCellPadding(padding)
                         .multilineTextAlignment(cell.textAlignment)
                         .gridColumnAlignment(cell.horizontalAlignment)
                         .gridCellColumns(Int(cell.colspan))

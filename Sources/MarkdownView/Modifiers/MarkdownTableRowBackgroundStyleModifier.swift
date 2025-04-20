@@ -16,7 +16,7 @@ extension View {
     /// >
     /// > You should set `horizontalSpacing` and `verticalSpacing` to `0` and add spacing between cells manually.
     /// >
-    /// > Avoid using `.padding(_:)` to adjust spacing, use `.safeAreaPadding(_:)` instead.
+    /// > Avoid using `.padding(_:)` to adjust spacing, use `.markdownTableCellPadding(_:)` instead.
     ///
     /// Here is an example:
     ///
@@ -25,11 +25,11 @@ extension View {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
     ///             configuration.header
-    ///                 .safeAreaPadding(8)
+    ///                 .markdownTableCellPadding(8)
     ///                 .markdownTableCellBackgroundStyle(.background)
     ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
     ///                 row
-    ///                     .safeAreaPadding(8)
+    ///                     .markdownTableCellPadding(8)
     ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary), in: .rect(cornerRadius: 10))
     ///             }
     ///         }
@@ -54,7 +54,7 @@ extension View {
     /// >
     /// > You should set `horizontalSpacing` and `verticalSpacing` to `0` and add spacing between cells manually.
     /// >
-    /// > Avoid using `.padding(_:)` to adjust spacing, use `.safeAreaPadding(_:)` instead.
+    /// > Avoid using `.padding(_:)` to adjust spacing, use `.markdownTableCellPadding(_:)` instead.
     ///
     /// Here is an example:
     ///
@@ -63,11 +63,11 @@ extension View {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
     ///             configuration.header
-    ///                 .safeAreaPadding(8)
+    ///                 .markdownTableCellPadding(8)
     ///                 .markdownTableCellBackgroundStyle(.background)
     ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
     ///                 row
-    ///                     .safeAreaPadding(8)
+    ///                     .markdownTableCellPadding(8)
     ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary))
     ///             }
     ///         }
