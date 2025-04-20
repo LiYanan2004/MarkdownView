@@ -16,7 +16,7 @@ extension View {
     /// >
     /// > You should set `horizontalSpacing` and `verticalSpacing` to `0` and add spacing between cells manually.
     /// >
-    /// > Avoid using `.padding(_:)` to adjust spacing, use `.safeAreaPadding(_:)` instead.
+    /// > Avoid using `.padding(_:)` to adjust spacing, use `.markdownTableCellPadding(_:)` instead.
     ///
     /// Here is an example:
     ///
@@ -25,7 +25,7 @@ extension View {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
     ///             configuration.header
-    ///                 .safeAreaPadding(8)
+    ///                 .markdownTableCellPadding(8)
     ///                 .markdownTableCellOverlay {
     ///                     Rectangle()
     ///                         .stroke()
@@ -33,7 +33,7 @@ extension View {
     ///                 }
     ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (_, row) in
     ///                 row
-    ///                     .safeAreaPadding(8)
+    ///                     .markdownTableCellPadding(8)
     ///                     .markdownTableCellOverlay {
     ///                         Rectangle()
     ///                             .stroke()
