@@ -15,25 +15,20 @@ struct MarkdownTableCellStyle: Identifiable {
     var position: Position
     var id: Position { position }
     
-    var size: CGSize
+    var rect: CGRect
     var width: CGFloat {
-        size.width
+        rect.width
     }
     var height: CGFloat {
-        size.height
+        rect.height
     }
     
     var backgroundStyle: AnyShapeStyle? = nil
     var backgroundShape: any Shape = .rect
     var overlayContent: AnyView? = nil
     
-    init(position: Position, size: CGSize) {
+    init(position: Position, rect: CGRect) {
         self.position = position
-        self.size = size
-    }
-    
-    init(position: Position, width: CGFloat, height: CGFloat) {
-        self.position = position
-        self.size = CGSize(width: width, height: height)
+        self.rect = rect
     }
 }

@@ -28,22 +28,22 @@ extension View {
         if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {
             safeAreaPadding(edges, length)
         } else {
-            safeAreaInset(edge: .top) {
+            safeAreaInset(edge: .top, spacing: 0) {
                 EmptyView()
                     .frame(width: 0, height: 0)
                     .padding(.top, edges.contains(.top) ? length : 0)
             }
-            .safeAreaInset(edge: .bottom) {
+            .safeAreaInset(edge: .bottom, spacing: 0) {
                 EmptyView()
                     .frame(width: 0, height: 0)
                     .padding(.bottom, edges.contains(.bottom) ? length : 0)
             }
-            .safeAreaInset(edge: .leading) {
+            .safeAreaInset(edge: .leading, spacing: 0) {
                 EmptyView()
                     .frame(width: 0, height: 0)
                     .padding(.leading, edges.contains(.leading) ? length : 0)
             }
-            .safeAreaInset(edge: .trailing) {
+            .safeAreaInset(edge: .trailing, spacing: 0) {
                 EmptyView()
                     .frame(width: 0, height: 0)
                     .padding(.trailing, edges.contains(.trailing) ? length : 0)
