@@ -35,6 +35,13 @@ fileprivate struct GithubMarkdownTable: View {
     /* Spacing values derived from GitHub's CSS table styles */
     private var horizontalSpacing: CGFloat = 13
     private var verticalSpacing: CGFloat = 6
+    private var backgroundColor: Color {
+        if colorScheme == .dark {
+            Color(red: 14 / 255, green: 17 / 255, blue: 22 / 255)
+        } else {
+            Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255)
+        }
+    }
     private var borderColor: Color {
         if colorScheme == .dark {
             Color(red: 61 / 255, green: 68 / 255, blue: 67 / 255)
@@ -54,14 +61,14 @@ fileprivate struct GithubMarkdownTable: View {
         if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
             Grid(horizontalSpacing: 0, verticalSpacing: 0) {
                 configuration.header
-                    .markdownTableRowBackgroundStyle(.background)
+                    .markdownTableRowBackgroundStyle(backgroundColor)
                     .markdownTableCellOverlay {
                         Rectangle()
                             .stroke(borderColor)
                             .opacity(0.5)
                     }
                 ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
-                    let backgroundStyle = index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(borderColor)
+                    let backgroundStyle = index % 2 == 0 ? AnyShapeStyle(backgroundColor) : AnyShapeStyle(alternativeRowColor)
                     row
                         .markdownTableRowBackgroundStyle(backgroundStyle)
                         .markdownTableCellOverlay {
