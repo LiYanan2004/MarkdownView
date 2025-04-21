@@ -58,38 +58,33 @@ fileprivate struct GithubMarkdownTable: View {
     }
     
     var body: some View {
-        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-            Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-                configuration.header
-                    .markdownTableRowBackgroundStyle(backgroundColor)
-                    .markdownTableCellOverlay {
-                        Rectangle()
-                            .stroke(borderColor)
-                            .opacity(0.5)
+        Group {
+            if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+                Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+                    configuration.table.header
+                        
+                    ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (index, row) in
+                        let backgroundStyle = index % 2 == 0 ? AnyShapeStyle(backgroundColor) : AnyShapeStyle(alternativeRowColor)
+                        row
+                            .markdownTableRowBackgroundStyle(backgroundStyle)
                     }
-                ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
-                    let backgroundStyle = index % 2 == 0 ? AnyShapeStyle(backgroundColor) : AnyShapeStyle(alternativeRowColor)
-                    row
-                        .markdownTableRowBackgroundStyle(backgroundStyle)
-                        .markdownTableCellOverlay {
-                            Rectangle()
-                                .stroke(borderColor)
-                                .opacity(0.5)
-                        }
                 }
+            } else {
+                configuration.table.fallback
             }
-            .markdownTableCellPadding(.vertical, verticalSpacing)
-            .markdownTableCellPadding(.horizontal, horizontalSpacing)
-            .overlay {
-                Rectangle()
-                    .stroke(borderColor)
-                    .opacity(0.5)
-            }
-        } else {
-            configuration.fallback
-                .horizontalSpacing(horizontalSpacing)
-                .verticalSpacing(verticalSpacing)
-                .showsRowSeparators()
+        }
+        .markdownTableRowBackgroundStyle(backgroundColor)
+        .markdownTableCellOverlay {
+            Rectangle()
+                .stroke(borderColor)
+                .opacity(0.5)
+        }
+        .markdownTableCellPadding(.vertical, verticalSpacing)
+        .markdownTableCellPadding(.horizontal, horizontalSpacing)
+        .overlay {
+            Rectangle()
+                .stroke(borderColor)
+                .opacity(0.5)
         }
     }
 }
