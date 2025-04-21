@@ -7,9 +7,7 @@ struct MarkdownTable: View {
     
     var body: some View {
         let configuration = MarkdownTableStyleConfiguration(
-            header: MarkdownTableStyleConfiguration.Header(table.head),
-            rows: table.body.rows.map(MarkdownTableStyleConfiguration.Row.init),
-            fallback: MarkdownTableStyleConfiguration.FallbackTable(table)
+            table: MarkdownTableStyleConfiguration.Table(table: table)
         )
         tableStyle
             .makeBody(configuration: configuration)
@@ -22,6 +20,22 @@ struct MarkdownTable: View {
 extension MarkdownTable {
     static let CoordinateSpaceName: String = "markdownview-table"
 }
+
+struct MarkdownTableBody: View {
+    var tableBody: Markdown.Table.Body
+    
+    @Environment(\.markdownRendererConfiguration) private var configuration
+    
+    var body: some View {
+        ForEach(Array(tableBody.children.enumerated()), id: \.offset) { (_, row) in
+            CmarkNodeVisitor(configuration: configuration)
+                .makeBody(for: row)
+                .font(configuration.fontGroup.tableBody)
+                .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
+        }
+    }
+}
+
 
 // MARK: - Auxiliary
 

@@ -40,9 +40,9 @@ fileprivate struct DefaultMarkdownTable: View {
     var body: some View {
         Group {
             if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
-                Grid(horizontalSpacing: spacing, verticalSpacing: spacing) {
-                    configuration.header
-                    ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (_, row) in
+                Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+                    configuration.table.header
+                    ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (_, row) in
                         if showsRowSeparators {
                             Divider()
                         }
@@ -50,14 +50,11 @@ fileprivate struct DefaultMarkdownTable: View {
                     }
                 }
             } else {
-                configuration.fallback
+                configuration.table.fallback
                     .showsRowSeparators(showsRowSeparators)
-                    .horizontalSpacing(spacing)
-                    .verticalSpacing(spacing)
             }
         }
-        ._markdownTableStylesIgnored()
-        .scenePadding()
+        .markdownTableCellPadding(spacing)
         .overlay {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(.quaternary, lineWidth: 2)

@@ -157,7 +157,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitTableHead(_ head: Markdown.Table.Head) -> MarkdownNodeView {
         MarkdownNodeView {
-            MarkdownTableHead(head: head)
+            MarkdownTableRow(
+                rowIndex: 0,
+                cells: Array(head.cells)
+            )
         }
     }
     
@@ -169,7 +172,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitTableRow(_ row: Markdown.Table.Row) -> MarkdownNodeView {
         MarkdownNodeView {
-            MarkdownTableRow(row: row)
+            MarkdownTableRow(
+                rowIndex: row.indexInParent + 1 /* header */,
+                cells: Array(row.cells)
+            )
         }
     }
     

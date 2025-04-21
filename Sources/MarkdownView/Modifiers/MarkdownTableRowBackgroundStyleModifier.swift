@@ -18,9 +18,9 @@ extension View {
     /// struct AlternativeBackgroundTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-    ///             configuration.header
+    ///             configuration.table.header
     ///                 .markdownTableCellBackgroundStyle(.background)
-    ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
+    ///             ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (index, row) in
     ///                 row
     ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary))
     ///             }
@@ -49,9 +49,9 @@ extension View {
     /// struct AlternativeBackgroundTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-    ///             configuration.header
+    ///             configuration.table.header
     ///                 .markdownTableCellBackgroundStyle(.background)
-    ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (index, row) in
+    ///             ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (index, row) in
     ///                 row
     ///                     .markdownTableRowBackgroundStyle(index % 2 == 0 ? AnyShapeStyle(.background) : AnyShapeStyle(.background.secondary))
     ///             }

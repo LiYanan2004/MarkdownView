@@ -12,7 +12,7 @@
 
 - ``MarkdownTableStyle/makeBody(configuration:)``
 - ``MarkdownTableStyle/Body``
-- ``MarkdownTableStyleConfiguration``
+- <doc:MarkdownTableStyleConfiguration>
 - ``MarkdownTableStyle/Configuration``
 
 ### Supporting types
