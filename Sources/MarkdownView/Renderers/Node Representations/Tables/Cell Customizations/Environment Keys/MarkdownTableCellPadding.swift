@@ -46,7 +46,7 @@ struct MarkdownTableCellPadding {
 
 @MainActor
 struct MarkdownTableCellPaddingEnvironmentKey: @preconcurrency EnvironmentKey {
-    static var defaultValue: MarkdownTableCellPadding = .zero
+    static var defaultValue: MarkdownTableCellPadding = .init(.all, amount: 8)
 }
 
 extension EnvironmentValues {
