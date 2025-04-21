@@ -17,7 +17,7 @@ struct AdaptiveGridRow: View {
                     .id(cell.id)
                     .frame(maxWidth: columnWidths[col], alignment: alignment)
                     .modifier(
-                        MarkdownTableCellStyleTransformer(
+                        MarkdownTableStylePreferenceSynchronizer(
                             row: row.index ?? 0,
                             column: col
                         )

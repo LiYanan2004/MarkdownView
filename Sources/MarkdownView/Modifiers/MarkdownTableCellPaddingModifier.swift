@@ -62,7 +62,7 @@ extension View {
     /// }
     /// ```
     ///
-    /// You can use `.padding(_:)` for `header` and `row` since this will apply to all cells within the scope, but it's still recomended to use ``SwiftUICore/View/markdownTableCellPadding(_:_:)`` for this purpose.
+    /// You can use `.padding(_:)` for `header` and `row` since this will apply to all cells within the scope, but it's still recomended to use ``SwiftUICore/View/markdownTableCellPadding(_:)`` for this purpose.
     nonisolated public func markdownTableCellPadding(
         _ amount: CGFloat
     ) -> some View {
