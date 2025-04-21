@@ -18,13 +18,13 @@ extension View {
     /// struct GridTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-    ///             configuration.header
+    ///             configuration.table.header
     ///                 .markdownTableCellOverlay {
     ///                     Rectangle()
     ///                         .stroke()
     ///                         .ignoresSafeArea()
     ///                 }
-    ///             ForEach(Array(configuration.rows.enumerated()), id: \.offset) { (_, row) in
+    ///             ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (_, row) in
     ///                 row
     ///                     .markdownTableCellOverlay {
     ///                         Rectangle()
