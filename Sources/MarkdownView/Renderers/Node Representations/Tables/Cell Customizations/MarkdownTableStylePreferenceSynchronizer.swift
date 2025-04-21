@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MarkdownTableCellStyleTransformer: ViewModifier {
+struct MarkdownTableStylePreferenceSynchronizer: ViewModifier {
     var row: Int
     var column: Int
     

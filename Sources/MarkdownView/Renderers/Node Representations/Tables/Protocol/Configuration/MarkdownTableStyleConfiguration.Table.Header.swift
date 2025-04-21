@@ -14,6 +14,7 @@ extension MarkdownTableStyleConfiguration.Table {
     /// On platforms that does not supports `Grid`, it would be `EmptyView`.
     public struct Header: View {
         var head: Markdown.Table.Head
+        @Environment(\.markdownRendererConfiguration.fontGroup.tableHeader) private var font
         
         init(_ head: Markdown.Table.Head) {
             self.head = head
@@ -25,6 +26,7 @@ extension MarkdownTableStyleConfiguration.Table {
                 rowIndex: 0,
                 cells: Array(head.cells)
             )
+            .font(font)
         }
     }
 }

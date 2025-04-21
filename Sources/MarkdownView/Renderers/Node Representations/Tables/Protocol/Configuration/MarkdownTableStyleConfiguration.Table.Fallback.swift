@@ -29,9 +29,9 @@ extension MarkdownTableStyleConfiguration.Table {
                 verticalSpacing: verticalSpacing,
                 showDivider: showsRowSeparators
             ) {
-                GridRowContainer {
+                GridRowContainer(index: 0) {
                     let cells = Array(table.head.children) as! [Markdown.Table.Cell]
-                    for (column, cell) in cells.enumerated() {
+                    for cell in cells {
                         GridCellContainer(alignment: cell.horizontalAlignment) {
                             CmarkNodeVisitor(configuration: configuration)
                                 .makeBody(for: cell)
@@ -39,19 +39,13 @@ extension MarkdownTableStyleConfiguration.Table {
                                 .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                                 .multilineTextAlignment(cell.textAlignment)
                                 ._markdownCellPadding(padding)
-                                .modifier(
-                                    MarkdownTableCellStyleTransformer(
-                                        row: 0,
-                                        column: column
-                                    )
-                                )
                         }
                     }
                 }
                 for (rowIndex, row) in table.body.children.enumerated() {
-                    GridRowContainer {
+                    GridRowContainer(index: rowIndex + /* header */ 1) {
                         let cells = Array(row.children) as! [Markdown.Table.Cell]
-                        for (column, cell) in cells.enumerated() {
+                        for cell in cells {
                             GridCellContainer(alignment: cell.horizontalAlignment) {
                                 CmarkNodeVisitor(configuration: configuration)
                                     .makeBody(for: cell)
@@ -59,12 +53,6 @@ extension MarkdownTableStyleConfiguration.Table {
                                     .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
                                     .multilineTextAlignment(cell.textAlignment)
                                     ._markdownCellPadding(padding)
-                                    .modifier(
-                                        MarkdownTableCellStyleTransformer(
-                                            row: rowIndex + 1 /* header */,
-                                            column: column
-                                        )
-                                    )
                             }
                         }
                     }

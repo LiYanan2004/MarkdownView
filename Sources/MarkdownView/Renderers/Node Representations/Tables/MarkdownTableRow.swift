@@ -30,7 +30,7 @@ struct MarkdownTableRow: View {
                         .gridCellColumns(Int(cell.colspan))
                         ._markdownCellPadding(padding)
                         .modifier(
-                            MarkdownTableCellStyleTransformer(
+                            MarkdownTableStylePreferenceSynchronizer(
                                 row: rowIndex,
                                 column: index
                             )

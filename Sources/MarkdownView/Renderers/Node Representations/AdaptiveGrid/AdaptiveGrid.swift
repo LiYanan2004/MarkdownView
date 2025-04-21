@@ -29,10 +29,10 @@ struct AdaptiveGrid: View {
         self.showDivider = showDivider
         
         columnsCount = self.rows.reduce(0) { max($1.count, $0) }
-        let sizes = [CGFloat](repeating: .zero, count: self.rows.count * columnsCount)
+        let sizes = [CGFloat](repeating: .greatestFiniteMagnitude, count: self.rows.count * columnsCount)
         // Save widths of all cells and calculate relative width for each column
         _cellSizes = State(initialValue: sizes)
-        _colWidths = State(initialValue: [CGFloat](repeating: .zero, count: columnsCount))
+        _colWidths = State(initialValue: [CGFloat](repeating: .greatestFiniteMagnitude, count: columnsCount))
     }
     
     /// Create an adaptive grid that dynamically adjust column width to best fit the content.
@@ -48,25 +48,13 @@ struct AdaptiveGrid: View {
         self.showDivider = showDivider
         
         columnsCount = self.rows.reduce(0) { max($1.count, $0) }
-        let sizes = [CGFloat](repeating: .zero, count: self.rows.count * columnsCount)
+        let sizes = [CGFloat](repeating: .greatestFiniteMagnitude, count: self.rows.count * columnsCount)
         // Save widths of all cells and calculate relative width for each column
         _cellSizes = State(initialValue: sizes)
-        _colWidths = State(initialValue: [CGFloat](repeating: .zero, count: columnsCount))
+        _colWidths = State(initialValue: [CGFloat](repeating: .greatestFiniteMagnitude, count: columnsCount))
     }
     
     var body: some View {
-        GeometryReader { geometryProxy in
-            tableBody
-                .heightOfView($height)
-                ._task(id: geometryProxy.size) {
-                    _width = geometryProxy.size.width
-                    updateLayout()
-                }
-        }
-        .frame(height: height)
-    }
-    
-    private var tableBody: some View {
         VStack(spacing: verticalSpacing) {
             ForEach(rows.indices, id: \.self) { row in
                 AdaptiveGridRow(
@@ -86,6 +74,15 @@ struct AdaptiveGrid: View {
                 }
             }
         }
+        .background {
+            GeometryReader { geometryProxy in
+                Color.clear
+                    ._task(id: geometryProxy.size) {
+                        _width = geometryProxy.size.width
+                        updateLayout()
+                    }
+            }
+        }
     }
     
     // Re-calculate column width for table.
@@ -97,16 +94,13 @@ struct AdaptiveGrid: View {
                 colWidth[col] = size
             }
         }
-        let spacing = max(0, (_width - colWidth.reduce(0, +)) / CGFloat(columnsCount))
-        self.colWidths = colWidth.map {
-            $0 + spacing
-        }
+        self.colWidths = colWidth
     }
 }
 
 struct AdaptiveGrid_Previews: PreviewProvider {
     static let grid = GridContainer {
-        GridRowContainer {
+        GridRowContainer(index: 0) {
             GridCellContainer {
                 Text("Cell")
             }
@@ -114,7 +108,7 @@ struct AdaptiveGrid_Previews: PreviewProvider {
                 Text("Leading")
             }
         }
-        GridRowContainer {
+        GridRowContainer(index: 1) {
             GridCellContainer {
                 Text("Cell")
             }

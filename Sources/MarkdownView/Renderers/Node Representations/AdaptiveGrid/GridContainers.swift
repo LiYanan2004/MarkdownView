@@ -42,17 +42,20 @@ protocol GridRowProtocol {
 }
 
 struct GridRowContainer: GridRowProtocol {
+    var index: Int?
     var cells: [GridCellContainer]
     var count: Int { cells.count }
     
-    init(cells: [GridCellContainer]) {
+    init(index: Int? = nil, cells: [GridCellContainer]) {
+        self.index = index
         self.cells = cells
     }
 }
 
 extension GridRowContainer {
-    init(@GridRowBuilder _ row: () -> GridRowContainer) {
-        self = row()
+    init(index: Int, @GridRowBuilder _ row: () -> GridRowContainer) {
+        let row = row()
+        self.init(index: index, cells: row.cells)
     }
 }
 
