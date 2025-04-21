@@ -16,6 +16,12 @@ struct AdaptiveGridRow: View {
                 cell.content
                     .id(cell.id)
                     .frame(maxWidth: columnWidths[col], alignment: alignment)
+                    .modifier(
+                        MarkdownTableCellStyleTransformer(
+                            row: row.index ?? 0,
+                            column: col
+                        )
+                    )
             }
             if row.count < columnsCount {
                 ForEach(row.count..<columnsCount, id: \.self) { index in
@@ -25,7 +31,6 @@ struct AdaptiveGridRow: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity)
         ._overlay { sizeDetector }
     }
     
