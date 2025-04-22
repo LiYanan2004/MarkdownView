@@ -39,7 +39,7 @@ struct NetworkImage: View {
                     .font(.callout)
             }
         }
-        .onChange(of: url, initial: true) {
+        .onValueChange(url, initial: true) {
             Task.detached {
                 let loadedFromCache = Task { @MainActor in
                     await loadFromCache()
