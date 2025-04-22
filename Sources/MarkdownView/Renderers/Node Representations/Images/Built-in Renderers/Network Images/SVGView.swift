@@ -44,15 +44,15 @@ fileprivate class WebViewDelegate: NSObject, WKNavigationDelegate {
     
     nonisolated func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         MainActor.assumeIsolated {
-            // Get SVG size via DIV container.
-            webView.evaluateJavaScript("var style = window.getComputedStyle ? window.getComputedStyle(svg_content,null) : null || svg_content.currentStyle;")
-            webView.evaluateJavaScript("style.width") { width, _ in
-                guard let width = (width as? String)?.htmlSize() else { return }
-                self.updateSize?(CGSize(width: width, height: .zero))
+            webView.evaluateJavaScript("(() => { const svg = document.querySelector('svg'); return svg.hasAttribute('width') ? svg.getBoundingClientRect().width : null; })()") { result, _ in
+                if let width = (result as? NSNumber)?.doubleValue, width.isNormal {
+                    self.updateSize?(CGSize(width: width, height: .zero))
+                }
             }
-            webView.evaluateJavaScript("style.height") { height, _ in
-                guard let height = (height as? String)?.htmlSize() else { return }
-                self.updateSize?(CGSize(width: .zero, height: height))
+            webView.evaluateJavaScript("document.querySelector('svg').getBoundingClientRect().height") { result, _ in
+                if let height = (result as? NSNumber)?.doubleValue, height.isNormal {
+                    self.updateSize?(CGSize(width: .zero, height: height))
+                }
             }
         }
     }
@@ -89,7 +89,7 @@ fileprivate struct _SVGViewBridge: NSViewRepresentable {
 fileprivate struct _SVGViewBridge: UIViewRepresentable {
     var html: String
     var updateSize: (CGSize) -> Void
-
+    
     func makeUIView(context: Context) -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
         let webView = WKWebView(frame: .zero, configuration: webConfiguration)
@@ -132,7 +132,7 @@ struct SVG: Identifiable, Hashable {
     
     private init(html: String) {
         // Remove test cases to enable WKWebview to render SVG content.
-        var representation = "<!DOCTYPE html><html><head><meta name=viewport content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'></head><body style='margin:0;padding:0;background-color:transparent;'><div id='svg_content' style='display:table;'>\(html)</div></body></html>"
+        var representation = "<!DOCTYPE html><html><head><meta name=viewport content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'></head><body style='margin:0;padding:0;background-color:transparent;'><div id='svg_content' style=''>\(html)</div></body></html>"
         let testCases = representation.getElementsByTagName("d:SVGTestCase")
         for testCase in testCases {
             representation = representation.replacingOccurrences(of: testCase, with: "")
