@@ -12,7 +12,7 @@ struct MarkdownHeading: View {
     let heading: Heading
     
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.headingVerticalPadding) private var padding
+    @Environment(\.headingPaddings) private var paddings
     private var font: Font {
         let fontProvider = configuration.fontGroup
         return switch heading.level {
@@ -43,7 +43,7 @@ struct MarkdownHeading: View {
         CmarkNodeVisitor(configuration: configuration)
             .descendInto(heading)
             .id(id)
-            .padding(.vertical, padding[heading.level])
+            .padding(paddings[heading.level])
             .foregroundStyle(foregroundStyle)
             .font(font)
             .accessibilityAddTraits(.isHeader)
