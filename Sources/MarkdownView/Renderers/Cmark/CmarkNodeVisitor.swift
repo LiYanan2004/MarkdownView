@@ -197,16 +197,8 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitHeading(_ heading: Heading) -> MarkdownNodeView {
-        var shouldAddAdditionalSpacing = true
-        if let parent = heading.parent,
-           (0..<parent.childCount).contains(heading.indexInParent - 1),
-           let previousHeading = parent.child(at: heading.indexInParent - 1),
-           previousHeading is Heading {
-            shouldAddAdditionalSpacing = false
-        }
-        
-        return MarkdownNodeView {
-            MarkdownHeading(heading: heading, shouldAddAdditionalSpacing: shouldAddAdditionalSpacing)
+        MarkdownNodeView {
+            MarkdownHeading(heading: heading)
         }
     }
     

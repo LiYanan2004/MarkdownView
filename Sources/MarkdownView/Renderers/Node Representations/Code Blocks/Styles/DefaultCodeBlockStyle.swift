@@ -79,7 +79,7 @@ struct DefaultMarkdownCodeBlock: View {
             .padding(16)
         }
         .task(id: codeHighlightingConfiguration, immediateHighlight)
-        .onChange(of: codeBlockConfiguration) {
+        .onValueChange(codeBlockConfiguration) {
             debouncedHighlight()
         }
         .lineSpacing(4)

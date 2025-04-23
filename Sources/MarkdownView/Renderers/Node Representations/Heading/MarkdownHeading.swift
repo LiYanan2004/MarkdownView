@@ -10,9 +10,9 @@ import Markdown
 
 struct MarkdownHeading: View {
     let heading: Heading
-    var shouldAddAdditionalSpacing: Bool
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.headingPaddings) private var paddings
     private var font: Font {
         let fontProvider = configuration.fontGroup
         return switch heading.level {
@@ -43,7 +43,7 @@ struct MarkdownHeading: View {
         CmarkNodeVisitor(configuration: configuration)
             .descendInto(heading)
             .id(id)
-            .padding(.top, shouldAddAdditionalSpacing ? nil : 0)
+            .padding(paddings[heading.level])
             .foregroundStyle(foregroundStyle)
             .font(font)
             .accessibilityAddTraits(.isHeader)
