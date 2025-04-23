@@ -18,7 +18,6 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
     var inlineCodeTintColor: Color = .accentColor
     var blockQuoteTintColor: Color = .accentColor
     var fontGroup: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic)
-    var foregroundStyleGroup: AnyMarkdownForegroundStyleGroup = AnyMarkdownForegroundStyleGroup(.automatic)
     
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
     

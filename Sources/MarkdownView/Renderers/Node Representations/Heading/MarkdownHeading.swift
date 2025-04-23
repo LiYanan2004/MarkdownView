@@ -12,7 +12,9 @@ struct MarkdownHeading: View {
     let heading: Heading
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.headingStyleGroup) private var headingStyleGroup
     @Environment(\.headingPaddings) private var paddings
+    
     private var font: Font {
         let fontProvider = configuration.fontGroup
         return switch heading.level {
@@ -26,14 +28,13 @@ struct MarkdownHeading: View {
         }
     }
     private var foregroundStyle: AnyShapeStyle {
-        let styleProvider = configuration.foregroundStyleGroup
         return switch heading.level {
-        case 1: styleProvider.h1
-        case 2: styleProvider.h2
-        case 3: styleProvider.h3
-        case 4: styleProvider.h4
-        case 5: styleProvider.h5
-        case 6: styleProvider.h6
+        case 1: headingStyleGroup.h1
+        case 2: headingStyleGroup.h2
+        case 3: headingStyleGroup.h3
+        case 4: headingStyleGroup.h4
+        case 5: headingStyleGroup.h5
+        case 6: headingStyleGroup.h6
         default: AnyShapeStyle(.foreground)
         }
     }

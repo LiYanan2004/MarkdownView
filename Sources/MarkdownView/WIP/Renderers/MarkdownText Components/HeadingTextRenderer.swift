@@ -26,12 +26,12 @@ struct HeadingTextRenderer: MarkdownNode2TextRenderer {
         }
         
         let foregroundStyle = switch level {
-        case 1: context.environment.markdownRendererConfiguration.foregroundStyleGroup.h1
-        case 2: context.environment.markdownRendererConfiguration.foregroundStyleGroup.h2
-        case 3: context.environment.markdownRendererConfiguration.foregroundStyleGroup.h3
-        case 4: context.environment.markdownRendererConfiguration.foregroundStyleGroup.h4
-        case 5: context.environment.markdownRendererConfiguration.foregroundStyleGroup.h5
-        case 6: context.environment.markdownRendererConfiguration.foregroundStyleGroup.h6
+        case 1: context.environment.headingStyleGroup.h1
+        case 2: context.environment.headingStyleGroup.h2
+        case 3: context.environment.headingStyleGroup.h3
+        case 4: context.environment.headingStyleGroup.h4
+        case 5: context.environment.headingStyleGroup.h5
+        case 6: context.environment.headingStyleGroup.h6
         default: AnyShapeStyle(.foreground)
         }
         

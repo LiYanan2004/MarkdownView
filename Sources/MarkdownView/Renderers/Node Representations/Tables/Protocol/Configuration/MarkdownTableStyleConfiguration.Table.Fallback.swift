@@ -36,7 +36,6 @@ extension MarkdownTableStyleConfiguration.Table {
                             CmarkNodeVisitor(configuration: configuration)
                                 .makeBody(for: cell)
                                 .font(configuration.fontGroup.tableHeader)
-                                .foregroundStyle(configuration.foregroundStyleGroup.tableHeader)
                                 .multilineTextAlignment(cell.textAlignment)
                                 ._markdownCellPadding(padding)
                         }
@@ -50,7 +49,6 @@ extension MarkdownTableStyleConfiguration.Table {
                                 CmarkNodeVisitor(configuration: configuration)
                                     .makeBody(for: cell)
                                     .font(configuration.fontGroup.tableBody)
-                                    .foregroundStyle(configuration.foregroundStyleGroup.tableBody)
                                     .multilineTextAlignment(cell.textAlignment)
                                     ._markdownCellPadding(padding)
                             }

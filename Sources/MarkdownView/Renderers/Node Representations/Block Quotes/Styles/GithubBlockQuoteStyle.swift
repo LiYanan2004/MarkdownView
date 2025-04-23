@@ -41,7 +41,7 @@ fileprivate struct GithubBlockQuoteView: View {
     var body: some View {
         configuration.content
             .frame(maxWidth: .infinity, alignment: .leading)
-            .foregroundStyleGroup(_SecondaryForegroundStyleGroup())
+            .headingStyleGroup(_SecondaryForegroundStyleGroup())
             .foregroundStyle(.secondary)
             ._zeroPaddingForAllHeadings()
             .padding(.horizontal, fontSize)
@@ -55,7 +55,7 @@ fileprivate struct GithubBlockQuoteView: View {
 
 // MARK: - Auxiliary
 
-fileprivate struct _SecondaryForegroundStyleGroup: MarkdownForegroundStyleGroup {
+fileprivate struct _SecondaryForegroundStyleGroup: HeadingStyleGroup {
     var h1: some ShapeStyle { .secondary }
     var h2: some ShapeStyle { .secondary }
     var h3: some ShapeStyle { .secondary }

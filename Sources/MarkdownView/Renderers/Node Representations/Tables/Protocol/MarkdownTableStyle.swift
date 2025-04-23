@@ -21,7 +21,7 @@ public protocol MarkdownTableStyle {
     
     /// Creates the view that represents the current markdown table.
     ///
-    /// It's recommended to use `Grid` to construct a table, but since `Grid` is only available for iOS 16, macOS 13, tvOS 16 and watchOS 9, you will need to use ``MarkdownTableStyleConfiguration/FallbackTable`` on older platforms.
+    /// It's recommended to use `Grid` to construct a table, but since `Grid` is only available for iOS 16, macOS 13, tvOS 16 and watchOS 9, you will need to use ``MarkdownTableStyleConfiguration/Table/Fallback`` on older platforms.
     @preconcurrency
     @MainActor
     @ViewBuilder
