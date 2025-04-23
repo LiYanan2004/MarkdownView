@@ -23,14 +23,18 @@ public protocol MarkdownForegroundStyleGroup {
     associatedtype CodeBlockStyle: ShapeStyle
     associatedtype BlockQuoteStyle: ShapeStyle
     
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `CodeBlockStyle` instead.")
     var codeBlock: CodeBlockStyle { get }
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `BlockQuoteStyle` instead.")
     var blockQuote: BlockQuoteStyle { get }
     
     // Tables
     associatedtype TableHeaderStyle: ShapeStyle
     associatedtype TableBodyStyle: ShapeStyle
     
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownTableStyle` instead.")
     var tableHeader: TableHeaderStyle { get }
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownTableStyle` instead.")
     var tableBody: TableBodyStyle { get }
 }
 

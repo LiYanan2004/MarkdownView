@@ -72,4 +72,12 @@ extension View {
             paddings[headingLevel.rawValue] = insets
         }
     }
+    
+    nonisolated public func _zeroPaddingForAllHeadings() -> some View {
+        transformEnvironment(\.headingPaddings) { paddings in
+            for level in 1...6 {
+                paddings[level] = EdgeInsets()
+            }
+        }
+    }
 }
