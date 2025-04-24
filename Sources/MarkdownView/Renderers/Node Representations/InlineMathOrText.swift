@@ -58,6 +58,7 @@ struct InlineMathOrText {
     }
 }
 
+#if canImport(LaTeXSwiftUI)
 struct InlineMath: View {
     var latexText: String
     @Environment(\.markdownFontGroup.inlineMath) private var font
@@ -81,3 +82,4 @@ struct InlineMath: View {
         }
     }
 }
+#endif
