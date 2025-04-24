@@ -17,15 +17,12 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
     var linkTintColor: Color = .accentColor
     var inlineCodeTintColor: Color = .accentColor
     var blockQuoteTintColor: Color = .accentColor
-    var fontGroup: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic)
     
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
     
     var allowedImageRenderers: Set<String> = ["https", "http"]
     var allowedBlockDirectiveRenderers: Set<String> = ["math"]
 }
-
-
 
 // MARK: - SwiftUI Environment
 

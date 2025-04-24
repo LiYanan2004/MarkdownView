@@ -10,7 +10,6 @@ import Markdown
 
 struct MarkdownLink: MarkupVisitor {
     var tint: Color
-    var font: Font
     
     func attributed(_ markup: Markup) -> SwiftUI.Text {
         var attributer = self
@@ -27,7 +26,6 @@ struct MarkdownLink: MarkupVisitor {
     
     func visitText(_ text: Markdown.Text) -> AttributedString {
         var attributedString = AttributedString(stringLiteral: text.plainText)
-        attributedString.font = font
         return attributedString
     }
     
@@ -49,13 +47,13 @@ struct MarkdownLink: MarkupVisitor {
     
     mutating func visitStrong(_ strong: Strong) -> AttributedString {
         var attributedString = attributedString(from: strong)
-        attributedString.font = font.bold()
+//        attributedString.font = font.bold()
         return attributedString
     }
     
     mutating func visitEmphasis(_ emphasis: Emphasis) -> AttributedString {
         var attributedString = attributedString(from: emphasis)
-        attributedString.font = font.italic()
+//        attributedString.font = font.italic()
         return attributedString
     }
     
@@ -68,7 +66,7 @@ struct MarkdownLink: MarkupVisitor {
     
     mutating func visitInlineHTML(_ inlineHTML: InlineHTML) -> AttributedString {
         var attributedString = attributedString(inlineHTML.rawHTML, from: inlineHTML)
-        attributedString.font = font
+//        attributedString.font = font
         return attributedString
     }
 }

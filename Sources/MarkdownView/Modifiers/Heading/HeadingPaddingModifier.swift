@@ -10,7 +10,7 @@ import SwiftUI
 extension View {
     /// Sets vertical paddings for specific heading.
     ///
-    /// Default amount of paddings are added to vertical edges, values are:
+    /// Default amount of paddings are added to top edge, values are:
     /// - h1: 24
     /// - h2: 24
     /// - h3: 16
@@ -44,7 +44,7 @@ extension View {
     
     /// Sets vertical paddings for specific heading.
     ///
-    /// Default amount of paddings are added to vertical edges, values are:
+    /// Default amount of paddings are added to top edge, values are:
     /// - h1: 24
     /// - h2: 24
     /// - h3: 16

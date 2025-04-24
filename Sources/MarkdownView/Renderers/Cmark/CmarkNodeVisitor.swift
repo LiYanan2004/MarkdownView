@@ -237,13 +237,31 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         switch nodeView.contentType {
         case .text:
             return MarkdownNodeView {
-                MarkdownLink(
-                    tint: configuration.linkTintColor,
-                    font: configuration.fontGroup.body
-                ).attributed(link)
+                nodeView.asText!
+                    .contentShape(.rect)
+                    .onTapGesture {
+                        guard let destination = link.destination,
+                              let url = URL(string: destination) else { return }
+                        #if os(macOS)
+                        NSWorkspace.shared.open(url)
+                        #elseif !os(watchOS)
+                        UIApplication.shared.open(url)
+                        #endif
+                    }
+                    .foregroundStyle(configuration.linkTintColor)
             }
         case .view:
-            return nodeView
+            return MarkdownNodeView {
+                if let destination = link.destination,
+                   let url = URL(string: destination) {
+                    Link(destination: url) {
+                        nodeView
+                    }
+                } else {
+                    nodeView
+                        .foregroundStyle(configuration.linkTintColor)
+                }
+            }
         }
     }
 }

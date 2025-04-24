@@ -10,6 +10,7 @@ public struct MarkdownView: View {
     @Environment(\.displayScale) private var displayScale
     
     @Environment(\.markdownViewStyle) private var markdownViewStyle
+    @Environment(\.markdownFontGroup.body) private var bodyFont
     @Environment(\.markdownRendererConfiguration) private var configuration
     
     public init(_ text: String) {
@@ -33,7 +34,7 @@ public struct MarkdownView: View {
         markdownViewStyle
             .makeBody(configuration: MarkdownViewStyleConfiguration(body: _renderedBody))
             .erasedToAnyView()
-            .font(configuration.fontGroup.body)
+            .font(bodyFont)
     }
     
     @ViewBuilder
