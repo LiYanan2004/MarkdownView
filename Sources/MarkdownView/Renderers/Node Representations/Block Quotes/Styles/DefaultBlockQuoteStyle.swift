@@ -21,7 +21,7 @@ extension BlockQuoteStyle where Self == DefaultBlockQuoteStyle {
 
 fileprivate struct DefaultBlockQuoteView: View {
     var configuration: BlockQuoteStyleConfiguration
-    @Environment(\.markdownRendererConfiguration.fontGroup.blockQuote) private var font
+    @Environment(\.markdownFontGroup.blockQuote) private var font
     @Environment(\.markdownRendererConfiguration.blockQuoteTintColor) private var tint
     var body: some View {
         configuration.content

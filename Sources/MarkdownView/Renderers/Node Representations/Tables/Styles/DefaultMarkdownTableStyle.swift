@@ -55,6 +55,7 @@ fileprivate struct DefaultMarkdownTable: View {
             }
         }
         .markdownTableCellPadding(spacing)
+        .padding(8)
         .overlay {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(.quaternary, lineWidth: 2)

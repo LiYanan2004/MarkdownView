@@ -233,17 +233,34 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
+        guard let destination = link.destination,
+              let url = URL(string: destination)
+        else { return descendInto(link) }
+        
         let nodeView = descendInto(link)
         switch nodeView.contentType {
         case .text:
             return MarkdownNodeView {
-                MarkdownLink(
-                    tint: configuration.linkTintColor,
-                    font: configuration.fontGroup.body
-                ).attributed(link)
+                nodeView.asText!
+                    .contentShape(.rect)
+                    #if os(macOS)
+                    .onTapGesture {
+                        NSWorkspace.shared.open(url)
+                    }
+                    #elseif !os(watchOS) && !os(tvOS)
+                    .onTapGesture {
+                        UIApplication.shared.open(url)
+                    }
+                    #endif
+                    .foregroundStyle(configuration.linkTintColor)
             }
         case .view:
-            return nodeView
+            return MarkdownNodeView {
+                Link(destination: url) {
+                    nodeView
+                }
+                .foregroundStyle(configuration.linkTintColor)
+            }
         }
     }
 }

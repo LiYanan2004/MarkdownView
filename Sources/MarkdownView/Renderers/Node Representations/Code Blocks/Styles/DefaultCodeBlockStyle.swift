@@ -59,7 +59,7 @@ struct DefaultMarkdownCodeBlock: View {
     var theme: CodeHighlighterTheme
     @Environment(\.colorScheme) private var colorScheme
     
-    @Environment(\.markdownRendererConfiguration.fontGroup) private var fontGroup
+    @Environment(\.markdownFontGroup) private var fontGroup
     
     @State private var attributedCode: AttributedString?
     @State private var codeHighlightTask: Task<Void, Error>?
