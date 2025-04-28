@@ -12,7 +12,7 @@ extension View {
     ///
     /// This is useful when you want to completely customize foreground styles.
     ///
-    /// - Parameter foregroundStyleGroup: A style set to apply to the MarkdownView.
+    /// - Parameter group: A style set to apply to the MarkdownView.
     nonisolated public func headingStyleGroup(
         _ group: some HeadingStyleGroup
     ) -> some View {
