@@ -1,0 +1,59 @@
+name: Generate Documentations
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  publish-docs:
+    env: # Environment Variables
+      SCHEME_NAME: MarkdownView
+      HOSTING_BASE_PATH: MarkdownView
+    environment: # Github Page environments
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build DocC archive
+        id: build-docs
+        run: |
+          xcodebuild \
+            docbuild \
+            -scheme $SCHEME_NAME \
+            -destination "platform=macOS" \
+            -derivedDataPath build-docs
+          ARCHIVE=$(find build-docs/Build/Products -name "$SCHEME_NAME.doccarchive" -type d | head -n1)
+          echo "archive=$ARCHIVE" >> $GITHUB_OUTPUT
+
+      - name: Process DocC archive
+        run: |
+          xcrun docc process-archive \
+            transform-for-static-hosting "${{ steps.build-docs.outputs.archive }}" \
+            --output-path docs \
+            --hosting-base-path $HOSTING_BASE_PATH
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - id: deployment
+        name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
