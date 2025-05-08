@@ -66,6 +66,9 @@ extension MarkdownNodeView {
         var textStorage = TextComposer()
         for content in contents {
             if case let .left(text) = content.storage {
+                if !autoLayout {
+                    textStorage.append(Text("\n"))
+                }
                 textStorage.append(text)
             } else {
                 if textStorage.hasText {

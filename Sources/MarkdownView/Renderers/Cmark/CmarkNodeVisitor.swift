@@ -30,8 +30,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         for markup in document.children {
             let nodeView = renderer.visit(markup)
             if let textOnCurrentNode = nodeView.asText, nodeViews.last?.contentType == .text {
-                let resolvedText = textOnCurrentNode._resolveText(in: .init())
-                nodeViews.append(MarkdownNodeView(Text("\n\(resolvedText)")))
+                nodeViews.append(MarkdownNodeView(textOnCurrentNode))
             } else {
                 nodeViews.append(nodeView)
             }
