@@ -25,7 +25,12 @@ struct MarkdownNodeView: View {
     }
     
     init<Content: View>(@ViewBuilder _ content: () -> Content) {
-        storage = .right(AnyView(content()))
+        let content = content()
+        if let markdownNode = content as? MarkdownNodeView {
+            storage = markdownNode.storage
+        } else {
+            storage = .right(AnyView(content))
+        }
     }
     
     var body: some View {
@@ -74,9 +79,12 @@ extension MarkdownNodeView {
             composedContents.append(MarkdownNodeView(textStorage.text))
         }
         
-        // Only contains text
         if composedContents.count == 1 {
-            self = composedContents[0]
+            if let textOnly = composedContents[0].asText {
+                storage = .left(textOnly)
+            } else {
+                storage = .right(AnyView(composedContents[0].body))
+            }
         } else {
             if #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *), autoLayout {
                 let composedView = FlowLayout(verticleSpacing: 8) {
