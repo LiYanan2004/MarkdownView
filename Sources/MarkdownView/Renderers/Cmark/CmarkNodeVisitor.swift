@@ -26,16 +26,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
 
     func visitDocument(_ document: Document) -> MarkdownNodeView {
         var renderer = self
-        var nodeViews = [MarkdownNodeView]()
-        for markup in document.children {
-            let nodeView = renderer.visit(markup)
-            if let textOnCurrentNode = nodeView.asText, nodeViews.last?.contentType == .text {
-                nodeViews.append(MarkdownNodeView(textOnCurrentNode))
-            } else {
-                nodeViews.append(nodeView)
-            }
+        let nodeViews = document.children.map {
+            renderer.visit($0)
         }
-        return MarkdownNodeView(nodeViews, autoLayout: false)
+        return MarkdownNodeView(nodeViews, layoutPolicy: .linebreak)
     }
     
     func defaultVisit(_ markup: Markdown.Markup) -> MarkdownNodeView {

@@ -54,19 +54,24 @@ struct MarkdownNodeView: View {
 }
 
 extension MarkdownNodeView {
+    enum LayoutPolicy {
+        case adaptive
+        case linebreak
+    }
+    
     /// Combine adjacent views of the same type.
     /// - Parameter contents: A set of contents to combine together.
     /// - Parameter alignment: The alignment in relation to these contents.
     init(
         _ contents: [MarkdownNodeView],
         alignment: HorizontalAlignment = .leading,
-        autoLayout: Bool = true
+        layoutPolicy: LayoutPolicy = .adaptive
     ) {
         var composedContents = [MarkdownNodeView]()
         var textStorage = TextComposer()
         for content in contents {
             if case let .left(text) = content.storage {
-                if !autoLayout {
+                if layoutPolicy == .linebreak {
                     textStorage.append(Text("\n"))
                 }
                 textStorage.append(text)
@@ -89,7 +94,8 @@ extension MarkdownNodeView {
                 storage = .right(AnyView(composedContents[0].body))
             }
         } else {
-            if #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *), autoLayout {
+            if layoutPolicy == .adaptive,
+               #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *) {
                 let composedView = FlowLayout(verticleSpacing: 8) {
                     ForEach(composedContents.indices, id: \.self) {
                         composedContents[$0].body
