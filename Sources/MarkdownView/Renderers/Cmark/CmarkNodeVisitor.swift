@@ -26,16 +26,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
 
     func visitDocument(_ document: Document) -> MarkdownNodeView {
         var renderer = self
-        var nodeViews = [MarkdownNodeView]()
-        for markup in document.children {
-            let nodeView = renderer.visit(markup)
-            if let textOnCurrentNode = nodeView.asText, nodeViews.last?.contentType == .text {
-                nodeViews.append(MarkdownNodeView(Text("\n") + textOnCurrentNode))
-            } else {
-                nodeViews.append(nodeView)
-            }
+        let nodeViews = document.children.map {
+            renderer.visit($0)
         }
-        return MarkdownNodeView(nodeViews, autoLayout: false)
+        return MarkdownNodeView(nodeViews, layoutPolicy: .linebreak)
     }
     
     func defaultVisit(_ markup: Markdown.Markup) -> MarkdownNodeView {
@@ -233,17 +227,34 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
+        guard let destination = link.destination,
+              let url = URL(string: destination)
+        else { return descendInto(link) }
+        
         let nodeView = descendInto(link)
         switch nodeView.contentType {
         case .text:
             return MarkdownNodeView {
-                MarkdownLink(
-                    tint: configuration.linkTintColor,
-                    font: configuration.fontGroup.body
-                ).attributed(link)
+                nodeView.asText!
+                    .contentShape(.rect)
+                    #if os(macOS)
+                    .onTapGesture {
+                        NSWorkspace.shared.open(url)
+                    }
+                    #elseif !os(watchOS) && !os(tvOS)
+                    .onTapGesture {
+                        UIApplication.shared.open(url)
+                    }
+                    #endif
+                    .foregroundStyle(configuration.linkTintColor)
             }
         case .view:
-            return nodeView
+            return MarkdownNodeView {
+                Link(destination: url) {
+                    nodeView
+                }
+                .foregroundStyle(configuration.linkTintColor)
+            }
         }
     }
 }

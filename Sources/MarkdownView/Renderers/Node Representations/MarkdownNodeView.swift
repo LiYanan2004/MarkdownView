@@ -25,7 +25,12 @@ struct MarkdownNodeView: View {
     }
     
     init<Content: View>(@ViewBuilder _ content: () -> Content) {
-        storage = .right(AnyView(content()))
+        let content = content()
+        if let markdownNode = content as? MarkdownNodeView {
+            storage = markdownNode.storage
+        } else {
+            storage = .right(AnyView(content))
+        }
     }
     
     var body: some View {
@@ -49,18 +54,26 @@ struct MarkdownNodeView: View {
 }
 
 extension MarkdownNodeView {
+    enum LayoutPolicy {
+        case adaptive
+        case linebreak
+    }
+    
     /// Combine adjacent views of the same type.
     /// - Parameter contents: A set of contents to combine together.
     /// - Parameter alignment: The alignment in relation to these contents.
     init(
         _ contents: [MarkdownNodeView],
         alignment: HorizontalAlignment = .leading,
-        autoLayout: Bool = true
+        layoutPolicy: LayoutPolicy = .adaptive
     ) {
         var composedContents = [MarkdownNodeView]()
         var textStorage = TextComposer()
         for content in contents {
             if case let .left(text) = content.storage {
+                if layoutPolicy == .linebreak {
+                    textStorage.append(Text("\n"))
+                }
                 textStorage.append(text)
             } else {
                 if textStorage.hasText {
@@ -74,11 +87,15 @@ extension MarkdownNodeView {
             composedContents.append(MarkdownNodeView(textStorage.text))
         }
         
-        // Only contains text
         if composedContents.count == 1 {
-            self = composedContents[0]
+            if let textOnly = composedContents[0].asText {
+                storage = .left(textOnly)
+            } else {
+                storage = .right(AnyView(composedContents[0].body))
+            }
         } else {
-            if #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *), autoLayout {
+            if layoutPolicy == .adaptive,
+               #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *) {
                 let composedView = FlowLayout(verticleSpacing: 8) {
                     ForEach(composedContents.indices, id: \.self) {
                         composedContents[$0].body

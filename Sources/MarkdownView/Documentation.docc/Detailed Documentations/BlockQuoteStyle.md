@@ -5,6 +5,7 @@
 ### Getting built-in styles
 
 - ``BlockQuoteStyle/default``
+- ``BlockQuoteStyle/github``
 
 ### Creating custom styles
 
@@ -16,3 +17,4 @@
 ### Supporting types
 
 - <doc:DefaultBlockQuoteStyle>
+- <doc:GithubBlockQuoteStyle>

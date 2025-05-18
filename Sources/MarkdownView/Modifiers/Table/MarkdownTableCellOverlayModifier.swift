@@ -18,22 +18,8 @@ extension View {
     /// struct GridTableStyle: MarkdownTableStyle {
     ///     func makeBody(configuration: Configuration) -> some View {
     ///         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-    ///             configuration.table.header
-    ///                 .markdownTableCellOverlay {
-    ///                     Rectangle()
-    ///                         .stroke()
-    ///                         .ignoresSafeArea()
-    ///                 }
-    ///             ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (_, row) in
-    ///                 row
-    ///                     .markdownTableCellOverlay {
-    ///                         Rectangle()
-    ///                             .stroke()
-    ///                             .ignoresSafeArea()
-    ///                     }
-    ///             }
-    ///         }
-    ///         .markdownTableCellPadding(8)
+    ///             configuration.table
+    ///                 .markdownTableCellPadding(8)
     ///     }
     /// }
     /// ```

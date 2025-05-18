@@ -51,3 +51,17 @@ extension MarkdownFontGroup {
     public var inlineMath: Font { Font.body }
     public var displayMath: Font { Font.body }
 }
+
+// MARK: - Environment Values
+
+@MainActor
+struct MarkdownFontGroupEnvironmentKey: @preconcurrency EnvironmentKey {
+    static var defaultValue: AnyMarkdownFontGroup = .init(.automatic)
+}
+
+extension EnvironmentValues {
+    var markdownFontGroup: AnyMarkdownFontGroup {
+        get { self[MarkdownFontGroupEnvironmentKey.self] }
+        set { self[MarkdownFontGroupEnvironmentKey.self] = newValue }
+    }
+}

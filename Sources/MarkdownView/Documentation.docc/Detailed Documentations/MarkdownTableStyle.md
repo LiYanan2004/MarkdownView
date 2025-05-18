@@ -6,6 +6,8 @@
 
 - ``MarkdownTableStyle/default``
 - ``MarkdownTableStyle/default(showsRowSeparators:)``
+- ``MarkdownTableStyle/github``
+- ``MarkdownTableStyle/grid``
 
 ### Creating custom styles
 
@@ -17,3 +19,5 @@
 ### Supporting types
 
 - <doc:DefaultMarkdownTableStyle>
+- <doc:GithubMarkdownTableStyle>
+- <doc:GridMarkdownTableStyle>
