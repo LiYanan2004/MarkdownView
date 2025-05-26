@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MarkdownTableCellPadding {
+struct MarkdownTableCellPadding: Sendable {
     private init() { }
     static let zero = MarkdownTableCellPadding()
     
@@ -44,9 +44,10 @@ struct MarkdownTableCellPadding {
     }
 }
 
-@MainActor
-struct MarkdownTableCellPaddingEnvironmentKey: @preconcurrency EnvironmentKey {
-    static var defaultValue: MarkdownTableCellPadding = .init(.all, amount: 8)
+// MARK: - Environment Values
+
+struct MarkdownTableCellPaddingEnvironmentKey: EnvironmentKey {
+    static let defaultValue: MarkdownTableCellPadding = .init(.all, amount: 8)
 }
 
 extension EnvironmentValues {

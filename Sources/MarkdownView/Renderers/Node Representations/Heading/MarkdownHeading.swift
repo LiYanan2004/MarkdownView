@@ -38,15 +38,34 @@ struct MarkdownHeading: View {
         default: AnyShapeStyle(.foreground)
         }
     }
+    private var accessibilityHeadingLevel: AccessibilityHeadingLevel {
+        return switch heading.level {
+        case 1: .h1
+        case 2: .h2
+        case 3: .h3
+        case 4: .h4
+        case 5: .h5
+        case 6: .h6
+        default: .unspecified
+        }
+    }
     
-    var body: some View {
-        let id = heading.range?.description ?? "Unknown Range"
+    var body: SwiftUI.Text {
+//        let id = heading.range?.description ?? "Unknown Range"
         CmarkNodeVisitor(configuration: configuration)
             .descendInto(heading)
-            .id(id)
-            .padding(paddings[heading.level])
-            .foregroundStyle(foregroundStyle)
-            .font(font)
-            .accessibilityAddTraits(.isHeader)
+        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {
+            return SwiftUI.Text(heading.plainText)
+                .font(font)
+                .foregroundStyle(foregroundStyle)
+                .accessibilityHeading(accessibilityHeadingLevel)
+        } else {
+            return SwiftUI.Text(heading.plainText)
+                .font(font)
+                .accessibilityHeading(accessibilityHeadingLevel)
+        }
+//            .id(id)
+//            .padding(paddings[heading.level])
+//            .accessibilityAddTraits(.isHeader)
     }
 }

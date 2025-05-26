@@ -7,12 +7,9 @@ struct MarkdownNodeView: View {
         case text, view
     }
     var contentType: ContentType {
-        if case .left(_) = storage {
-            .text
-        } else if case .right(_) = storage {
-            .view
-        } else {
-            fatalError()
+        switch storage {
+        case .left(_): .text
+        case .right(_): .view
         }
     }
     
@@ -22,6 +19,10 @@ struct MarkdownNodeView: View {
     
     init(@ViewBuilder _ content: () -> Text) {
         storage = .left(content())
+    }
+    
+    init<Content: View>(@ViewBuilder _ content: () -> Content) where Content.Body == Text {
+        storage = .left(content().body)
     }
     
     init<Content: View>(@ViewBuilder _ content: () -> Content) {
@@ -71,7 +72,7 @@ extension MarkdownNodeView {
         var textStorage = TextComposer()
         for content in contents {
             if case let .left(text) = content.storage {
-                if layoutPolicy == .linebreak {
+                if layoutPolicy == .linebreak && textStorage.hasText {
                     textStorage.append(Text("\n"))
                 }
                 textStorage.append(text)

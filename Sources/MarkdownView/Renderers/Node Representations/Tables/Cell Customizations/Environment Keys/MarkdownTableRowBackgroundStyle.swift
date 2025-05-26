@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-struct MarkdownTableRowBackgroundStyleEnvironmentKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: AnyShapeStyle? = nil
+struct MarkdownTableRowBackgroundStyleEnvironmentKey: EnvironmentKey {
+    static let defaultValue: AnyShapeStyle? = nil
 }
 
-struct MarkdownTableRowBackgroundShapeEnvironmentKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: any Shape = .rect
+struct MarkdownTableRowBackgroundShapeEnvironmentKey: EnvironmentKey {
+    static let defaultValue: _AnyShape = .init(.rect)
 }
 
 extension EnvironmentValues {
@@ -21,7 +21,7 @@ extension EnvironmentValues {
         set { self[MarkdownTableRowBackgroundStyleEnvironmentKey.self] = newValue }
     }
     
-    var markdownTableRowBackgroundShape: any Shape {
+    var markdownTableRowBackgroundShape: _AnyShape {
         get { self[MarkdownTableRowBackgroundShapeEnvironmentKey.self] }
         set { self[MarkdownTableRowBackgroundShapeEnvironmentKey.self] = newValue }
     }
