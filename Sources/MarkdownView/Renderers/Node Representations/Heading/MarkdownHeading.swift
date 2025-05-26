@@ -50,22 +50,13 @@ struct MarkdownHeading: View {
         }
     }
     
-    var body: SwiftUI.Text {
-//        let id = heading.range?.description ?? "Unknown Range"
+    var body: some View {
         CmarkNodeVisitor(configuration: configuration)
             .descendInto(heading)
-        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {
-            return SwiftUI.Text(heading.plainText)
-                .font(font)
-                .foregroundStyle(foregroundStyle)
-                .accessibilityHeading(accessibilityHeadingLevel)
-        } else {
-            return SwiftUI.Text(heading.plainText)
-                .font(font)
-                .accessibilityHeading(accessibilityHeadingLevel)
-        }
-//            .id(id)
-//            .padding(paddings[heading.level])
-//            .accessibilityAddTraits(.isHeader)
+            .font(font)
+            .foregroundStyle(foregroundStyle)
+            .accessibilityHeading(accessibilityHeadingLevel)
+            .padding(paddings[heading.level])
+            .accessibilityAddTraits(.isHeader)
     }
 }
