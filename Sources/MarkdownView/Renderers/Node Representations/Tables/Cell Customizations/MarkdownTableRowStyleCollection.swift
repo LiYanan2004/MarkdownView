@@ -8,13 +8,13 @@
 import SwiftUI
 
 @dynamicMemberLookup
-struct MarkdownTableRowStyleCollection {
+struct MarkdownTableRowStyleCollection: Sendable {
     typealias Storage = [MarkdownTableRowStyle.Position : MarkdownTableRowStyle]
     fileprivate var storage: Storage = [:] {
         willSet { cacheBox.caches = [:] }
     }
     
-    private class CacheBox {
+    private class CacheBox: @unchecked Sendable {
         enum CacheKey: Hashable {
             case minYs
             case maxYs
@@ -22,7 +22,21 @@ struct MarkdownTableRowStyleCollection {
             case rows
             case offsets(MarkdownTableRowStyle.Position)
         }
-        var caches: [CacheKey : Any] = [:]
+        private var lock = NSLock()
+        private var _caches: [CacheKey : Any] = [:]
+        
+        var caches: [CacheKey : Any] {
+            get {
+                lock.withLock {
+                    return _caches
+                }
+            }
+            set {
+                lock.withLock {
+                    _caches = newValue
+                }
+            }
+        }
     }
     private var cacheBox = CacheBox()
     
@@ -106,11 +120,13 @@ struct MarkdownTableRowStyleCollection {
 
 // MARK: - Preference Key
 
-@MainActor
-struct MarkdownTableRowStyleCollectionPreference: @preconcurrency PreferenceKey {
-    static var defaultValue: MarkdownTableRowStyleCollection = MarkdownTableRowStyleCollection()
+struct MarkdownTableRowStyleCollectionPreference: PreferenceKey {
+    static let defaultValue: MarkdownTableRowStyleCollection = MarkdownTableRowStyleCollection()
     
-    static func reduce(value: inout MarkdownTableRowStyleCollection, nextValue: () -> MarkdownTableRowStyleCollection) {
+    static func reduce(
+        value: inout MarkdownTableRowStyleCollection,
+        nextValue: () -> MarkdownTableRowStyleCollection
+    ) {
         value.storage.merge(nextValue().storage, uniquingKeysWith: { $1 })
     }
 }

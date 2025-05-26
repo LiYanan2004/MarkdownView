@@ -77,9 +77,8 @@ extension HeadingStyleGroup {
 
 // MARK: - Environment Value
 
-@MainActor
-struct HeadingStyleGroupEnvironmentKey: @preconcurrency EnvironmentKey {
-    static var defaultValue: AnyHeadingStyleGroup = .init(.automatic)
+struct HeadingStyleGroupEnvironmentKey: EnvironmentKey {
+    static let defaultValue: AnyHeadingStyleGroup = .init(.automatic)
 }
 
 extension EnvironmentValues {

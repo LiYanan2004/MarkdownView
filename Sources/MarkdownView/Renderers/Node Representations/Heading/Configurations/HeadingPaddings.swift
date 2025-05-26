@@ -60,9 +60,8 @@ struct HeadingPaddings: Sendable {
 
 // MARK: - Environment Values
 
-@MainActor
-struct HeadingPaddingsEnvironmentKey: @preconcurrency EnvironmentKey {
-    static var defaultValue: HeadingPaddings = .init()
+struct HeadingPaddingsEnvironmentKey: EnvironmentKey {
+    static let defaultValue: HeadingPaddings = .init()
 }
 
 extension EnvironmentValues {
