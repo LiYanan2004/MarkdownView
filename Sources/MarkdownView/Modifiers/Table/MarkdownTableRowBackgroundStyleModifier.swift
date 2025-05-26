@@ -35,7 +35,7 @@ extension View {
     ) -> some View {
         transformEnvironment(\.self) { environmentValues in
             environmentValues.markdownTableRowBackgroundStyle = AnyShapeStyle(background)
-            environmentValues.markdownTableRowBackgroundShape = shape
+            environmentValues.markdownTableRowBackgroundShape = _AnyShape(shape)
         }
     }
     
