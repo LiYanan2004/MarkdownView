@@ -26,8 +26,8 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
 
 // MARK: - SwiftUI Environment
 
-struct MarkdownRendererConfigurationKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: MarkdownRendererConfiguration = .init()
+struct MarkdownRendererConfigurationKey: EnvironmentKey {
+    static let defaultValue: MarkdownRendererConfiguration = .init()
 }
 
 extension EnvironmentValues {

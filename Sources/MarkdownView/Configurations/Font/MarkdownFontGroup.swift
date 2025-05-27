@@ -54,9 +54,8 @@ extension MarkdownFontGroup {
 
 // MARK: - Environment Values
 
-@MainActor
-struct MarkdownFontGroupEnvironmentKey: @preconcurrency EnvironmentKey {
-    static var defaultValue: AnyMarkdownFontGroup = .init(.automatic)
+struct MarkdownFontGroupEnvironmentKey: EnvironmentKey {
+    static let defaultValue: AnyMarkdownFontGroup = .init(.automatic)
 }
 
 extension EnvironmentValues {
