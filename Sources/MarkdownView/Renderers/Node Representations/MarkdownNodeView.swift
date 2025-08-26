@@ -73,7 +73,7 @@ extension MarkdownNodeView {
         for content in contents {
             if case let .left(text) = content.storage {
                 if layoutPolicy == .linebreak && textStorage.hasText {
-                    textStorage.append(Text("\n"))
+                    textStorage.append(Text(verbatim: "\n"))
                 }
                 textStorage.append(text)
             } else {
