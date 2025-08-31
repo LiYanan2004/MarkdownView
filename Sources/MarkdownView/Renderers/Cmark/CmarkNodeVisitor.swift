@@ -208,11 +208,37 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitStrong(_ strong: Strong) -> MarkdownNodeView {
         var textStorage = TextComposer()
+        var hasNonTextContent = false
+        
         for child in strong.children {
             var renderer = self
-            guard let text = renderer.visit(child).asText else { continue }
-            textStorage.append(text.bold())
+            let childView = renderer.visit(child)
+            
+            if let text = childView.asText {
+                textStorage.append(text.bold())
+            } else {
+                // Handle non-text content (like links) by preserving them
+                hasNonTextContent = true
+                break
+            }
         }
+        
+        // If we have non-text content, fall back to view-based composition
+        if hasNonTextContent {
+            var childViews = [MarkdownNodeView]()
+            for child in strong.children {
+                var renderer = self
+                let childView = renderer.visit(child)
+                
+                // Apply bold styling to the child view
+                let styledView = MarkdownNodeView {
+                    childView.font(.body.bold())
+                }
+                childViews.append(styledView)
+            }
+            return MarkdownNodeView(childViews)
+        }
+        
         return MarkdownNodeView(textStorage.text)
     }
     
