@@ -29,12 +29,14 @@ struct NetworkImage: View {
                 if let transformer = viewTransformer {
                     transformer(image, imageSize, url)
                         .task { await cacheFetchedImage(image) }
+                        .id(url)
                 } else {
                     AnyView(image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(maxWidth: max(imageSize.width, imageSize.height))
-                        .task { await cacheFetchedImage(image) })
+                        .task { await cacheFetchedImage(image) }
+                        .id(url))
                 }
             } else if let svg {
                 #if os(iOS) || os(macOS)
