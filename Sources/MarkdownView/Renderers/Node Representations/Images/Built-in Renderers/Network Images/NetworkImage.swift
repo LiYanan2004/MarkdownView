@@ -1,12 +1,12 @@
 import SwiftUI
 
 // Environment key for view transformation
-struct ImageViewTransformerKey: EnvironmentKey {
-    static let defaultValue: (@Sendable (AnyView, CGSize, URL) -> AnyView)? = nil
+public struct ImageViewTransformerKey: EnvironmentKey {
+    public static let defaultValue: (@Sendable (AnyView, CGSize, URL) -> AnyView)? = nil
 }
 
 extension EnvironmentValues {
-    var imageViewTransformer: (@Sendable (AnyView, CGSize, URL) -> AnyView)? {
+    public var imageViewTransformer: (@Sendable (AnyView, CGSize, URL) -> AnyView)? {
         get { self[ImageViewTransformerKey.self] }
         set { self[ImageViewTransformerKey.self] = newValue }
     }
