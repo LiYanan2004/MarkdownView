@@ -2,11 +2,11 @@ import SwiftUI
 
 // Environment key for view transformation
 public struct ImageViewTransformerKey: EnvironmentKey {
-    public static let defaultValue: (@Sendable (AnyView, CGSize, URL) -> AnyView)? = nil
+    public static let defaultValue: (@Sendable (Image, CGSize, URL) -> AnyView)? = nil
 }
 
-extension EnvironmentValues {
-    public var imageViewTransformer: (@Sendable (AnyView, CGSize, URL) -> AnyView)? {
+public extension EnvironmentValues {
+    var imageViewTransformer: (@Sendable (Image, CGSize, URL) -> AnyView)? {
         get { self[ImageViewTransformerKey.self] }
         set { self[ImageViewTransformerKey.self] = newValue }
     }
@@ -24,23 +24,17 @@ struct NetworkImage: View {
 
     var body: some View {
         VStack {
-            // In NetworkImage, replace the image rendering block with:
-
             if let image {
-                let originalImageView = AnyView(
-                    image
+                // REBELLION POINT: Transform the view if transformer exists
+                if let transformer = viewTransformer {
+                    transformer(image, imageSize, url)
+                        .task { await cacheFetchedImage(image) }
+                } else {
+                    AnyView(image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(maxWidth: max(imageSize.width, imageSize.height))
-                )
-
-                // REBELLION POINT: Transform the view if transformer exists
-                if let transformer = viewTransformer {
-                    transformer(originalImageView, imageSize, url)
-                        .task { await cacheFetchedImage(image) }
-                } else {
-                    originalImageView
-                        .task { await cacheFetchedImage(image) }
+                        .task { await cacheFetchedImage(image) })
                 }
             } else if let svg {
                 #if os(iOS) || os(macOS)
