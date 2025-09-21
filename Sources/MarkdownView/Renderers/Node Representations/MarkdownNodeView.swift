@@ -69,23 +69,27 @@ extension MarkdownNodeView {
         layoutPolicy: LayoutPolicy = .adaptive
     ) {
         var composedContents = [MarkdownNodeView]()
-        var textStorage = TextComposer()
+        var styledTexts: [SwiftUI.Text] = []
         for content in contents {
             if case let .left(text) = content.storage {
-                if layoutPolicy == .linebreak && textStorage.hasText {
-                    textStorage.append(Text(verbatim: "\n"))
+                if layoutPolicy == .linebreak && !styledTexts.isEmpty {
+                    styledTexts.append(SwiftUI.Text(verbatim: "\n"))
                 }
-                textStorage.append(text)
+                styledTexts.append(text)
             } else {
-                if textStorage.hasText {
-                    composedContents.append(MarkdownNodeView(textStorage.text))
-                    textStorage = TextComposer()
+                if !styledTexts.isEmpty {
+                    composedContents.append(MarkdownNodeView {
+                        styledTexts.reduce(SwiftUI.Text(""), +)
+                    })
+                    styledTexts = []
                 }
                 composedContents.append(content)
             }
         }
-        if textStorage.hasText {
-            composedContents.append(MarkdownNodeView(textStorage.text))
+        if !styledTexts.isEmpty {
+            composedContents.append(MarkdownNodeView {
+                styledTexts.reduce(SwiftUI.Text(""), +)
+            })
         }
         
         if composedContents.count == 1 {

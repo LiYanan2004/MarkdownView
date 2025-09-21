@@ -197,39 +197,41 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitEmphasis(_ emphasis: Markdown.Emphasis) -> MarkdownNodeView {
-        var textStorage = TextComposer()
+        var styledTexts: [SwiftUI.Text] = []
         for child in emphasis.children {
             var renderer = self
             guard let text = renderer.visit(child).asText else { continue }
-            textStorage.append(text.italic())
+            styledTexts.append(text.italic())
         }
-        return MarkdownNodeView(textStorage.text)
+        return MarkdownNodeView {
+            styledTexts.reduce(SwiftUI.Text(""), +)
+        }
     }
     
     func visitStrong(_ strong: Strong) -> MarkdownNodeView {
-        var textStorage = TextComposer()
+        var styledTexts: [SwiftUI.Text] = []
         var hasNonTextContent = false
-        
+
         for child in strong.children {
             var renderer = self
             let childView = renderer.visit(child)
-            
+
             if let text = childView.asText {
-                textStorage.append(text.bold())
+                styledTexts.append(text.bold())
             } else {
                 // Handle non-text content (like links) by preserving them
                 hasNonTextContent = true
                 break
             }
         }
-        
+
         // If we have non-text content, fall back to view-based composition
         if hasNonTextContent {
             var childViews = [MarkdownNodeView]()
             for child in strong.children {
                 var renderer = self
                 let childView = renderer.visit(child)
-                
+
                 // Apply bold styling to the child view
                 let styledView = MarkdownNodeView {
                     childView.font(.body.bold())
@@ -238,18 +240,22 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
             }
             return MarkdownNodeView(childViews)
         }
-        
-        return MarkdownNodeView(textStorage.text)
+
+        return MarkdownNodeView {
+            styledTexts.reduce(SwiftUI.Text(""), +)
+        }
     }
     
     func visitStrikethrough(_ strikethrough: Strikethrough) -> MarkdownNodeView {
-        var textStorage = TextComposer()
+        var styledTexts: [SwiftUI.Text] = []
         for child in strikethrough.children {
             var renderer = self
             guard let text = renderer.visit(child).asText else { continue }
-            textStorage.append(text.strikethrough())
+            styledTexts.append(text.strikethrough())
         }
-        return MarkdownNodeView(textStorage.text)
+        return MarkdownNodeView {
+            styledTexts.reduce(SwiftUI.Text(""), +)
+        }
     }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
