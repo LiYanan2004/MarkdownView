@@ -52,7 +52,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 .makeBody(configuration: configuration)
         } else {
             MarkdownNodeView {
-                Text(verbatim: text.plainText)
+                Text(text.plainText)
             }
         }
     }
@@ -71,7 +71,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitSoftBreak(_ softBreak: SoftBreak) -> MarkdownNodeView {
         MarkdownNodeView {
-            Text(verbatim: " ")
+            Text(" ")
         }
     }
     
@@ -83,7 +83,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitLineBreak(_ lineBreak: LineBreak) -> MarkdownNodeView {
         MarkdownNodeView {
-            Text(verbatim: "\n")
+            Text("\n")
         }
     }
     
@@ -98,7 +98,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitInlineHTML(_ inlineHTML: InlineHTML) -> MarkdownNodeView {
         MarkdownNodeView {
-            Text(verbatim: inlineHTML.rawHTML)
+            Text(inlineHTML.rawHTML)
         }
     }
     
@@ -121,7 +121,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitHTMLBlock(_ html: HTMLBlock) -> MarkdownNodeView {
         MarkdownNodeView {
-            Text(verbatim: html.rawHTML)
+            Text(html.rawHTML)
         }
     }
     

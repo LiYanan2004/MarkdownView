@@ -10,18 +10,18 @@ import SwiftUI
 @resultBuilder
 struct TextBuilder {
     static func buildBlock(_ components: Text...) -> Text {
-        components.reduce(Text(verbatim: ""), +)
+        components.reduce(Text(""), +)
     }
     
     static func buildArray(_ components: [Text]) -> Text {
-        components.reduce(Text(verbatim: ""), +)
+        components.reduce(Text(""), +)
     }
     
     static func buildOptional(_ component: Text?) -> Text {
         if let component {
             return component
         }
-        return Text(verbatim: "")
+        return Text("")
     }
     
     static func buildExpression(_ expression: Image) -> Text {

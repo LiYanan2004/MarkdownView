@@ -73,7 +73,7 @@ struct DefaultMarkdownCodeBlock: View {
                 if let attributedCode {
                     Text(attributedCode)
                 } else {
-                    Text(verbatim: codeBlockConfiguration.code)
+                    Text(codeBlockConfiguration.code)
                 }
             }
             .padding(16)
