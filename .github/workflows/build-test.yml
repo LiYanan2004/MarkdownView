@@ -25,6 +25,7 @@ jobs:
           
       - name: Download iOS Simulator
         run: |
+          xcrun simctl list > /dev/null # Required to prevent the next command from sometimes not working
           xcodebuild -downloadPlatform "iOS Simulator"
 
       - name: Build for iOS
@@ -32,7 +33,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'generic/platform=iOS Simulator' \
             -quiet
 
   build-macos:
@@ -67,6 +68,7 @@ jobs:
           
       - name: Download tvOS Simulator
         run: |
+          xcrun simctl list > /dev/null # Required to prevent the next command from sometimes not working
           xcodebuild -downloadPlatform "tvOS Simulator"
           
       - name: Build for tvOS
@@ -74,7 +76,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk appletvsimulator \
-            -destination 'platform=tvOS Simulator,name=Apple TV' \
+            -destination 'generic/platform=tvOS Simulator' \
             -quiet
 
   build-watchos:
@@ -90,6 +92,7 @@ jobs:
           
       - name: Download watchOS Simulator
         run: |
+          xcrun simctl list > /dev/null # Required to prevent the next command from sometimes not working
           xcodebuild -downloadPlatform "watchOS Simulator"
 
       - name: Build for watchOS
@@ -97,7 +100,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk watchsimulator \
-            -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 2 (49mm)' \
+            -destination 'generic/platform=watchOS Simulator' \
             -quiet
 
   build-visionos:
@@ -113,6 +116,7 @@ jobs:
           
       - name: Download visionOS Simulator
         run: |
+          xcrun simctl list > /dev/null # Required to prevent the next command from sometimes not working
           xcodebuild -downloadPlatform "visionOS Simulator"
 
       - name: Build for visionOS
@@ -120,5 +124,5 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk xros \
-            -destination 'platform=visionOS Simulator,name=Apple Vision Pro' \
+            -destination 'generic/platform=visionOS Simulator' \
             -quiet

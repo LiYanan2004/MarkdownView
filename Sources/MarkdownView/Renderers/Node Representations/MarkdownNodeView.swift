@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MarkdownNodeView: View {
-    private var storage: Either<Text, AnyView>
+    private var storage: Either<AttributedString, AnyView>
     
     enum ContentType: String {
         case text, view
@@ -13,16 +13,16 @@ struct MarkdownNodeView: View {
         }
     }
     
-    init(_ content: @autoclosure () -> Text) {
-        storage = .left(content())
+    init(_ text: AttributedString) {
+        self.storage = .left(text)
     }
     
-    init(@ViewBuilder _ content: () -> Text) {
-        storage = .left(content())
+    init(_ text: AttributedSubstring) {
+        self.storage = .left(AttributedString(text))
     }
     
-    init<Content: View>(@ViewBuilder _ content: () -> Content) where Content.Body == Text {
-        storage = .left(content().body)
+    init(_ text: String) {
+        self.storage = .left(AttributedString(text))
     }
     
     init<Content: View>(@ViewBuilder _ content: () -> Content) {
@@ -36,8 +36,8 @@ struct MarkdownNodeView: View {
     
     var body: some View {
         Group {
-            if case .left(let text) = storage {
-                text
+            if case .left(let attributedString) = storage {
+                Text(attributedString)
             } else if case .right(let view) = storage {
                 view
             }
@@ -46,9 +46,9 @@ struct MarkdownNodeView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
     
-    var asText: Text? {
-        if case let .left(text) = storage {
-            return text
+    var asAttributedString: AttributedString? {
+        if case let .left(attributedString) = storage {
+            return attributedString
         }
         return nil
     }
@@ -69,28 +69,28 @@ extension MarkdownNodeView {
         layoutPolicy: LayoutPolicy = .adaptive
     ) {
         var composedContents = [MarkdownNodeView]()
-        var textStorage = TextComposer()
+        var attributedString = AttributedString()
         for content in contents {
             if case let .left(text) = content.storage {
-                if layoutPolicy == .linebreak && textStorage.hasText {
-                    textStorage.append(Text(verbatim: "\n"))
+                if layoutPolicy == .linebreak && !attributedString.characters.isEmpty {
+                    attributedString += "\n"
                 }
-                textStorage.append(text)
+                attributedString += text
             } else {
-                if textStorage.hasText {
-                    composedContents.append(MarkdownNodeView(textStorage.text))
-                    textStorage = TextComposer()
+                if !attributedString.characters.isEmpty {
+                    composedContents.append(MarkdownNodeView(attributedString))
+                    attributedString = AttributedString()
                 }
                 composedContents.append(content)
             }
         }
-        if textStorage.hasText {
-            composedContents.append(MarkdownNodeView(textStorage.text))
+        if !attributedString.characters.isEmpty {
+            composedContents.append(MarkdownNodeView(attributedString))
         }
         
         if composedContents.count == 1 {
-            if let textOnly = composedContents[0].asText {
-                storage = .left(textOnly)
+            if let attributedString = composedContents[0].asAttributedString {
+                storage = .left(attributedString)
             } else {
                 storage = .right(AnyView(composedContents[0].body))
             }
