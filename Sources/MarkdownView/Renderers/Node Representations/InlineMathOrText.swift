@@ -53,7 +53,7 @@ struct InlineMathOrText {
         
         return MarkdownNodeView(nodeViews)
         #else
-        return MarkdownNodeView(Text(text))
+        return MarkdownNodeView(text)
         #endif
     }
 }
