@@ -31,7 +31,7 @@ struct InlineMathOrText {
             // Add normal text before the current LaTeX match (if any)
             if processingIndex < range.lowerBound {
                 let normalText = String(text[processingIndex..<range.lowerBound])
-                nodeViews.append(MarkdownNodeView(Text(normalText)))
+                nodeViews.append(MarkdownNodeView(normalText))
             }
             
             // Add the current LaTeX node
@@ -48,7 +48,7 @@ struct InlineMathOrText {
         // Add any remaining text after the last LaTeX match
         if processingIndex < text.endIndex {
             let remainingText = String(text[processingIndex..<text.endIndex])
-            nodeViews.append(MarkdownNodeView(Text(remainingText)))
+            nodeViews.append(MarkdownNodeView(remainingText))
         }
         
         return MarkdownNodeView(nodeViews)

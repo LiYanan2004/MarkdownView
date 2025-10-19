@@ -55,8 +55,6 @@ struct MarkdownImage: View {
     }
     
     private var fallbackView: some View {
-        MarkdownNodeView {
-            Text(image.plainText)
-        }
+        MarkdownNodeView(image.plainText)
     }
 }
