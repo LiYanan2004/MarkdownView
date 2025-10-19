@@ -33,7 +33,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'generic/platform=iOS Simulator' \
             -quiet
 
   build-macos:
@@ -76,7 +76,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk appletvsimulator \
-            -destination 'platform=tvOS Simulator,name=Apple TV' \
+            -destination 'generic/platform=tvOS Simulator' \
             -quiet
 
   build-watchos:
@@ -100,7 +100,7 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk watchsimulator \
-            -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 2 (49mm)' \
+            -destination 'generic/platform=watchOS Simulator' \
             -quiet
 
   build-visionos:
@@ -124,5 +124,5 @@ jobs:
           xcodebuild clean build \
             -scheme ${{ env.PROJECT_SCHEME }} \
             -sdk xros \
-            -destination 'platform=visionOS Simulator,name=Apple Vision Pro' \
+            -destination 'generic/platform=visionOS Simulator' \
             -quiet
