@@ -13,16 +13,19 @@ struct HTMLBlockView: View {
     @State private var contentSize = CGSize.zero
     
     var body: some View {
+        // FIXME: Dynamic height not supported.
         HTMLView(
-            "<html><body style=\"margin: 0px;width: 100%\"><div id=\"container\">\(html)</div></body></html>"
+            "<html style=\"overscroll-behavior:none;width:100%;\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body style=\"margin:0px;\"><div id=\"container\">\(html)</div></body></html>"
         ) { webView in
-            webView.evaluateJavaScript("document.body.scrollHeight") { result, _ in
+            webView.evaluateJavaScript(
+                "document.body.scrollHeight"
+            ) { result, _ in
                 if let height = (result as? NSNumber)?.doubleValue, height.isNormal {
                     contentSize.height = height
                 }
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: contentSize.height)
         .frame(height: contentSize.height)
     }
 }
