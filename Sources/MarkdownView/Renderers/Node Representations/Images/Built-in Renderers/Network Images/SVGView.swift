@@ -1,6 +1,4 @@
 import SwiftUI
-#if canImport(WebKit)
-import WebKit
 
 // MARK: - SVGView
 
@@ -11,12 +9,16 @@ struct SVGView: View {
     @State private var viewWidth = CGFloat.zero
    
     var body: some View {
-        _SVGViewBridge(html: svg.htmlRepresentation) { size in
-            if size.width.isNormal {
-                actualSize.width = size.width
+        HTMLView(svg.htmlRepresentation) { webView in
+            webView.evaluateJavaScript("(() => { const svg = document.querySelector('svg'); return svg.hasAttribute('width') ? svg.getBoundingClientRect().width : null; })()") { result, _ in
+                if let width = (result as? NSNumber)?.doubleValue, width.isNormal {
+                    actualSize.width = width
+                }
             }
-            if size.height.isNormal {
-                actualSize.height = size.height
+            webView.evaluateJavaScript("document.querySelector('svg').getBoundingClientRect().height") { result, _ in
+                if let height = (result as? NSNumber)?.doubleValue, height.isNormal {
+                    actualSize.height = height
+                }
             }
         }
         .disabled(disableInteractions)
@@ -31,88 +33,6 @@ struct SVGView: View {
         viewWidth >= actualSize.width
     }
 }
-
-// MARK: - WKWebView Delegate
-
-@MainActor
-fileprivate class WebViewDelegate: NSObject, WKNavigationDelegate {
-    var updateSize: ((CGSize) -> Void)?
-    
-    init(updateSize: ((CGSize) -> Void)?) {
-        self.updateSize = updateSize
-    }
-    
-    nonisolated func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        MainActor.assumeIsolated {
-            webView.evaluateJavaScript("(() => { const svg = document.querySelector('svg'); return svg.hasAttribute('width') ? svg.getBoundingClientRect().width : null; })()") { result, _ in
-                if let width = (result as? NSNumber)?.doubleValue, width.isNormal {
-                    self.updateSize?(CGSize(width: width, height: .zero))
-                }
-            }
-            webView.evaluateJavaScript("document.querySelector('svg').getBoundingClientRect().height") { result, _ in
-                if let height = (result as? NSNumber)?.doubleValue, height.isNormal {
-                    self.updateSize?(CGSize(width: .zero, height: height))
-                }
-            }
-        }
-    }
-}
-#endif
-
-// MARK: - Representation Views
-
-#if os(macOS)
-fileprivate struct _SVGViewBridge: NSViewRepresentable {
-    var html: String
-    var updateSize: ((CGSize) -> Void)?
-    
-    func makeNSView(context: Context) -> WKWebView {
-        let webConfiguration = WKWebViewConfiguration()
-        let webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        // MARK: Not sure if `drawsBackground` is private API.
-        webView.setValue(false, forKey: "drawsBackground")
-        webView.navigationDelegate = context.coordinator.self
-        return webView
-    }
-    
-    func updateNSView(_ webView: WKWebView, context: Context) {
-        DispatchQueue.main.async {
-            webView.loadHTMLString(html, baseURL: nil)
-        }
-    }
-    
-    func makeCoordinator() -> WebViewDelegate {
-        Coordinator(updateSize: updateSize)
-    }
-}
-#elseif os(iOS) || os(visionOS)
-fileprivate struct _SVGViewBridge: UIViewRepresentable {
-    var html: String
-    var updateSize: (CGSize) -> Void
-    
-    func makeUIView(context: Context) -> WKWebView {
-        let webConfiguration = WKWebViewConfiguration()
-        let webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        webView.isOpaque = false
-        webView.backgroundColor = .clear
-        webView.scrollView.backgroundColor = .clear
-        webView.navigationDelegate = context.coordinator.self
-        webView.scrollView.bounces = false
-        
-        return webView
-    }
-    
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        DispatchQueue.main.async {
-            webView.loadHTMLString(html, baseURL: nil)
-        }
-    }
-    
-    func makeCoordinator() -> WebViewDelegate {
-        WebViewDelegate(updateSize: updateSize)
-    }
-}
-#endif
 
 // MARK: - SVG Helpers
 
