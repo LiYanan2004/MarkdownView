@@ -110,7 +110,9 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitHTMLBlock(_ html: HTMLBlock) -> MarkdownNodeView {
-        MarkdownNodeView(html.rawHTML)
+        MarkdownNodeView {
+            HTMLBlockView(html: html.rawHTML)
+        }
     }
     
     func visitListItem(_ listItem: ListItem) -> MarkdownNodeView {
