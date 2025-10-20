@@ -8,7 +8,17 @@
 import SwiftUI
 #if canImport(WebKit)
 import WebKit
+
+final class MDWebView: WKWebView {
+    #if os(macOS)
+    override func scrollWheel(with event: NSEvent) {
+        nextResponder?.scrollWheel(with: event)
+        return
+    }
+    #endif
+}
 #endif
+
 
 #if os(macOS)
 struct HTMLView: NSViewRepresentable {
@@ -20,16 +30,15 @@ struct HTMLView: NSViewRepresentable {
         self.onFinishLoading = onFinishLoading
     }
     
-    func makeNSView(context: Context) -> WKWebView {
+    func makeNSView(context: Context) -> MDWebView {
         let webConfiguration = WKWebViewConfiguration()
-        let webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        // MARK: Not sure if `drawsBackground` is private API.
+        let webView = MDWebView(frame: .zero, configuration: webConfiguration)
         webView.setValue(false, forKey: "drawsBackground")
         webView.navigationDelegate = context.coordinator.self
         return webView
     }
     
-    func updateNSView(_ webView: WKWebView, context: Context) {
+    func updateNSView(_ webView: MDWebView, context: Context) {
         DispatchQueue.main.async {
             webView.loadHTMLString(html, baseURL: nil)
         }
@@ -42,6 +51,7 @@ struct HTMLView: NSViewRepresentable {
 #elseif os(iOS) || os(visionOS)
 struct HTMLView: UIViewRepresentable {
     var html: String
+    @State private var _html: String = ""
     var onFinishLoading: ((WKWebView) -> Void)?
     
     init(_ html: String, onFinishLoading: ((WKWebView) -> Void)? = nil) {
@@ -49,20 +59,22 @@ struct HTMLView: UIViewRepresentable {
         self.onFinishLoading = onFinishLoading
     }
     
-    func makeUIView(context: Context) -> WKWebView {
+    func makeUIView(context: Context) -> MDWebView {
         let webConfiguration = WKWebViewConfiguration()
-        let webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        let webView = MDWebView(frame: .zero, configuration: webConfiguration)
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         webView.navigationDelegate = context.coordinator.self
         webView.scrollView.bounces = false
+        webView.scrollView.isScrollEnabled = false
         
         return webView
     }
     
-    func updateUIView(_ webView: WKWebView, context: Context) {
+    func updateUIView(_ webView: MDWebView, context: Context) {
         DispatchQueue.main.async {
+            self._html = html
             webView.loadHTMLString(html, baseURL: nil)
         }
     }
