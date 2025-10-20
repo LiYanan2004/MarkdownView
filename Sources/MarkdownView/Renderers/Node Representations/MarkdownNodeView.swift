@@ -73,7 +73,7 @@ extension MarkdownNodeView {
         for content in contents {
             if case let .left(text) = content.storage {
                 if layoutPolicy == .linebreak && !attributedString.characters.isEmpty {
-                    attributedString += "\n"
+                    attributedString += "\n\n"
                 }
                 attributedString += text
             } else {
