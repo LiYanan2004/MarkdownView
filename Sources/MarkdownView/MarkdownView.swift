@@ -32,7 +32,9 @@ public struct MarkdownView: View {
     
     public var body: some View {
         markdownViewStyle
-            .makeBody(configuration: MarkdownViewStyleConfiguration(body: _renderedBody))
+            .makeBody(
+                configuration: MarkdownViewStyleConfiguration(body: _renderedBody)
+            )
             .erasedToAnyView()
             .font(bodyFont)
     }
