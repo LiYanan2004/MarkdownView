@@ -92,8 +92,11 @@ struct HTMLView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         context.coordinator.configure(webView)
         webView.navigationDelegate = context.coordinator
-        webView.scrollView.bounces = false
-        webView.scrollView.isScrollEnabled = false
+        
+        webView.scrollView.alwaysBounceVertical = false
+        webView.scrollView.showsVerticalScrollIndicator = false
+        webView.scrollView.alwaysBounceHorizontal = true
+        webView.scrollView.showsHorizontalScrollIndicator = true
         
         return webView
     }
