@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import WebKit
 
 struct HTMLBlockView: View {
     var html: String
