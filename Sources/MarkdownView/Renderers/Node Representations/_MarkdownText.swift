@@ -23,7 +23,7 @@ struct _MarkdownText: View {
             Text(attributedString)
         } else {
             Text(text)
-                .task {
+                .task(id: text) {
                     var attributedString = text
                     for run in text.runs.reversed() where (run.isHTML ?? false) {
                         let range = run.range
