@@ -5,10 +5,9 @@
 //  Created by Yanan Li on 2025/10/21.
 //
 
-#if canImport(WebKit)
 import SwiftUI
-import WebKit
 
+#if canImport(WebKit)
 struct SVGView: View {
     var svg: SVG
     
@@ -34,6 +33,7 @@ struct SVGView: View {
         .frame(maxWidth: actualSize.width == .zero ? .infinity : actualSize.width)
         .frame(height: actualSize.height)
         .widthOfView($viewWidth)
+
     }
     
     private var disableInteractions: Bool {
@@ -42,6 +42,7 @@ struct SVGView: View {
         viewWidth >= actualSize.width
     }
 }
+#endif
 
 // MARK: - SVG Helpers
 
@@ -122,4 +123,3 @@ fileprivate extension String {
         return result
     }
 }
-#endif

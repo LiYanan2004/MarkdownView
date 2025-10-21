@@ -12,6 +12,7 @@ struct HTMLBlockView: View {
     @State private var contentSize = CGSize.zero
     
     var body: some View {
+        #if canImport(WebKit)
         HTMLView(
             html,
             onContentHeightChange: { height in
@@ -20,5 +21,8 @@ struct HTMLBlockView: View {
         )
         .frame(maxWidth: .infinity)
         .frame(height: max(contentSize.height, 1))
+        #else
+        Text(html)
+        #endif
     }
 }
