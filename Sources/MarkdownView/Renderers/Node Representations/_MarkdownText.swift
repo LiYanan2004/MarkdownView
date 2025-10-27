@@ -19,29 +19,31 @@ struct _MarkdownText: View {
     }
     
     var body: some View {
-        if let attributedString {
-            Text(attributedString)
-        } else {
-            Text(text)
-                .task(id: text) {
-                    var attributedString = text
-                    for run in text.runs.reversed() where (run.isHTML ?? false) {
-                        let range = run.range
-                        
-                        if let htmlAttrString = try? AttributedString(
-                            NSAttributedString(
-                                data: Data(String(text.characters[range]).utf8),
-                                options: [
-                                    .documentType: NSAttributedString.DocumentType.html
-                                ],
-                                documentAttributes: nil
-                            )
-                        ) {
-                            attributedString.replaceSubrange(range, with: htmlAttrString)
-                        }
-                    }
-                    self.attributedString = attributedString
+        Group {
+            if let attributedString {
+                Text(attributedString)
+            } else {
+                Text(text)
+            }
+        }
+        .task(id: text) {
+            var attributedString = text
+            for run in text.runs.reversed() where (run.isHTML ?? false) {
+                let range = run.range
+                
+                if let htmlAttrString = try? AttributedString(
+                    NSAttributedString(
+                        data: Data(String(text.characters[range]).utf8),
+                        options: [
+                            .documentType: NSAttributedString.DocumentType.html
+                        ],
+                        documentAttributes: nil
+                    )
+                ) {
+                    attributedString.replaceSubrange(range, with: htmlAttrString)
                 }
+            }
+            self.attributedString = attributedString
         }
     }
 }
