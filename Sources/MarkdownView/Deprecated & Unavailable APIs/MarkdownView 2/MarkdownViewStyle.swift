@@ -8,6 +8,7 @@
 import SwiftUI
 
 extension View {
+    @available(*, deprecated, message: "Wrap `MarkdownView` or apply modifiers directly at here. If you have already created a `MarkdownViewStyle`, just copy the code from `makeBody(configuration:) -> Body` and copy to here.")
     nonisolated public func markdownViewStyle(_ style: some MarkdownViewStyle) -> some View {
         environment(\.markdownViewStyle, style)
     }
@@ -18,6 +19,7 @@ extension View {
 /// The appearance and layout behavior of MarkdownView.
 @MainActor
 @preconcurrency
+@available(*, deprecated, message: "Use `ViewModifier` protocol instead.")
 public protocol MarkdownViewStyle {
     /// The properties of a MarkdownView.
     typealias Configuration = MarkdownViewStyleConfiguration
@@ -47,12 +49,14 @@ public struct MarkdownViewStyleConfiguration {
 // MARK: - DefaultMarkdownViewStyle
 
 /// A MarkdownViewStyle that uses default appearances.
+@available(*, deprecated)
 public struct DefaultMarkdownViewStyle: MarkdownViewStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.body
     }
 }
 
+@available(*, deprecated)
 extension MarkdownViewStyle where Self == DefaultMarkdownViewStyle {
     /// A MarkdownViewStyle that uses default appearances.
     static public var `default`: DefaultMarkdownViewStyle { .init() }
@@ -61,6 +65,7 @@ extension MarkdownViewStyle where Self == DefaultMarkdownViewStyle {
 // MARK: - EditorMarkdownViewStyle
 
 /// A MarkdownViewStyle that takes up all available spaces and align its content to top-leading, just like an editor.
+@available(*, deprecated, message: "Use `.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)` instead.")
 public struct EditorMarkdownViewStyle: MarkdownViewStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.body
@@ -68,6 +73,7 @@ public struct EditorMarkdownViewStyle: MarkdownViewStyle {
     }
 }
 
+@available(*, deprecated)
 extension MarkdownViewStyle where Self == EditorMarkdownViewStyle {
     /// A MarkdownViewStyle that takes up all available spaces and align its content to top-leading, just like an editor.
     static public var editor: EditorMarkdownViewStyle { .init() }
@@ -75,11 +81,13 @@ extension MarkdownViewStyle where Self == EditorMarkdownViewStyle {
 
 // MARK: - MarkdownViewStyle + Environment
 
+@available(*, deprecated)
 struct MarkdownViewStyleEnvironmentKey: @preconcurrency EnvironmentKey {
     @MainActor static var defaultValue: any MarkdownViewStyle = .default
 }
 
 extension EnvironmentValues {
+    @available(*, deprecated)
     var markdownViewStyle: any MarkdownViewStyle {
         get { self[MarkdownViewStyleEnvironmentKey.self] }
         set { self[MarkdownViewStyleEnvironmentKey.self] = newValue }
