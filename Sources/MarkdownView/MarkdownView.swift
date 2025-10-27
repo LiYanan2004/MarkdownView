@@ -3,38 +3,25 @@ import Markdown
 
 /// A view that renders markdown content.
 public struct MarkdownView: View {
-    private var content: MarkdownContent
-    
-    @State private var viewSize = CGSize.zero
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.displayScale) private var displayScale
+    @ObservedObject private var content: MarkdownContent
     
     @Environment(\.markdownFontGroup.body) private var bodyFont
     @Environment(\.markdownRendererConfiguration) private var configuration
     
     /// Creates a view that renders given markdown string.
-    ///
-    /// - Parameter text: The Markdown source to render.
+    /// - Parameter text: The markdown source to render.
     public init(_ text: String) {
-        self.content = MarkdownContent(
-            raw: .plainText(text)
-        )
+        self.content = MarkdownContent(text)
     }
     
-    @_spi(WIP)
+    /// Creates a view that renders the markdown from a local file at given url.
+    /// - Parameter url: The url to the markdown file to render.
     public init(_ url: URL) {
-        self.content = MarkdownContent(
-            raw: .url(url)
-        )
+        self.content =  MarkdownContent(url)
     }
     
-    /// Creates a view that renders from a ``MarkdownContent`` instance.
-    ///
-    /// Use this initializer when the content comes from ``MarkdownReader`` or a
-    /// cached value so that multiple Markdown views can reuse the same parsed
-    /// document and renderer cache.
-    ///
-    /// - Parameter content: The parsed Markdown to render.
+    /// Creates an instance that renders from a ``MarkdownContent`` .
+    /// - Parameter content: The ``MarkdownContent`` to render.
     public init(_ content: MarkdownContent) {
         self.content = content
     }
@@ -46,11 +33,15 @@ public struct MarkdownView: View {
     @ViewBuilder
     private var _renderedBody: some View {
         if configuration.rendersMath {
-            MathFirstMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration)
+            MathFirstMarkdownViewRenderer().makeBody(
+                content: content,
+                configuration: configuration
+            )
         } else {
-            CmarkFirstMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration)
+            CmarkFirstMarkdownViewRenderer().makeBody(
+                content: content,
+                configuration: configuration
+            )
         }
     }
 }

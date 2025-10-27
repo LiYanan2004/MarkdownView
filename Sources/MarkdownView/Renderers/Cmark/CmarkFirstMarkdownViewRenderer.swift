@@ -19,6 +19,6 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
         }
         
         return CmarkNodeVisitor(configuration: configuration)
-            .makeBody(for: content.parse(options: parseOptions))
+            .makeBody(for: content.document(options: parseOptions))
     }
 }
