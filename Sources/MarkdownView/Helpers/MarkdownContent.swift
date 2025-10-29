@@ -44,13 +44,11 @@ public struct MarkdownContent: Sendable {
         self.raw = raw
         
         func parseRawContent() -> Document {
-            let expcapedRawMarkdown = raw.text
-                .replacingOccurrences(of: "\\", with: "\\\\")
             var options = ParseOptions()
             options.insert(.parseBlockDirectives)
             
             return Document(
-                parsing: expcapedRawMarkdown,
+                parsing: raw.text,
                 source: raw.source,
                 options: options
             )
