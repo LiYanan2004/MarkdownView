@@ -1,0 +1,69 @@
+{
+  "originHash" : "f4d03e345245610b75bf95dd6ba52ae3b242a904e383d2e60b09a95660344227",
+  "pins" : [
+    {
+      "identity" : "highlightr",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sinkingsugar/Highlightr.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "c6ff2ac558ba25fc88a9ca7b84259d01fc588c3d"
+      }
+    },
+    {
+      "identity" : "latexswiftui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/colinc86/LaTeXSwiftUI.git",
+      "state" : {
+        "revision" : "c45e0fd45f64923c49c5904a9f9626bc8939f05f",
+        "version" : "1.5.0"
+      }
+    },
+    {
+      "identity" : "mathjaxswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/colinc86/MathJaxSwift",
+      "state" : {
+        "revision" : "e23d6eab941da699ac4a60fb0e60f3ba5c937459",
+        "version" : "3.4.0"
+      }
+    },
+    {
+      "identity" : "swift-cmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-cmark.git",
+      "state" : {
+        "revision" : "b022b08312decdc46585e0b3440d97f6f22ef703",
+        "version" : "0.6.0"
+      }
+    },
+    {
+      "identity" : "swift-html-entities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Kitura/swift-html-entities",
+      "state" : {
+        "revision" : "d8ca73197f59ce260c71bd6d7f6eb8bbdccf508b",
+        "version" : "4.0.1"
+      }
+    },
+    {
+      "identity" : "swift-markdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-markdown.git",
+      "state" : {
+        "revision" : "ea79e83c8744d2b50b0dc2d5bbd1e857e1253bf9",
+        "version" : "0.6.0"
+      }
+    },
+    {
+      "identity" : "swiftdraw",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swhitty/SwiftDraw",
+      "state" : {
+        "revision" : "2a36e6ce369cbecdd031ee95f5b5b3faa69ef50f",
+        "version" : "0.21.0"
+      }
+    }
+  ],
+  "version" : 3
+}
