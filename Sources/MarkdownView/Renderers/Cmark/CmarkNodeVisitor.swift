@@ -233,27 +233,14 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         return MarkdownNodeView(attributedString)
     }
     
-    mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
-        guard let destination = link.destination,
-              let url = URL(string: destination)
-        else { return descendInto(link) }
-        
-        let nodeView = descendInto(link)
-        return if let attributedString = nodeView.asAttributedString {
-            MarkdownNodeView(
-                attributedString.mergingAttributes(
-                    AttributeContainer()
-                        .link(url)
-                        .foregroundColor(configuration.linkTintColor)
+    func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
+        MarkdownNodeView {
+            MarkdownStyledLink(
+                configuration: LinkStyleConfiguration(
+                    destination: link.destination,
+                    title: link.title
                 )
             )
-        } else {
-             MarkdownNodeView {
-                Link(destination: url) {
-                    nodeView
-                }
-                .foregroundStyle(configuration.linkTintColor)
-            }
         }
     }
 }
