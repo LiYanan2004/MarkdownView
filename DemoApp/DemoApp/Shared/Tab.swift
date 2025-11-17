@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 enum Tab: String, CaseIterable {
-    case overview, image, table, text, list, customization, interact, blockDirective, math
-    
+    case overview, image, table, text, list, customization, interact, blockDirective, math, link
+
     var name: String {
         switch self {
         case .overview: "Overview"
@@ -22,6 +22,7 @@ enum Tab: String, CaseIterable {
         case .interact: "Interact"
         case .blockDirective: "Block Directive"
         case .math: "Math Rendering"
+        case .link: "Link"
         }
     }
 }
@@ -58,6 +59,7 @@ extension Tab {
                     case .interact: InteractDestination()
                     case .blockDirective: BlockDirectiveDestination()
                     case .math: MathDestination()
+                    case .link: LinkDestination()
                     }
                 }
                 .frame(maxWidth: .infinity)
