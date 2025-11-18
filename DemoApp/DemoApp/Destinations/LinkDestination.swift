@@ -42,22 +42,16 @@ struct CustomLinkStyleInternal: View {
     var linkConfiguration: LinkStyleConfiguration
     var action: (_ url: URL) -> Void = { _ in }
 
-    @Environment(\.markdownRendererConfiguration) private var renderingConfiguration
-
     var body: some View {
         if let destination = linkConfiguration.destination, let url = URL(string: destination) {
-            MarkdownNodeView {
-                Link(destination: url) {
-                    Text(linkConfiguration.title ?? "link")
-                }
-                .foregroundStyle(renderingConfiguration.linkTintColor)
+            Link(destination: url) {
+                Text(linkConfiguration.title ?? "link")
             }
+            .foregroundStyle(.blue)
         } else {
             if let title = linkConfiguration.title {
-                MarkdownNodeView {
-                    Text(title)
-                        .foregroundStyle(renderingConfiguration.linkTintColor)
-                }
+                Text(title)
+                    .foregroundStyle(.blue)
             } else {
                 EmptyView()
             }
