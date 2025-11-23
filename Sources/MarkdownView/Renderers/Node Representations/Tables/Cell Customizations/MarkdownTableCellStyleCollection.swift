@@ -14,7 +14,7 @@ struct MarkdownTableCellStyleCollection: Sendable {
         willSet { cacheBox.reset() }
     }
     
-    private class CacheBox: /* via DispatchQueue */ @unchecked Sendable {
+    private class CacheBox: /* NSLock */ @unchecked Sendable {
         enum CacheKey: Hashable {
             case minXs
             case maxXs
@@ -25,25 +25,26 @@ struct MarkdownTableCellStyleCollection: Sendable {
             case cells
             case offsets(MarkdownTableCellStyle.Position)
         }
+        
         private var caches: [CacheKey : Any] = [:]
-        private var queue = DispatchQueue(
-            label: "com.liyanan2004.MarkdownView.TableCellStyle"
-        )
+        private let lock = NSLock()
         
         subscript(key: CacheKey) -> Any? {
-            queue.sync { caches[key] }
+            lock.lock()
+            defer { lock.unlock() }
+            return caches[key]
         }
         
         func updateValue(_ value: Any, forKey key: CacheKey) {
-            queue.sync {
-                caches[key] = value
-            }
+            lock.lock()
+            caches[key] = value
+            lock.unlock()
         }
         
         func reset() {
-            queue.sync {
-                caches = [:]
-            }
+            lock.lock()
+            caches = [:]
+            lock.unlock()
         }
     }
     private var cacheBox = CacheBox()
