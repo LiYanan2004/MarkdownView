@@ -8,13 +8,13 @@
 import SwiftUI
 
 @dynamicMemberLookup
-struct MarkdownTableCellStyleCollection {
+struct MarkdownTableCellStyleCollection: Sendable {
     typealias Storage = [MarkdownTableCellStyle.Position : MarkdownTableCellStyle]
     fileprivate var storage: Storage = [:] {
-        willSet { cacheBox.caches = [:] }
+        willSet { cacheBox.reset() }
     }
     
-    private class CacheBox {
+    private class CacheBox: /* via DispatchQueue */ @unchecked Sendable {
         enum CacheKey: Hashable {
             case minXs
             case maxXs
@@ -25,7 +25,26 @@ struct MarkdownTableCellStyleCollection {
             case cells
             case offsets(MarkdownTableCellStyle.Position)
         }
-        var caches: [CacheKey : Any] = [:]
+        private var caches: [CacheKey : Any] = [:]
+        private var queue = DispatchQueue(
+            label: "com.liyanan2004.MarkdownView.TableCellStyle"
+        )
+        
+        subscript(key: CacheKey) -> Any? {
+            queue.sync { caches[key] }
+        }
+        
+        func updateValue(_ value: Any, forKey key: CacheKey) {
+            queue.sync {
+                caches[key] = value
+            }
+        }
+        
+        func reset() {
+            queue.sync {
+                caches = [:]
+            }
+        }
     }
     private var cacheBox = CacheBox()
     
@@ -39,17 +58,17 @@ struct MarkdownTableCellStyleCollection {
     }
     
     var cells: [MarkdownTableCellStyle] {
-        if let cached = cacheBox.caches[.cells] {
+        if let cached = cacheBox[.cells] {
             return cached as! [MarkdownTableCellStyle]
         }
         
         let cells = Array(storage.values)
-        cacheBox.caches[.cells] = cells
+        cacheBox.updateValue(cells, forKey: .cells)
         return cells
     }
     
     var minXs: [CGFloat] {
-        if let cached = cacheBox.caches[.minXs] {
+        if let cached = cacheBox[.minXs] {
             return cached as! [CGFloat]
         }
         
@@ -57,12 +76,12 @@ struct MarkdownTableCellStyleCollection {
         let minXs = (0..<columns).map { column in
             cells.filter { $0.position.column == column }.map(\.rect.minX).min() ?? 0
         }
-        cacheBox.caches[.minXs] = minXs
+        cacheBox.updateValue(minXs, forKey: .minXs)
         return minXs
     }
     
     var maxXs: [CGFloat] {
-        if let cached = cacheBox.caches[.maxXs] {
+        if let cached = cacheBox[.maxXs] {
             return cached as! [CGFloat]
         }
         
@@ -70,12 +89,12 @@ struct MarkdownTableCellStyleCollection {
         let maxXs = (0..<columns).map { column in
             cells.filter { $0.position.column == column }.map(\.rect.maxX).max() ?? 0
         }
-        cacheBox.caches[.maxXs] = maxXs
+        cacheBox.updateValue(maxXs, forKey: .maxXs)
         return maxXs
     }
     
     var minYs: [CGFloat] {
-        if let cached = cacheBox.caches[.minYs] {
+        if let cached = cacheBox[.minYs] {
             return cached as! [CGFloat]
         }
         
@@ -83,12 +102,12 @@ struct MarkdownTableCellStyleCollection {
         let minYs = (0..<rows).map { row in
             cells.filter { $0.position.row == row }.map(\.rect.minY).min() ?? 0
         }
-        cacheBox.caches[.minYs] = minYs
+        cacheBox.updateValue(minYs, forKey: .minYs)
         return minYs
     }
     
     var maxYs: [CGFloat] {
-        if let cached = cacheBox.caches[.maxYs] {
+        if let cached = cacheBox[.maxYs] {
             return cached as! [CGFloat]
         }
         
@@ -96,12 +115,12 @@ struct MarkdownTableCellStyleCollection {
         let maxYs = (0..<rows).map { row in
             cells.filter { $0.position.row == row }.map(\.rect.maxY).max() ?? 0
         }
-        cacheBox.caches[.maxYs] = maxYs
+        cacheBox.updateValue(maxYs, forKey: .maxYs)
         return maxYs
     }
     
     var widths: [CGFloat] {
-        if let cached = cacheBox.caches[.widths] {
+        if let cached = cacheBox[.widths] {
             return cached as! [CGFloat]
         }
         
@@ -113,12 +132,12 @@ struct MarkdownTableCellStyleCollection {
         for (index, additionalWidth) in additionalWidths.enumerated() {
             widths[index] += additionalWidth
         }
-        cacheBox.caches[.widths] = widths
+        cacheBox.updateValue(widths, forKey: .widths)
         return widths
     }
     
     var heights: [CGFloat] {
-        if let cached = cacheBox.caches[.heights] {
+        if let cached = cacheBox[.heights] {
             return cached as! [CGFloat]
         }
         
@@ -130,14 +149,14 @@ struct MarkdownTableCellStyleCollection {
         for (index, additionalHeight) in additionalHeights.enumerated() {
             heights[index] += additionalHeight
         }
-        cacheBox.caches[.heights] = heights
+        cacheBox.updateValue(heights, forKey: .heights)
         return heights
     }
     
     func offset(for position: MarkdownTableCellStyle.Position) -> CGSize {
         guard storage[position] != nil else { return .zero }
         
-        if let cached = cacheBox.caches[.offsets(position)] {
+        if let cached = cacheBox[.offsets(position)] {
             return cached as! CGSize
         }
         
@@ -145,18 +164,18 @@ struct MarkdownTableCellStyleCollection {
             width: minXs[position.column],
             height: minYs[position.row]
         )
-        cacheBox.caches[.offsets(position)] = offset
+        cacheBox.updateValue(offset, forKey: .offsets(position))
         return offset
     }
 }
 
 // MARK: - Preference Key
 
-@MainActor
-struct MarkdownTableCellStyleCollectionPreference: @preconcurrency PreferenceKey {
-    static var defaultValue: MarkdownTableCellStyleCollection = MarkdownTableCellStyleCollection()
+struct MarkdownTableCellStyleCollectionPreference: PreferenceKey {
+    static let defaultValue: MarkdownTableCellStyleCollection = MarkdownTableCellStyleCollection()
     
     static func reduce(value: inout MarkdownTableCellStyleCollection, nextValue: () -> MarkdownTableCellStyleCollection) {
         value.storage.merge(nextValue().storage, uniquingKeysWith: { $1 })
     }
 }
+
