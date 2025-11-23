@@ -234,13 +234,8 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
-        MarkdownNodeView {
-            MarkdownStyledLink(
-                configuration: LinkStyleConfiguration(
-                    destination: link.destination,
-                    title: link.title
-                )
-            )
+        return MarkdownNodeView {
+            MarkdownStyledLink(link: link)
         }
     }
 }

@@ -48,6 +48,10 @@ struct CustomLinkStyleInternal: View {
                 Text(linkConfiguration.title ?? "link")
             }
             .foregroundStyle(.blue)
+            .environment(\.openURL, OpenURLAction { url in
+                action(url)
+                return .handled
+            })
         } else {
             if let title = linkConfiguration.title {
                 Text(title)
