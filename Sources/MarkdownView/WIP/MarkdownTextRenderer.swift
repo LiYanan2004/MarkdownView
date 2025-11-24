@@ -14,6 +14,6 @@ struct MarkdownTextRenderer {
     
     func renderMarkdownContent(_ markdownContent: MarkdownContent) -> MarkdownTextNode {
         var renderer = self
-        return renderer.visit(markdownContent.document)
+        return renderer.visit(markdownContent.parse())
     }
 }

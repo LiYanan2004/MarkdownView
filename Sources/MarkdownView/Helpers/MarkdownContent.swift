@@ -37,24 +37,46 @@ enum RawMarkdownContent: Sendable, Hashable {
 public struct MarkdownContent: Sendable {
     var raw: RawMarkdownContent
     
-    /// Parsed markdown document.
-    public var document: Document
+    class ParsedDocumentStore: /* NSLock */ @unchecked Sendable {
+        private var lock = NSLock()
+        private var caches: [ParseOptions.RawValue : Document] = [:]
+        
+        fileprivate func parse(_ rawContent: RawMarkdownContent, options: ParseOptions = ParseOptions()) -> Document {
+            lock.lock()
+            defer { lock.unlock() }
+            
+            if let cached = caches[options.rawValue] {
+                return cached
+            }
+            
+            let document = Document(
+                parsing: rawContent.text,
+                source: rawContent.source,
+                options: options
+            )
+            caches[options.rawValue] = document
+            return document
+        }
+        
+        var documents: LazySequence<Dictionary<ParseOptions.RawValue, Document>.Values> {
+            lock.withLock {
+                caches.values.lazy
+            }
+        }
+        
+        var hasParsedDocument: Bool {
+            !documents.isEmpty
+        }
+    }
+    var store: ParsedDocumentStore
     
     internal init(raw: RawMarkdownContent) {
         self.raw = raw
-        
-        func parseRawContent() -> Document {
-            var options = ParseOptions()
-            options.insert(.parseBlockDirectives)
-            
-            return Document(
-                parsing: raw.text,
-                source: raw.source,
-                options: options
-            )
-        }
-        
-        self.document = parseRawContent()
+        self.store = ParsedDocumentStore()
+    }
+    
+    func parse(options: ParseOptions = ParseOptions()) -> Document {
+        store.parse(raw, options: options)
     }
 }
 
