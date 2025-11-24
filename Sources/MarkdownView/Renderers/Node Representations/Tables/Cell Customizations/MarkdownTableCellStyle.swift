@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MarkdownTableCellStyle: Identifiable {
+struct MarkdownTableCellStyle: Identifiable, @unchecked Sendable {
     struct Position: Hashable {
         var column: Int
         var row: Int
@@ -25,7 +25,7 @@ struct MarkdownTableCellStyle: Identifiable {
     
     var backgroundStyle: AnyShapeStyle? = nil
     var backgroundShape: any Shape = .rect
-    var overlayContent: AnyView? = nil
+    @MainActor var overlayContent: AnyView? = nil
     
     init(position: Position, rect: CGRect) {
         self.position = position
