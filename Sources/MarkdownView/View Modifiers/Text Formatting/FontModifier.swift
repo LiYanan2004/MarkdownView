@@ -8,7 +8,6 @@
 import SwiftUI
 
 extension View {
-    
     /// Apply a font group to MarkdownView.
     ///
     /// Customize fonts for multiple types of text.
@@ -41,5 +40,4 @@ extension View {
             }
         }
     }
-    
 }
