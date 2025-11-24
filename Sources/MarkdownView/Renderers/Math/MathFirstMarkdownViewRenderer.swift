@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Markdown
 
 struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
@@ -16,7 +17,7 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         var rawText = content.raw.text
         
         var extractor = ParsingRangesExtractor()
-        extractor.visit(content.document)
+        extractor.visit(content.parse(options: ParseOptions().union(.parseBlockDirectives)))
         for range in extractor.parsableRanges(in: rawText) {
             let segment = rawText[range]
             let segmentParser = MathParser(text: segment)

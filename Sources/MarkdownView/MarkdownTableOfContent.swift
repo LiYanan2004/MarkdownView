@@ -18,7 +18,9 @@ public struct MarkdownTableOfContent<Content: View>: View {
     
     private var headings: [MarkdownHeading] {
         var toc = TableOfContentVisitor()
-        toc.visit(markdownContent.document)
+        toc.visit(
+            markdownContent.store.documents.first ?? markdownContent.parse()
+        )
         return toc.headings
     }
     

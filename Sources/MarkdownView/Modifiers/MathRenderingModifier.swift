@@ -14,10 +14,13 @@ extension View {
     nonisolated public func markdownMathRenderingEnabled(_ enabled: Bool = true) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.math.shouldRender = enabled
-            BlockDirectiveRenderers.shared.addRenderer(
-                MathBlockDirectiveRenderer(),
-                for: "math"
-            )
+            if enabled {
+                configuration.allowedBlockDirectiveRenderers.insert("math")
+                BlockDirectiveRenderers.shared.addRenderer(
+                    MathBlockDirectiveRenderer(),
+                    for: "math"
+                )
+            }
         }
     }
 }

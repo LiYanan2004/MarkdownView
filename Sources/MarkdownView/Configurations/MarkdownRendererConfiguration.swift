@@ -21,7 +21,7 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
     
     var allowedImageRenderers: Set<String> = ["https", "http"]
-    var allowedBlockDirectiveRenderers: Set<String> = ["math"]
+    var allowedBlockDirectiveRenderers: Set<String> = []
 }
 
 // MARK: - SwiftUI Environment
