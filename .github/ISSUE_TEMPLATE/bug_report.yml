@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a problem and help us improve the project.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Library Version
+      description: You can find this from your Swift Package Manager in Xcode project
+        navigator. If you are using a specific branch (e.g. `main`), it would be
+        better to input the commit number you're currently using.
+      placeholder: "`v2.6`, `1992b57`, `main`, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe this issue clearly and what is the expected behavior? You
+        can share your observations on when it happens
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample-code
+    attributes:
+      label: Minimum reproducible code
+      description: Submit the minimum code that can reproduce this issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample-markdown
+    attributes:
+      label: Raw markdown
+      description: The markdown that can reproduce the issue.
+      value: |-
+        ````markdown
+
+        ````
+    validations:
+      required: true
+
+  - type: textarea
+    id: more-context
+    attributes:
+      label: Additional comments
+      description: Feel free to let me know if you can provide any other context
