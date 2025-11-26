@@ -47,7 +47,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
-        if configuration.math.shouldRender {
+        if configuration.rendersMath {
             InlineMathOrText(text: text.plainText)
                 .makeBody(configuration: configuration)
         } else {
@@ -187,7 +187,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitHeading(_ heading: Heading) -> MarkdownNodeView {
         MarkdownNodeView {
-            MarkdownHeading(heading: heading)
+            HeadingText(heading: heading)
         }
     }
     

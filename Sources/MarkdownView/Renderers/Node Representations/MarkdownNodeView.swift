@@ -37,7 +37,7 @@ struct MarkdownNodeView: View {
     var body: some View {
         Group {
             if case .left(let attributedString) = storage {
-                _MarkdownText(attributedString)
+                MarkdownText(attributedString)
             } else if case .right(let view) = storage {
                 view
             }

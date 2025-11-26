@@ -7,9 +7,9 @@ struct MarkdownList<List: ListItemContainer>: View {
     @Environment(\.markdownRendererConfiguration) private var configuration
     private var marker: Either<AnyUnorderedListMarkerProtocol, AnyOrderedListMarkerProtocol> {
         if listItemsContainer is UnorderedList {
-            return .left(configuration.listConfiguration.unorderedListMarker)
+            return .left(configuration.list.unorderedListMarker)
         } else if listItemsContainer is OrderedList {
-            return .right(configuration.listConfiguration.orderedListMarker)
+            return .right(configuration.list.orderedListMarker)
         } else {
             fatalError("Marker Protocol not implemented for \(type(of: listItemsContainer)).")
         }
@@ -26,7 +26,7 @@ struct MarkdownList<List: ListItemContainer>: View {
             ) { (index, listItem) in
                 HStack(alignment: .firstTextBaseline) {
                     CheckboxOrMarker(list: self, listItem: listItem, index: index)
-                        .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndentation : 0)
+                        .padding(.leading, depth == 0 ? configuration.list.leadingIndentation : 0)
                     CmarkNodeVisitor(configuration: configuration)
                         .makeBody(for: listItem)
                 }

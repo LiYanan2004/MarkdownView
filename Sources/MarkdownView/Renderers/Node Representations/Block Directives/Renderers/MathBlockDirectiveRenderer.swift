@@ -26,7 +26,7 @@ fileprivate struct DisplayMath: View {
     @Environment(\.markdownFontGroup.displayMath) private var font
     @Environment(\.markdownRendererConfiguration.math) private var math
     private var latexMath: String? {
-        math.displayMathStorage?[mathIdentifier]
+        math.displayMathStorage[mathIdentifier]
     }
 
     var body: some View {

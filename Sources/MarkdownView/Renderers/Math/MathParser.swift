@@ -3,6 +3,7 @@
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2025/2/24.
+//  Credits to colinc86/LaTeXSwiftUI
 //
 
 import SwiftUI
@@ -11,9 +12,6 @@ import LaTeXSwiftUI
 import MathJaxSwift
 #endif
 
-/*
- Credits to colinc86/LaTeXSwiftUI
- */
 @_spi(MarkdownMath)
 public struct MathParser {
     public var text: any StringProtocol

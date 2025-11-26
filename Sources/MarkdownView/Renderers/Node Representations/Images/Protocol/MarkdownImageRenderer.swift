@@ -7,11 +7,17 @@
 
 import SwiftUI
 
-/// A type that renders images.
+/// A type that renders Markdown image nodes for a specific URL scheme.
 ///
-/// Think of this type as a SwiftUI View wrapper.
+/// The protocol mirrors SwiftUI’s `View` construction model: implement
+/// ``MarkdownImageRenderer/makeBody(configuration:)`` and return a view hierarchy
+/// that knows how to fetch and display the requested image. The method is
+/// invoked on the main actor, so heavy work (networking, decoding, etc.) should
+/// be delegated to another view or task.
 ///
-/// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
+/// > Tip: Because protocol witnesses cannot use property wrappers, keep the
+/// > renderer itself lightweight and move any `@Environment` or `@State`
+/// > dependencies into a nested SwiftUI view.
 @preconcurrency
 @MainActor
 public protocol MarkdownImageRenderer {
@@ -29,17 +35,24 @@ public protocol MarkdownImageRenderer {
     typealias Configuration = MarkdownImageRendererConfiguration
 }
 
-/// The properties of a markdown image.
+/// The immutable properties of a Markdown image node.
 public struct MarkdownImageRendererConfiguration: Sendable {
     /// The source url of an image.
+    ///
+    /// When the original Markdown uses a relative path and a base URL was
+    /// provided via ``View/markdownBaseURL(_:)``, this value already contains the
+    /// resolved absolute URL. Otherwise it is the URL verbatim from the Markdown.
     public var url: URL
     /// The alternative text of an image.
+    ///
+    /// MarkdownView automatically suppresses the alternative text when the image
+    /// appears inside a link so you can decide how to expose descriptive text.
     public var alternativeText: String?
 }
 
 // MARK: - Type Erasure
 
-/// A type-erasure for type conforms to `MarkdownImageRenderer`.
+/// A type-erased wrapper for any ``MarkdownImageRenderer`` implementation.
 public struct AnyMarkdownImageRenderer: MarkdownImageRenderer {
     public typealias Body = AnyView
     

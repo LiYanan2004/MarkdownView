@@ -21,3 +21,15 @@ protocol MarkdownViewRenderer {
         configuration: MarkdownRendererConfiguration
     ) -> Body
 }
+
+extension MarkdownViewRenderer {
+    internal func parseOptions(for configuration: MarkdownRendererConfiguration) -> ParseOptions {
+        var options = ParseOptions()
+        
+        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
+            options.insert(.parseBlockDirectives)
+        }
+        
+        return options
+    }
+}
