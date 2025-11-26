@@ -42,7 +42,7 @@ public final class MarkdownContent: ObservableObject {
     ///
     /// If the `parseOptions` is set to `nil` and there is any cached document available, the first cached result will be returned.
     internal func document(options: ParseOptions = ParseOptions()) -> Document {
-        store.parse(raw, options: options)
+        store.parse(options: options)
     }
 }
 
@@ -81,7 +81,6 @@ extension MarkdownContent {
         }
         
         fileprivate func parse(
-            _ source: MarkdownContent.Raw,
             options: ParseOptions = ParseOptions()
         ) -> Document {
             lock.lock()
@@ -93,7 +92,7 @@ extension MarkdownContent {
             
             let text: String
             do {
-                text = try source.markdownText
+                text = try content.markdown
             } catch {
                 text = ""
                 logger.error("Unable to retrieve markdown content in string format: \(error). (fallback to empty string).")

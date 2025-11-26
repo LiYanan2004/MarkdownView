@@ -45,3 +45,14 @@ public struct MarkdownView: View {
         }
     }
 }
+
+@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+#Preview(traits: .sizeThatFitsLayout) {
+    VStack {
+        MarkdownView("Hello **World**")
+    }
+    #if os(macOS) || os(iOS)
+    .textSelection(.enabled)
+    #endif
+    .padding()
+}
