@@ -60,5 +60,4 @@ extension Markdown.Table.Cell {
             }
         }
     }
-
 }

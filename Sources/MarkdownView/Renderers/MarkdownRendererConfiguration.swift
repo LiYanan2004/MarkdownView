@@ -8,16 +8,14 @@
 import Foundation
 import SwiftUI
 
-struct MarkdownRendererConfiguration: Equatable, KeyPathModifiable, Sendable {
+struct MarkdownRendererConfiguration: Equatable, KeyPathModifying, Sendable {
     var preferredBaseURL: URL?
     var componentSpacing: CGFloat = 8
     
     var math = MathRendering()
     var rendersMath: Bool { math.isEnabled }
     
-    var linkTintColor: Color = .accentColor
-    var inlineCodeTintColor: Color = .accentColor
-    var blockQuoteTintColor: Color = .accentColor
+    var preferredTintColors: [MarkdownTintableComponent: Color] = [:]
     
     var list = MarkdownListConfiguration()
     

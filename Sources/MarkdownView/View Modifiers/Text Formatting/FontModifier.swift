@@ -20,10 +20,10 @@ extension View {
     /// Sets the font for the specific component in MarkdownView.
     /// - Parameters:
     ///   - font: The font to apply to these components.
-    ///   - type: The type of components to apply the font.
-    nonisolated public func font(_ font: Font, for type: MarkdownTextType) -> some View {
+    ///   - component: The component to apply the font.
+    nonisolated public func font(_ font: Font, for component: MarkdownComponent) -> some View {
         transformEnvironment(\.markdownFontGroup) { fontGroup in
-            switch type {
+            switch component {
             case .h1: fontGroup._h1 = font
             case .h2: fontGroup._h2 = font
             case .h3: fontGroup._h3 = font
