@@ -13,31 +13,39 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         content: MarkdownContent,
         configuration: MarkdownRendererConfiguration
     ) -> some View {
-        var configuration = configuration
-        var rawText = (try? content.markdown) ?? ""
-        
-        var extractor = ParsingRangesExtractor()
-        extractor.visit(content.document())
-        for range in extractor.parsableRanges(in: rawText) {
-            let segment = rawText[range]
-            let segmentParser = MathParser(text: segment)
-            for math in segmentParser.mathRepresentations.reversed() where !math.kind.inline {
-                let mathIdentifier = configuration.math.appendDisplayMath(
-                    rawText[math.range]
-                )
-                rawText.replaceSubrange(
-                    math.range,
-                    with: "@math(uuid:\(mathIdentifier))"
-                )
-            }
-        }
-        
-        return CmarkFirstMarkdownViewRenderer().makeBody(
-            content: MarkdownContent(.plainText(rawText)),
+        makeMathFirstBody(
+            content: content,
             configuration: configuration
-        )
+        ) { content, configuration in
+            CmarkFirstMarkdownViewRenderer().makeBody(
+                content: content,
+                configuration: configuration
+            )
+        }
     }
 }
+
+#if canImport(RichText)
+
+@available(iOS 26.0, macOS 26.0, *)
+struct MathFirstTextViewRenderer: MarkdownViewRenderer {
+    func makeBody(
+        content: MarkdownContent,
+        configuration: MarkdownRendererConfiguration
+    ) -> some View {
+        makeMathFirstBody(
+            content: content,
+            configuration: configuration
+        ) { content, configuration in
+            TextViewViewRenderer().makeBody(
+                content: content,
+                configuration: configuration
+            )
+        }
+    }
+}
+
+#endif
 
 // MARK: - Auxiliary
 
@@ -95,4 +103,34 @@ fileprivate extension SourceLocation {
         let targetUtf8Index = string.utf8.index(utf8LineStart, offsetBy: byteOffset, limitedBy: string.utf8.endIndex) ?? string.utf8.endIndex
         return targetUtf8Index.samePosition(in: string) ?? string.endIndex
     }
+}
+
+private func makeMathFirstBody<Body: View>(
+    content: MarkdownContent,
+    configuration: MarkdownRendererConfiguration,
+    @ViewBuilder render: (MarkdownContent, MarkdownRendererConfiguration) -> Body
+) -> Body {
+    var configuration = configuration
+    var rawText = (try? content.markdown) ?? ""
+    
+    var extractor = MathFirstMarkdownViewRenderer.ParsingRangesExtractor()
+    extractor.visit(content.document())
+    for range in extractor.parsableRanges(in: rawText) {
+        let segment = rawText[range]
+        let segmentParser = MathParser(text: segment)
+        for math in segmentParser.mathRepresentations.reversed() where !math.kind.inline {
+            let mathIdentifier = configuration.math.appendDisplayMath(
+                rawText[math.range]
+            )
+            rawText.replaceSubrange(
+                math.range,
+                with: "@math(uuid:\(mathIdentifier))"
+            )
+        }
+    }
+    
+    return render(
+        MarkdownContent(.plainText(rawText)),
+        configuration
+    )
 }

@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct AnyOrderedListMarkerProtocol: OrderedListMarkerProtocol {
+public struct AnyOrderedListMarkerProtocol: OrderedListMarkerProtocol {
     private var _marker: AnyHashable
-    var monospaced: Bool {
+    public var monospaced: Bool {
         (_marker as! (any OrderedListMarkerProtocol)).monospaced
     }
     
-    init<T: OrderedListMarkerProtocol>(_ marker: T) {
+    public init<T: OrderedListMarkerProtocol>(_ marker: T) {
         self._marker = AnyHashable(marker)
     }
     

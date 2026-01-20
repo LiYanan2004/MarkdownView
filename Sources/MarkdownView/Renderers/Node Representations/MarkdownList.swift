@@ -4,7 +4,7 @@ import Markdown
 struct MarkdownList<List: ListItemContainer>: View {
     var listItemsContainer: List
     private var depth: Int {
-        listItemsContainer.relativeDepth
+        listItemsContainer.listDepth
     }
     
     @Environment(\.markdownRendererConfiguration) private var configuration
