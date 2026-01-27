@@ -34,7 +34,9 @@ public struct MarkdownView: View {
     }
 }
 
-@available(iOS 26.0, macOS 14.0, *)
+@available(iOS 17.0, macOS 14.0, *)
+@available(watchOS, unavailable)
+@available(tvOS, unavailable)
 #Preview(traits: .sizeThatFitsLayout) {
     VStack {
         MarkdownView("Hello **World**")
