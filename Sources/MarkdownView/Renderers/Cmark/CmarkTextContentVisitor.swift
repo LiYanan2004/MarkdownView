@@ -41,15 +41,7 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
         var content = TextContent([])
         for child in markup.children {
             var renderer = self
-            let fragments = renderer.visit(child)
-                .fragments
-                .flatMap({ frag -> [TextContent.Fragment] in
-                    if case .view = frag {
-                        return RichText.LineBreak().textContent.fragments + [frag]
-                    }
-                    return [frag]
-                })
-            content += TextContent(fragments)
+            content += renderer.visit(child)
         }
         return content
     }
@@ -92,7 +84,7 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitBlockDirective(_ blockDirective: BlockDirective) -> TextContent {
-        inlineViewContent(for: blockDirective) {
+        inlineViewContent(for: blockDirective, appendsLineBreak: true) {
             MarkdownBlockDirective(blockDirective: blockDirective)
         }
     }
@@ -109,7 +101,8 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
         
         return inlineViewContent(
             for: blockQuote,
-            replacement: replacementAttrString
+            replacement: replacementAttrString,
+            appendsLineBreak: true
         ) {
             MarkdownBlockQuote(blockQuote: blockQuote)
         }
@@ -120,7 +113,7 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitThematicBreak(_ thematicBreak: ThematicBreak) -> TextContent {
-        inlineViewContent(for: thematicBreak) {
+        inlineViewContent(for: thematicBreak, appendsLineBreak: true) {
             Divider()
         }
     }
@@ -157,7 +150,8 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
     func visitCodeBlock(_ codeBlock: CodeBlock) -> TextContent {
         inlineViewContent(
             for: codeBlock,
-            replacement: AttributedString(codeBlock.code)
+            replacement: AttributedString(codeBlock.code),
+            appendsLineBreak: true
         ) {
             MarkdownStyledCodeBlock(
                 configuration: CodeBlockStyleConfiguration(
@@ -174,7 +168,8 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
             replacement: AttributedString(
                 html.rawHTML,
                 attributes: AttributeContainer().isHTML(true)
-            )
+            ),
+            appendsLineBreak: true
         ) {
             HTMLBlockView(html: html.rawHTML)
         }
@@ -252,7 +247,8 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
         }
         return inlineViewContent(
             for: table,
-            replacement: replacementAttrString
+            replacement: replacementAttrString,
+            appendsLineBreak: true
         ) {
             MarkdownTable(table: table)
         }
@@ -391,6 +387,7 @@ private extension CmarkTextContentVisitor {
     func inlineViewContent(
         for markup: any Markup,
         replacement: AttributedString? = nil,
+        appendsLineBreak: Bool = false,
         @ViewBuilder content: @escaping () -> some View
     ) -> TextContent {
         let view = content()
@@ -402,7 +399,9 @@ private extension CmarkTextContentVisitor {
         )
         return TextContent {
             TextContent(.view(attachment))
-            LineBreak()
+            if appendsLineBreak {
+                LineBreak()
+            }
         }
     }
     
