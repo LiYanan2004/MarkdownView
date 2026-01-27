@@ -14,7 +14,23 @@ extension View {
     ///
     /// - Parameter fontGroup: A font set to apply to the MarkdownView.
     nonisolated public func fontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
-        environment(\.markdownFontGroup, .init(fontGroup))
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            configuration.fonts = [
+                .h1: fontGroup.h1,
+                .h2: fontGroup.h2,
+                .h3: fontGroup.h3,
+                .h4: fontGroup.h4,
+                .h5: fontGroup.h5,
+                .h6: fontGroup.h6,
+                .body: fontGroup.body,
+                .codeBlock: fontGroup.codeBlock,
+                .blockQuote: fontGroup.blockQuote,
+                .tableHeader: fontGroup.tableHeader,
+                .tableBody: fontGroup.tableBody,
+                .inlineMath: fontGroup.inlineMath,
+                .displayMath: fontGroup.displayMath,
+            ]
+        }
     }
     
     /// Sets the font for the specific component in MarkdownView.
@@ -22,22 +38,8 @@ extension View {
     ///   - font: The font to apply to these components.
     ///   - component: The component to apply the font.
     nonisolated public func font(_ font: Font, for component: MarkdownComponent) -> some View {
-        transformEnvironment(\.markdownFontGroup) { fontGroup in
-            switch component {
-            case .h1: fontGroup._h1 = font
-            case .h2: fontGroup._h2 = font
-            case .h3: fontGroup._h3 = font
-            case .h4: fontGroup._h4 = font
-            case .h5: fontGroup._h5 = font
-            case .h6: fontGroup._h6 = font
-            case .body: fontGroup._body = font
-            case .blockQuote: fontGroup._blockQuote = font
-            case .codeBlock: fontGroup._codeBlock = font
-            case .tableBody: fontGroup._tableBody = font
-            case .tableHeader: fontGroup._tableHeader = font
-            case .inlineMath: fontGroup._inlineMath = font
-            case .displayMath: fontGroup._displayMath = font
-            }
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            configuration.fonts[component] = font
         }
     }
 }

@@ -21,10 +21,10 @@ extension BlockQuoteStyle where Self == DefaultBlockQuoteStyle {
 
 fileprivate struct DefaultBlockQuoteView: View {
     var configuration: BlockQuoteStyleConfiguration
-    @Environment(\.markdownFontGroup.blockQuote) private var font
     @Environment(\.markdownRendererConfiguration) private var rendererConfiguration
     var body: some View {
         let tint = rendererConfiguration.preferredTintColors[.blockQuote] ?? .accentColor
+        let font = rendererConfiguration.fonts[.blockQuote] ?? .system(.body, design: .serif)
         configuration.content
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)

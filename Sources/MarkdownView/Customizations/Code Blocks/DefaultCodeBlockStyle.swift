@@ -58,8 +58,7 @@ struct DefaultMarkdownCodeBlock: View {
     
     var theme: CodeHighlighterTheme
     @Environment(\.colorScheme) private var colorScheme
-    
-    @Environment(\.markdownFontGroup) private var fontGroup
+    @Environment(\.markdownRendererConfiguration) private var rendererConfiguration
     
     @State private var attributedCode: AttributedString?
     @State private var codeHighlightTask: Task<Void, Error>?
@@ -83,7 +82,7 @@ struct DefaultMarkdownCodeBlock: View {
             debouncedHighlight()
         }
         .lineSpacing(4)
-        .font(fontGroup.codeBlock)
+        .font(rendererConfiguration.fonts[.codeBlock] ?? .system(.callout, design: .monospaced))
         .frame(maxWidth: .infinity, alignment: .leading)
         #if os(macOS) || os(iOS)
         .safeAreaInset(edge: .top, spacing: 0) {
