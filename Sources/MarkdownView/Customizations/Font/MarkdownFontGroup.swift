@@ -59,6 +59,7 @@ struct MarkdownFontGroupEnvironmentKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
+    @available(*, deprecated, message: "Use markdownRendererConfiguration.fonts via font modifiers instead.")
     var markdownFontGroup: AnyMarkdownFontGroup {
         get { self[MarkdownFontGroupEnvironmentKey.self] }
         set { self[MarkdownFontGroupEnvironmentKey.self] = newValue }

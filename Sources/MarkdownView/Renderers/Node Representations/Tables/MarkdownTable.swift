@@ -25,9 +25,9 @@ struct MarkdownTableBody: View {
     var tableBody: Markdown.Table.Body
     
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.markdownFontGroup.tableBody) private var font
     
     var body: some View {
+        let font = configuration.fonts[.tableBody] ?? .body
         ForEach(Array(tableBody.children.enumerated()), id: \.offset) { (_, row) in
             CmarkNodeVisitor(configuration: configuration)
                 .makeBody(for: row)

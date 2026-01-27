@@ -16,22 +16,17 @@ extension View {
     @ViewBuilder
     nonisolated public func tint(
         _ tint: Color,
-        for component: TintableComponent
+        for component: MarkdownTintableComponent
     ) -> some View {
-        switch component {
-        case .blockQuote:
-            environment(\.markdownRendererConfiguration.blockQuoteTintColor, tint)
-        case .inlineCodeBlock:
-            environment(\.markdownRendererConfiguration.inlineCodeTintColor, tint)
-        case .link:
-            environment(\.markdownRendererConfiguration.linkTintColor, tint)
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            configuration.preferredTintColors[component] = tint
         }
     }
 }
 
 /// Components that can apply a tint color.
 @_documentation(visibility: internal)
-public enum TintableComponent: Hashable, Sendable {
+public enum MarkdownTintableComponent: Hashable, Sendable {
     case blockQuote
     case inlineCodeBlock
     case link

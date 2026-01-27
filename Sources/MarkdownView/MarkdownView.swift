@@ -5,8 +5,8 @@ import Markdown
 public struct MarkdownView: View {
     @ObservedObject private var content: MarkdownContent
     
-    @Environment(\.markdownFontGroup.body) private var bodyFont
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownViewRenderer) private var renderer
     
     /// Creates a view that renders given markdown string.
     /// - Parameter text: The markdown source to render.
@@ -27,29 +27,20 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        _renderedBody.font(bodyFont)
-    }
-    
-    @ViewBuilder
-    private var _renderedBody: some View {
-        if configuration.rendersMath {
-            MathFirstMarkdownViewRenderer().makeBody(
-                content: content,
-                configuration: configuration
-            )
-        } else {
-            CmarkFirstMarkdownViewRenderer().makeBody(
-                content: content,
-                configuration: configuration
-            )
-        }
+        renderer
+            .makeBody(content: content, configuration: configuration)
+            .erasedToAnyView()
+            .font(configuration.fonts[.body] ?? Font.body)
     }
 }
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, *)
+@available(watchOS, unavailable)
+@available(tvOS, unavailable)
 #Preview(traits: .sizeThatFitsLayout) {
     VStack {
         MarkdownView("Hello **World**")
+            .markdownTextSelection(.enabled)
     }
     #if os(macOS) || os(iOS)
     .textSelection(.enabled)

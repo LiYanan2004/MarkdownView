@@ -12,19 +12,18 @@ struct HeadingText: View {
     let heading: Heading
     
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.markdownFontGroup) private var fontGroup
     @Environment(\.headingStyleGroup) private var headingStyleGroup
     @Environment(\.headingPaddings) private var paddings
     
     private var font: Font {
         return switch heading.level {
-        case 1: fontGroup.h1
-        case 2: fontGroup.h2
-        case 3: fontGroup.h3
-        case 4: fontGroup.h4
-        case 5: fontGroup.h5
-        case 6: fontGroup.h6
-        default: fontGroup.body
+        case 1: configuration.fonts[.h1] ?? .largeTitle
+        case 2: configuration.fonts[.h2] ?? .title
+        case 3: configuration.fonts[.h3] ?? .title2
+        case 4: configuration.fonts[.h4] ?? .title3
+        case 5: configuration.fonts[.h5] ?? .headline
+        case 6: configuration.fonts[.h6] ?? .headline.weight(.regular)
+        default: configuration.fonts[.body] ?? .body
         }
     }
     private var foregroundStyle: AnyShapeStyle {

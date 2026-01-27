@@ -13,8 +13,6 @@ extension MarkdownTableStyleConfiguration.Table {
     public struct Fallback: View {
         private var table: Markdown.Table
         @Environment(\.markdownRendererConfiguration) private var configuration
-        @Environment(\.markdownFontGroup.tableHeader) private var headerFont
-        @Environment(\.markdownFontGroup.tableBody) private var bodyFont
         @Environment(\.markdownTableCellPadding) private var padding
         private var showsRowSeparators: Bool = false
         private var horizontalSpacing: CGFloat = 0
@@ -26,6 +24,8 @@ extension MarkdownTableStyleConfiguration.Table {
         
         @_documentation(visibility: internal)
         public var body: some View {
+            let headerFont = configuration.fonts[.tableHeader] ?? .headline
+            let bodyFont = configuration.fonts[.tableBody] ?? .body
             AdaptiveGrid(
                 horizontalSpacing: horizontalSpacing,
                 verticalSpacing: verticalSpacing,

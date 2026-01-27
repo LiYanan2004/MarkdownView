@@ -23,10 +23,13 @@ struct MathBlockDirectiveRenderer: BlockDirectiveRenderer {
 
 fileprivate struct DisplayMath: View {
     var mathIdentifier: UUID
-    @Environment(\.markdownFontGroup.displayMath) private var font
+    @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.markdownRendererConfiguration.math) private var math
     private var latexMath: String? {
         math.displayMathStorage[mathIdentifier]
+    }
+    private var font: Font {
+        configuration.fonts[.displayMath] ?? .body
     }
 
     var body: some View {

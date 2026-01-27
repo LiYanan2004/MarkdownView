@@ -3,6 +3,9 @@ import Markdown
 
 struct MarkdownList<List: ListItemContainer>: View {
     var listItemsContainer: List
+    private var depth: Int {
+        listItemsContainer.listDepth
+    }
     
     @Environment(\.markdownRendererConfiguration) private var configuration
     private var marker: Either<AnyUnorderedListMarkerProtocol, AnyOrderedListMarkerProtocol> {
@@ -13,9 +16,6 @@ struct MarkdownList<List: ListItemContainer>: View {
         } else {
             fatalError("Marker Protocol not implemented for \(type(of: listItemsContainer)).")
         }
-    }
-    private var depth: Int {
-        listItemsContainer.listDepth
     }
     
     var body: some View {
