@@ -8,8 +8,8 @@
 import Foundation
 
 protocol Cacheable {
-    associatedtype CacheKey: Hashable
-    var cacheKey: CacheKey { get }
+    associatedtype Key: Hashable
+    var cacheKey: Key { get }
     
     init?(fromCache value: any Cacheable)
 }

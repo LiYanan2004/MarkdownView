@@ -47,7 +47,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
-        if configuration.math.shouldRender {
+        if configuration.rendersMath {
             InlineMathOrText(text: text.plainText)
                 .makeBody(configuration: configuration)
         } else {
@@ -82,9 +82,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitInlineCode(_ inlineCode: InlineCode) -> MarkdownNodeView {
+        let tint = configuration.preferredTintColors[.inlineCodeBlock] ?? .accentColor
         var attributedString = AttributedString(stringLiteral: inlineCode.code)
-        attributedString.foregroundColor = configuration.inlineCodeTintColor
-        attributedString.backgroundColor = configuration.inlineCodeTintColor.opacity(0.1)
+        attributedString.foregroundColor = tint
+        attributedString.backgroundColor = tint.opacity(0.1)
         return MarkdownNodeView(attributedString)
     }
     
@@ -187,7 +188,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     
     func visitHeading(_ heading: Heading) -> MarkdownNodeView {
         MarkdownNodeView {
-            MarkdownHeading(heading: heading)
+            HeadingText(heading: heading)
         }
     }
     
@@ -239,12 +240,13 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         else { return descendInto(link) }
         
         let nodeView = descendInto(link)
+        let tintColor = configuration.preferredTintColors[.link] ?? .accentColor
         return if let attributedString = nodeView.asAttributedString {
             MarkdownNodeView(
                 attributedString.mergingAttributes(
                     AttributeContainer()
                         .link(url)
-                        .foregroundColor(configuration.linkTintColor)
+                        .foregroundColor(tintColor)
                 )
             )
         } else {
@@ -252,7 +254,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 Link(destination: url) {
                     nodeView
                 }
-                .foregroundStyle(configuration.linkTintColor)
+                .foregroundStyle(tintColor)
             }
         }
     }

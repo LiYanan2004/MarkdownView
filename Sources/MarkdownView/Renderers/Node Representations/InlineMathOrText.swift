@@ -61,7 +61,11 @@ struct InlineMathOrText {
 #if canImport(LaTeXSwiftUI)
 struct InlineMath: View {
     var latexText: String
-    @Environment(\.markdownFontGroup.inlineMath) private var font
+    @Environment(\.markdownRendererConfiguration) private var configuration
+    
+    private var font: Font {
+        configuration.fonts[.inlineMath] ?? .body
+    }
     
     var body: some View {
         if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {

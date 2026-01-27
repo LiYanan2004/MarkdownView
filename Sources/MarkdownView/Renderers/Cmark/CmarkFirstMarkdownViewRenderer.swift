@@ -13,50 +13,35 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
         content: MarkdownContent,
         configuration: MarkdownRendererConfiguration
     ) -> some View {
-        _makeAndCacheBody(
-            content: content,
-            configuration: configuration
-        )
-    }
-    
-    private func _makeAndCacheBody(
-        content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
-    ) -> some View {
-        if let cached = CacheStorage.shared.withCacheIfAvailable(
-            content,
-            type: Cache.self
-        ), cached.configuration == configuration {
-            return AnyView(cached.renderedView)
-        }
-        
         var parseOptions = ParseOptions()
         if !configuration.allowedBlockDirectiveRenderers.isEmpty {
             parseOptions.insert(.parseBlockDirectives)
         }
         
-        let renderedView = CmarkNodeVisitor(configuration: configuration)
-            .makeBody(for: content.parse(options: parseOptions))
-            .erasedToAnyView()
-        
-        CacheStorage.shared.addCache(
-            Cache(
-                markdownContent: content,
-                configuration: configuration,
-                renderedView: renderedView
-            )
-        )
-        
-        return renderedView
+        return CmarkNodeVisitor(configuration: configuration)
+            .makeBody(for: content.document(options: parseOptions))
     }
 }
 
-extension CmarkFirstMarkdownViewRenderer {
-    struct Cache: Cacheable {
-        var markdownContent: MarkdownContent
-        var configuration: MarkdownRendererConfiguration
-        var renderedView: any View
+#if canImport(RichText)
+import RichText
+
+@available(iOS 26, macOS 26, *)
+struct TextViewViewRenderer: MarkdownViewRenderer {
+    func makeBody(
+        content: MarkdownContent,
+        configuration: MarkdownRendererConfiguration
+    ) -> some View {
+        var parseOptions = ParseOptions()
+        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
+            parseOptions.insert(.parseBlockDirectives)
+        }
         
-        var cacheKey: some Hashable { markdownContent }
+        let textContent = CmarkTextContentVisitor(configuration: configuration)
+            .makeTextContent(for: content.document(options: parseOptions))
+        return TextView {
+            textContent
+        }
     }
 }
+#endif
