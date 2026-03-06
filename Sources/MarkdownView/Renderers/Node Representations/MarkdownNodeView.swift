@@ -35,15 +35,16 @@ struct MarkdownNodeView: View {
     }
     
     var body: some View {
-        Group {
-            if case .left(let attributedString) = storage {
-                MarkdownText(attributedString)
-            } else if case .right(let view) = storage {
-                view
-            }
+        switch storage {
+        case .left(let attributedString):
+            MarkdownText(attributedString)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+        case .right(let view):
+            view
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .lineLimit(nil)
-        .fixedSize(horizontal: false, vertical: true)
     }
     
     var asAttributedString: AttributedString? {
@@ -89,24 +90,20 @@ extension MarkdownNodeView {
         }
         
         if composedContents.count == 1 {
-            if let attributedString = composedContents[0].asAttributedString {
-                storage = .left(attributedString)
-            } else {
-                storage = .right(AnyView(composedContents[0].body))
-            }
+            storage = composedContents[0].storage
         } else {
             if layoutPolicy == .adaptive,
                #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *) {
                 let composedView = FlowLayout(verticleSpacing: 8) {
                     ForEach(composedContents.indices, id: \.self) {
-                        composedContents[$0].body
+                        composedContents[$0]
                     }
                 }
                 storage = .right(AnyView(composedView))
             } else {
                 let composedView = VStack(alignment: alignment, spacing: 8) {
                     ForEach(composedContents.indices, id: \.self) {
-                        composedContents[$0].body
+                        composedContents[$0]
                     }
                 }
                 storage = .right(AnyView(composedView))

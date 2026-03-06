@@ -25,23 +25,21 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
 
     func visitDocument(_ document: Document) -> MarkdownNodeView {
-        var renderer = self
+        var visitor = self
         let nodeViews = document.children.map {
-            renderer.visit($0)
+            visitor.visit($0)
         }
         return MarkdownNodeView(nodeViews, layoutPolicy: .linebreak)
     }
-    
+
     func defaultVisit(_ markup: Markdown.Markup) -> MarkdownNodeView {
         descendInto(markup)
     }
-    
+
     func descendInto(_ markup: any Markup) -> MarkdownNodeView {
-        var nodeViews = [MarkdownNodeView]()
-        for child in markup.children {
-            var renderer = self
-            let nodeView = renderer.visit(child)
-            nodeViews.append(nodeView)
+        var visitor = self
+        let nodeViews = markup.children.map {
+            visitor.visit($0)
         }
         return MarkdownNodeView(nodeViews)
     }
@@ -170,11 +168,9 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitTableCell(_ cell: Markdown.Table.Cell) -> MarkdownNodeView {
-        var cellViews = [MarkdownNodeView]()
-        for child in cell.children {
-            var renderer = CmarkNodeVisitor(configuration: configuration)
-            let cellView = renderer.visit(child)
-            cellViews.append(cellView)
+        var visitor = self
+        let cellViews = cell.children.map {
+            visitor.visit($0)
         }
         return MarkdownNodeView(
             cellViews,
@@ -193,10 +189,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitEmphasis(_ emphasis: Markdown.Emphasis) -> MarkdownNodeView {
+        var visitor = self
         var attributedString = AttributedString()
         for child in emphasis.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
+            guard let text = visitor.visit(child).asAttributedString else { continue }
             let intent = text.inlinePresentationIntent ?? []
             attributedString += text.mergingAttributes(
                 AttributeContainer()
@@ -205,12 +201,12 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         }
         return MarkdownNodeView(attributedString)
     }
-    
+
     func visitStrong(_ strong: Strong) -> MarkdownNodeView {
+        var visitor = self
         var attributedString = AttributedString()
         for child in strong.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
+            guard let text = visitor.visit(child).asAttributedString else { continue }
             let intent = text.inlinePresentationIntent ?? []
             attributedString += text.mergingAttributes(
                 AttributeContainer()
@@ -219,12 +215,12 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         }
         return MarkdownNodeView(attributedString)
     }
-    
+
     func visitStrikethrough(_ strikethrough: Strikethrough) -> MarkdownNodeView {
+        var visitor = self
         var attributedString = AttributedString()
         for child in strikethrough.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
+            guard let text = visitor.visit(child).asAttributedString else { continue }
             let intent = text.inlinePresentationIntent ?? []
             attributedString += text.mergingAttributes(
                 AttributeContainer()
