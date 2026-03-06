@@ -15,7 +15,7 @@ import RichText
 @available(iOS 26, macOS 26, *)
 struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
-    
+
     init(configuration: MarkdownRendererConfiguration) {
         self.configuration = configuration
     }
@@ -184,29 +184,51 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
         
         var attributes = AttributeContainer([.paragraphStyle: paragraphStyle])
         let markerString: String?
-        switch listItem.parent {
-            case let list as UnorderedList:
-                let marker = configuration.list.unorderedListMarker
-                markerString = marker.marker(listDepth: list.listDepth)
-                attributes = attributes.font((configuration.fonts[.body] ?? .body).monospaced(marker.monospaced))
-            case let list as OrderedList:
-                let marker = configuration.list.orderedListMarker
-                markerString = marker.marker(at: listItem.indexInParent, listDepth: list.listDepth)
-                attributes = attributes.font((configuration.fonts[.body] ?? .body).monospaced(marker.monospaced))
-            default:
-                markerString = nil
+        let hasCheckbox = listItem.checkbox != nil
+        if hasCheckbox {
+            markerString = nil
+        } else {
+            switch listItem.parent {
+                case let list as UnorderedList:
+                    let marker = configuration.list.unorderedListMarker
+                    markerString = marker.marker(listDepth: list.listDepth)
+                    attributes = attributes.font((configuration.fonts[.body] ?? .body).monospaced(marker.monospaced))
+                case let list as OrderedList:
+                    let marker = configuration.list.orderedListMarker
+                    markerString = marker.marker(at: listItem.indexInParent, listDepth: list.listDepth)
+                    attributes = attributes.font((configuration.fonts[.body] ?? .body).monospaced(marker.monospaced))
+                default:
+                    markerString = nil
+            }
         }
 
         let children = Array(listItem.children)
-        
+
         let firstChildContent = children.first.map(descendInto)
         let trailingBlocks = children.dropFirst().map { child in
             var nestedRenderer = self
             return nestedRenderer.visit(child)
         }
-        
+
         return TextContent {
-            if let markerString {
+            if let checkbox = listItem.checkbox {
+                let checkboxView: some View = Group {
+                    switch checkbox {
+                    case .checked:
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.tint)
+                    case .unchecked:
+                        Image(systemName: "circle")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                let attachment = InlineHostingAttachment(
+                    checkboxView,
+                    id: listItem.range,
+                    replacement: nil
+                )
+                TextContent(.view(attachment))
+            } else if let markerString {
                 AttributedString(markerString, attributes: attributes)
             }
             Space()
@@ -264,16 +286,46 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
             case 6: MarkdownComponent.h6
             default: MarkdownComponent.body
         }
+        let foregroundStyle: AnyShapeStyle = switch heading.level {
+            case 1: configuration.headingStyleGroup.h1
+            case 2: configuration.headingStyleGroup.h2
+            case 3: configuration.headingStyleGroup.h3
+            case 4: configuration.headingStyleGroup.h4
+            case 5: configuration.headingStyleGroup.h5
+            case 6: configuration.headingStyleGroup.h6
+            default: AnyShapeStyle(.foreground)
+        }
+        let font = configuration.fonts[component] ?? .body
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.paragraphSpacing = 12
         paragraphStyle.paragraphSpacingBefore = 12
         let attributes = AttributeContainer([.paragraphStyle : paragraphStyle as NSParagraphStyle])
             .presentationIntent(.init(.header(level: heading.level), identity: heading.indexInParent))
             .accessibilityHeadingLevel(AttributeScopes.AccessibilityAttributes.HeadingLevelAttribute.HeadingLevel(rawValue: heading.level) ?? .unspecified)
-            .font(configuration.fonts[component] ?? .body)
-        
+            .font(font)
+
+        let replacement = AttributedString(heading.plainText, attributes: attributes)
         return TextContent {
-            AttributedString(heading.plainText, attributes: attributes)
+            inlineViewContent(
+                for: heading,
+                replacement: replacement
+            ) {
+                SwiftUI.Text(heading.plainText)
+                    .font(font)
+                    .foregroundStyle(foregroundStyle)
+                    .accessibilityHeading({
+                        switch heading.level {
+                        case 1: .h1
+                        case 2: .h2
+                        case 3: .h3
+                        case 4: .h4
+                        case 5: .h5
+                        case 6: .h6
+                        default: .unspecified
+                        }
+                    }() as AccessibilityHeadingLevel)
+                    .accessibilityAddTraits(.isHeader)
+            }
             LineBreak()
         }
     }
