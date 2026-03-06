@@ -383,14 +383,15 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
         
         let linkContent = descendInto(link)
         let tintColor = configuration.preferredTintColors[.link] ?? .accentColor
-        
+        let underline = configuration.underlineLinks
+
         let contentView = linkContent.fragments.first(byUnwrapping: {
             if case let .view(attachment) = $0 {
                 return attachment.view
             }
             return nil
         })
-        
+
         if let contentView {
             return inlineViewContent(
                 for: link,
@@ -403,16 +404,21 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
                     contentView
                 }
                 .foregroundStyle(tintColor)
+                .underline(underline)
             }
         } else {
             let attributedString = linkContent.attributedStringIgnoringViews
             return TextContent(
                 .attributedString(
-                    attributedString.mergingAttributes(
-                        AttributeContainer()
+                    attributedString.mergingAttributes({
+                        var container = AttributeContainer()
                             .link(url)
                             .foregroundColor(tintColor)
-                    )
+                        if underline {
+                            container.underlineStyle = .single
+                        }
+                        return container
+                    }())
                 )
             )
         }

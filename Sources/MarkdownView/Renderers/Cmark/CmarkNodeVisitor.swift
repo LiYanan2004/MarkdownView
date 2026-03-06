@@ -241,13 +241,18 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         
         let nodeView = descendInto(link)
         let tintColor = configuration.preferredTintColors[.link] ?? .accentColor
+        let underline = configuration.underlineLinks
         return if let attributedString = nodeView.asAttributedString {
             MarkdownNodeView(
-                attributedString.mergingAttributes(
-                    AttributeContainer()
+                attributedString.mergingAttributes({
+                    var container = AttributeContainer()
                         .link(url)
                         .foregroundColor(tintColor)
-                )
+                    if underline {
+                        container.underlineStyle = .single
+                    }
+                    return container
+                }())
             )
         } else {
              MarkdownNodeView {
@@ -255,6 +260,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                     nodeView
                 }
                 .foregroundStyle(tintColor)
+                .underline(underline)
             }
         }
     }
