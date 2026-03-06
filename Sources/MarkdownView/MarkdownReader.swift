@@ -21,25 +21,25 @@ import SwiftUI
 /// }
 /// ```
 public struct MarkdownReader<Content: View>: View {
-    @ObservedObject private var content: MarkdownContent
+    @StateObject private var content: MarkdownContent
     private var _body: (_ markdownContent: MarkdownContent) -> Content
-    
+
     public init(
         _ text: String,
         @ViewBuilder contents: @escaping (MarkdownContent) -> Content
     ) {
-        content = MarkdownContent(text)
+        _content = StateObject(wrappedValue: MarkdownContent(text))
         self._body = contents
     }
-    
+
     public init(
         _ url: URL,
         @ViewBuilder contents: @escaping (MarkdownContent) -> Content
     ) {
-        content = MarkdownContent(url)
+        _content = StateObject(wrappedValue: MarkdownContent(url))
         self._body = contents
     }
-    
+
     public var body: some View {
         _body(content)
     }

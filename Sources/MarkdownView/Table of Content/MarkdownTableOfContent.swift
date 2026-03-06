@@ -7,32 +7,46 @@ import Markdown
 /// table of contents stays in sync. The easiest way to do this is to wrap both
 /// views in a ``MarkdownReader``.
 public struct MarkdownTableOfContent<Content: View>: View {
-    @ObservedObject private var content: MarkdownContent
+    @StateObject private var ownedContent: MarkdownContent
+    @ObservedObject private var externalContent: MarkdownContent
+    private var usesExternalContent: Bool
     private var contents: (_ headings: [MarkdownHeading]) -> Content
+
+    private var content: MarkdownContent {
+        usesExternalContent ? externalContent : ownedContent
+    }
 
     public init(
         _ content: MarkdownContent,
         @ViewBuilder contents: @escaping ([MarkdownHeading]) -> Content
     ) {
-        self.content = content
+        _ownedContent = StateObject(wrappedValue: content)
+        _externalContent = ObservedObject(wrappedValue: content)
+        usesExternalContent = true
         self.contents = contents
     }
-    
+
     @_disfavoredOverload
     public init(
         _ content: URL,
         @ViewBuilder contents: @escaping ([MarkdownHeading]) -> Content
     ) {
-        self.content = .init(content)
+        let mc = MarkdownContent(content)
+        _ownedContent = StateObject(wrappedValue: mc)
+        _externalContent = ObservedObject(wrappedValue: mc)
+        usesExternalContent = false
         self.contents = contents
     }
-    
+
     @_disfavoredOverload
     public init(
         _ content: String,
         @ViewBuilder contents: @escaping ([MarkdownHeading]) -> Content
     ) {
-        self.content = .init(content)
+        let mc = MarkdownContent(content)
+        _ownedContent = StateObject(wrappedValue: mc)
+        _externalContent = ObservedObject(wrappedValue: mc)
+        usesExternalContent = false
         self.contents = contents
     }
     
