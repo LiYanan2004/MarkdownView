@@ -34,6 +34,8 @@ public struct MarkdownRendererConfiguration: Equatable, Sendable {
     
     public internal(set) var list = MarkdownListConfiguration()
     
+    public internal(set) var headingStyleGroup: AnyHeadingStyleGroup = .init(.automatic)
+
     public internal(set) var allowedImageRenderers: Set<String> = ["https", "http"]
     public internal(set) var allowedBlockDirectiveRenderers: Set<String> = []
     
