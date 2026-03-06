@@ -38,8 +38,8 @@ extension MarkdownTableStyleConfiguration.Table: View {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             Grid(horizontalSpacing: 0, verticalSpacing: 0) {
                 header
-                ForEach(Array(rows.enumerated()), id: \.offset) { (_, row) in
-                    row
+                ForEach(rows.indices, id: \.self) { index in
+                    rows[index]
                 }
             }
         } else {

@@ -18,17 +18,18 @@ struct MarkdownList<List: ListItemContainer>: View {
         }
     }
     
+    private var listItems: [ListItem] {
+        Array(listItemsContainer.listItems)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(
-                Array(listItemsContainer.listItems.enumerated()),
-                id: \.offset
-            ) { (index, listItem) in
+            ForEach(listItems.indices, id: \.self) { index in
                 HStack(alignment: .firstTextBaseline) {
-                    CheckboxOrMarker(list: self, listItem: listItem, index: index)
+                    CheckboxOrMarker(list: self, listItem: listItems[index], index: index)
                         .padding(.leading, depth == 0 ? configuration.list.leadingIndentation : 0)
                     CmarkNodeVisitor(configuration: configuration)
-                        .makeBody(for: listItem)
+                        .makeBody(for: listItems[index])
                 }
             }
         }
@@ -71,12 +72,16 @@ struct MarkdownList<List: ListItemContainer>: View {
 struct MarkdownListItem: View {
     var listItem: ListItem
     @Environment(\.markdownRendererConfiguration) private var configuration
-    
+
+    private var children: [Markup] {
+        Array(listItem.children)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-            ForEach(Array(listItem.children.enumerated()), id: \.offset) { (_, child) in
+            ForEach(children.indices, id: \.self) { index in
                 CmarkNodeVisitor(configuration: configuration)
-                    .makeBody(for: child)
+                    .makeBody(for: children[index])
             }
         }
     }

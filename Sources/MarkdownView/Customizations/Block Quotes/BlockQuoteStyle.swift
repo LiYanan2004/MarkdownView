@@ -41,12 +41,16 @@ public struct BlockQuoteStyleConfiguration {
             self.blockQuote = blockQuote
         }
         
+        private var children: [Markup] {
+            Array(blockQuote.children)
+        }
+
         @_documentation(visibility: internal)
         public var body: some View {
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-                ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
+                ForEach(children.indices, id: \.self) { index in
                     CmarkNodeVisitor(configuration: configuration)
-                        .makeBody(for: child)
+                        .makeBody(for: children[index])
                 }
             }
         }
