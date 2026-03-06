@@ -31,6 +31,8 @@ public struct MarkdownRendererConfiguration: Equatable, Sendable {
     public var rendersMath: Bool { math.isEnabled }
     
     public internal(set) var preferredTintColors: [MarkdownTintableComponent: Color] = [:]
+
+    public internal(set) var underlineLinks: Bool = false
     
     public internal(set) var list = MarkdownListConfiguration()
     
