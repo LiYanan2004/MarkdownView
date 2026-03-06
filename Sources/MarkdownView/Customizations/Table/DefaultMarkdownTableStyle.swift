@@ -42,11 +42,11 @@ fileprivate struct DefaultMarkdownTable: View {
             if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 Grid(horizontalSpacing: 0, verticalSpacing: 0) {
                     configuration.table.header
-                    ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (_, row) in
+                    ForEach(configuration.table.rows.indices, id: \.self) { index in
                         if showsRowSeparators {
                             Divider()
                         }
-                        row
+                        configuration.table.rows[index]
                     }
                 }
             } else {

@@ -36,7 +36,7 @@ struct TextViewViewRenderer: MarkdownViewRenderer {
         if !configuration.allowedBlockDirectiveRenderers.isEmpty {
             parseOptions.insert(.parseBlockDirectives)
         }
-        
+
         let textContent = CmarkTextContentVisitor(configuration: configuration)
             .makeTextContent(for: content.document(options: parseOptions))
         return TextView {
