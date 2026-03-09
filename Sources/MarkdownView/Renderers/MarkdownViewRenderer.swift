@@ -120,11 +120,11 @@ extension MarkdownViewRenderer {
     }
 }
 
-struct MarkdownViewRendererKey: EnvironmentKey {
-    nonisolated(unsafe) static let defaultValue: any MarkdownViewRenderer = .automatic
+public struct MarkdownViewRendererKey: EnvironmentKey {
+    nonisolated(unsafe) public static let defaultValue: any MarkdownViewRenderer = .automatic
 }
 
-extension EnvironmentValues {
+public extension EnvironmentValues {
     var markdownViewRenderer: any MarkdownViewRenderer {
         get { self[MarkdownViewRendererKey.self] }
         set { self[MarkdownViewRendererKey.self] = newValue }
