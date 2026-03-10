@@ -31,9 +31,13 @@ public struct MarkdownRendererConfiguration: Equatable, Sendable {
     public var rendersMath: Bool { math.isEnabled }
     
     public internal(set) var preferredTintColors: [MarkdownTintableComponent: Color] = [:]
+
+    public internal(set) var underlineLinks: Bool = false
     
     public internal(set) var list = MarkdownListConfiguration()
     
+    public internal(set) var headingStyleGroup: AnyHeadingStyleGroup = .init(.automatic)
+
     public internal(set) var allowedImageRenderers: Set<String> = ["https", "http"]
     public internal(set) var allowedBlockDirectiveRenderers: Set<String> = []
     

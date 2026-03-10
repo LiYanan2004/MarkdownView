@@ -23,14 +23,18 @@ extension MarkdownTable {
 
 struct MarkdownTableBody: View {
     var tableBody: Markdown.Table.Body
-    
+
     @Environment(\.markdownRendererConfiguration) private var configuration
-    
+
+    private var rows: [Markup] {
+        Array(tableBody.children)
+    }
+
     var body: some View {
         let font = configuration.fonts[.tableBody] ?? .body
-        ForEach(Array(tableBody.children.enumerated()), id: \.offset) { (_, row) in
+        ForEach(rows.indices, id: \.self) { index in
             CmarkNodeVisitor(configuration: configuration)
-                .makeBody(for: row)
+                .makeBody(for: rows[index])
                 .font(font)
         }
     }
