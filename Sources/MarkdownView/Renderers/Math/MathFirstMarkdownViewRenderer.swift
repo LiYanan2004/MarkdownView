@@ -53,19 +53,10 @@ fileprivate extension MathFirstMarkdownViewRenderer {
     struct ParsingRangesExtractor: MarkupWalker {
         private var excludedRanges: [Range<SourceLocation>] = []
         
-        var extractor = ParsingRangesExtractor()
-        extractor.visit(content.parse(options: ParseOptions().union(.parseBlockDirectives)))
-        for range in extractor.parsableRanges(in: rawText).reversed() {
-            let segment = rawText[range]
-            let segmentParser = MathParser(text: segment)
-            for math in segmentParser.mathRepresentations.reversed() where !math.kind.inline {
-                let mathIdentifier = configuration.math.appendDisplayMath(
-                    rawText[math.range]
-                )
-                rawText.replaceSubrange(
-                    math.range,
-                    with: "@math(uuid:\(mathIdentifier))"
-                )
+        func parsableRanges(in text: String) -> [Range<String.Index>] {
+            var allowedRanges: [Range<String.Index>] = []
+            let excludedRanges = self.excludedRanges.map {
+                ($0.lowerBound.index(in: text)..<$0.upperBound.index(in: text))
             }
 
             let fullRange = text.startIndex..<text.endIndex
