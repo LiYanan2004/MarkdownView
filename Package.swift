@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
     name: "MarkdownView",
     platforms: [
-        .macOS(.v12),
-        .iOS(.v15),
-        .tvOS(.v15),
-        .watchOS(.v8),
+        .macOS(.v13),
+        .iOS(.v16),
+        .tvOS(.v16),
+        .watchOS(.v9),
         .visionOS(.v1),
     ],
     products: [
@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
         .package(url: "https://github.com/raspu/Highlightr.git", from: "2.2.1"),
         .package(url: "https://github.com/colinc86/LaTeXSwiftUI.git", from: "1.4.1"),
+        .package(url: "https://github.com/LiYanan2004/RichText.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -36,6 +37,11 @@ let package = Package(
                 .product(
                     name: "LaTeXSwiftUI",
                     package: "LaTeXSwiftUI",
+                    condition: .when(platforms: [.iOS, .macOS])
+                ),
+                .product(
+                    name: "RichText",
+                    package: "RichText",
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
             ],
