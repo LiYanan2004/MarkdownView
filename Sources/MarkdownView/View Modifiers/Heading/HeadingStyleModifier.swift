@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension View {
+extension SwiftUI.View {
     /// Apply a foreground style group to MarkdownView.
     ///
     /// This is useful when you want to completely customize foreground styles.
@@ -16,20 +16,11 @@ extension View {
     nonisolated public func headingStyleGroup(
         _ group: some HeadingStyleGroup
     ) -> some View {
-        environment(\.headingStyleGroup, AnyHeadingStyleGroup(group))
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            configuration.headingStyleGroup = AnyHeadingStyleGroup(group)
+        }
     }
-    
-    /// Apply a foreground style group to MarkdownView.
-    ///
-    /// This is useful when you want to completely customize foreground styles.
-    ///
-    /// - Parameter group: A style set to apply to the MarkdownView.
-    @available(*, deprecated, renamed: "headingStyleGroup")
-    nonisolated public func foregroundStyleGroup(
-        _ group: some HeadingStyleGroup
-    ) -> some View {
-        headingStyleGroup(group)
-    }
+
     
     /// Sets foreground style for the specific component in MarkdownView.
     ///
@@ -51,6 +42,22 @@ extension View {
             case .h6: foregroundStyleGroup._h6 = erasedShapeStyle
             }
         }
+    }
+}
+
+// MARK: - Deprecated
+
+extension SwiftUI.View {
+    /// Apply a foreground style group to MarkdownView.
+    ///
+    /// This is useful when you want to completely customize foreground styles.
+    ///
+    /// - Parameter group: A style set to apply to the MarkdownView.
+    @available(*, deprecated, renamed: "headingStyleGroup")
+    nonisolated public func foregroundStyleGroup(
+        _ group: some HeadingStyleGroup
+    ) -> some View {
+        headingStyleGroup(group)
     }
     
     /// Sets foreground style for the specific component in MarkdownView.
