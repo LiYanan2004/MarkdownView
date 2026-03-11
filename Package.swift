@@ -16,7 +16,8 @@ let package = Package(
         .library(name: "MarkdownView", targets: ["MarkdownView"]),
     ],
     traits: [
-        "LaTeX"
+        "LaTeX",
+        .default(enabledTraits: ["LaTeX"])
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
