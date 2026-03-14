@@ -146,7 +146,7 @@ extension MarkdownTextNode {
                     )
                 )
         default:
-            return Text("Unimplemented: \(kind)")
+            return Text("Unimplemented: \(String(describing: kind))")
         }
     }
 }
