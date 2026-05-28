@@ -21,6 +21,14 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
     
     var allowedImageRenderers: Set<String> = ["https", "http"]
+    /// Custom link renderers keyed by URL scheme (or `"*"` wildcard).
+    /// Replaces the previous singleton `MarkdownLinkRenders.shared` so each
+    /// SwiftUI subtree carries its own renderer registration through the
+    /// environment — two `.markdownLinkRenderer(...)` calls in different
+    /// subtrees no longer race on a global last-writer-wins dictionary.
+    /// Dictionary keys are the allow-list; absence means the default
+    /// (Branch A) text rendering applies.
+    var linkRenderers: [String: AnyMarkdownLinkRenderer] = [:]
     var allowedBlockDirectiveRenderers: Set<String> = []
 }
 

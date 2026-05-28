@@ -237,8 +237,51 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         guard let destination = link.destination,
               let url = URL(string: destination)
         else { return descendInto(link) }
-        
+
         let nodeView = descendInto(link)
+
+        // Custom renderer dispatch (Orbit fork addition).
+        // Build defaultLabel by routing back through MarkdownNodeView so we
+        // preserve _MarkdownText's async HTML-run processing (isHTML(true)
+        // runs set by visitInlineHTML are converted via NSAttributedString
+        // HTML import in _MarkdownText.swift). Use mergingAttributes
+        // (default .keepNew) for color so it OVERRIDES any per-run
+        // foreground (e.g. visitInlineCode sets inlineCodeTintColor
+        // explicitly) — matches Branch A semantics below.
+        if let scheme = url.scheme,
+           let renderer = configuration.linkRenderers[scheme] ?? configuration.linkRenderers["*"]
+        {
+            let defaultLabel: AnyView
+            if let attrs = nodeView.asAttributedString {
+                defaultLabel = AnyView(
+                    MarkdownNodeView(
+                        attrs.mergingAttributes(
+                            AttributeContainer()
+                                .foregroundColor(configuration.linkTintColor)
+                        )
+                    )
+                )
+            } else {
+                defaultLabel = AnyView(
+                    nodeView.foregroundStyle(configuration.linkTintColor)
+                )
+            }
+            let config = MarkdownLinkRendererConfiguration(url: url, label: defaultLabel)
+            // `renderer.makeBody` is the stored closure on
+            // `AnyMarkdownLinkRenderer` and already returns `AnyView` — no
+            // explicit `.erasedToAnyView()` needed.
+            return MarkdownNodeView {
+                renderer.makeBody(config)
+            }
+        }
+
+        // Default path — UNCHANGED for text-only links (Branch A).
+        // Note: we intentionally do NOT add .help() to Branch A.
+        // _MarkdownText wraps the whole paragraph in a single
+        // Text(AttributedString); a .help() there would apply to the entire
+        // paragraph, not per link. Per-link tooltips are only achievable
+        // via the custom-renderer path above (each link becomes its own
+        // View).
         return if let attributedString = nodeView.asAttributedString {
             MarkdownNodeView(
                 attributedString.mergingAttributes(
@@ -253,6 +296,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                     nodeView
                 }
                 .foregroundStyle(configuration.linkTintColor)
+                .help(url.absoluteString)
             }
         }
     }
