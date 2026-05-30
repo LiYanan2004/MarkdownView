@@ -12,18 +12,7 @@ import Markdown
 @preconcurrency
 struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
-
-    /// Inline emphasis (bold / italic / strikethrough) inherited from ancestor
-    /// nodes. Threaded down the visit so leaf producers that build their own
-    /// label — notably a link rendered by a custom `MarkdownLinkRenderer`, whose
-    /// output is a SwiftUI View that can't be re-styled by an ancestor — can
-    /// apply the emphasis when constructing their attributed text. Text nodes
-    /// don't need it (the ancestor merges the intent onto their runs directly).
     var activeInlineIntent: InlinePresentationIntent = []
-
-    init(configuration: MarkdownRendererConfiguration) {
-        self.configuration = configuration
-    }
     
     func makeBody(for markup: any Markup) -> some View {
         var visitor = self
@@ -211,14 +200,6 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         applyInlineIntent(.strikethrough, to: strikethrough.children)
     }
 
-    /// Merge an inline presentation intent (bold / italic / strikethrough) onto
-    /// a run of inline children. Text children receive the intent on their
-    /// attributed runs. Non-text children — e.g. a link rendered by a custom
-    /// `MarkdownLinkRenderer`, which returns a SwiftUI View that cannot carry an
-    /// `InlinePresentationIntent` — are preserved as-is rather than dropped, and
-    /// laid out alongside the text by `MarkdownNodeView`'s text+view compositor.
-    /// (Previously these children were silently skipped, so e.g. a link inside
-    /// `**bold**` disappeared entirely.)
     private func applyInlineIntent(
         _ newIntent: InlinePresentationIntent,
         to children: MarkupChildren
@@ -226,17 +207,16 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         var nodes = [MarkdownNodeView]()
         for child in children {
             var renderer = self
-            // Thread the emphasis down so view-producing descendants (e.g. a
-            // custom-rendered link) can bold/italicize their own label.
             renderer.activeInlineIntent.formUnion(newIntent)
             let node = renderer.visit(child)
             if let text = node.asAttributedString {
                 let intent = text.inlinePresentationIntent ?? []
-                nodes.append(MarkdownNodeView(
+                let attributedNode = MarkdownNodeView(
                     text.mergingAttributes(
                         AttributeContainer().inlinePresentationIntent(intent.union(newIntent))
                     )
-                ))
+                )
+                nodes.append(attributedNode)
             } else {
                 nodes.append(node)
             }
@@ -250,59 +230,24 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         else { return descendInto(link) }
 
         let nodeView = descendInto(link)
-
-        // Custom renderer dispatch (Orbit fork addition).
-        // Build defaultLabel by routing back through MarkdownNodeView so we
-        // preserve _MarkdownText's async HTML-run processing (isHTML(true)
-        // runs set by visitInlineHTML are converted via NSAttributedString
-        // HTML import in _MarkdownText.swift). Use mergingAttributes
-        // (default .keepNew) for color so it OVERRIDES any per-run
-        // foreground (e.g. visitInlineCode sets inlineCodeTintColor
-        // explicitly) — matches Branch A semantics below.
-        if let scheme = url.scheme,
-           let renderer = configuration.linkRenderers[scheme] ?? configuration.linkRenderers["*"]
-        {
-            let defaultLabel: AnyView
-            if let attrs = nodeView.asAttributedString {
-                defaultLabel = AnyView(
-                    MarkdownNodeView(
-                        attrs.mergingAttributes(
-                            AttributeContainer()
-                                .foregroundColor(configuration.linkTintColor)
-                        )
-                    )
-                )
-            } else {
-                defaultLabel = AnyView(
-                    nodeView.foregroundStyle(configuration.linkTintColor)
-                )
-            }
-            // Pass inherited emphasis (link inside **bold** / *italic* /
-            // ~~strike~~) to the renderer. The renderer owns its label's font,
-            // so it (not the library) reflects the emphasis — an
-            // `inlinePresentationIntent` attribute or `.bold()` on the label
-            // doesn't reliably render through a custom renderer's view, and a
-            // custom font's bold face must be selected explicitly.
-            let config = MarkdownLinkRendererConfiguration(
+        if let urlScheme = url.scheme,
+           configuration.allowedLinkRenderers.contains(urlScheme),
+           let renderer = MarkdownLinkRenderers.named(urlScheme) {
+            let labelContent: AnyView = nodeView
+                .foregroundStyle(configuration.linkTintColor)
+                .erasedToAnyView()
+            let linkConfiguration = MarkdownLinkRendererConfiguration(
                 url: url,
-                label: defaultLabel,
-                inlinePresentationIntent: activeInlineIntent
+                label: labelContent
             )
-            // `renderer.makeBody` is the stored closure on
-            // `AnyMarkdownLinkRenderer` and already returns `AnyView` — no
-            // explicit `.erasedToAnyView()` needed.
             return MarkdownNodeView {
-                renderer.makeBody(config)
+                renderer
+                    .makeBody(configuration: linkConfiguration)
+                    .erasedToAnyView()
+                    .foregroundStyle(self.configuration.linkTintColor)
             }
         }
 
-        // Default path — UNCHANGED for text-only links (Branch A).
-        // Note: we intentionally do NOT add .help() to Branch A.
-        // _MarkdownText wraps the whole paragraph in a single
-        // Text(AttributedString); a .help() there would apply to the entire
-        // paragraph, not per link. Per-link tooltips are only achievable
-        // via the custom-renderer path above (each link becomes its own
-        // View).
         return if let attributedString = nodeView.asAttributedString {
             MarkdownNodeView(
                 attributedString.mergingAttributes(
@@ -317,7 +262,6 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                     nodeView
                 }
                 .foregroundStyle(configuration.linkTintColor)
-                .help(url.absoluteString)
             }
         }
     }

@@ -8,7 +8,7 @@
 import SwiftUI
 import Markdown
 
-struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {    
+struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
         configuration: MarkdownRendererConfiguration
@@ -30,13 +30,8 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
             return AnyView(cached.renderedView)
         }
         
-        var parseOptions = ParseOptions()
-        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
-            parseOptions.insert(.parseBlockDirectives)
-        }
-        
         let renderedView = CmarkNodeVisitor(configuration: configuration)
-            .makeBody(for: content.parse(options: parseOptions))
+            .makeBody(for: content.parse(options: parseOptions(for: configuration)))
             .erasedToAnyView()
         
         CacheStorage.shared.addCache(
@@ -48,6 +43,16 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
         )
         
         return renderedView
+    }
+}
+
+fileprivate extension CmarkFirstMarkdownViewRenderer {
+    func parseOptions(for configuration: MarkdownRendererConfiguration) -> ParseOptions {
+        var parseOptions = ParseOptions()
+        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
+            parseOptions.insert(.parseBlockDirectives)
+        }
+        return parseOptions
     }
 }
 
