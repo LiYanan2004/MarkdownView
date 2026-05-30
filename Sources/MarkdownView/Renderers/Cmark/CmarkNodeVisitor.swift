@@ -12,10 +12,7 @@ import Markdown
 @preconcurrency
 struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
-    
-    init(configuration: MarkdownRendererConfiguration) {
-        self.configuration = configuration
-    }
+    var activeInlineIntent: InlinePresentationIntent = []
     
     func makeBody(for markup: any Markup) -> some View {
         var visitor = self
@@ -192,53 +189,65 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitEmphasis(_ emphasis: Markdown.Emphasis) -> MarkdownNodeView {
-        var attributedString = AttributedString()
-        for child in emphasis.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
-            let intent = text.inlinePresentationIntent ?? []
-            attributedString += text.mergingAttributes(
-                AttributeContainer()
-                    .inlinePresentationIntent(intent.union(.emphasized))
-            )
-        }
-        return MarkdownNodeView(attributedString)
+        applyInlineIntent(.emphasized, to: emphasis.children)
     }
-    
+
     func visitStrong(_ strong: Strong) -> MarkdownNodeView {
-        var attributedString = AttributedString()
-        for child in strong.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
-            let intent = text.inlinePresentationIntent ?? []
-            attributedString += text.mergingAttributes(
-                AttributeContainer()
-                    .inlinePresentationIntent(intent.union(.stronglyEmphasized))
-            )
-        }
-        return MarkdownNodeView(attributedString)
+        applyInlineIntent(.stronglyEmphasized, to: strong.children)
     }
-    
+
     func visitStrikethrough(_ strikethrough: Strikethrough) -> MarkdownNodeView {
-        var attributedString = AttributedString()
-        for child in strikethrough.children {
+        applyInlineIntent(.strikethrough, to: strikethrough.children)
+    }
+
+    private func applyInlineIntent(
+        _ newIntent: InlinePresentationIntent,
+        to children: MarkupChildren
+    ) -> MarkdownNodeView {
+        var nodes = [MarkdownNodeView]()
+        for child in children {
             var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
-            let intent = text.inlinePresentationIntent ?? []
-            attributedString += text.mergingAttributes(
-                AttributeContainer()
-                    .inlinePresentationIntent(intent.union(.strikethrough))
-            )
+            renderer.activeInlineIntent.formUnion(newIntent)
+            let node = renderer.visit(child)
+            if let text = node.asAttributedString {
+                let intent = text.inlinePresentationIntent ?? []
+                let attributedNode = MarkdownNodeView(
+                    text.mergingAttributes(
+                        AttributeContainer().inlinePresentationIntent(intent.union(newIntent))
+                    )
+                )
+                nodes.append(attributedNode)
+            } else {
+                nodes.append(node)
+            }
         }
-        return MarkdownNodeView(attributedString)
+        return MarkdownNodeView(nodes)
     }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
         guard let destination = link.destination,
               let url = URL(string: destination)
         else { return descendInto(link) }
-        
+
         let nodeView = descendInto(link)
+        if let urlScheme = url.scheme,
+           configuration.allowedLinkRenderers.contains(urlScheme),
+           let renderer = MarkdownLinkRenderers.named(urlScheme) {
+            let labelContent: AnyView = nodeView
+                .foregroundStyle(configuration.linkTintColor)
+                .erasedToAnyView()
+            let linkConfiguration = MarkdownLinkRendererConfiguration(
+                url: url,
+                label: labelContent
+            )
+            return MarkdownNodeView {
+                renderer
+                    .makeBody(configuration: linkConfiguration)
+                    .erasedToAnyView()
+                    .foregroundStyle(self.configuration.linkTintColor)
+            }
+        }
+
         return if let attributedString = nodeView.asAttributedString {
             MarkdownNodeView(
                 attributedString.mergingAttributes(

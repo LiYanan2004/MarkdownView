@@ -21,6 +21,7 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
     
     var allowedImageRenderers: Set<String> = ["https", "http"]
+    var allowedLinkRenderers: Set<String> = []
     var allowedBlockDirectiveRenderers: Set<String> = []
 }
 
