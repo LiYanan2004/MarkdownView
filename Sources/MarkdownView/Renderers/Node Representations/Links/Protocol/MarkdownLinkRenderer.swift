@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 /// A type that renders inline markdown links.
 ///
@@ -50,6 +51,12 @@ public struct MarkdownLinkRendererConfiguration {
     /// custom renderer. Wrap this in your custom view to preserve the
     /// surrounding inline formatting.
     public var label: AnyView
+    /// Inline emphasis inherited from ancestor nodes (e.g. a link inside
+    /// `**bold**` / `*italic*` / `~~strike~~`). The custom renderer's output is
+    /// a SwiftUI View that can't be re-styled by the ancestor, so the renderer
+    /// is responsible for reflecting this emphasis on its label — e.g. by
+    /// selecting a bold/italic font. Empty when the link isn't emphasized.
+    public var inlinePresentationIntent: InlinePresentationIntent = []
 }
 
 // MARK: - Type Erasure

@@ -12,7 +12,15 @@ import Markdown
 @preconcurrency
 struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
-    
+
+    /// Inline emphasis (bold / italic / strikethrough) inherited from ancestor
+    /// nodes. Threaded down the visit so leaf producers that build their own
+    /// label — notably a link rendered by a custom `MarkdownLinkRenderer`, whose
+    /// output is a SwiftUI View that can't be re-styled by an ancestor — can
+    /// apply the emphasis when constructing their attributed text. Text nodes
+    /// don't need it (the ancestor merges the intent onto their runs directly).
+    var activeInlineIntent: InlinePresentationIntent = []
+
     init(configuration: MarkdownRendererConfiguration) {
         self.configuration = configuration
     }
@@ -192,45 +200,48 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitEmphasis(_ emphasis: Markdown.Emphasis) -> MarkdownNodeView {
-        var attributedString = AttributedString()
-        for child in emphasis.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
-            let intent = text.inlinePresentationIntent ?? []
-            attributedString += text.mergingAttributes(
-                AttributeContainer()
-                    .inlinePresentationIntent(intent.union(.emphasized))
-            )
-        }
-        return MarkdownNodeView(attributedString)
+        applyInlineIntent(.emphasized, to: emphasis.children)
     }
-    
+
     func visitStrong(_ strong: Strong) -> MarkdownNodeView {
-        var attributedString = AttributedString()
-        for child in strong.children {
-            var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
-            let intent = text.inlinePresentationIntent ?? []
-            attributedString += text.mergingAttributes(
-                AttributeContainer()
-                    .inlinePresentationIntent(intent.union(.stronglyEmphasized))
-            )
-        }
-        return MarkdownNodeView(attributedString)
+        applyInlineIntent(.stronglyEmphasized, to: strong.children)
     }
-    
+
     func visitStrikethrough(_ strikethrough: Strikethrough) -> MarkdownNodeView {
-        var attributedString = AttributedString()
-        for child in strikethrough.children {
+        applyInlineIntent(.strikethrough, to: strikethrough.children)
+    }
+
+    /// Merge an inline presentation intent (bold / italic / strikethrough) onto
+    /// a run of inline children. Text children receive the intent on their
+    /// attributed runs. Non-text children — e.g. a link rendered by a custom
+    /// `MarkdownLinkRenderer`, which returns a SwiftUI View that cannot carry an
+    /// `InlinePresentationIntent` — are preserved as-is rather than dropped, and
+    /// laid out alongside the text by `MarkdownNodeView`'s text+view compositor.
+    /// (Previously these children were silently skipped, so e.g. a link inside
+    /// `**bold**` disappeared entirely.)
+    private func applyInlineIntent(
+        _ newIntent: InlinePresentationIntent,
+        to children: MarkupChildren
+    ) -> MarkdownNodeView {
+        var nodes = [MarkdownNodeView]()
+        for child in children {
             var renderer = self
-            guard let text = renderer.visit(child).asAttributedString else { continue }
-            let intent = text.inlinePresentationIntent ?? []
-            attributedString += text.mergingAttributes(
-                AttributeContainer()
-                    .inlinePresentationIntent(intent.union(.strikethrough))
-            )
+            // Thread the emphasis down so view-producing descendants (e.g. a
+            // custom-rendered link) can bold/italicize their own label.
+            renderer.activeInlineIntent.formUnion(newIntent)
+            let node = renderer.visit(child)
+            if let text = node.asAttributedString {
+                let intent = text.inlinePresentationIntent ?? []
+                nodes.append(MarkdownNodeView(
+                    text.mergingAttributes(
+                        AttributeContainer().inlinePresentationIntent(intent.union(newIntent))
+                    )
+                ))
+            } else {
+                nodes.append(node)
+            }
         }
-        return MarkdownNodeView(attributedString)
+        return MarkdownNodeView(nodes)
     }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
@@ -266,7 +277,17 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                     nodeView.foregroundStyle(configuration.linkTintColor)
                 )
             }
-            let config = MarkdownLinkRendererConfiguration(url: url, label: defaultLabel)
+            // Pass inherited emphasis (link inside **bold** / *italic* /
+            // ~~strike~~) to the renderer. The renderer owns its label's font,
+            // so it (not the library) reflects the emphasis — an
+            // `inlinePresentationIntent` attribute or `.bold()` on the label
+            // doesn't reliably render through a custom renderer's view, and a
+            // custom font's bold face must be selected explicitly.
+            let config = MarkdownLinkRendererConfiguration(
+                url: url,
+                label: defaultLabel,
+                inlinePresentationIntent: activeInlineIntent
+            )
             // `renderer.makeBody` is the stored closure on
             // `AnyMarkdownLinkRenderer` and already returns `AnyView` — no
             // explicit `.erasedToAnyView()` needed.
