@@ -12,8 +12,9 @@ import LaTeXSwiftUI
 #endif
 
 struct MathBlockDirectiveRenderer: BlockDirectiveRenderer {
-    func makeBody(configuration: Configuration) -> some View {
-        if let identifier = UUID(uuidString: configuration.arguments[0].value) {
+    func makeBody(configuration: BlockDirectiveRendererConfiguration) -> some View {
+        if let identifierValue = configuration.arguments.first?.value,
+           let identifier = UUID(uuidString: identifierValue) {
             DisplayMath(mathIdentifier: identifier)
         } else {
             EmptyView()

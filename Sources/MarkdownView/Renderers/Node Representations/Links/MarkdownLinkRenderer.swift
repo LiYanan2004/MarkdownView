@@ -1,17 +1,8 @@
 import Foundation
 import SwiftUI
 
-@preconcurrency
-@MainActor
-public protocol MarkdownLinkRenderer {
-    associatedtype Body: View
-
-    @preconcurrency
-    @MainActor
-    @ViewBuilder
-    func makeBody(configuration: Configuration) -> Body
-
-    typealias Configuration = MarkdownLinkRendererConfiguration
+public protocol MarkdownLinkRenderer: MarkdownElementRenderer where Configuration == MarkdownLinkRendererConfiguration {
+    associatedtype Configuration = MarkdownLinkRendererConfiguration
 }
 
 public struct MarkdownLinkRendererConfiguration {

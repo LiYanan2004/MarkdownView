@@ -10,6 +10,7 @@ public struct MarkdownView: View {
     @Environment(\.displayScale) private var displayScale
     
     @Environment(\.markdownViewStyle) private var markdownViewStyle
+    @Environment(\.markdownElementRenderers) private var customRenderers
     @Environment(\.markdownFontGroup.body) private var bodyFont
     @Environment(\.markdownRendererConfiguration) private var configuration
     
@@ -43,10 +44,10 @@ public struct MarkdownView: View {
     private var _renderedBody: some View {
         if configuration.math.shouldRender {
             MathFirstMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration)
+                .makeBody(content: content, configuration: configuration, customRenderers: customRenderers)
         } else {
             CmarkFirstMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration)
+                .makeBody(content: content, configuration: configuration, customRenderers: customRenderers)
         }
     }
 }

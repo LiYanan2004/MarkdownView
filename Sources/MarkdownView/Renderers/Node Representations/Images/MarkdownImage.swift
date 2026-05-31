@@ -29,7 +29,7 @@ struct MarkdownImage: View {
         }
     }
     @Environment(\.markdownRendererConfiguration.preferredBaseURL) private var baseURL
-    @Environment(\.markdownRendererConfiguration.allowedImageRenderers) private var allowedRenderer
+    @Environment(\.markdownElementRenderers) private var customRenderers
     
     var body: some View {
         if let url {
@@ -37,9 +37,12 @@ struct MarkdownImage: View {
                 url: url,
                 alternativeText: alternativeText
             )
-            if let scheme = url.scheme, allowedRenderer.contains(scheme),
-               let renderer = MarkdownImageRenders.named(scheme) {
+            if let renderer = imageRenderer(for: url) {
                 renderer
+                    .makeBody(configuration: configuration)
+                    .erasedToAnyView()
+            } else if isNetworkImageURL(url) {
+                NetworkMarkdownImageRenderer()
                     .makeBody(configuration: configuration)
                     .erasedToAnyView()
             } else if let baseURL {
@@ -53,8 +56,22 @@ struct MarkdownImage: View {
             fallbackView
         }
     }
-    
+
     private var fallbackView: some View {
         MarkdownNodeView(image.plainText)
+    }
+
+    private func imageRenderer(for url: URL) -> (any MarkdownImageRenderer)? {
+        guard let scheme = url.scheme else {
+            return nil
+        }
+        return customRenderers
+            .compactMap(\.image)
+            .first(where: { $0.scheme == scheme })?
+            .renderer
+    }
+
+    private func isNetworkImageURL(_ url: URL) -> Bool {
+        url.scheme == "http" || url.scheme == "https"
     }
 }

@@ -18,6 +18,7 @@ protocol MarkdownViewRenderer {
     @ViewBuilder
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        customRenderers: [MarkdownElementRendererRegistration]
     ) -> Body
 }

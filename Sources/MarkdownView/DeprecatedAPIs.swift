@@ -9,14 +9,14 @@ import SwiftUI
 import Markdown
 
 extension View {
-    @available(*, unavailable, renamed: "blockDirectiveRenderer")
+    @available(*, unavailable, message: "Use markdownElementRenderer(.blockDirective(_:name:)) instead.")
     nonisolated public func blockDirectiveProvider(
         _ renderer: some BlockDirectiveDisplayable, for name: String
     ) -> some View {
         fatalError()
     }
     
-    @available(*, unavailable, renamed: "markdownImageRenderer")
+    @available(*, unavailable, message: "Use markdownElementRenderer(.image(_:urlScheme:)) instead.")
     nonisolated public func imageProvider(
         _ provider: some ImageDisplayable, forURLScheme urlScheme: String
     ) -> some View {

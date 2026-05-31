@@ -12,21 +12,8 @@ import SwiftUI
 /// Think of this type as a SwiftUI View wrapper.
 ///
 /// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
-@preconcurrency
-@MainActor
-public protocol MarkdownImageRenderer {
-    /// A type that represents the image.
-    associatedtype Body: View
-    
-    /// Creates a view that represents the image.
-    /// - parameter configuration: The properties of a markdown image.
-    @preconcurrency
-    @MainActor
-    @ViewBuilder
-    func makeBody(configuration: Configuration) -> Body
-    
-    /// The properties of a markdown image.
-    typealias Configuration = MarkdownImageRendererConfiguration
+public protocol MarkdownImageRenderer: MarkdownElementRenderer where Configuration == MarkdownImageRendererConfiguration {
+    associatedtype Configuration = MarkdownImageRendererConfiguration
 }
 
 /// The properties of a markdown image.

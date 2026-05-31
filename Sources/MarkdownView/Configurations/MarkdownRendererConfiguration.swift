@@ -19,10 +19,6 @@ struct MarkdownRendererConfiguration: Equatable, AllowingModifyThroughKeyPath, S
     var blockQuoteTintColor: Color = .accentColor
     
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
-    
-    var allowedImageRenderers: Set<String> = ["https", "http"]
-    var allowedLinkRenderers: Set<String> = []
-    var allowedBlockDirectiveRenderers: Set<String> = []
 }
 
 // MARK: - SwiftUI Environment

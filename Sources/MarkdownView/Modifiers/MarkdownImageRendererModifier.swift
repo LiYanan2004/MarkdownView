@@ -12,13 +12,11 @@ extension View {
     ///
     /// - parameter renderer: The render you created to handle image loading and rendering.
     /// - parameter urlScheme: A scheme for deciding which renderer to use.
+    @available(*, deprecated, message: "Use markdownElementRenderer(.image(_:urlScheme:)) instead.")
     nonisolated public func markdownImageRenderer(
         _ renderer: some MarkdownImageRenderer,
         forURLScheme urlScheme: String
     ) -> some View {
-        transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            MarkdownImageRenders.shared.addRenderer(renderer, forURLScheme: urlScheme)
-            configuration.allowedImageRenderers.insert(urlScheme)
-        }
+        markdownElementRenderer(.image(renderer, urlScheme: urlScheme))
     }
 }

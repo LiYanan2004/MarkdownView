@@ -11,7 +11,8 @@ import Markdown
 struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        customRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
         var configuration = configuration
         var rawText = content.raw.text
@@ -34,6 +35,6 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         
         let _content = MarkdownContent(raw: .plainText(rawText))
         return CmarkFirstMarkdownViewRenderer()
-            .makeBody(content: _content, configuration: configuration)
+            .makeBody(content: _content, configuration: configuration, customRenderers: customRenderers)
     }
 }

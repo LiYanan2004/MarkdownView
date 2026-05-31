@@ -11,6 +11,7 @@ import Markdown
 struct MarkdownHeading: View {
     let heading: Heading
     
+    @Environment(\.markdownElementRenderers) private var customRenderers
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.markdownFontGroup) private var fontGroup
     @Environment(\.headingStyleGroup) private var headingStyleGroup
@@ -51,7 +52,7 @@ struct MarkdownHeading: View {
     }
     
     var body: some View {
-        CmarkNodeVisitor(configuration: configuration)
+        CmarkNodeVisitor(configuration: configuration, customRenderers: customRenderers)
             .descendInto(heading)
             .font(font)
             .foregroundStyle(foregroundStyle)
