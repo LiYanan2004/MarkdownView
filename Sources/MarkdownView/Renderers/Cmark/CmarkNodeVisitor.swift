@@ -12,7 +12,16 @@ import Markdown
 @preconcurrency
 struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
-    var activeInlineIntent: InlinePresentationIntent = []
+    var elementRenderers: [MarkdownElementRendererRegistration]
+    private var activeInlineIntent: InlinePresentationIntent = []
+    
+    init(
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
+    ) {
+        self.configuration = configuration
+        self.elementRenderers = elementRenderers
+    }
     
     func makeBody(for markup: any Markup) -> some View {
         var visitor = self
@@ -168,7 +177,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     func visitTableCell(_ cell: Markdown.Table.Cell) -> MarkdownNodeView {
         var cellViews = [MarkdownNodeView]()
         for child in cell.children {
-            var renderer = CmarkNodeVisitor(configuration: configuration)
+            var renderer = CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
             let cellView = renderer.visit(child)
             cellViews.append(cellView)
         }
@@ -199,40 +208,17 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     func visitStrikethrough(_ strikethrough: Strikethrough) -> MarkdownNodeView {
         applyInlineIntent(.strikethrough, to: strikethrough.children)
     }
-
-    private func applyInlineIntent(
-        _ newIntent: InlinePresentationIntent,
-        to children: MarkupChildren
-    ) -> MarkdownNodeView {
-        var nodes = [MarkdownNodeView]()
-        for child in children {
-            var renderer = self
-            renderer.activeInlineIntent.formUnion(newIntent)
-            let node = renderer.visit(child)
-            if let text = node.asAttributedString {
-                let intent = text.inlinePresentationIntent ?? []
-                let attributedNode = MarkdownNodeView(
-                    text.mergingAttributes(
-                        AttributeContainer().inlinePresentationIntent(intent.union(newIntent))
-                    )
-                )
-                nodes.append(attributedNode)
-            } else {
-                nodes.append(node)
-            }
-        }
-        return MarkdownNodeView(nodes)
-    }
     
     mutating func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
         guard let destination = link.destination,
               let url = URL(string: destination)
         else { return descendInto(link) }
-
+        
         let nodeView = descendInto(link)
-        if let urlScheme = url.scheme,
-           configuration.allowedLinkRenderers.contains(urlScheme),
-           let renderer = MarkdownLinkRenderers.named(urlScheme) {
+        let availableRenderers = elementRenderers.compactMap(\.link)
+        if availableRenderers.isEmpty == false,
+           let urlScheme = url.scheme,
+           let linkRenderer = availableRenderers.first(where: { $0.scheme == urlScheme })?.renderer {
             let labelContent: AnyView = nodeView
                 .foregroundStyle(configuration.linkTintColor)
                 .erasedToAnyView()
@@ -241,7 +227,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 label: labelContent
             )
             return MarkdownNodeView {
-                renderer
+                linkRenderer
                     .makeBody(configuration: linkConfiguration)
                     .erasedToAnyView()
                     .foregroundStyle(self.configuration.linkTintColor)
@@ -264,5 +250,29 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 .foregroundStyle(configuration.linkTintColor)
             }
         }
+    }
+    
+    private func applyInlineIntent(
+        _ newIntent: InlinePresentationIntent,
+        to children: MarkupChildren
+    ) -> MarkdownNodeView {
+        var nodes = [MarkdownNodeView]()
+        for child in children {
+            var renderer = self
+            renderer.activeInlineIntent.formUnion(newIntent)
+            let node = renderer.visit(child)
+            if let text = node.asAttributedString {
+                let intent = text.inlinePresentationIntent ?? []
+                let attributedNode = MarkdownNodeView(
+                    text.mergingAttributes(
+                        AttributeContainer().inlinePresentationIntent(intent.union(newIntent))
+                    )
+                )
+                nodes.append(attributedNode)
+            } else {
+                nodes.append(node)
+            }
+        }
+        return MarkdownNodeView(nodes)
     }
 }

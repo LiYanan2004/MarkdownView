@@ -12,6 +12,7 @@ struct MarkdownTableRow: View {
     private var rowIndex: Int
     private var cells: [Markdown.Table.Cell]
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.markdownTableCellPadding) private var padding
     
     init(rowIndex: Int, cells: [Markdown.Table.Cell]) {
@@ -23,7 +24,7 @@ struct MarkdownTableRow: View {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             GridRow {
                 ForEach(Array(cells.enumerated()), id: \.offset) { (index, cell) in
-                    CmarkNodeVisitor(configuration: configuration)
+                    CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                         .makeBody(for: cell)
                         .multilineTextAlignment(cell.textAlignment)
                         .gridColumnAlignment(cell.horizontalAlignment)

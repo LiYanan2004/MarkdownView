@@ -36,6 +36,7 @@ public struct BlockQuoteStyleConfiguration {
     public struct Content: View {
         private var blockQuote: BlockQuote
         @Environment(\.markdownRendererConfiguration) private var configuration
+        @Environment(\.markdownElementRenderers) private var elementRenderers
         
         init(blockQuote: BlockQuote) {
             self.blockQuote = blockQuote
@@ -45,7 +46,7 @@ public struct BlockQuoteStyleConfiguration {
         public var body: some View {
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
-                    CmarkNodeVisitor(configuration: configuration)
+                    CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                         .makeBody(for: child)
                 }
             }

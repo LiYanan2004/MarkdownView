@@ -13,6 +13,7 @@ extension MarkdownTableStyleConfiguration.Table {
     public struct Fallback: View {
         private var table: Markdown.Table
         @Environment(\.markdownRendererConfiguration) private var configuration
+        @Environment(\.markdownElementRenderers) private var elementRenderers
         @Environment(\.markdownFontGroup.tableHeader) private var headerFont
         @Environment(\.markdownFontGroup.tableBody) private var bodyFont
         @Environment(\.markdownTableCellPadding) private var padding
@@ -35,7 +36,7 @@ extension MarkdownTableStyleConfiguration.Table {
                     let cells = Array(table.head.children) as! [Markdown.Table.Cell]
                     for cell in cells {
                         GridCellContainer(alignment: cell.horizontalAlignment) {
-                            CmarkNodeVisitor(configuration: configuration)
+                            CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                                 .makeBody(for: cell)
                                 .font(headerFont)
                                 .multilineTextAlignment(cell.textAlignment)
@@ -48,7 +49,7 @@ extension MarkdownTableStyleConfiguration.Table {
                         let cells = Array(row.children) as! [Markdown.Table.Cell]
                         for cell in cells {
                             GridCellContainer(alignment: cell.horizontalAlignment) {
-                                CmarkNodeVisitor(configuration: configuration)
+                                CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                                     .makeBody(for: cell)
                                     .font(bodyFont)
                                     .multilineTextAlignment(cell.textAlignment)

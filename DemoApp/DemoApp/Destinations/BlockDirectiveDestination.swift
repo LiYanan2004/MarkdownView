@@ -36,7 +36,7 @@ struct BlockDirectiveDestination: View {
             
             Section {
                 MarkdownView(text)
-                    .blockDirectiveRenderer(.note, for: "note")
+                    .markdownElementRenderer(.blockDirective(.note, name: "note"))
             } header: {
                 Text("MarkdownView")
                     .font(.headline)
@@ -56,7 +56,7 @@ struct BlockDirectiveDestination: View {
 // MARK: - Custom Note Block Directive Renderer
 
 struct NoteBlockDirective: BlockDirectiveRenderer {
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: BlockDirectiveRendererConfiguration) -> some View {
         Text(configuration.wrappedString)
             .padding(20)
             .background(

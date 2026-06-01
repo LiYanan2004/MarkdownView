@@ -5,6 +5,8 @@ struct MarkdownList<List: ListItemContainer>: View {
     var listItemsContainer: List
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
+    
     private var marker: Either<AnyUnorderedListMarkerProtocol, AnyOrderedListMarkerProtocol> {
         if listItemsContainer is UnorderedList {
             return .left(configuration.listConfiguration.unorderedListMarker)
@@ -27,7 +29,7 @@ struct MarkdownList<List: ListItemContainer>: View {
                 HStack(alignment: .firstTextBaseline) {
                     CheckboxOrMarker(list: self, listItem: listItem, index: index)
                         .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndentation : 0)
-                    CmarkNodeVisitor(configuration: configuration)
+                    CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                         .makeBody(for: listItem)
                 }
             }
@@ -71,11 +73,12 @@ struct MarkdownList<List: ListItemContainer>: View {
 struct MarkdownListItem: View {
     var listItem: ListItem
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     
     var body: some View {
         VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(Array(listItem.children.enumerated()), id: \.offset) { (_, child) in
-                CmarkNodeVisitor(configuration: configuration)
+                CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                     .makeBody(for: child)
             }
         }

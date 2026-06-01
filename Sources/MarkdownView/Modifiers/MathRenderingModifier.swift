@@ -12,15 +12,24 @@ extension View {
     ///
     /// - parameter enabled: A Boolean value that indicates whether to parse & render math expressions. The default value is true.
     nonisolated public func markdownMathRenderingEnabled(_ enabled: Bool = true) -> some View {
-        transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            configuration.math.shouldRender = enabled
-            if enabled {
-                configuration.allowedBlockDirectiveRenderers.insert("math")
-                BlockDirectiveRenderers.shared.addRenderer(
-                    MathBlockDirectiveRenderer(),
-                    for: "math"
-                )
+        modifier(MarkdownMathRenderingModifier(isEnabled: enabled))
+    }
+}
+
+// MARK: - Auxiliary
+
+fileprivate struct MarkdownMathRenderingModifier: ViewModifier {
+    let isEnabled: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .transformEnvironment(\.markdownRendererConfiguration) { configuration in
+                configuration.math.shouldRender = isEnabled
             }
-        }
+            .transformEnvironment(\.markdownElementRenderers) { renderers in
+                if isEnabled {
+                    renderers.register(.blockDirective(MathBlockDirectiveRenderer(), name: "math"))
+                }
+            }
     }
 }
