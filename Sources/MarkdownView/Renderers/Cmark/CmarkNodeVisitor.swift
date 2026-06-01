@@ -88,9 +88,10 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     }
     
     func visitInlineCode(_ inlineCode: InlineCode) -> MarkdownNodeView {
+        let tintColor = configuration.tintColors[.inlineCodeBlock, default: .accentColor]
         var attributedString = AttributedString(stringLiteral: inlineCode.code)
-        attributedString.foregroundColor = configuration.inlineCodeTintColor
-        attributedString.backgroundColor = configuration.inlineCodeTintColor.opacity(0.1)
+        attributedString.foregroundColor = tintColor
+        attributedString.backgroundColor = tintColor.opacity(0.1)
         return MarkdownNodeView(attributedString)
     }
     
@@ -214,13 +215,14 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
               let url = URL(string: destination)
         else { return descendInto(link) }
         
+        let tintColor = configuration.tintColors[.link, default: .accentColor]
         let nodeView = descendInto(link)
         let availableRenderers = elementRenderers.compactMap(\.link)
         if availableRenderers.isEmpty == false,
            let urlScheme = url.scheme,
            let linkRenderer = availableRenderers.first(where: { $0.scheme == urlScheme })?.renderer {
             let labelContent: AnyView = nodeView
-                .foregroundStyle(configuration.linkTintColor)
+                .foregroundStyle(tintColor)
                 .erasedToAnyView()
             let linkConfiguration = MarkdownLinkRendererConfiguration(
                 url: url,
@@ -230,7 +232,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 linkRenderer
                     .makeBody(configuration: linkConfiguration)
                     .erasedToAnyView()
-                    .foregroundStyle(self.configuration.linkTintColor)
+                    .foregroundStyle(tintColor)
             }
         }
 
@@ -239,7 +241,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 attributedString.mergingAttributes(
                     AttributeContainer()
                         .link(url)
-                        .foregroundColor(configuration.linkTintColor)
+                        .foregroundColor(tintColor)
                 )
             )
         } else {
@@ -247,7 +249,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 Link(destination: url) {
                     nodeView
                 }
-                .foregroundStyle(configuration.linkTintColor)
+                .foregroundStyle(tintColor)
             }
         }
     }

@@ -7,32 +7,25 @@
 
 import SwiftUI
 
-extension View {
-    /// Sets the tint color for specific MarkdownView component.
+extension SwiftUI.View {
+    /// Sets the tint color for specific markdown tintable component.
     ///
     /// - Parameters:
     ///   - tint: The tint color to apply.
     ///   - component: The tintable component to apply the tint color.
-    @ViewBuilder
     nonisolated public func tint(
         _ tint: Color,
-        for component: TintableComponent
+        for component: MarkdownTintableComponent
     ) -> some View {
-        switch component {
-        case .blockQuote:
-            environment(\.markdownRendererConfiguration.blockQuoteTintColor, tint)
-        case .inlineCodeBlock:
-            environment(\.markdownRendererConfiguration.inlineCodeTintColor, tint)
-        case .link:
-            environment(\.markdownRendererConfiguration.linkTintColor, tint)
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            switch component {
+                case .blockQuote:
+                    configuration.tintColors[.blockQuote] = tint
+                case .inlineCodeBlock:
+                    configuration.tintColors[.inlineCodeBlock] = tint
+                case .link:
+                    configuration.tintColors[.link] = tint
+            }
         }
     }
-}
-
-/// Components that can apply a tint color.
-@_documentation(visibility: internal)
-public enum TintableComponent {
-    case blockQuote
-    case inlineCodeBlock
-    case link
 }

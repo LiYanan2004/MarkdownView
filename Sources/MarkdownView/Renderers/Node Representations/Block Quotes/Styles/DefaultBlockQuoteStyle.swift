@@ -21,19 +21,22 @@ extension BlockQuoteStyle where Self == DefaultBlockQuoteStyle {
 
 fileprivate struct DefaultBlockQuoteView: View {
     var configuration: BlockQuoteStyleConfiguration
+    
+    @Environment(\.markdownRendererConfiguration) private var rendererConfiguration
     @Environment(\.markdownFontGroup.blockQuote) private var font
-    @Environment(\.markdownRendererConfiguration.blockQuoteTintColor) private var tint
+    
     var body: some View {
+        let tintColor = rendererConfiguration.tintColors[.blockQuote, default: .accentColor]
         configuration.content
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .font(font)
             .padding(.horizontal, 20)
             .background {
-                tint.opacity(0.1)
+                tintColor.opacity(0.1)
             }
             .overlay(alignment: .leading) {
-                tint.frame(width: 4)
+                tintColor.frame(width: 4)
             }
             .clipShape(.rect(cornerRadius: 3))
     }
