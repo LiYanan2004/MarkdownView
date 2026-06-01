@@ -70,6 +70,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     func visitBlockQuote(_ blockQuote: BlockQuote) -> MarkdownNodeView {
         MarkdownNodeView {
             MarkdownBlockQuote(blockQuote: blockQuote)
+                .tint(configuration.tintColors[.blockQuote, default: .accentColor])
         }
     }
     
@@ -216,13 +217,14 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         else { return descendInto(link) }
         
         let tintColor = configuration.tintColors[.link, default: .accentColor]
+        
         let nodeView = descendInto(link)
         let availableRenderers = elementRenderers.compactMap(\.link)
         if availableRenderers.isEmpty == false,
            let urlScheme = url.scheme,
            let linkRenderer = availableRenderers.first(where: { $0.scheme == urlScheme })?.renderer {
             let labelContent: AnyView = nodeView
-                .foregroundStyle(tintColor)
+                .tint(tintColor)
                 .erasedToAnyView()
             let linkConfiguration = MarkdownLinkRendererConfiguration(
                 url: url,
@@ -232,7 +234,6 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
                 linkRenderer
                     .makeBody(configuration: linkConfiguration)
                     .erasedToAnyView()
-                    .foregroundStyle(tintColor)
             }
         }
 

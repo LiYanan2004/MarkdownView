@@ -10,15 +10,12 @@ public protocol MarkdownLinkRenderer: MarkdownElementRenderer where Configuratio
 public struct MarkdownLinkRendererConfiguration {
     /// The destination URL of the link.
     public var url: URL
-    private var renderedLabel: AnyView
 
     /// The label generated from the markdown link contents.
-    public var label: some View {
-        renderedLabel
-    }
+    public var label: AnyView
+}
 
-    init<Label: View>(url: URL, label: Label) {
-        self.url = url
-        self.renderedLabel = label.erasedToAnyView()
-    }
+@available(*, unavailable)
+extension MarkdownLinkRendererConfiguration: Sendable {
+    
 }
