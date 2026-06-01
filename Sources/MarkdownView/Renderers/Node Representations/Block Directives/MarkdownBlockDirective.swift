@@ -11,7 +11,7 @@ import Markdown
 struct MarkdownBlockDirective: View {
     var blockDirective: BlockDirective
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.markdownElementRenderers) private var customRenderers
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     
     var body: some View {
         if let renderer = blockDirectiveRenderer(for: blockDirective.name) {
@@ -29,13 +29,13 @@ struct MarkdownBlockDirective: View {
                 .makeBody(configuration: configuration)
                 .erasedToAnyView()
         } else {
-            CmarkNodeVisitor(configuration: configuration, customRenderers: customRenderers)
+            CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                 .descendInto(blockDirective)
         }
     }
 
     private func blockDirectiveRenderer(for name: String) -> (any BlockDirectiveRenderer)? {
-        customRenderers
+        elementRenderers
             .compactMap(\.blockDirective)
             .first(where: { $0.name == name })?
             .renderer

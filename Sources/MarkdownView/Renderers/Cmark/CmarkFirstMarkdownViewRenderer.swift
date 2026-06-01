@@ -12,21 +12,21 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
         configuration: MarkdownRendererConfiguration,
-        customRenderers: [MarkdownElementRendererRegistration]
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
         _makeAndCacheBody(
             content: content,
             configuration: configuration,
-            customRenderers: customRenderers
+            elementRenderers: elementRenderers
         )
     }
     
     private func _makeAndCacheBody(
         content: MarkdownContent,
         configuration: MarkdownRendererConfiguration,
-        customRenderers: [MarkdownElementRendererRegistration]
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
-        if customRenderers.isEmpty,
+        if elementRenderers.isEmpty,
            let cached = CacheStorage.shared.withCacheIfAvailable(
             content,
             type: Cache.self
@@ -36,13 +36,13 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
         
         let visitor = CmarkNodeVisitor(
             configuration: configuration,
-            customRenderers: customRenderers
+            elementRenderers: elementRenderers
         )
         let renderedView = visitor
-            .makeBody(for: content.parse(options: parseOptions(for: customRenderers)))
+            .makeBody(for: content.parse(options: parseOptions(for: elementRenderers)))
             .erasedToAnyView()
         
-        if customRenderers.isEmpty {
+        if elementRenderers.isEmpty {
             CacheStorage.shared.addCache(
                 Cache(
                     markdownContent: content,
@@ -57,9 +57,9 @@ struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
 }
 
 fileprivate extension CmarkFirstMarkdownViewRenderer {
-    func parseOptions(for customRenderers: [MarkdownElementRendererRegistration]) -> ParseOptions {
+    func parseOptions(for elementRenderers: [MarkdownElementRendererRegistration]) -> ParseOptions {
         var parseOptions = ParseOptions()
-        if customRenderers.contains(where: { $0.blockDirective != nil }) {
+        if elementRenderers.contains(where: { $0.blockDirective != nil }) {
             parseOptions.insert(.parseBlockDirectives)
         }
         return parseOptions

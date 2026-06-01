@@ -74,7 +74,7 @@ struct MarkdownElementRenderersEnvironmentKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    var markdownElementRenderers: [MarkdownElementRendererRegistration] {
+    package var markdownElementRenderers: [MarkdownElementRendererRegistration] {
         get { self[MarkdownElementRenderersEnvironmentKey.self] }
         set { self[MarkdownElementRenderersEnvironmentKey.self] = newValue }
     }

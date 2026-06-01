@@ -29,7 +29,7 @@ struct MarkdownImage: View {
         }
     }
     @Environment(\.markdownRendererConfiguration.preferredBaseURL) private var baseURL
-    @Environment(\.markdownElementRenderers) private var customRenderers
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     
     var body: some View {
         if let url {
@@ -65,7 +65,7 @@ struct MarkdownImage: View {
         guard let scheme = url.scheme else {
             return nil
         }
-        return customRenderers
+        return elementRenderers
             .compactMap(\.image)
             .first(where: { $0.scheme == scheme })?
             .renderer

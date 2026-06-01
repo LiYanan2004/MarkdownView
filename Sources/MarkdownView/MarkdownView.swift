@@ -9,10 +9,10 @@ public struct MarkdownView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.displayScale) private var displayScale
     
-    @Environment(\.markdownViewStyle) private var markdownViewStyle
-    @Environment(\.markdownElementRenderers) private var customRenderers
-    @Environment(\.markdownFontGroup.body) private var bodyFont
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
+    @Environment(\.markdownViewStyle) private var markdownViewStyle
+    @Environment(\.markdownFontGroup.body) private var bodyFont
     
     public init(_ text: String) {
         self.content = MarkdownContent(
@@ -44,10 +44,10 @@ public struct MarkdownView: View {
     private var _renderedBody: some View {
         if configuration.math.shouldRender {
             MathFirstMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration, customRenderers: customRenderers)
+                .makeBody(content: content, configuration: configuration, elementRenderers: elementRenderers)
         } else {
             CmarkFirstMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration, customRenderers: customRenderers)
+                .makeBody(content: content, configuration: configuration, elementRenderers: elementRenderers)
         }
     }
 }

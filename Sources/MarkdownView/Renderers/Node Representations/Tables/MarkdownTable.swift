@@ -25,12 +25,12 @@ struct MarkdownTableBody: View {
     var tableBody: Markdown.Table.Body
     
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.markdownElementRenderers) private var customRenderers
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.markdownFontGroup.tableBody) private var font
     
     var body: some View {
         ForEach(Array(tableBody.children.enumerated()), id: \.offset) { (_, row) in
-            CmarkNodeVisitor(configuration: configuration, customRenderers: customRenderers)
+            CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                 .makeBody(for: row)
                 .font(font)
         }

@@ -12,15 +12,15 @@ import Markdown
 @preconcurrency
 struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
-    var customRenderers: [MarkdownElementRendererRegistration]
+    var elementRenderers: [MarkdownElementRendererRegistration]
     private var activeInlineIntent: InlinePresentationIntent = []
     
     init(
         configuration: MarkdownRendererConfiguration,
-        customRenderers: [MarkdownElementRendererRegistration]
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) {
         self.configuration = configuration
-        self.customRenderers = customRenderers
+        self.elementRenderers = elementRenderers
     }
     
     func makeBody(for markup: any Markup) -> some View {
@@ -177,7 +177,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     func visitTableCell(_ cell: Markdown.Table.Cell) -> MarkdownNodeView {
         var cellViews = [MarkdownNodeView]()
         for child in cell.children {
-            var renderer = CmarkNodeVisitor(configuration: configuration, customRenderers: customRenderers)
+            var renderer = CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
             let cellView = renderer.visit(child)
             cellViews.append(cellView)
         }
@@ -215,7 +215,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
         else { return descendInto(link) }
         
         let nodeView = descendInto(link)
-        let availableRenderers = customRenderers.compactMap(\.link)
+        let availableRenderers = elementRenderers.compactMap(\.link)
         if availableRenderers.isEmpty == false,
            let urlScheme = url.scheme,
            let linkRenderer = availableRenderers.first(where: { $0.scheme == urlScheme })?.renderer {
