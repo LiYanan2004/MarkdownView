@@ -8,6 +8,12 @@
 import SwiftUI
 
 extension SwiftUI.View {
+    /// Registers a custom renderer for markdown elements in this view hierarchy.
+    ///
+    /// Register a renderer with the same block directive name or URL scheme to replace an earlier registration in the same scope.
+    ///
+    /// - Parameter registration: The renderer registration to apply.
+    /// - Returns: A view that uses the specified registration when rendering markdown content.
     nonisolated public func markdownElementRenderer(_ registration: MarkdownElementRendererRegistration) -> some View {
         transformEnvironment(\.markdownElementRenderers) { renderers in
             renderers.register(registration)
@@ -18,10 +24,11 @@ extension SwiftUI.View {
 // MARK: - Deprecated
 
 extension SwiftUI.View {
-    /// Adds your custom block directive renderer.
+    /// Registers a custom renderer for block directives with the specified name.
     ///
-    /// - parameter renderer: The renderer you have created to handle block directive rendering.
-    /// - parameter name: The name of the block directive.
+    /// - Parameter renderer: The renderer to use for matching block directives.
+    /// - Parameter name: The block directive name to match.
+    /// - Returns: A view that uses the specified renderer for matching block directives.
     @available(*, deprecated, message: "Use markdownElementRenderer(.blockDirective(_:name:)) instead.")
     nonisolated public func blockDirectiveRenderer(
         _ renderer: some BlockDirectiveRenderer,
@@ -30,10 +37,11 @@ extension SwiftUI.View {
         markdownElementRenderer(.blockDirective(renderer, name: name))
     }
     
-    /// Use custom renderer to render images.
+    /// Registers a custom renderer for images with the specified URL scheme.
     ///
-    /// - parameter renderer: The render you created to handle image loading and rendering.
-    /// - parameter urlScheme: A scheme for deciding which renderer to use.
+    /// - Parameter renderer: The renderer to use for matching image URLs.
+    /// - Parameter urlScheme: The URL scheme to match.
+    /// - Returns: A view that uses the specified renderer for matching image URLs.
     @available(*, deprecated, message: "Use markdownElementRenderer(.image(_:urlScheme:)) instead.")
     nonisolated public func markdownImageRenderer(
         _ renderer: some MarkdownImageRenderer,
@@ -42,6 +50,11 @@ extension SwiftUI.View {
         markdownElementRenderer(.image(renderer, urlScheme: urlScheme))
     }
     
+    /// Registers a custom renderer for links with the specified URL scheme.
+    ///
+    /// - Parameter renderer: The renderer to use for matching link URLs.
+    /// - Parameter urlScheme: The URL scheme to match.
+    /// - Returns: A view that uses the specified renderer for matching link URLs.
     @available(*, deprecated, message: "Use markdownElementRenderer(.link(_:urlScheme:)) instead.")
     nonisolated public func markdownLinkRenderer(
         _ renderer: some MarkdownLinkRenderer,
@@ -50,4 +63,3 @@ extension SwiftUI.View {
         markdownElementRenderer(.link(renderer, urlScheme: urlScheme))
     }
 }
-

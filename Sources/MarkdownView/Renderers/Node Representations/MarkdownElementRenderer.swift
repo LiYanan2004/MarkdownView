@@ -7,9 +7,13 @@
 
 import SwiftUI
 
+/// A registration that associates a markdown element with a custom renderer.
 public enum MarkdownElementRendererRegistration {
+    /// Registers a renderer for a block directive with the specified name.
     case blockDirective(any BlockDirectiveRenderer, name: String)
+    /// Registers a renderer for images that use the specified URL scheme.
     case image(any MarkdownImageRenderer, urlScheme: String)
+    /// Registers a renderer for links that use the specified URL scheme.
     case link(any MarkdownLinkRenderer, urlScheme: String)
     
     var renderer: any MarkdownElementRenderer {
@@ -42,12 +46,21 @@ public enum MarkdownElementRendererRegistration {
     }
 }
 
+/// A type that creates a view for a markdown element.
+///
+/// Use one of the specialized renderer protocols, such as ``MarkdownImageRenderer``, ``MarkdownLinkRenderer``, or ``BlockDirectiveRenderer``, to adopt this protocol with the correct configuration type.
 @preconcurrency
 @MainActor
 public protocol MarkdownElementRenderer {
+    /// The input that describes the markdown element to render.
     associatedtype Configuration
+    /// The view that represents the rendered markdown element.
     associatedtype Body: View
 
+    /// Creates the view for the specified markdown element.
+    ///
+    /// - Parameter configuration: The values that describe the markdown element.
+    /// - Returns: A view that renders the markdown element.
     @preconcurrency
     @MainActor
     @ViewBuilder
