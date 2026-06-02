@@ -50,6 +50,7 @@ fileprivate struct DisplayMath: View {
         #if canImport(LaTeXSwiftUI)
         if let latexMath {
             LaTeX(latexMath)
+                .renderingStyle(.wait)
                 .renderingStyle(.empty)
                 .ignoreStringFormatting()
                 .blockMode(.blockText)

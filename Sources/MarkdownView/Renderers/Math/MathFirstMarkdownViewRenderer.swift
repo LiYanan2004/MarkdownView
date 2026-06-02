@@ -15,25 +15,26 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
         var configuration = configuration
-        var rawText = content.raw.text
+        let rawText = content.raw.text
+
+        var mathRangesResolver = MathParsableRangesResolver()
+        mathRangesResolver.visit(content.parse(options: ParseOptions().union(.parseBlockDirectives)))
+
+        #if canImport(LaTeXSwiftUI)
+        let includeInlineMath = true
+        #else
+        let includeInlineMath = false
+        #endif
         
-        var extractor = ParsingRangesExtractor()
-        extractor.visit(content.parse(options: ParseOptions().union(.parseBlockDirectives)))
-        for range in extractor.parsableRanges(in: rawText).reversed() {
-            let segment = rawText[range]
-            let segmentParser = MathParser(text: segment)
-            for math in segmentParser.mathRepresentations.reversed() where !math.kind.inline {
-                let mathIdentifier = configuration.math.appendDisplayMath(
-                    rawText[math.range]
-                )
-                rawText.replaceSubrange(
-                    math.range,
-                    with: "@math(uuid:\(mathIdentifier))"
-                )
-            }
-        }
+        let preprocessedMath = MathPlaceholderPreprocessor.process(
+            rawText,
+            parsableRanges: mathRangesResolver.resolve(in: rawText),
+            includeInlineMath: includeInlineMath
+        )
+        configuration.math.displayMathStorage = preprocessedMath.displayMathStorage
+        configuration.math.inlineMathStorage = preprocessedMath.inlineMathStorage
         
-        let _content = MarkdownContent(raw: .plainText(rawText))
+        let _content = MarkdownContent(raw: .plainText(preprocessedMath.markdown))
         return CmarkFirstMarkdownViewRenderer()
             .makeBody(content: _content, configuration: configuration, elementRenderers: elementRenderers)
     }
