@@ -9,12 +9,12 @@ import Markdown
 
 extension MathFirstMarkdownViewRenderer {
     struct ParsingRangesExtractor: MarkupWalker {
-        private var excludedRanges: [Range<SourceLocation>] = []
+        private var resolvableExcludedRanges: [any MarkdownTextRangesResolvable] = []
         
         func parsableRanges(in text: String) -> [Range<String.Index>] {
             var allowedRanges: [Range<String.Index>] = []
-            let excludedRanges = self.excludedRanges.map {
-                ($0.lowerBound.index(in: text)..<$0.upperBound.index(in: text))
+            let excludedRanges = resolvableExcludedRanges.flatMap {
+                $0.resolve(in: text)
             }
 
             let fullRange = text.startIndex..<text.endIndex
@@ -41,31 +41,22 @@ extension MathFirstMarkdownViewRenderer {
         
         mutating func visitCodeBlock(_ codeBlock: CodeBlock) {
             guard let range = codeBlock.range else { return }
-            self.excludedRanges.append(range)
+            resolvableExcludedRanges.append(range)
         }
 
         mutating func visitInlineCode(_ inlineCode: InlineCode) {
             guard let range = inlineCode.range else { return }
-            self.excludedRanges.append(range)
+            resolvableExcludedRanges.append(range)
         }
-    }
-}
 
-fileprivate extension SourceLocation {
-    func index(in string: String) -> String.Index {
-        var idx = string.startIndex
-        var currentLine = 1
-        while currentLine < self.line && idx < string.endIndex {
-            if string[idx] == "\n" {
-                currentLine += 1
-            }
-            idx = string.index(after: idx)
+        mutating func visitLink(_ link: Link) {
+            resolvableExcludedRanges.append(link)
+            descendInto(link)
         }
-        guard let utf8LineStart = idx.samePosition(in: string.utf8) else {
-            return string.endIndex
+
+        mutating func visitImage(_ image: Image) {
+            guard let range = image.range else { return }
+            resolvableExcludedRanges.append(range)
         }
-        let byteOffset = self.column - 1
-        let targetUtf8Index = string.utf8.index(utf8LineStart, offsetBy: byteOffset, limitedBy: string.utf8.endIndex) ?? string.utf8.endIndex
-        return targetUtf8Index.samePosition(in: string) ?? string.endIndex
     }
 }

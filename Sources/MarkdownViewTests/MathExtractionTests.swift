@@ -7,60 +7,114 @@
 
 import Testing
 import Markdown
-@_spi(MarkdownMath) @testable import MarkdownView
+@testable import MarkdownView
 
-@MainActor
+@Suite("Math Extraction")
 struct MathExtractionTests {
-    struct MathExtractionTestConfiguration: Sendable {
-        var plainText: String
-        var extractedMath: [String]
+    @Test
+    func testExtractsDollarDelimitedInlineMath() async throws {
+        let markdown = #"""
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. The sample mean is $\bar{x} = \frac{1}{n}\sum_{i=1}^{n}x_i$, and the report continues with ordinary prose.
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"$\bar{x} = \frac{1}{n}\sum_{i=1}^{n}x_i$"#,
+        ])
     }
 
-    @Test(
-        arguments: [
-            MathExtractionTestConfiguration(
-                plainText: #"delimiters to show math inline: $\sqrt{3x-1}+(1+x)^2$"#,
-                extractedMath: [#"$\sqrt{3x-1}+(1+x)^2$"#]
-            ),
-            MathExtractionTestConfiguration(
-                plainText: #"""
-                **The Cauchy-Schwarz Inequality**
-                $$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
-                """#,
-                extractedMath: [#"$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$"#]
-            ),
-            MathExtractionTestConfiguration(
-                plainText: #"\( G_{\mu\nu} \): Einstein tensor (spacetime curvature)"#,
-                extractedMath: [#"\( G_{\mu\nu} \)"#]
-            ),
-            MathExtractionTestConfiguration(
-                plainText: #"\[ \hat{H}\psi = E\psi \quad \text{where} \quad \hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf{r}) \]"#,
-                extractedMath: [#"\[ \hat{H}\psi = E\psi \quad \text{where} \quad \hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf{r}) \]"#]
-            ),
-            MathExtractionTestConfiguration(
-                plainText: #"$(a_n)_{n \in \mathbb{N}}$ und $(b_n)_{n \in \mathbb{N}}$ sind geometrische Folgen."#,
-                extractedMath: [
-                    #"$(a_n)_{n \in \mathbb{N}}$"#,
-                    #"$(b_n)_{n \in \mathbb{N}}$"#,
-                ]
-            ),
-        ]
-    )
-    func testMathExtractionCase(
-        _ configuration: MathExtractionTestConfiguration
-    ) async throws {
-        let parser = MathParser(text: configuration.plainText)
-        let extractedMath = parser.mathRepresentations
-            .map(\.range)
-            .map { String(configuration.plainText[$0]) }
-        #expect(extractedMath == configuration.extractedMath)
+    @Test
+    func testExtractsParenthesesDelimitedInlineMath() async throws {
+        let markdown = #"""
+        Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. The confidence interval \( \hat{p} \pm z_{\alpha/2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}} \) appears inline.
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"\( \hat{p} \pm z_{\alpha/2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}} \)"#,
+        ])
+    }
+
+    @Test
+    func testExtractsDollarDelimitedDisplayMath() async throws {
+        let markdown = #"""
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames.
+
+        $$\int_{0}^{1} x^2\,dx = \frac{1}{3}$$
+
+        Donec ullamcorper nulla non metus auctor fringilla.
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"$$\int_{0}^{1} x^2\,dx = \frac{1}{3}$$"#,
+        ])
+    }
+
+    @Test
+    func testExtractsBracketDelimitedDisplayMath() async throws {
+        let markdown = #"""
+        Cras mattis consectetur purus sit amet fermentum.
+
+        \[
+        \nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
+        \]
+
+        Integer posuere erat a ante venenatis dapibus.
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"""
+            \[
+            \nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
+            \]
+            """#,
+        ])
+    }
+
+    @Test
+    func testExtractsNamedEquation() async throws {
+        let markdown = #"""
+        Maecenas sed diam eget risus varius blandit sit amet non magna.
+
+        \begin{equation}
+        E = mc^2
+        \end{equation}
+
+        Etiam porta sem malesuada magna mollis euismod.
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"""
+            \begin{equation}
+            E = mc^2
+            \end{equation}
+            """#,
+        ])
+    }
+
+    @Test
+    func testExtractsUnnumberedNamedEquation() async throws {
+        let markdown = #"""
+        Nullam id dolor id nibh ultricies vehicula ut id elit.
+
+        \begin{equation*}
+        a^2 + b^2 = c^2
+        \end{equation*}
+
+        Aenean lacinia bibendum nulla sed consectetur.
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"""
+            \begin{equation*}
+            a^2 + b^2 = c^2
+            \end{equation*}
+            """#,
+        ])
     }
 
     @Test
     func testMathPreprocessingProtectsInlineMathUnderscores() async throws {
-        let markdown = #"$(a_n)_{n \in \mathbb{N}}$ und $(b_n)_{n \in \mathbb{N}}$ sind geometrische Folgen."#
-        let preprocessor = MathPlaceholderPreprocessor()
-        let result = preprocessor.process(markdown)
+        let markdown = #"Lorem ipsum dolor sit amet, $(a_n)_{n \in \mathbb{N}}$ and $(b_n)_{n \in \mathbb{N}}$ are both geometric sequences."#
+        let result = MathPlaceholderPreprocessor().process(markdown)
 
         #expect(result.inlineMathStorage.count == 2)
         #expect(result.displayMathStorage.isEmpty)
@@ -73,7 +127,52 @@ struct MathExtractionTests {
 
     @Test
     func testMathPreprocessingPreservesInlineCodeMathLiteral() async throws {
-        let markdown = #"Use `$x_y$` literally, then render $a_b$."#
+        let markdown = #"Lorem ipsum keeps `$x_y$` as source text while rendering $a_b$ in the same sentence."#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown.contains(#"`$x_y$`"#))
+        #expect(Array(result.inlineMathStorage.values) == [#"$a_b$"#])
+    }
+
+    @Test
+    func testMathPreprocessingPreservesLinkMetadataLiterals() async throws {
+        let markdown = #"Read [Apple Developer](https://developer.apple.com/documentation/swift "$release$ notes") before rendering $x_y$ in the paragraph."#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown.contains(#"https://developer.apple.com/documentation/swift"#))
+        #expect(result.markdown.contains(#""$release$ notes""#))
+        #expect(Array(result.inlineMathStorage.values) == [#"$x_y$"#])
+    }
+
+    @Test
+    func testMathPreprocessingPreservesInlineCodeInLinkLabels() async throws {
+        let markdown = #"Read [the `$x_y$` example](https://example.com) before rendering $a_b$ in the paragraph."#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown.contains(#"[the `$x_y$` example]"#))
+        #expect(Array(result.inlineMathStorage.values) == [#"$a_b$"#])
+    }
+
+    @Test
+    func testMathPreprocessingPreservesImageLiterals() async throws {
+        let markdown = #"![Google logo $asset$](https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png "Google $asset$ logo") and render $x_y$."#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown.contains(#"![Google logo $asset$]"#))
+        #expect(result.markdown.contains(#"https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"#))
+        #expect(result.markdown.contains(#""Google $asset$ logo""#))
+        #expect(Array(result.inlineMathStorage.values) == [#"$x_y$"#])
+    }
+
+    private func extractedMath(in markdown: String) -> [String] {
+        MathParser(text: markdown).mathRepresentations.map { mathRepresentation in
+            String(markdown[mathRepresentation.range])
+        }
+    }
+
+    private func processMarkdownParsingRanges(
+        in markdown: String
+    ) -> MathPlaceholderPreprocessor.Result {
         var extractor = MathFirstMarkdownViewRenderer.ParsingRangesExtractor()
         extractor.visit(
             Document(
@@ -82,14 +181,9 @@ struct MathExtractionTests {
             )
         )
 
-        let preprocessor = MathPlaceholderPreprocessor()
-        let result = preprocessor.process(
+        return MathPlaceholderPreprocessor().process(
             markdown,
             parsableRanges: extractor.parsableRanges(in: markdown)
         )
-
-        #expect(result.markdown.contains(#"`$x_y$`"#))
-        #expect(!result.inlineMathStorage.values.contains(#"$x_y$"#))
-        #expect(result.inlineMathStorage.values.contains(#"$a_b$"#))
     }
 }

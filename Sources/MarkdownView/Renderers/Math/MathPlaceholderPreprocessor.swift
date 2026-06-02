@@ -7,11 +7,10 @@
 
 import Foundation
 
-@_spi(MarkdownMath)
-public struct MathPlaceholderPreprocessor {
-    public init() {}
+package struct MathPlaceholderPreprocessor {
+    package init() {}
 
-    public func process(
+    package func process(
         _ markdown: String,
         includeInlineMath: Bool = true
     ) -> Result {
@@ -22,7 +21,7 @@ public struct MathPlaceholderPreprocessor {
         )
     }
 
-    public func process(
+    package func process(
         _ markdown: String,
         parsableRanges: [Range<String.Index>],
         includeInlineMath: Bool = true
@@ -104,8 +103,8 @@ public struct MathPlaceholderPreprocessor {
 extension MathPlaceholderPreprocessor {
     public struct Result {
         public let markdown: String
-        public let inlineMathStorage: [UUID: String]
-        public let displayMathStorage: [UUID: String]
+        public let inlineMathStorage: [UUID : String]
+        public let displayMathStorage: [UUID : String]
     }
 }
 
