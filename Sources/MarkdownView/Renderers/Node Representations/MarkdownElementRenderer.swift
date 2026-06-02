@@ -10,7 +10,7 @@ import SwiftUI
 /// A registration that associates a markdown element with a custom renderer.
 public enum MarkdownElementRendererRegistration {
     /// Registers a renderer for a block directive with the specified name.
-    case blockDirective(any BlockDirectiveRenderer, name: String)
+    case blockDirective(any MarkdownBlockDirectiveRenderer, name: String)
     /// Registers a renderer for images that use the specified URL scheme.
     case image(any MarkdownImageRenderer, urlScheme: String)
     /// Registers a renderer for links that use the specified URL scheme.
@@ -24,7 +24,7 @@ public enum MarkdownElementRendererRegistration {
         }
     }
 
-    var blockDirective: (name: String, renderer: any BlockDirectiveRenderer)? {
+    var blockDirective: (name: String, renderer: any MarkdownBlockDirectiveRenderer)? {
         if case .blockDirective(let renderer, let name) = self {
             return (name, renderer)
         }
@@ -48,7 +48,7 @@ public enum MarkdownElementRendererRegistration {
 
 /// A type that creates a view for a markdown element.
 ///
-/// Use one of the specialized renderer protocols, such as ``MarkdownImageRenderer``, ``MarkdownLinkRenderer``, or ``BlockDirectiveRenderer``, to adopt this protocol with the correct configuration type.
+/// Use one of the specialized renderer protocols, such as ``MarkdownImageRenderer``, ``MarkdownLinkRenderer``, or ``MarkdownBlockDirectiveRenderer``, to adopt this protocol with the correct configuration type.
 @preconcurrency
 @MainActor
 public protocol MarkdownElementRenderer {

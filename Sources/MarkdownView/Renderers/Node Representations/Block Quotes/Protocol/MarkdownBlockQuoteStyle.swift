@@ -1,5 +1,5 @@
 //
-//  BlockQuoteStyle.swift
+//  MarkdownBlockQuoteStyle.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2025/4/17.
@@ -15,7 +15,7 @@ import Markdown
 /// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
 @preconcurrency
 @MainActor
-public protocol BlockQuoteStyle {
+public protocol MarkdownBlockQuoteStyle {
     /// A view that represents the current block quote.
     associatedtype Body: View
     /// Creates the view that represents the current block quote.
@@ -24,11 +24,11 @@ public protocol BlockQuoteStyle {
     @ViewBuilder
     func makeBody(configuration: Configuration) -> Body
     /// The properties of a block quote.
-    typealias Configuration = BlockQuoteStyleConfiguration
+    typealias Configuration = MarkdownBlockQuoteStyleConfiguration
 }
 
 /// The properties of a block quote.
-public struct BlockQuoteStyleConfiguration {
+public struct MarkdownBlockQuoteStyleConfiguration {
     /// The content of a block quote.
     public var content: Content
     
@@ -55,18 +55,26 @@ public struct BlockQuoteStyleConfiguration {
 }
 
 @available(*, unavailable)
-extension BlockQuoteStyleConfiguration: Sendable {
+extension MarkdownBlockQuoteStyleConfiguration: Sendable {
     
 }
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownBlockQuoteStyle")
+public typealias BlockQuoteStyle = MarkdownBlockQuoteStyle
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownBlockQuoteStyleConfiguration")
+public typealias BlockQuoteStyleConfiguration = MarkdownBlockQuoteStyleConfiguration
 
 // MARK: - Environment Value
 
 struct BlockQuoteStyleKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: any BlockQuoteStyle = DefaultBlockQuoteStyle()
+    @MainActor static var defaultValue: any MarkdownBlockQuoteStyle = DefaultBlockQuoteStyle()
 }
 
 extension EnvironmentValues {
-    package var blockQuoteStyle: any BlockQuoteStyle {
+    package var blockQuoteStyle: any MarkdownBlockQuoteStyle {
         get { self[BlockQuoteStyleKey.self] }
         set { self[BlockQuoteStyleKey.self] = newValue }
     }

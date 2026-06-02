@@ -31,7 +31,7 @@ extension SwiftUI.View {
     /// - Returns: A view that uses the specified renderer for matching block directives.
     @available(*, deprecated, message: "Use markdownElementRenderer(.blockDirective(_:name:)) instead.")
     nonisolated public func blockDirectiveRenderer(
-        _ renderer: some BlockDirectiveRenderer,
+        _ renderer: some MarkdownBlockDirectiveRenderer,
         for name: String
     ) -> some View {
         markdownElementRenderer(.blockDirective(renderer, name: name))

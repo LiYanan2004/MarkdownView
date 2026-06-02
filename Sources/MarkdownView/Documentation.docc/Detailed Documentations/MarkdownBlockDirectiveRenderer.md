@@ -1,16 +1,16 @@
-# ``BlockDirectiveRenderer``
+# ``MarkdownBlockDirectiveRenderer``
 
 ## Topics
 
 ### Creating custom renderers
 
 - ``MarkdownElementRenderer/makeBody(configuration:)``
-- ``BlockDirectiveRendererConfiguration``
-- ``BlockDirectiveRenderer/Configuration``
+- ``MarkdownBlockDirectiveRendererConfiguration``
+- ``MarkdownBlockDirectiveRenderer/Configuration``
 
 ### Substituting renderer
 
-- ``AnyBlockDirectiveRenderer``
+- ``AnyMarkdownBlockDirectiveRenderer``
 
 ### Registering renderers
 

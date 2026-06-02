@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MarkdownStyledCodeBlock: View {
-    var configuration: CodeBlockStyleConfiguration
+    var configuration: MarkdownCodeBlockStyleConfiguration
     @Environment(\.codeBlockStyle) private var codeBlockStyle
     
     var body: some View {

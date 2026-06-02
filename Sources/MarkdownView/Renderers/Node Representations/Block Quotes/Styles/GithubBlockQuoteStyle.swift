@@ -8,19 +8,19 @@
 import SwiftUI
 
 /// Github block quote style that applies to a MarkdownView.
-public struct GithubBlockQuoteStyle: BlockQuoteStyle {
+public struct GithubBlockQuoteStyle: MarkdownBlockQuoteStyle {
     public func makeBody(configuration: Configuration) -> some View {
         GithubBlockQuoteView(configuration: configuration)
     }
 }
 
-extension BlockQuoteStyle where Self == GithubBlockQuoteStyle {
+extension MarkdownBlockQuoteStyle where Self == GithubBlockQuoteStyle {
     /// A block quote style that matches the appearance of block quotes in Github..
     static public var github: GithubBlockQuoteStyle { .init() }
 }
 
 fileprivate struct GithubBlockQuoteView: View {
-    var configuration: BlockQuoteStyleConfiguration
+    var configuration: MarkdownBlockQuoteStyleConfiguration
     #if os(macOS)
     @ScaledMetric(relativeTo: .body) private var fontSize: CGFloat = 13
     #elseif os(tvOS)

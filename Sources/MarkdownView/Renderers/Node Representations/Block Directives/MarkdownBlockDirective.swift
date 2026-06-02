@@ -15,7 +15,7 @@ struct MarkdownBlockDirective: View {
     
     var body: some View {
         if let renderer = blockDirectiveRenderer(for: blockDirective.name) {
-            let configuration = BlockDirectiveRendererConfiguration(
+            let configuration = MarkdownBlockDirectiveRendererConfiguration(
                 wrappedString: blockDirective
                     .children
                     .compactMap { $0.format() }
@@ -23,7 +23,7 @@ struct MarkdownBlockDirective: View {
                 arguments: blockDirective
                     .argumentText
                     .parseNameValueArguments()
-                    .map { BlockDirectiveRendererConfiguration.Argument($0) }
+                    .map { MarkdownBlockDirectiveRendererConfiguration.Argument($0) }
             )
             renderer
                 .makeBody(configuration: configuration)
@@ -34,7 +34,7 @@ struct MarkdownBlockDirective: View {
         }
     }
 
-    private func blockDirectiveRenderer(for name: String) -> (any BlockDirectiveRenderer)? {
+    private func blockDirectiveRenderer(for name: String) -> (any MarkdownBlockDirectiveRenderer)? {
         elementRenderers
             .compactMap(\.blockDirective)
             .first(where: { $0.name == name })?

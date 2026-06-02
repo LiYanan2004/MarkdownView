@@ -28,17 +28,17 @@ public protocol HeadingStyleGroup {
     /// The style for displaying h6 text.
     var h6: H6Style { get }
     
-    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `CodeBlockStyle` instead.")
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownCodeBlockStyle` instead.")
     @_documentation(visibility: internal)
     associatedtype CodeBlockStyle: ShapeStyle
-    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `BlockQuoteStyle` instead.")
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownBlockQuoteStyle` instead.")
     @_documentation(visibility: internal)
     associatedtype BlockQuoteStyle: ShapeStyle
     
-    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `CodeBlockStyle` instead.")
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownCodeBlockStyle` instead.")
     @_documentation(visibility: internal)
     var codeBlock: CodeBlockStyle { get }
-    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `BlockQuoteStyle` instead.")
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownBlockQuoteStyle` instead.")
     @_documentation(visibility: internal)
     var blockQuote: BlockQuoteStyle { get }
     

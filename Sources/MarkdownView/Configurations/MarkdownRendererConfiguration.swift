@@ -19,8 +19,8 @@ struct MarkdownRendererConfiguration: Hashable, AllowingModifyThroughKeyPath, Se
 
 // MARK: - MarkdownTintableComponent
 
-@available(*, deprecated, renamed: "MarkdownTintableComponent")
 @_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownTintableComponent")
 public typealias TintableComponent = MarkdownTintableComponent
 
 /// Components that can apply a tint color.

@@ -17,7 +17,7 @@ struct MarkdownListConfiguration: Hashable, @unchecked Sendable {
 // MARK: - Ordered List Marker
 
 /// A type that represents the marker for ordered list items.
-public protocol OrderedListMarkerProtocol: Hashable {
+public protocol MarkdownOrderedListMarkerProtocol: Hashable {
     /// Returns a marker for a specific index of ordered list item. Index starting from 0.
     func marker(at index: Int, listDepth: Int) -> String
     
@@ -25,29 +25,29 @@ public protocol OrderedListMarkerProtocol: Hashable {
     var monospaced: Bool { get }
 }
 
-extension OrderedListMarkerProtocol {
+extension MarkdownOrderedListMarkerProtocol {
     public var monospaced: Bool {
         true
     }
 }
 
-struct AnyOrderedListMarkerProtocol: OrderedListMarkerProtocol {
+struct AnyOrderedListMarkerProtocol: MarkdownOrderedListMarkerProtocol {
     private var _marker: AnyHashable
     var monospaced: Bool {
-        (_marker as! (any OrderedListMarkerProtocol)).monospaced
+        (_marker as! (any MarkdownOrderedListMarkerProtocol)).monospaced
     }
     
-    init<T: OrderedListMarkerProtocol>(_ marker: T) {
+    init<T: MarkdownOrderedListMarkerProtocol>(_ marker: T) {
         self._marker = AnyHashable(marker)
     }
     
     public func marker(at index: Int, listDepth: Int) -> String {
-        (_marker as! (any OrderedListMarkerProtocol)).marker(at: index, listDepth: listDepth)
+        (_marker as! (any MarkdownOrderedListMarkerProtocol)).marker(at: index, listDepth: listDepth)
     }
 }
 
 /// An auto-increasing digits marker for ordered list items.
-public struct OrderedListIncreasingDigitsMarker: OrderedListMarkerProtocol {
+public struct OrderedListIncreasingDigitsMarker: MarkdownOrderedListMarkerProtocol {
     public func marker(at index: Int, listDepth: Int) -> String {
         String(index + 1) + "."
     }
@@ -55,13 +55,13 @@ public struct OrderedListIncreasingDigitsMarker: OrderedListMarkerProtocol {
     public var monospaced: Bool { false }
 }
 
-extension OrderedListMarkerProtocol where Self == OrderedListIncreasingDigitsMarker {
+extension MarkdownOrderedListMarkerProtocol where Self == OrderedListIncreasingDigitsMarker {
     /// An auto-increasing digits marker for ordered list items.
     static public var increasingDigits: OrderedListIncreasingDigitsMarker { .init() }
 }
 
 /// An auto-increasing letters marker for ordered list items.
-public struct OrderedListIncreasingLettersMarker: OrderedListMarkerProtocol {
+public struct OrderedListIncreasingLettersMarker: MarkdownOrderedListMarkerProtocol {
     public func marker(at index: Int, listDepth: Int) -> String {
         let base = 26
         var index = index
@@ -86,7 +86,7 @@ public struct OrderedListIncreasingLettersMarker: OrderedListMarkerProtocol {
     public var monospaced: Bool { false }
 }
 
-extension OrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMarker {
+extension MarkdownOrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMarker {
     /// An auto-increasing letters marker for ordered list items.
     static public var increasingLetters: OrderedListIncreasingLettersMarker { .init() }
 }
@@ -94,7 +94,7 @@ extension OrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMa
 // MARK: - Unordered List Marker
 
 /// A type that represents the marker for unordered list items.
-public protocol UnorderedListMarkerProtocol: Hashable {
+public protocol MarkdownUnorderedListMarkerProtocol: Hashable {
     /// Returns a marker for a specific indentation level of unordered list item. indentationLevel starting from 0.
     func marker(listDepth: Int) -> String
     
@@ -102,47 +102,57 @@ public protocol UnorderedListMarkerProtocol: Hashable {
     var monospaced: Bool { get }
 }
 
-extension UnorderedListMarkerProtocol {
+extension MarkdownUnorderedListMarkerProtocol {
     public var monospaced: Bool {
         true
     }
 }
 
-struct AnyUnorderedListMarkerProtocol: UnorderedListMarkerProtocol {
+struct AnyUnorderedListMarkerProtocol: MarkdownUnorderedListMarkerProtocol {
     private var _marker: AnyHashable
     var monospaced: Bool {
-        (_marker as! (any UnorderedListMarkerProtocol)).monospaced
+        (_marker as! (any MarkdownUnorderedListMarkerProtocol)).monospaced
     }
     
-    init<T: UnorderedListMarkerProtocol>(_ marker: T) {
+    init<T: MarkdownUnorderedListMarkerProtocol>(_ marker: T) {
         self._marker = AnyHashable(marker)
     }
     
     public func marker(listDepth: Int) -> String {
-        (_marker as! (any UnorderedListMarkerProtocol)).marker(listDepth: listDepth)
+        (_marker as! (any MarkdownUnorderedListMarkerProtocol)).marker(listDepth: listDepth)
     }
 }
 
 /// A dash marker for unordered list items.
-public struct UnorderedListDashMarker: UnorderedListMarkerProtocol {
+public struct UnorderedListDashMarker: MarkdownUnorderedListMarkerProtocol {
     public func marker(listDepth: Int) -> String {
         "-"
     }
 }
 
-extension UnorderedListMarkerProtocol where Self == UnorderedListDashMarker {
+extension MarkdownUnorderedListMarkerProtocol where Self == UnorderedListDashMarker {
     /// A dash marker for unordered list items.
     static public var dash: UnorderedListDashMarker { .init() }
 }
 
 /// A bullet marker for unordered list items.
-public struct UnorderedListBulletMarker: UnorderedListMarkerProtocol {
+public struct UnorderedListBulletMarker: MarkdownUnorderedListMarkerProtocol {
     public func marker(listDepth: Int) -> String {
         "•"
     }
 }
 
-extension UnorderedListMarkerProtocol where Self == UnorderedListBulletMarker {
+extension MarkdownUnorderedListMarkerProtocol where Self == UnorderedListBulletMarker {
     /// A bullet marker for unordered list items.
     static public var bullet: UnorderedListBulletMarker { .init() }
 }
+
+// MARK: - Deprecations
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownOrderedListMarkerProtocol")
+public typealias OrderedListMarkerProtocol = MarkdownOrderedListMarkerProtocol
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownUnorderedListMarkerProtocol")
+public typealias UnorderedListMarkerProtocol = MarkdownUnorderedListMarkerProtocol

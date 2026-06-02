@@ -14,13 +14,13 @@ extension View {
         }
     }
     
-    nonisolated public func markdownUnorderedListMarker(_ marker: some UnorderedListMarkerProtocol) -> some View {
+    nonisolated public func markdownUnorderedListMarker(_ marker: some MarkdownUnorderedListMarkerProtocol) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.listConfiguration.unorderedListMarker = AnyUnorderedListMarkerProtocol(marker)
         }
     }
     
-    nonisolated public func markdownOrderedListMarker(_ marker: some OrderedListMarkerProtocol) -> some View {
+    nonisolated public func markdownOrderedListMarker(_ marker: some MarkdownOrderedListMarkerProtocol) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.listConfiguration.orderedListMarker = AnyOrderedListMarkerProtocol(marker)
         }

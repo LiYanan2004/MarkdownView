@@ -8,19 +8,19 @@
 import SwiftUI
 
 /// Default block quote style that applies to a MarkdownView.
-public struct DefaultBlockQuoteStyle: BlockQuoteStyle {
+public struct DefaultBlockQuoteStyle: MarkdownBlockQuoteStyle {
     public func makeBody(configuration: Configuration) -> some View {
         DefaultBlockQuoteView(configuration: configuration)
     }
 }
 
-extension BlockQuoteStyle where Self == DefaultBlockQuoteStyle {
+extension MarkdownBlockQuoteStyle where Self == DefaultBlockQuoteStyle {
     /// Default block quote style.
     static public var `default`: DefaultBlockQuoteStyle { .init() }
 }
 
 fileprivate struct DefaultBlockQuoteView: View {
-    var configuration: BlockQuoteStyleConfiguration
+    var configuration: MarkdownBlockQuoteStyleConfiguration
     
     @Environment(\.markdownRendererConfiguration) private var rendererConfiguration
     @Environment(\.markdownFontGroup.blockQuote) private var font

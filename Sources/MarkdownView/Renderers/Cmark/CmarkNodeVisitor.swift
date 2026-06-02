@@ -114,7 +114,7 @@ struct CmarkNodeVisitor: @preconcurrency MarkupVisitor {
     func visitCodeBlock(_ codeBlock: CodeBlock) -> MarkdownNodeView {
         MarkdownNodeView {
             MarkdownStyledCodeBlock(
-                configuration: CodeBlockStyleConfiguration(
+                configuration: MarkdownCodeBlockStyleConfiguration(
                     language: codeBlock.language,
                     code: codeBlock.code
                 )

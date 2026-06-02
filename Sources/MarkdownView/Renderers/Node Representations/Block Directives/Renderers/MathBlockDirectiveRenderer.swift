@@ -11,8 +11,8 @@ import SwiftUI
 import LaTeXSwiftUI
 #endif
 
-struct MathBlockDirectiveRenderer: BlockDirectiveRenderer {
-    func makeBody(configuration: BlockDirectiveRendererConfiguration) -> some View {
+struct MathBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
+    func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
         if let identifierValue = configuration.arguments.first?.value,
            let identifier = UUID(uuidString: identifierValue) {
             DisplayMath(mathIdentifier: identifier)

@@ -14,7 +14,18 @@ extension View {
     /// Customize fonts for multiple types of text.
     ///
     /// - Parameter fontGroup: A font set to apply to the MarkdownView.
+    @inlinable
+    @available(*, deprecated, renamed: "markdownFontGroup")
     nonisolated public func fontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
+        markdownFontGroup(fontGroup)
+    }
+    
+    /// Apply a font group to MarkdownView.
+    ///
+    /// Customize fonts for multiple types of text.
+    ///
+    /// - Parameter fontGroup: A font set to apply to the MarkdownView.
+    nonisolated public func markdownFontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
         environment(\.markdownFontGroup, .init(fontGroup))
     }
     
