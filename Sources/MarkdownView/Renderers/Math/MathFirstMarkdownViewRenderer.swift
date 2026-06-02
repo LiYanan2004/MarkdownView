@@ -17,24 +17,23 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
         var configuration = configuration
         let rawText = content.raw.text
 
-        var extractor = ParsingRangesExtractor()
-        extractor.visit(content.parse(options: ParseOptions().union(.parseBlockDirectives)))
+        var mathRangesResolver = MathParsableRangesResolver()
+        mathRangesResolver.visit(content.parse(options: ParseOptions().union(.parseBlockDirectives)))
 
         #if canImport(LaTeXSwiftUI)
         let includeInlineMath = true
         #else
         let includeInlineMath = false
         #endif
-
-        let preprocessedMath = MathPlaceholderPreprocessor()
-            .process(
-                rawText,
-                parsableRanges: extractor.parsableRanges(in: rawText),
-                includeInlineMath: includeInlineMath
-            )
+        
+        let preprocessedMath = MathPlaceholderPreprocessor.process(
+            rawText,
+            parsableRanges: mathRangesResolver.resolve(in: rawText),
+            includeInlineMath: includeInlineMath
+        )
         configuration.math.displayMathStorage = preprocessedMath.displayMathStorage
         configuration.math.inlineMathStorage = preprocessedMath.inlineMathStorage
-
+        
         let _content = MarkdownContent(raw: .plainText(preprocessedMath.markdown))
         return CmarkFirstMarkdownViewRenderer()
             .makeBody(content: _content, configuration: configuration, elementRenderers: elementRenderers)

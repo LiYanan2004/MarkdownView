@@ -114,7 +114,7 @@ struct MathExtractionTests {
     @Test
     func testMathPreprocessingProtectsInlineMathUnderscores() async throws {
         let markdown = #"Lorem ipsum dolor sit amet, $(a_n)_{n \in \mathbb{N}}$ and $(b_n)_{n \in \mathbb{N}}$ are both geometric sequences."#
-        let result = MathPlaceholderPreprocessor().process(markdown)
+        let result = MathPlaceholderPreprocessor.process(markdown)
 
         #expect(result.inlineMathStorage.count == 2)
         #expect(result.displayMathStorage.isEmpty)
@@ -173,17 +173,17 @@ struct MathExtractionTests {
     private func processMarkdownParsingRanges(
         in markdown: String
     ) -> MathPlaceholderPreprocessor.Result {
-        var extractor = MathFirstMarkdownViewRenderer.ParsingRangesExtractor()
-        extractor.visit(
+        var mathRangesResolver = MathParsableRangesResolver()
+        mathRangesResolver.visit(
             Document(
                 parsing: markdown,
                 options: ParseOptions().union(.parseBlockDirectives)
             )
         )
 
-        return MathPlaceholderPreprocessor().process(
+        return MathPlaceholderPreprocessor.process(
             markdown,
-            parsableRanges: extractor.parsableRanges(in: markdown)
+            parsableRanges: mathRangesResolver.resolve(in: markdown)
         )
     }
 }

@@ -7,10 +7,8 @@
 
 import Foundation
 
-package struct MathPlaceholderPreprocessor {
-    package init() {}
-
-    package func process(
+package enum MathPlaceholderPreprocessor {
+    package static func process(
         _ markdown: String,
         includeInlineMath: Bool = true
     ) -> Result {
@@ -21,7 +19,7 @@ package struct MathPlaceholderPreprocessor {
         )
     }
 
-    package func process(
+    package static func process(
         _ markdown: String,
         parsableRanges: [Range<String.Index>],
         includeInlineMath: Bool = true
