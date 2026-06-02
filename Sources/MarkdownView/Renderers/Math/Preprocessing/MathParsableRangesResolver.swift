@@ -15,6 +15,7 @@ struct MathParsableRangesResolver: MarkupWalker {
         let includedRanges = resolvableIncludedRanges
             .flatMap { $0.resolve(in: text) }
             .sorted { $0.lowerBound < $1.lowerBound }
+            .merged(throughWhitespaceAndNewlinesIn: text)
         let excludedRanges = resolvableExcludedRanges.flatMap {
             $0.resolve(in: text)
         }
@@ -96,5 +97,31 @@ fileprivate extension MathParsableRangesResolver {
         }
 
         return allowedRanges
+    }
+}
+
+fileprivate extension Array where Element == Range<String.Index> {
+    func merged(throughWhitespaceAndNewlinesIn text: String) -> Self {
+        guard let firstRange = first else { return [] }
+
+        return dropFirst().reduce(into: [firstRange]) { mergedRanges, currentRange in
+            guard let previousRange = mergedRanges.popLast() else {
+                mergedRanges.append(currentRange)
+                return
+            }
+
+            if previousRange.upperBound >= currentRange.lowerBound {
+                mergedRanges.append(previousRange.lowerBound..<Swift.max(previousRange.upperBound, currentRange.upperBound))
+                return
+            }
+
+            let gap = text[previousRange.upperBound..<currentRange.lowerBound]
+            if gap.allSatisfy(\.isWhitespace) {
+                mergedRanges.append(previousRange.lowerBound..<currentRange.upperBound)
+            } else {
+                mergedRanges.append(previousRange)
+                mergedRanges.append(currentRange)
+            }
+        }
     }
 }

@@ -10,17 +10,6 @@ import Foundation
 package enum MathPlaceholderPreprocessor {
     package static func process(
         _ markdown: String,
-        includeInlineMath: Bool = true
-    ) -> Result {
-        process(
-            markdown,
-            parsableRanges: [markdown.startIndex..<markdown.endIndex],
-            includeInlineMath: includeInlineMath
-        )
-    }
-
-    package static func process(
-        _ markdown: String,
         parsableRanges: [Range<String.Index>],
         includeInlineMath: Bool = true
     ) -> Result {
