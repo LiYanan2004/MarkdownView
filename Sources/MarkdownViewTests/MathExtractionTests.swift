@@ -145,6 +145,19 @@ struct MathExtractionTests {
     }
 
     @Test
+    func testMathPreprocessingPreservesReferenceLinkMetadataLiterals() async throws {
+        let markdown = #"""
+        [Apple Developer]: https://developer.apple.com/documentation/swift/$release "$release$ notes"
+        
+        Read [Apple Developer] for more information.
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown.contains(#"[Apple Developer]: https://developer.apple.com/documentation/swift/$release "$release$ notes""#))
+        #expect(result.inlineMathStorage.isEmpty)
+    }
+    
+    @Test
     func testMathPreprocessingPreservesInlineCodeInLinkLabels() async throws {
         let markdown = #"Read [the `$x_y$` example](https://example.com) before rendering $a_b$ in the paragraph."#
         let result = processMarkdownParsingRanges(in: markdown)

@@ -8,32 +8,31 @@
 import Markdown
 
 struct MathParsableRangesResolver: MarkupWalker {
+    private var resolvableIncludedRanges: [SourceRange] = []
     private var resolvableExcludedRanges: [any MarkdownTextRangesResolvable] = []
     
     func resolve(in text: String) -> [Range<String.Index>] {
-        var allowedRanges: [Range<String.Index>] = []
+        let includedRanges = resolvableIncludedRanges
+            .flatMap { $0.resolve(in: text) }
+            .sorted { $0.lowerBound < $1.lowerBound }
         let excludedRanges = resolvableExcludedRanges.flatMap {
             $0.resolve(in: text)
         }
 
-        let fullRange = text.startIndex..<text.endIndex
-        let sortedExcluded = excludedRanges.sorted { $0.lowerBound < $1.lowerBound }
-        var currentStart = fullRange.lowerBound
-        
-        for ex in sortedExcluded {
-            if currentStart < ex.lowerBound {
-                allowedRanges.append(currentStart..<ex.lowerBound)
-            }
-            if currentStart < ex.upperBound {
-                currentStart = ex.upperBound
-            }
+        return includedRanges.flatMap { includedRange in
+            subtract(excludedRanges, from: includedRange)
         }
-        if currentStart < fullRange.upperBound {
-            allowedRanges.append(currentStart..<fullRange.upperBound)
-        }
-        return allowedRanges
     }
-    
+
+    mutating func visitDocument(_ document: Document) {
+        for child in document.children {
+            if let range = child.range {
+                resolvableIncludedRanges.append(range)
+            }
+            descendInto(child)
+        }
+    }
+
     mutating func defaultVisit(_ markup: any Markup) {
         descendInto(markup)
     }
@@ -56,5 +55,46 @@ struct MathParsableRangesResolver: MarkupWalker {
     mutating func visitImage(_ image: Image) {
         guard let range = image.range else { return }
         resolvableExcludedRanges.append(range)
+    }
+
+    mutating func visitInlineHTML(_ inlineHTML: InlineHTML) {
+        guard let range = inlineHTML.range else { return }
+        resolvableExcludedRanges.append(range)
+    }
+
+    mutating func visitHTMLBlock(_ htmlBlock: HTMLBlock) {
+        guard let range = htmlBlock.range else { return }
+        resolvableExcludedRanges.append(range)
+    }
+}
+
+fileprivate extension MathParsableRangesResolver {
+    func subtract(
+        _ excludedRanges: [Range<String.Index>],
+        from includedRange: Range<String.Index>
+    ) -> [Range<String.Index>] {
+        var allowedRanges: [Range<String.Index>] = []
+        let sortedExcludedRanges = excludedRanges
+            .filter { $0.overlaps(includedRange) }
+            .sorted { $0.lowerBound < $1.lowerBound }
+        var currentStart = includedRange.lowerBound
+
+        for excludedRange in sortedExcludedRanges {
+            if currentStart < excludedRange.lowerBound {
+                allowedRanges.append(
+                    currentStart..<min(excludedRange.lowerBound, includedRange.upperBound)
+                )
+            }
+
+            if currentStart < excludedRange.upperBound {
+                currentStart = min(excludedRange.upperBound, includedRange.upperBound)
+            }
+        }
+
+        if currentStart < includedRange.upperBound {
+            allowedRanges.append(currentStart..<includedRange.upperBound)
+        }
+
+        return allowedRanges
     }
 }
