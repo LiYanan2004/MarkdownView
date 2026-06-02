@@ -25,7 +25,9 @@ extension MathFirstMarkdownViewRenderer {
                 if currentStart < ex.lowerBound {
                     allowedRanges.append(currentStart..<ex.lowerBound)
                 }
-                currentStart = ex.upperBound
+                if currentStart < ex.upperBound {
+                    currentStart = ex.upperBound
+                }
             }
             if currentStart < fullRange.upperBound {
                 allowedRanges.append(currentStart..<fullRange.upperBound)
@@ -39,6 +41,11 @@ extension MathFirstMarkdownViewRenderer {
         
         mutating func visitCodeBlock(_ codeBlock: CodeBlock) {
             guard let range = codeBlock.range else { return }
+            self.excludedRanges.append(range)
+        }
+
+        mutating func visitInlineCode(_ inlineCode: InlineCode) {
+            guard let range = inlineCode.range else { return }
             self.excludedRanges.append(range)
         }
     }

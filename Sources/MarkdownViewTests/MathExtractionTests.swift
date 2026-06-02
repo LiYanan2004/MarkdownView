@@ -6,7 +6,8 @@
 //
 
 import Testing
-@_spi(MarkdownMath) import MarkdownView
+import Markdown
+@_spi(MarkdownMath) @testable import MarkdownView
 
 @MainActor
 struct MathExtractionTests {
@@ -14,7 +15,7 @@ struct MathExtractionTests {
         var plainText: String
         var extractedMath: [String]
     }
-    
+
     @Test(
         arguments: [
             MathExtractionTestConfiguration(
@@ -36,6 +37,13 @@ struct MathExtractionTests {
                 plainText: #"\[ \hat{H}\psi = E\psi \quad \text{where} \quad \hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf{r}) \]"#,
                 extractedMath: [#"\[ \hat{H}\psi = E\psi \quad \text{where} \quad \hat{H} = -\frac{\hbar^2}{2m}\nabla^2 + V(\mathbf{r}) \]"#]
             ),
+            MathExtractionTestConfiguration(
+                plainText: #"$(a_n)_{n \in \mathbb{N}}$ und $(b_n)_{n \in \mathbb{N}}$ sind geometrische Folgen."#,
+                extractedMath: [
+                    #"$(a_n)_{n \in \mathbb{N}}$"#,
+                    #"$(b_n)_{n \in \mathbb{N}}$"#,
+                ]
+            ),
         ]
     )
     func testMathExtractionCase(
@@ -46,5 +54,42 @@ struct MathExtractionTests {
             .map(\.range)
             .map { String(configuration.plainText[$0]) }
         #expect(extractedMath == configuration.extractedMath)
+    }
+
+    @Test
+    func testMathPreprocessingProtectsInlineMathUnderscores() async throws {
+        let markdown = #"$(a_n)_{n \in \mathbb{N}}$ und $(b_n)_{n \in \mathbb{N}}$ sind geometrische Folgen."#
+        let preprocessor = MathPlaceholderPreprocessor()
+        let result = preprocessor.process(markdown)
+
+        #expect(result.inlineMathStorage.count == 2)
+        #expect(result.displayMathStorage.isEmpty)
+        #expect(Set(result.inlineMathStorage.values) == Set([
+            #"$(a_n)_{n \in \mathbb{N}}$"#,
+            #"$(b_n)_{n \in \mathbb{N}}$"#,
+        ]))
+        #expect(!result.markdown.contains("_"))
+    }
+
+    @Test
+    func testMathPreprocessingPreservesInlineCodeMathLiteral() async throws {
+        let markdown = #"Use `$x_y$` literally, then render $a_b$."#
+        var extractor = MathFirstMarkdownViewRenderer.ParsingRangesExtractor()
+        extractor.visit(
+            Document(
+                parsing: markdown,
+                options: ParseOptions().union(.parseBlockDirectives)
+            )
+        )
+
+        let preprocessor = MathPlaceholderPreprocessor()
+        let result = preprocessor.process(
+            markdown,
+            parsableRanges: extractor.parsableRanges(in: markdown)
+        )
+
+        #expect(result.markdown.contains(#"`$x_y$`"#))
+        #expect(!result.inlineMathStorage.values.contains(#"$x_y$"#))
+        #expect(result.inlineMathStorage.values.contains(#"$a_b$"#))
     }
 }

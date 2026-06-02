@@ -14,21 +14,14 @@ extension MarkdownRendererConfiguration {
             set(enabled) {
                 if enabled {
                     displayMathStorage = [:]
+                    inlineMathStorage = [:]
                 } else {
                     displayMathStorage = nil
+                    inlineMathStorage = nil
                 }
             }
         }
         var displayMathStorage: [UUID : String]? = nil
-        
-        mutating func appendDisplayMath(_ displayMath: some StringProtocol) -> UUID {
-            if displayMathStorage == nil {
-                displayMathStorage = [:]
-            }
-            
-            let id = UUID()
-            displayMathStorage![id] = String(displayMath)
-            return id
-        }
+        var inlineMathStorage: [UUID : String]? = nil
     }
 }
