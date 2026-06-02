@@ -119,16 +119,19 @@ struct InlineMath: View {
         if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
             ViewThatFits(in: .horizontal) {
                 LaTeX(latexText)
+                    .renderingStyle(.wait)
                     .blockMode(.alwaysInline)
                     .font(font)
                 ScrollView(.horizontal) {
                     LaTeX(latexText)
+                        .renderingStyle(.wait)
                         .blockMode(.alwaysInline)
                         .font(font)
                 }
             }
         } else {
             LaTeX(latexText)
+                .renderingStyle(.wait)
                 .blockMode(.alwaysInline)
                 .font(font)
         }

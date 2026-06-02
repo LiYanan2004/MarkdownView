@@ -51,7 +51,7 @@ struct MathDestination: View {
 #Preview {
     NavigationStack {
         ScrollView {
-            ImageDestination()
+            MathDestination()
                 .frame(width: 300)
         }
     }
