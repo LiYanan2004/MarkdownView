@@ -113,8 +113,7 @@ struct MathExtractionTests {
 
     @Test
     func testMathPreprocessingProtectsInlineMathUnderscores() async throws {
-        let markdown = #"Lorem ipsum dolor sit amet, $(a_n)_{n \in \mathbb{N}}$ and $(b_n)_{n \in \mathbb{N}}$ are both geometric sequences."#
-        let result = MathPlaceholderPreprocessor.process(markdown)
+        let result = processMarkdownParsingRanges(in: #"Lorem ipsum dolor sit amet, $(a_n)_{n \in \mathbb{N}}$ and $(b_n)_{n \in \mathbb{N}}$ are both geometric sequences."#)
 
         #expect(result.inlineMathStorage.count == 2)
         #expect(result.displayMathStorage.isEmpty)
