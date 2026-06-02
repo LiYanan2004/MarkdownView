@@ -37,5 +37,8 @@ MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well
 
 ### Extensibility
 
+- <doc:MarkdownElementRenderer>
+- <doc:MarkdownElementRendererRegistration>
 - <doc:MarkdownImageRenderer>
+- <doc:MarkdownLinkRenderer>
 - <doc:BlockDirectiveRenderer>

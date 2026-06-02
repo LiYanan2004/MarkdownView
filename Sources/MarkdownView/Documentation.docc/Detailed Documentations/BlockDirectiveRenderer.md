@@ -4,11 +4,14 @@
 
 ### Creating custom renderers
 
-- ``BlockDirectiveRenderer/makeBody(configuration:)``
-- ``BlockDirectiveRenderer/Body``
+- ``MarkdownElementRenderer/makeBody(configuration:)``
 - ``BlockDirectiveRendererConfiguration``
 - ``BlockDirectiveRenderer/Configuration``
 
 ### Substituting renderer
 
 - ``AnyBlockDirectiveRenderer``
+
+### Registering renderers
+
+- ``MarkdownElementRendererRegistration/blockDirective(_:name:)``

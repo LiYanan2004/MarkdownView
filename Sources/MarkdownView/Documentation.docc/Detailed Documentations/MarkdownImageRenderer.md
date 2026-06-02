@@ -4,11 +4,14 @@
 
 ### Creating custom renderers
 
-- ``MarkdownImageRenderer/makeBody(configuration:)``
-- ``MarkdownImageRenderer/Body``
+- ``MarkdownElementRenderer/makeBody(configuration:)``
 - ``MarkdownImageRendererConfiguration``
 - ``MarkdownImageRenderer/Configuration``
 
 ### Substituting renderer
 
 - ``AnyMarkdownImageRenderer``
+
+### Registering renderers
+
+- ``MarkdownElementRendererRegistration/image(_:urlScheme:)``
