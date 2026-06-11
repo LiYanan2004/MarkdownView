@@ -8,6 +8,8 @@ struct MarkdownList<List: ListItemContainer>: View {
     }
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
+
     private var marker: Either<AnyUnorderedListMarkerProtocol, AnyOrderedListMarkerProtocol> {
         if listItemsContainer is UnorderedList {
             return .left(configuration.list.unorderedListMarker)
@@ -28,7 +30,7 @@ struct MarkdownList<List: ListItemContainer>: View {
                 HStack(alignment: .firstTextBaseline) {
                     CheckboxOrMarker(list: self, listItem: listItems[index], index: index)
                         .padding(.leading, depth == 0 ? configuration.list.leadingIndentation : 0)
-                    CmarkNodeVisitor(configuration: configuration)
+                    CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                         .makeBody(for: listItems[index])
                 }
             }
@@ -72,6 +74,7 @@ struct MarkdownList<List: ListItemContainer>: View {
 struct MarkdownListItem: View {
     var listItem: ListItem
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
 
     private var children: [Markup] {
         Array(listItem.children)
@@ -80,7 +83,7 @@ struct MarkdownListItem: View {
     var body: some View {
         VStack(alignment: .leading, spacing: configuration.componentSpacing) {
             ForEach(children.indices, id: \.self) { index in
-                CmarkNodeVisitor(configuration: configuration)
+                CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
                     .makeBody(for: children[index])
             }
         }

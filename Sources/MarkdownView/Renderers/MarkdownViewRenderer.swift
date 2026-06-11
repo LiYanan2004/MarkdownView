@@ -16,7 +16,8 @@ public protocol MarkdownViewRenderer {
     @ViewBuilder
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> Body
 }
 
@@ -26,19 +27,32 @@ public struct AutomaticMarkdownViewRenderer: MarkdownViewRenderer {
     @ViewBuilder
     public func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
         #if canImport(RichText)
         if #available(iOS 26.0, macOS 26.0, *) {
             TextContentMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration)
+                .makeBody(
+                    content: content,
+                    configuration: configuration,
+                    elementRenderers: elementRenderers
+                )
         } else {
             ViewMarkdownViewRenderer()
-                .makeBody(content: content, configuration: configuration)
+                .makeBody(
+                    content: content,
+                    configuration: configuration,
+                    elementRenderers: elementRenderers
+                )
         }
         #else
         ViewMarkdownViewRenderer()
-            .makeBody(content: content, configuration: configuration)
+            .makeBody(
+                content: content,
+                configuration: configuration,
+                elementRenderers: elementRenderers
+            )
         #endif
     }
 }
@@ -49,17 +63,20 @@ public struct ViewMarkdownViewRenderer: MarkdownViewRenderer {
     @ViewBuilder
     public func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
         if configuration.rendersMath {
             MathFirstMarkdownViewRenderer().makeBody(
                 content: content,
-                configuration: configuration
+                configuration: configuration,
+                elementRenderers: elementRenderers
             )
         } else {
             CmarkFirstMarkdownViewRenderer().makeBody(
                 content: content,
-                configuration: configuration
+                configuration: configuration,
+                elementRenderers: elementRenderers
             )
         }
     }
@@ -76,17 +93,20 @@ public struct TextContentMarkdownViewRenderer: MarkdownViewRenderer {
     @ViewBuilder
     public func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
         if configuration.rendersMath {
             MathFirstTextViewRenderer().makeBody(
                 content: content,
-                configuration: configuration
+                configuration: configuration,
+                elementRenderers: elementRenderers
             )
         } else {
             TextViewViewRenderer().makeBody(
                 content: content,
-                configuration: configuration
+                configuration: configuration,
+                elementRenderers: elementRenderers
             )
         }
     }
@@ -109,10 +129,10 @@ public extension MarkdownViewRenderer where Self == TextContentMarkdownViewRende
 #endif
 
 extension MarkdownViewRenderer {
-    internal func parseOptions(for configuration: MarkdownRendererConfiguration) -> ParseOptions {
+    internal func parseOptions(for elementRenderers: [MarkdownElementRendererRegistration]) -> ParseOptions {
         var options = ParseOptions()
         
-        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
+        if elementRenderers.contains(where: { $0.blockDirective != nil }) {
             options.insert(.parseBlockDirectives)
         }
         

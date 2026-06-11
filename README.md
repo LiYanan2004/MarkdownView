@@ -87,7 +87,7 @@ To do that, first create your renderer.
 
 ```swift
 struct CustomImageRenderer: MarkdownImageRenderer {
-    func makeBody(configuration: Configutation) -> some View {
+    func makeBody(configuration: Configuration) -> some View {
         AsyncImage(url: configuration.url) {
             switch $0 {
             case .empty: ProgressView()
@@ -104,7 +104,7 @@ Then apply your renderer to `MarkdownView`.
 
 ```swift
 MarkdownView(markdownText)
-    .imageRenderer(CustomImageRenderer(), forURLScheme: "my-image")
+    .markdownElementRenderer(.image(CustomImageRenderer(), urlScheme: "my-image"))
 ```
 
 The implementation of the block directive is exactly the same way.

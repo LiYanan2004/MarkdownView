@@ -11,17 +11,19 @@ import Markdown
 struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
-        makeMathFirstBody(
+        let (preprocessedContent, preprocessedConfiguration) = preprocessedMathContent(
             content: content,
             configuration: configuration
-        ) { content, configuration in
-            CmarkFirstMarkdownViewRenderer().makeBody(
-                content: content,
-                configuration: configuration
+        )
+        return CmarkFirstMarkdownViewRenderer()
+            .makeBody(
+                content: preprocessedContent,
+                configuration: preprocessedConfiguration,
+                elementRenderers: elementRenderers
             )
-        }
     }
 }
 
@@ -31,17 +33,18 @@ struct MathFirstMarkdownViewRenderer: MarkdownViewRenderer {
 struct MathFirstTextViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
-        makeMathFirstBody(
+        let (preprocessedContent, preprocessedConfiguration) = preprocessedMathContent(
             content: content,
             configuration: configuration
-        ) { content, configuration in
-            TextViewViewRenderer().makeBody(
-                content: content,
-                configuration: configuration
-            )
-        }
+        )
+        TextViewViewRenderer().makeBody(
+            content: preprocessedContent,
+            configuration: preprocessedConfiguration,
+            elementRenderers: elementRenderers
+        )
     }
 }
 
@@ -49,88 +52,32 @@ struct MathFirstTextViewRenderer: MarkdownViewRenderer {
 
 // MARK: - Auxiliary
 
-fileprivate extension MathFirstMarkdownViewRenderer {
-    struct ParsingRangesExtractor: MarkupWalker {
-        private var excludedRanges: [Range<SourceLocation>] = []
-        
-        func parsableRanges(in text: String) -> [Range<String.Index>] {
-            var allowedRanges: [Range<String.Index>] = []
-            let excludedRanges = self.excludedRanges.map {
-                ($0.lowerBound.index(in: text)..<$0.upperBound.index(in: text))
-            }
-
-            let fullRange = text.startIndex..<text.endIndex
-            let sortedExcluded = excludedRanges.sorted { $0.lowerBound < $1.lowerBound }
-            var currentStart = fullRange.lowerBound
-            
-            for ex in sortedExcluded {
-                if currentStart < ex.lowerBound {
-                    allowedRanges.append(currentStart..<ex.lowerBound)
-                }
-                currentStart = ex.upperBound
-            }
-            if currentStart < fullRange.upperBound {
-                allowedRanges.append(currentStart..<fullRange.upperBound)
-            }
-            return allowedRanges
-        }
-        
-        mutating func defaultVisit(_ markup: any Markup) {
-            descendInto(markup)
-        }
-        
-        mutating func visitCodeBlock(_ codeBlock: CodeBlock) {
-            guard let range = codeBlock.range else { return }
-            self.excludedRanges.append(range)
-        }
-    }
-}
-
-fileprivate extension SourceLocation {
-    func index(in string: String) -> String.Index {
-        var idx = string.startIndex
-        var currentLine = 1
-        while currentLine < self.line && idx < string.endIndex {
-            if string[idx] == "\n" {
-                currentLine += 1
-            }
-            idx = string.index(after: idx)
-        }
-        guard let utf8LineStart = idx.samePosition(in: string.utf8) else {
-            return string.endIndex
-        }
-        let byteOffset = self.column - 1
-        let targetUtf8Index = string.utf8.index(utf8LineStart, offsetBy: byteOffset, limitedBy: string.utf8.endIndex) ?? string.utf8.endIndex
-        return targetUtf8Index.samePosition(in: string) ?? string.endIndex
-    }
-}
-
-private func makeMathFirstBody<Body: View>(
+private func preprocessedMathContent(
     content: MarkdownContent,
-    configuration: MarkdownRendererConfiguration,
-    @ViewBuilder render: (MarkdownContent, MarkdownRendererConfiguration) -> Body
-) -> Body {
+    configuration: MarkdownRendererConfiguration
+) -> (content: MarkdownContent, configuration: MarkdownRendererConfiguration) {
     var configuration = configuration
-    var rawText = (try? content.markdown) ?? ""
-    
-    var extractor = MathFirstMarkdownViewRenderer.ParsingRangesExtractor()
-    extractor.visit(content.document())
-    for range in extractor.parsableRanges(in: rawText).reversed() {
-        let segment = rawText[range]
-        let segmentParser = MathParser(text: segment)
-        for math in segmentParser.mathRepresentations.reversed() where !math.kind.inline {
-            let mathIdentifier = configuration.math.appendDisplayMath(
-                rawText[math.range]
-            )
-            rawText.replaceSubrange(
-                math.range,
-                with: "@math(uuid:\(mathIdentifier))"
-            )
-        }
-    }
-    
-    return render(
-        MarkdownContent(.plainText(rawText)),
+    let rawText = (try? content.markdown) ?? ""
+
+    var mathRangesResolver = MathParsableRangesResolver()
+    mathRangesResolver.visit(content.document(options: ParseOptions().union(.parseBlockDirectives)))
+
+    #if canImport(LaTeXSwiftUI)
+    let includeInlineMath = true
+    #else
+    let includeInlineMath = false
+    #endif
+
+    let preprocessedMath = MathPlaceholderPreprocessor.process(
+        rawText,
+        parsableRanges: mathRangesResolver.resolve(in: rawText),
+        includeInlineMath: includeInlineMath
+    )
+    configuration.math.displayMathStorage = preprocessedMath.displayMathStorage
+    configuration.math.inlineMathStorage = preprocessedMath.inlineMathStorage
+
+    return (
+        MarkdownContent(.plainText(preprocessedMath.markdown)),
         configuration
     )
 }

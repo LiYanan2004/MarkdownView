@@ -6,29 +6,15 @@ import Markdown
 /// Think of this type as a SwiftUI View wrapper.
 ///
 /// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
-@preconcurrency
-@MainActor
-@_typeEraser(AnyBlockDirectiveRenderer)
-public protocol BlockDirectiveRenderer {
-    /// A view that represents the current block directive.
-    associatedtype Body: SwiftUI.View
-    
-    /// Creates a view that represents the body of the block directive.
-    ///
-    /// - Parameter configuration: The properties of a block directive.
-    @preconcurrency
-    @MainActor
-    @ViewBuilder
-    func makeBody(configuration: Configuration) -> Body
-    
-    /// The properties of a block directive.
-    typealias Configuration = BlockDirectiveRendererConfiguration
+@_typeEraser(AnyMarkdownBlockDirectiveRenderer)
+public protocol MarkdownBlockDirectiveRenderer: MarkdownElementRenderer where Configuration == MarkdownBlockDirectiveRendererConfiguration {
+    associatedtype Configuration = MarkdownBlockDirectiveRendererConfiguration
 }
 
 /// The properties of a block directive.
 @preconcurrency
 @MainActor
-public struct BlockDirectiveRendererConfiguration: Sendable {
+public struct MarkdownBlockDirectiveRendererConfiguration: Sendable {
     /// The string wrapped in a block directive.
     public var wrappedString: String
     /// The arguments of a block directive.
@@ -53,19 +39,19 @@ public struct BlockDirectiveRendererConfiguration: Sendable {
 
 // MARK: - Type Erasure
 
-/// A type-erasure for type conforms to `BlockDirectiveRenderer`.
-public struct AnyBlockDirectiveRenderer: BlockDirectiveRenderer {
+/// A type-erasure for type conforms to `MarkdownBlockDirectiveRenderer`.
+public struct AnyMarkdownBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
     public typealias Body = AnyView
     
     private let _makeBody: (Configuration) -> AnyView
     
-    public init<T: BlockDirectiveRenderer>(erasing renderer: T) {
+    public init<T: MarkdownBlockDirectiveRenderer>(erasing renderer: T) {
         _makeBody = {
             AnyView(renderer.makeBody(configuration: $0))
         }
     }
     
-    public init<T: BlockDirectiveRenderer>(_ renderer: T) {
+    public init<T: MarkdownBlockDirectiveRenderer>(_ renderer: T) {
         _makeBody = {
             AnyView(renderer.makeBody(configuration: $0))
         }
@@ -75,3 +61,15 @@ public struct AnyBlockDirectiveRenderer: BlockDirectiveRenderer {
         _makeBody(configuration)
     }
 }
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownBlockDirectiveRenderer")
+public typealias BlockDirectiveRenderer = MarkdownBlockDirectiveRenderer
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownBlockDirectiveRendererConfiguration")
+public typealias BlockDirectiveRendererConfiguration = MarkdownBlockDirectiveRendererConfiguration
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "AnyMarkdownBlockDirectiveRenderer")
+public typealias AnyBlockDirectiveRenderer = AnyMarkdownBlockDirectiveRenderer

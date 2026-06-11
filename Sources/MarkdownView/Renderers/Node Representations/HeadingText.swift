@@ -12,6 +12,7 @@ struct HeadingText: View {
     let heading: Heading
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.headingStyleGroup) private var headingStyleGroup
     @Environment(\.headingPaddings) private var paddings
     
@@ -50,7 +51,7 @@ struct HeadingText: View {
     }
     
     var body: some View {
-        CmarkNodeVisitor(configuration: configuration)
+        CmarkNodeVisitor(configuration: configuration, elementRenderers: elementRenderers)
             .descendInto(heading)
             .font(font)
             .foregroundStyle(foregroundStyle)

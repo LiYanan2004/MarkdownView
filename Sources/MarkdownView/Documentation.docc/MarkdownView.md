@@ -29,13 +29,16 @@ MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well
 - <doc:MarkdownViewStyle>
 - <doc:MarkdownFontGroup>
 - <doc:HeadingStyleGroup>
-- <doc:CodeBlockStyle>
-- <doc:BlockQuoteStyle>
+- <doc:MarkdownCodeBlockStyle>
+- <doc:MarkdownBlockQuoteStyle>
 - <doc:MarkdownTableStyle>
-- <doc:OrderedListMarkerProtocol>
-- <doc:UnorderedListMarkerProtocol>
+- <doc:MarkdownOrderedListMarkerProtocol>
+- <doc:MarkdownUnorderedListMarkerProtocol>
 
 ### Extensibility
 
+- <doc:MarkdownElementRenderer>
+- <doc:MarkdownElementRendererRegistration>
 - <doc:MarkdownImageRenderer>
-- <doc:BlockDirectiveRenderer>
+- <doc:MarkdownLinkRenderer>
+- <doc:MarkdownBlockDirectiveRenderer>

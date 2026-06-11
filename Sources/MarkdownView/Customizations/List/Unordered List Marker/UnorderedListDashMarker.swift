@@ -8,13 +8,13 @@
 import Foundation
 
 /// A dash marker for unordered list items.
-public struct UnorderedListDashMarker: UnorderedListMarkerProtocol {
+public struct UnorderedListDashMarker: MarkdownUnorderedListMarkerProtocol {
     public func marker(listDepth: Int) -> String {
         "-"
     }
 }
 
-extension UnorderedListMarkerProtocol where Self == UnorderedListDashMarker {
+extension MarkdownUnorderedListMarkerProtocol where Self == UnorderedListDashMarker {
     /// A dash marker for unordered list items.
     static public var dash: UnorderedListDashMarker { .init() }
 }

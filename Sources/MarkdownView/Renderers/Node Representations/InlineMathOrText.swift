@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import RegexBuilder
 #if canImport(LaTeXSwiftUI)
 import LaTeXSwiftUI
 import MathJaxSwift
@@ -16,47 +15,101 @@ import MathJaxSwift
 @MainActor
 struct InlineMathOrText {
     var text: String
-    
+
     @preconcurrency
     @MainActor
     func makeBody(configuration: MarkdownRendererConfiguration) -> MarkdownNodeView {
         #if canImport(LaTeXSwiftUI)
-        let mathParser = MathParser(text: text)
+        let mathSegments = self.mathSegments(configuration: configuration)
+
+        guard !mathSegments.isEmpty else {
+            return MarkdownNodeView(text)
+        }
+
         var nodeViews: [MarkdownNodeView] = []
         var processingIndex = text.startIndex
-        
-        for math in mathParser.mathRepresentations {
-            let range = math.range
-            
-            // Add normal text before the current LaTeX match (if any)
-            if processingIndex < range.lowerBound {
-                let normalText = String(text[processingIndex..<range.lowerBound])
+
+        for mathSegment in mathSegments {
+            if processingIndex < mathSegment.range.lowerBound {
+                let normalText = String(text[processingIndex..<mathSegment.range.lowerBound])
                 nodeViews.append(MarkdownNodeView(normalText))
             }
-            
-            // Add the current LaTeX node
-            let latexText = String(text[range])
+
             nodeViews.append(
                 MarkdownNodeView {
-                    InlineMath(latexText: latexText)
+                    InlineMath(latexText: mathSegment.latexText)
                 }
             )
-            
-            processingIndex = range.upperBound
+
+            processingIndex = mathSegment.range.upperBound
         }
-        
-        // Add any remaining text after the last LaTeX match
+
         if processingIndex < text.endIndex {
             let remainingText = String(text[processingIndex..<text.endIndex])
             nodeViews.append(MarkdownNodeView(remainingText))
         }
-        
+
         return MarkdownNodeView(nodeViews)
         #else
         return MarkdownNodeView(text)
         #endif
     }
 }
+
+#if canImport(LaTeXSwiftUI)
+fileprivate extension InlineMathOrText {
+    struct MathSegment {
+        var range: Range<String.Index>
+        var latexText: String
+    }
+
+    func mathSegments(configuration: MarkdownRendererConfiguration) -> [MathSegment] {
+        let placeholderSegments = inlinePlaceholderSegments(configuration: configuration)
+        let parsedSegments = MathParser(text: text)
+            .mathRepresentations
+            .lazy
+            .map {
+                MathSegment(
+                    range: $0.range,
+                    latexText: String(text[$0.range])
+                )
+            }
+            .filter { parsedSegment in
+                !placeholderSegments.contains { placeholderSegment in
+                    parsedSegment.range.overlaps(placeholderSegment.range)
+                }
+            }
+
+        return (placeholderSegments + parsedSegments)
+            .sorted { $0.range.lowerBound < $1.range.lowerBound }
+    }
+
+    func inlinePlaceholderSegments(configuration: MarkdownRendererConfiguration) -> [MathSegment] {
+        let inlineMathStorage = configuration.math.inlineMathStorage
+        guard !inlineMathStorage.isEmpty else {
+            return []
+        }
+
+        var mathSegments: [MathSegment] = []
+        for (identifier, latexText) in inlineMathStorage {
+            let placeholder = MathPlaceholderPreprocessor.inlinePlaceholder(for: identifier)
+            var searchRange = text.startIndex..<text.endIndex
+
+            while let placeholderRange = text.range(of: placeholder, range: searchRange) {
+                mathSegments.append(
+                    MathSegment(
+                        range: placeholderRange,
+                        latexText: latexText
+                    )
+                )
+                searchRange = placeholderRange.upperBound..<text.endIndex
+            }
+        }
+
+        return mathSegments
+    }
+}
+#endif
 
 #if canImport(LaTeXSwiftUI)
 struct InlineMath: View {
@@ -71,16 +124,19 @@ struct InlineMath: View {
         if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
             ViewThatFits(in: .horizontal) {
                 LaTeX(latexText)
+                    .renderingStyle(.wait)
                     .blockMode(.alwaysInline)
                     .font(font)
                 ScrollView(.horizontal) {
                     LaTeX(latexText)
+                        .renderingStyle(.wait)
                         .blockMode(.alwaysInline)
                         .font(font)
                 }
             }
         } else {
             LaTeX(latexText)
+                .renderingStyle(.wait)
                 .blockMode(.alwaysInline)
                 .font(font)
         }

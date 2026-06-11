@@ -52,25 +52,27 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
             return TextContent(.string(plainText))
         }
         #if canImport(LaTeXSwiftUI)
-        let mathParser = MathParser(text: plainText)
+        let mathSegments = mathSegments(in: plainText)
+        guard !mathSegments.isEmpty else {
+            return TextContent(.string(plainText))
+        }
+
         var content = TextContent([])
         var processingIndex = plainText.startIndex
         
-        for math in mathParser.mathRepresentations {
-            let range = math.range
-            if processingIndex < range.lowerBound {
-                content += TextContent(.string(String(plainText[processingIndex..<range.lowerBound])))
+        for mathSegment in mathSegments {
+            if processingIndex < mathSegment.range.lowerBound {
+                content += TextContent(.string(String(plainText[processingIndex..<mathSegment.range.lowerBound])))
             }
             
-            let latexText = String(plainText[range])
             content += inlineViewContent(
                 for: text,
-                replacement: AttributedString(latexText)
+                replacement: AttributedString(mathSegment.latexText)
             ) {
-                InlineMath(latexText: latexText)
+                InlineMath(latexText: mathSegment.latexText)
             }
             
-            processingIndex = range.upperBound
+            processingIndex = mathSegment.range.upperBound
         }
         
         if processingIndex < plainText.endIndex {
@@ -222,12 +224,9 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
                             .foregroundStyle(.secondary)
                     }
                 }
-                let attachment = InlineHostingAttachment(
-                    checkboxView,
-                    id: listItem.range,
-                    replacement: nil
-                )
-                TextContent(.view(attachment))
+                InlineView(id: listItem.range, replacement: nil) {
+                    checkboxView
+                }
             } else if let markerString {
                 AttributedString(markerString, attributes: attributes)
             }
@@ -385,43 +384,20 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
         let tintColor = configuration.preferredTintColors[.link] ?? .accentColor
         let underline = configuration.underlineLinks
 
-        let contentView = linkContent.fragments.first(byUnwrapping: {
-            if case let .view(attachment) = $0 {
-                return attachment.view
-            }
-            return nil
-        })
-
-        if let contentView {
-            return inlineViewContent(
-                for: link,
-                replacement: AttributedString(
-                    link.plainText,
-                    attributes: AttributeContainer().link(url)
-                )
-            ) {
-                Link(destination: url) {
-                    contentView
-                }
-                .foregroundStyle(tintColor)
-                .underline(underline)
-            }
-        } else {
-            let attributedString = linkContent.attributedStringIgnoringViews
-            return TextContent(
-                .attributedString(
-                    attributedString.mergingAttributes({
-                        var container = AttributeContainer()
-                            .link(url)
-                            .foregroundColor(tintColor)
-                        if underline {
-                            container.underlineStyle = .single
-                        }
-                        return container
-                    }())
-                )
+        let attributedString = linkContent.attributedStringIgnoringViews
+        return TextContent(
+            .attributedString(
+                attributedString.mergingAttributes({
+                    var container = AttributeContainer()
+                        .link(url)
+                        .foregroundColor(tintColor)
+                    if underline {
+                        container.underlineStyle = .single
+                    }
+                    return container
+                }())
             )
-        }
+        )
     }
     
     func visitParagraph(_ paragraph: Paragraph) -> TextContent {
@@ -434,6 +410,57 @@ struct CmarkTextContentVisitor: @preconcurrency MarkupVisitor {
 
 @available(iOS 26, macOS 26, *)
 private extension CmarkTextContentVisitor {
+    struct MathSegment {
+        var range: Range<String.Index>
+        var latexText: String
+    }
+
+    func mathSegments(in text: String) -> [MathSegment] {
+        let placeholderSegments = inlinePlaceholderSegments(in: text)
+        let parsedSegments = MathParser(text: text)
+            .mathRepresentations
+            .lazy
+            .map {
+                MathSegment(
+                    range: $0.range,
+                    latexText: String(text[$0.range])
+                )
+            }
+            .filter { parsedSegment in
+                !placeholderSegments.contains { placeholderSegment in
+                    parsedSegment.range.overlaps(placeholderSegment.range)
+                }
+            }
+
+        return (placeholderSegments + parsedSegments)
+            .sorted { $0.range.lowerBound < $1.range.lowerBound }
+    }
+
+    func inlinePlaceholderSegments(in text: String) -> [MathSegment] {
+        let inlineMathStorage = configuration.math.inlineMathStorage
+        guard !inlineMathStorage.isEmpty else {
+            return []
+        }
+
+        var mathSegments: [MathSegment] = []
+        for (identifier, latexText) in inlineMathStorage {
+            let placeholder = MathPlaceholderPreprocessor.inlinePlaceholder(for: identifier)
+            var searchRange = text.startIndex..<text.endIndex
+
+            while let placeholderRange = text.range(of: placeholder, range: searchRange) {
+                mathSegments.append(
+                    MathSegment(
+                        range: placeholderRange,
+                        latexText: latexText
+                    )
+                )
+                searchRange = placeholderRange.upperBound..<text.endIndex
+            }
+        }
+
+        return mathSegments
+    }
+
     func combine(_ contents: [TextContent]) -> TextContent {
         var combined = TextContent([])
         for content in contents where !content.fragments.isEmpty {
@@ -450,13 +477,16 @@ private extension CmarkTextContentVisitor {
     ) -> TextContent {
         let view = content()
             .environment(\.markdownRendererConfiguration, configuration)
-        let attachment = InlineHostingAttachment(
-            view,
-            id: markup.range,
-            replacement: replacement
-        )
         return TextContent {
-            TextContent(.view(attachment))
+            if let range = markup.range {
+                InlineView(id: range, replacement: replacement) {
+                    view
+                }
+            } else {
+                InlineView(replacement: replacement) {
+                    view
+                }
+            }
             if appendsLineBreak {
                 LineBreak()
             }

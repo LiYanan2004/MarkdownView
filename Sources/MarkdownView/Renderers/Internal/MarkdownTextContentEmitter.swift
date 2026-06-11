@@ -323,28 +323,6 @@ private extension MarkdownTextContentEmitter {
             let linkedContent = combine(children.map(render))
             let tintColor = configuration.preferredTintColors[.link] ?? .accentColor
 
-            let linkedView = linkedContent.fragments.first(byUnwrapping: { fragment in
-                if case let .view(attachment) = fragment {
-                    return attachment.view
-                }
-                return nil
-            })
-
-            if let linkedView {
-                return inlineViewContent(
-                    sourceRange: sourceRange,
-                    replacement: AttributedString(
-                        plainText,
-                        attributes: AttributeContainer().link(destinationURL)
-                    )
-                ) {
-                    Link(destination: destinationURL) {
-                        linkedView
-                    }
-                    .foregroundStyle(tintColor)
-                }
-            }
-
             let attributedString = linkedContent.attributedStringIgnoringViews
             return TextContent(
                 .attributedString(
@@ -426,14 +404,17 @@ private extension MarkdownTextContentEmitter {
         let view = content()
             .environment(\.markdownRendererConfiguration, configuration)
             .environment(\.markdownSubtreeRenderer, subtreeRenderer)
-        let attachment = InlineHostingAttachment(
-            view,
-            id: sourceRange,
-            replacement: replacement
-        )
 
         return TextContent {
-            TextContent(.view(attachment))
+            if let sourceRange {
+                InlineView(id: sourceRange, replacement: replacement) {
+                    view
+                }
+            } else {
+                InlineView(replacement: replacement) {
+                    view
+                }
+            }
             if appendsLineBreak {
                 LineBreak()
             }

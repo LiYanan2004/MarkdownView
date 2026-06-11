@@ -8,13 +8,13 @@
 import Foundation
 
 /// A bullet marker for unordered list items.
-public struct UnorderedListBulletMarker: UnorderedListMarkerProtocol {
+public struct UnorderedListBulletMarker: MarkdownUnorderedListMarkerProtocol {
     public func marker(listDepth: Int) -> String {
         "•"
     }
 }
 
-extension UnorderedListMarkerProtocol where Self == UnorderedListBulletMarker {
+extension MarkdownUnorderedListMarkerProtocol where Self == UnorderedListBulletMarker {
     /// A bullet marker for unordered list items.
     static public var bullet: UnorderedListBulletMarker { .init() }
 }

@@ -12,7 +12,7 @@ import SwiftUI
 #endif
 
 /// Default code block style that applies to a MarkdownView.
-public struct DefaultCodeBlockStyle: CodeBlockStyle {
+public struct DefaultCodeBlockStyle: MarkdownCodeBlockStyle {
     /// Theme configuration in the current context.
     public var highlighterTheme: CodeHighlighterTheme
     
@@ -33,7 +33,7 @@ public struct DefaultCodeBlockStyle: CodeBlockStyle {
     }
 }
 
-extension CodeBlockStyle where Self == DefaultCodeBlockStyle {
+extension MarkdownCodeBlockStyle where Self == DefaultCodeBlockStyle {
     /// Default code block theme with light theme called "xcode" and dark theme called "dark".
     static public var `default`: DefaultCodeBlockStyle { .init() }
     
@@ -54,7 +54,7 @@ extension CodeBlockStyle where Self == DefaultCodeBlockStyle {
 // MARK: - Default View Implementation
 
 struct DefaultMarkdownCodeBlock: View {
-    var codeBlockConfiguration: CodeBlockStyleConfiguration
+    var codeBlockConfiguration: MarkdownCodeBlockStyleConfiguration
     
     var theme: CodeHighlighterTheme
     @Environment(\.colorScheme) private var colorScheme

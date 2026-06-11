@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -15,10 +15,14 @@ let package = Package(
     products: [
         .library(name: "MarkdownView", targets: ["MarkdownView"]),
     ],
+    traits: [
+        "LaTeX",
+        .default(enabledTraits: ["LaTeX"])
+    ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
         .package(url: "https://github.com/raspu/Highlightr.git", from: "2.2.1"),
-        .package(url: "https://github.com/colinc86/LaTeXSwiftUI.git", from: "1.4.1"),
+        .package(url: "https://github.com/colinc86/LaTeXSwiftUI.git", from: "1.5.0"),
         .package(url: "https://github.com/LiYanan2004/RichText.git", branch: "main"),
     ],
     targets: [
@@ -37,7 +41,7 @@ let package = Package(
                 .product(
                     name: "LaTeXSwiftUI",
                     package: "LaTeXSwiftUI",
-                    condition: .when(platforms: [.iOS, .macOS])
+                    condition: .when(platforms: [.iOS, .macOS], traits: ["LaTeX"])
                 ),
                 .product(
                     name: "RichText",

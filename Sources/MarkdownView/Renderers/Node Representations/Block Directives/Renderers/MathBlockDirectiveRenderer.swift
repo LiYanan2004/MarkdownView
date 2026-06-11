@@ -11,9 +11,10 @@ import SwiftUI
 import LaTeXSwiftUI
 #endif
 
-struct MathBlockDirectiveRenderer: BlockDirectiveRenderer {
-    func makeBody(configuration: Configuration) -> some View {
-        if let identifier = UUID(uuidString: configuration.arguments[0].value) {
+struct MathBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
+    func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
+        if let identifierValue = configuration.arguments.first?.value,
+           let identifier = UUID(uuidString: identifierValue) {
             DisplayMath(mathIdentifier: identifier)
         } else {
             EmptyView()
@@ -52,6 +53,7 @@ fileprivate struct DisplayMath: View {
         #if canImport(LaTeXSwiftUI)
         if let latexMath {
             LaTeX(latexMath)
+                .renderingStyle(.wait)
                 .renderingStyle(.empty)
                 .ignoreStringFormatting()
                 .blockMode(.blockText)

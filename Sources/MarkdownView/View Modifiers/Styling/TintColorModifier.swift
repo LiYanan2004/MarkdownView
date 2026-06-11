@@ -7,13 +7,12 @@
 
 import SwiftUI
 
-extension View {
-    /// Sets the tint color for specific MarkdownView component.
+extension SwiftUI.View {
+    /// Sets the tint color for specific markdown tintable component.
     ///
     /// - Parameters:
     ///   - tint: The tint color to apply.
     ///   - component: The tintable component to apply the tint color.
-    @ViewBuilder
     nonisolated public func tint(
         _ tint: Color,
         for component: MarkdownTintableComponent

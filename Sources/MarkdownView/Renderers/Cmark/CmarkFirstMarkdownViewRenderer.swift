@@ -8,18 +8,17 @@
 import SwiftUI
 import Markdown
 
-struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {    
+struct CmarkFirstMarkdownViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
-        var parseOptions = ParseOptions()
-        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
-            parseOptions.insert(.parseBlockDirectives)
-        }
-        
-        return CmarkNodeVisitor(configuration: configuration)
-            .makeBody(for: content.document(options: parseOptions))
+        return CmarkNodeVisitor(
+            configuration: configuration,
+            elementRenderers: elementRenderers
+        )
+            .makeBody(for: content.document(options: parseOptions(for: elementRenderers)))
     }
 }
 
@@ -30,15 +29,11 @@ import RichText
 struct TextViewViewRenderer: MarkdownViewRenderer {
     func makeBody(
         content: MarkdownContent,
-        configuration: MarkdownRendererConfiguration
+        configuration: MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration]
     ) -> some View {
-        var parseOptions = ParseOptions()
-        if !configuration.allowedBlockDirectiveRenderers.isEmpty {
-            parseOptions.insert(.parseBlockDirectives)
-        }
-
         let textContent = CmarkTextContentVisitor(configuration: configuration)
-            .makeTextContent(for: content.document(options: parseOptions))
+            .makeTextContent(for: content.document(options: parseOptions(for: elementRenderers)))
         return TextView {
             textContent
         }

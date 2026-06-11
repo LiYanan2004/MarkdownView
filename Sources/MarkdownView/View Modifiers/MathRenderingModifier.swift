@@ -25,15 +25,22 @@ extension View {
     ///   for a subtree. The default is `true`, which turns math rendering on for
     ///   the given view hierarchy.
     nonisolated public func markdownMathRenderingEnabled(_ enabled: Bool = true) -> some View {
-        transformEnvironment(\.markdownRendererConfiguration) { configuration in
-            configuration.math.isEnabled = enabled
-            if enabled {
-                configuration.allowedBlockDirectiveRenderers.insert("math")
-                BlockDirectiveRenderers.shared.addRenderer(
-                    MathBlockDirectiveRenderer(),
-                    for: "math"
-                )
+        modifier(MarkdownMathRenderingModifier(isEnabled: enabled))
+    }
+}
+
+fileprivate struct MarkdownMathRenderingModifier: ViewModifier {
+    let isEnabled: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .transformEnvironment(\.markdownRendererConfiguration) { configuration in
+                configuration.math.isEnabled = isEnabled
             }
-        }
+            .transformEnvironment(\.markdownElementRenderers) { renderers in
+                if isEnabled {
+                    renderers.register(.blockDirective(MathBlockDirectiveRenderer(), name: "math"))
+                }
+            }
     }
 }

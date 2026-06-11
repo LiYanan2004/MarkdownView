@@ -12,15 +12,14 @@ import LaTeXSwiftUI
 import MathJaxSwift
 #endif
 
-@_spi(MarkdownMath)
-public struct MathParser {
-    public var text: any StringProtocol
+package struct MathParser {
+    package var text: any StringProtocol
     
-    public init(text: some StringProtocol) {
+    package init(text: some StringProtocol) {
         self.text = text
     }
     
-    public var mathRepresentations: [MathRepresentation] {
+    package var mathRepresentations: [MathRepresentation] {
         var stack = [MathRepresentation.Kind]()
         var index = text.startIndex
         var startIndex = index
@@ -85,14 +84,14 @@ public struct MathParser {
 }
 
 extension MathParser {
-    public struct MathRepresentation: Sendable, Hashable {
-        public var kind: Kind
-        public var range: Range<String.Index>
+    package struct MathRepresentation: Sendable, Hashable {
+        package var kind: Kind
+        package var range: Range<String.Index>
     }
 }
 
 extension MathParser.MathRepresentation {
-    public enum Kind: Hashable, Sendable, CaseIterable {
+    package enum Kind: Hashable, Sendable, CaseIterable {
         /// An inline equation component.
         ///
         /// - Example: `$x^2$`
@@ -155,7 +154,7 @@ extension MathParser.MathRepresentation {
             }
         }
         
-        public static let allCases: [Kind] = [
+        package static let allCases: [Kind] = [
             .namedNoNumberEquation,
             .namedEquation,
             .blockEquation,

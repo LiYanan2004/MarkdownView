@@ -37,13 +37,13 @@ By adopting `MarkdownText`, user can get better selection experience, but it doe
 
 You can now customize list item marker for both ordered and unordered lists by creating your own type that conforms to:
 
-- ``OrderedListMarkerProtocol``
-- ``UnorderedListMarkerProtocol``
+- ``MarkdownOrderedListMarkerProtocol``
+- ``MarkdownUnorderedListMarkerProtocol``
 
 For example, you can create alternative bullet list with ease.
 
 ```swift
-struct UnorderedListAlternativeBulletMarker: UnorderedListMarkerProtocol {
+struct UnorderedListAlternativeBulletMarker: MarkdownUnorderedListMarkerProtocol {
     func marker(listDepth: Int) -> String {
         if (listDepth + 1) % 2 == 0 {
             "◦"

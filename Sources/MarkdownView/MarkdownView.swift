@@ -6,6 +6,7 @@ public struct MarkdownView: View {
     @ObservedObject private var content: MarkdownContent
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.markdownViewRenderer) private var renderer
     
     /// Creates a view that renders given markdown string.
@@ -28,7 +29,11 @@ public struct MarkdownView: View {
     
     public var body: some View {
         renderer
-            .makeBody(content: content, configuration: configuration)
+            .makeBody(
+                content: content,
+                configuration: configuration,
+                elementRenderers: elementRenderers
+            )
             .erasedToAnyView()
             .font(configuration.fonts[.body] ?? Font.body)
     }

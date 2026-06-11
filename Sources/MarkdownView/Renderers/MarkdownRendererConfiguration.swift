@@ -62,6 +62,7 @@ extension MarkdownRendererConfiguration {
     public struct MathRendering: Sendable, Hashable {
         public internal(set) var isEnabled: Bool = false
         public internal(set) var displayMathStorage: [UUID : String] = [:]
+        public internal(set) var inlineMathStorage: [UUID : String] = [:]
         
         mutating func setNeedsRendering(_ needRenderMath: Bool) {
             isEnabled = needRenderMath

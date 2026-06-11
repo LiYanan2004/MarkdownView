@@ -8,7 +8,7 @@
 import Foundation
 
 /// A type that represents the marker for ordered list items.
-public protocol OrderedListMarkerProtocol: Hashable {
+public protocol MarkdownOrderedListMarkerProtocol: Hashable {
     /// Returns a marker for a specific index of ordered list item. Index starting from 0.
     func marker(at index: Int, listDepth: Int) -> String
     
@@ -16,8 +16,12 @@ public protocol OrderedListMarkerProtocol: Hashable {
     var monospaced: Bool { get }
 }
 
-extension OrderedListMarkerProtocol {
+extension MarkdownOrderedListMarkerProtocol {
     public var monospaced: Bool {
         true
     }
 }
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownOrderedListMarkerProtocol")
+public typealias OrderedListMarkerProtocol = MarkdownOrderedListMarkerProtocol

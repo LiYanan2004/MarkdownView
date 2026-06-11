@@ -1,5 +1,5 @@
 //
-//  CodeBlockStyle.swift
+//  MarkdownCodeBlockStyle.swift
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2025/3/25.
@@ -14,7 +14,7 @@ import SwiftUI
 /// Don't directly access view dependencies (e.g. `@Environment`), use a separate view instead.
 @preconcurrency
 @MainActor
-public protocol CodeBlockStyle {
+public protocol MarkdownCodeBlockStyle {
     /// A view that represents the current code block.
     associatedtype Body: View
     /// Creates the view that represents the current code block.
@@ -23,23 +23,31 @@ public protocol CodeBlockStyle {
     @ViewBuilder
     func makeBody(configuration: Configuration) -> Body
     /// The properties of a code block.
-    typealias Configuration = CodeBlockStyleConfiguration
+    typealias Configuration = MarkdownCodeBlockStyleConfiguration
 }
 
 /// The properties of a code block.
-public struct CodeBlockStyleConfiguration: Hashable, Sendable, Codable {
+public struct MarkdownCodeBlockStyleConfiguration: Hashable, Sendable, Codable {
     public var language: String?
     public var code: String
 }
 
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownCodeBlockStyle")
+public typealias CodeBlockStyle = MarkdownCodeBlockStyle
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownCodeBlockStyleConfiguration")
+public typealias CodeBlockStyleConfiguration = MarkdownCodeBlockStyleConfiguration
+
 // MARK: - Environment Value
 
 struct CodeBlockStyleKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: any CodeBlockStyle = DefaultCodeBlockStyle()
+    @MainActor static var defaultValue: any MarkdownCodeBlockStyle = DefaultCodeBlockStyle()
 }
 
 extension EnvironmentValues {
-    package var codeBlockStyle: any CodeBlockStyle {
+    package var codeBlockStyle: any MarkdownCodeBlockStyle {
         get { self[CodeBlockStyleKey.self] }
         set { self[CodeBlockStyleKey.self] = newValue }
     }

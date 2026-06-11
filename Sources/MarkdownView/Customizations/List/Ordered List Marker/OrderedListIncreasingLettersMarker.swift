@@ -8,7 +8,7 @@
 import Foundation
 
 /// An auto-increasing letters marker for ordered list items.
-public struct OrderedListIncreasingLettersMarker: OrderedListMarkerProtocol {
+public struct OrderedListIncreasingLettersMarker: MarkdownOrderedListMarkerProtocol {
     public func marker(at index: Int, listDepth: Int) -> String {
         let base = 26
         var index = index
@@ -33,7 +33,7 @@ public struct OrderedListIncreasingLettersMarker: OrderedListMarkerProtocol {
     public var monospaced: Bool { false }
 }
 
-extension OrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMarker {
+extension MarkdownOrderedListMarkerProtocol where Self == OrderedListIncreasingLettersMarker {
     /// An auto-increasing letters marker for ordered list items.
     static public var increasingLetters: OrderedListIncreasingLettersMarker { .init() }
 }

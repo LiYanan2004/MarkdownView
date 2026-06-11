@@ -13,8 +13,8 @@ struct MarkdownBlockQuote: View {
     @Environment(\.blockQuoteStyle) private var blockQuoteStyle
     
     var body: some View {
-        let configuration = BlockQuoteStyleConfiguration(
-            content: BlockQuoteStyleConfiguration.Content(blockQuote: blockQuote)
+        let configuration = MarkdownBlockQuoteStyleConfiguration(
+            content: MarkdownBlockQuoteStyleConfiguration.Content(blockQuote: blockQuote)
         )
         blockQuoteStyle
             .makeBody(configuration: configuration)

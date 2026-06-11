@@ -20,19 +20,9 @@ import SwiftUI
 /// > dependencies into a nested SwiftUI view.
 @preconcurrency
 @MainActor
-public protocol MarkdownImageRenderer {
-    /// A type that represents the image.
-    associatedtype Body: View
-    
-    /// Creates a view that represents the image.
-    /// - parameter configuration: The properties of a markdown image.
-    @preconcurrency
-    @MainActor
-    @ViewBuilder
-    func makeBody(configuration: Configuration) -> Body
-    
+public protocol MarkdownImageRenderer: MarkdownElementRenderer where Configuration == MarkdownImageRendererConfiguration {
     /// The properties of a markdown image.
-    typealias Configuration = MarkdownImageRendererConfiguration
+    associatedtype Configuration = MarkdownImageRendererConfiguration
 }
 
 /// The immutable properties of a Markdown image node.

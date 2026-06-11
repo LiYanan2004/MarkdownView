@@ -22,10 +22,10 @@ extension View {
     
     /// Replaces the marker that unordered lists use for each item.
     ///
-    /// Provide a type that conforms to ``UnorderedListMarkerProtocol`` to drive
+    /// Provide a type that conforms to ``MarkdownUnorderedListMarkerProtocol`` to drive
     /// the bullet’s appearance.
     nonisolated public func markdownUnorderedListMarker(
-        _ marker: some UnorderedListMarkerProtocol
+        _ marker: some MarkdownUnorderedListMarkerProtocol
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.list.unorderedListMarker = AnyUnorderedListMarkerProtocol(marker)
@@ -34,10 +34,10 @@ extension View {
     
     /// Replaces the marker that ordered lists use for each row.
     ///
-    /// Provide a type that conforms to ``OrderedListMarkerProtocol`` to control
+    /// Provide a type that conforms to ``MarkdownOrderedListMarkerProtocol`` to control
     /// numbering, prefixes, and suffixes.
     nonisolated public func markdownOrderedListMarker(
-        _ marker: some OrderedListMarkerProtocol
+        _ marker: some MarkdownOrderedListMarkerProtocol
     ) -> some View {
         transformEnvironment(\.markdownRendererConfiguration) { configuration in
             configuration.list.orderedListMarker = AnyOrderedListMarkerProtocol(marker)
