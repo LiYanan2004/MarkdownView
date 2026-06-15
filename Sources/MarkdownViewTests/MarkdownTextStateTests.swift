@@ -30,11 +30,14 @@ struct MarkdownTextStateTests {
 
     @Test
     @MainActor
-    func renderedTextKeepsLatestInputCharacters() {
-        // Proves the HTML conversion stage does not truncate the final message.
-        // The stale visual text bug happens after this conversion, when the
-        // converted result is stored and selected for display.
-        let renderedText = _MarkdownText.renderedText(from: AttributedString(Self.bugMarkdown))
+    func renderedStateUsesOutputForMatchingInput() {
+        // Proves the display helper still uses the async rendered output when
+        // that output belongs to the exact input SwiftUI is asking it to show.
+        let input = AttributedString(Self.bugMarkdown)
+        let renderedText = _MarkdownText.visibleText(
+            input: input,
+            rendered: _MarkdownText.RenderedState(input: input, output: input)
+        )
 
         #expect(String(renderedText.characters) == Self.bugMarkdown)
     }
@@ -48,8 +51,11 @@ struct MarkdownTextStateTests {
         let latestInput = AttributedString(Self.bugMarkdown)
         var renderedState: _MarkdownText.RenderedState?
 
-        renderedState = _MarkdownText.renderedState(for: latestInput)
-        renderedState = _MarkdownText.renderedState(for: AttributedString(Self.partialBugMarkdown))
+        renderedState = _MarkdownText.RenderedState(input: latestInput, output: latestInput)
+        renderedState = _MarkdownText.RenderedState(
+            input: AttributedString(Self.partialBugMarkdown),
+            output: AttributedString(Self.partialBugMarkdown)
+        )
 
         let visibleText = _MarkdownText.visibleText(
             input: latestInput,
@@ -65,7 +71,10 @@ struct MarkdownTextStateTests {
         // Verifies the display decision directly. A cached rendered state for a
         // previous partial input must be ignored when SwiftUI asks the same view
         // identity to display newer text.
-        let renderedText = _MarkdownText.renderedState(for: AttributedString(Self.partialBugMarkdown))
+        let renderedText = _MarkdownText.RenderedState(
+            input: AttributedString(Self.partialBugMarkdown),
+            output: AttributedString(Self.partialBugMarkdown)
+        )
 
         let visibleText = _MarkdownText.visibleText(
             input: AttributedString(Self.bugMarkdown),

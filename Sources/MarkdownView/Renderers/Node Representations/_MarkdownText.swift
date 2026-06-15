@@ -12,21 +12,43 @@ import SwiftUI
 /// Convert HTML into  `AttributedString` asynchronously to avoid `AttributeGraph` crash.
 struct _MarkdownText: View {
     var text: AttributedString
-    @State private var renderedState: RenderedState?
+    @State private var attributedString: RenderedState?
     
     init(_ text: AttributedString) {
         self.text = text
     }
 
     var body: some View {
-        Text(Self.visibleText(input: text, rendered: renderedState))
-            .task(id: text) {
-                let renderedState = Self.renderedState(for: text)
-                // Streaming updates can start a new render before an older render finishes.
-                // Avoid committing work SwiftUI already cancelled for a superseded input.
-                guard !Task.isCancelled else { return }
-                self.renderedState = renderedState
+        Group {
+            if let attributedString = Self.renderedOutput(input: text, rendered: attributedString) {
+                Text(attributedString)
+            } else {
+                Text(text)
             }
+        }
+        .task(id: text) {
+            var attributedString = text
+            for run in text.runs.reversed() where (run.isHTML ?? false) {
+                let range = run.range
+
+                if let htmlAttrString = try? AttributedString(
+                    NSAttributedString(
+                        data: Data(String(text.characters[range]).utf8),
+                        options: [
+                            .documentType: NSAttributedString.DocumentType.html
+                        ],
+                        documentAttributes: nil
+                    )
+                ) {
+                    attributedString.replaceSubrange(range, with: htmlAttrString)
+                }
+            }
+
+            // Streaming updates can start a new render before an older render finishes.
+            // Avoid committing work SwiftUI already cancelled for a superseded input.
+            guard !Task.isCancelled else { return }
+            self.attributedString = RenderedState(input: text, output: attributedString)
+        }
     }
 
     static func visibleText(input: AttributedString, rendered: RenderedState?) -> AttributedString {
@@ -35,37 +57,12 @@ struct _MarkdownText: View {
         // `@State`. Only use the cached output when it was produced from the
         // exact input currently being displayed; otherwise fall back to `input`
         // so the visible text cannot regress while the next render catches up.
-        guard let rendered, rendered.input == input else {
-            return input
-        }
+        renderedOutput(input: input, rendered: rendered) ?? input
+    }
+
+    static func renderedOutput(input: AttributedString, rendered: RenderedState?) -> AttributedString? {
+        guard let rendered, rendered.input == input else { return nil }
         return rendered.output
-    }
-
-    static func renderedState(for text: AttributedString) -> RenderedState {
-        RenderedState(
-            input: text,
-            output: renderedText(from: text)
-        )
-    }
-
-    static func renderedText(from text: AttributedString) -> AttributedString {
-        var attributedString = text
-        for run in text.runs.reversed() where (run.isHTML ?? false) {
-            let range = run.range
-
-            if let htmlAttrString = try? AttributedString(
-                NSAttributedString(
-                    data: Data(String(text.characters[range]).utf8),
-                    options: [
-                        .documentType: NSAttributedString.DocumentType.html
-                    ],
-                    documentAttributes: nil
-                )
-            ) {
-                attributedString.replaceSubrange(range, with: htmlAttrString)
-            }
-        }
-        return attributedString
     }
 
     struct RenderedState {
