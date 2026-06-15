@@ -10,10 +10,16 @@ import Testing
 
 @testable import MarkdownView
 
+/// Regression coverage for streamed Markdown updates where the source text is
+/// already complete, but `_MarkdownText` can still show a stale rendered result
+/// from an older partial update.
 @Suite("Markdown Text State")
 struct MarkdownTextStateTests {
     @Test
     func markdownContentCacheKeyChangesWithInputText() {
+        // Proves the parser/cache key changes with the raw Markdown. If this
+        // failed, stale output could come from reusing a rendered document for
+        // different source text instead of from `_MarkdownText` state.
         let partialContent = MarkdownContent(raw: .plainText(Self.partialBugMarkdown))
         let finalContent = MarkdownContent(raw: .plainText(Self.bugMarkdown))
 
@@ -25,6 +31,9 @@ struct MarkdownTextStateTests {
     @Test
     @MainActor
     func renderedTextKeepsLatestInputCharacters() {
+        // Proves the HTML conversion stage does not truncate the final message.
+        // The stale visual text bug happens after this conversion, when the
+        // converted result is stored and selected for display.
         let renderedText = _MarkdownText.renderedText(from: AttributedString(Self.bugMarkdown))
 
         #expect(String(renderedText.characters) == Self.bugMarkdown)
@@ -33,6 +42,9 @@ struct MarkdownTextStateTests {
     @Test
     @MainActor
     func olderRenderTaskCannotOverwriteNewerRenderedState() {
+        // Simulates the race from streaming updates: the final input renders
+        // first, then an older partial render commits later. The visible text
+        // must stay on the latest input because rendered state is source-bound.
         let latestInput = AttributedString(Self.bugMarkdown)
         var renderedState: _MarkdownText.RenderedState?
 
@@ -50,6 +62,9 @@ struct MarkdownTextStateTests {
     @Test
     @MainActor
     func visibleTextUsesLatestInputWhenRenderedStateBelongsToPreviousInput() {
+        // Verifies the display decision directly. A cached rendered state for a
+        // previous partial input must be ignored when SwiftUI asks the same view
+        // identity to display newer text.
         let renderedText = _MarkdownText.renderedState(for: AttributedString(Self.partialBugMarkdown))
 
         let visibleText = _MarkdownText.visibleText(
@@ -63,6 +78,9 @@ struct MarkdownTextStateTests {
     @Test
     @MainActor
     func rebuildingViewIdentityShowsLatestInputText() {
+        // Documents why forcing a new SwiftUI identity with `.id(...)` masks the
+        // bug: the state starts empty, so `_MarkdownText` falls back to the
+        // current input before any async render finishes.
         let rebuiltVisibleText = _MarkdownText.visibleText(
             input: AttributedString(Self.bugMarkdown),
             rendered: nil
@@ -72,6 +90,8 @@ struct MarkdownTextStateTests {
 }
 
 private extension MarkdownTextStateTests {
+    // A realistic partial stream chunk captured from the reported failure. The
+    // missing tail starts after the ticket example.
     static let partialBugMarkdown = """
     ## 翻譯與理解
 
@@ -114,6 +134,8 @@ private extension MarkdownTextStateTests {
       - チケットが欲しい人いますか？（ちけっと が ほしい ひと いますか）：有想要票的人嗎？
     """
 
+    // The final stream content. Tests compare against this value to ensure the
+    // UI-facing text never regresses to `partialBugMarkdown`.
     static let bugMarkdown = partialBugMarkdown + """
 
       - これが欲しい人は手を挙げてください（これ が ほしい ひと は て を あげて ください）：想要這個的人請舉手
