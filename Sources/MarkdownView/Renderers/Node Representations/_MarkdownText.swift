@@ -20,8 +20,8 @@ struct _MarkdownText: View {
 
     var body: some View {
         Group {
-            if let attributedString = Self.renderedOutput(input: text, rendered: attributedString) {
-                Text(attributedString)
+            if let attributedString {
+                Text(Self.visibleText(input: text, rendered: attributedString))
             } else {
                 Text(text)
             }
@@ -51,17 +51,13 @@ struct _MarkdownText: View {
         }
     }
 
-    static func visibleText(input: AttributedString, rendered: RenderedState?) -> AttributedString {
+    static func visibleText(input: AttributedString, rendered: RenderedState) -> AttributedString {
         // `renderedState` is asynchronous cache state. During streaming, an older
         // partial input can finish after the latest input and briefly live in
         // `@State`. Only use the cached output when it was produced from the
         // exact input currently being displayed; otherwise fall back to `input`
         // so the visible text cannot regress while the next render catches up.
-        renderedOutput(input: input, rendered: rendered) ?? input
-    }
-
-    static func renderedOutput(input: AttributedString, rendered: RenderedState?) -> AttributedString? {
-        guard let rendered, rendered.input == input else { return nil }
+        guard rendered.input == input else { return input }
         return rendered.output
     }
 

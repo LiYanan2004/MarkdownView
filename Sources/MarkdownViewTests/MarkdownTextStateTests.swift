@@ -10,97 +10,44 @@ import Testing
 
 @testable import MarkdownView
 
-/// Regression coverage for streamed Markdown updates where the source text is
-/// already complete, but `_MarkdownText` can still show a stale rendered result
-/// from an older partial update.
+/// Regression coverage for streamed Markdown updates where `_MarkdownText`
+/// may hold rendered state from an older partial input.
 @Suite("Markdown Text State")
 struct MarkdownTextStateTests {
     @Test
-    func markdownContentCacheKeyChangesWithInputText() {
-        // Proves the parser/cache key changes with the raw Markdown. If this
-        // failed, stale output could come from reusing a rendered document for
-        // different source text instead of from `_MarkdownText` state.
-        let partialContent = MarkdownContent(raw: .plainText(Self.partialBugMarkdown))
-        let finalContent = MarkdownContent(raw: .plainText(Self.bugMarkdown))
-
-        #expect(partialContent != finalContent)
-        #expect(partialContent.raw.text == Self.partialBugMarkdown)
-        #expect(finalContent.raw.text == Self.bugMarkdown)
-    }
-
-    @Test
     @MainActor
-    func renderedStateUsesOutputForMatchingInput() {
-        // Proves the display helper still uses the async rendered output when
-        // that output belongs to the exact input SwiftUI is asking it to show.
-        let input = AttributedString(Self.bugMarkdown)
-        let renderedText = _MarkdownText.visibleText(
+    func visibleTextUsesRenderedOutputForMatchingInput() {
+        // Normal path: when rendered state belongs to the current input, display
+        // the rendered output rather than falling back to the raw input.
+        let input = AttributedString("raw <strong>markdown</strong>")
+        let output = AttributedString("raw markdown")
+
+        let visibleText = _MarkdownText.visibleText(
             input: input,
-            rendered: _MarkdownText.RenderedState(input: input, output: input)
+            rendered: _MarkdownText.RenderedState(input: input, output: output)
         )
 
-        #expect(String(renderedText.characters) == Self.bugMarkdown)
+        #expect(visibleText == output)
     }
 
     @Test
     @MainActor
-    func olderRenderTaskCannotOverwriteNewerRenderedState() {
-        // Simulates the race from streaming updates: the final input renders
-        // first, then an older partial render commits later. The visible text
-        // must stay on the latest input because rendered state is source-bound.
-        let latestInput = AttributedString(Self.bugMarkdown)
-        var renderedState: _MarkdownText.RenderedState?
-
-        renderedState = _MarkdownText.RenderedState(input: latestInput, output: latestInput)
-        renderedState = _MarkdownText.RenderedState(
-            input: AttributedString(Self.partialBugMarkdown),
-            output: AttributedString(Self.partialBugMarkdown)
-        )
-
+    func visibleTextFallsBackToLatestInputForStaleRenderedState() {
+        // Streaming can leave a rendered result from an older partial input in
+        // state. That stale output must not replace the latest input.
         let visibleText = _MarkdownText.visibleText(
-            input: latestInput,
-            rendered: renderedState
+            input: AttributedString(Self.bugMarkdown),
+            rendered: _MarkdownText.RenderedState(
+                input: AttributedString(Self.partialBugMarkdown),
+                output: AttributedString(Self.partialBugMarkdown)
+            )
         )
 
         #expect(String(visibleText.characters) == Self.bugMarkdown)
-    }
-
-    @Test
-    @MainActor
-    func visibleTextUsesLatestInputWhenRenderedStateBelongsToPreviousInput() {
-        // Verifies the display decision directly. A cached rendered state for a
-        // previous partial input must be ignored when SwiftUI asks the same view
-        // identity to display newer text.
-        let renderedText = _MarkdownText.RenderedState(
-            input: AttributedString(Self.partialBugMarkdown),
-            output: AttributedString(Self.partialBugMarkdown)
-        )
-
-        let visibleText = _MarkdownText.visibleText(
-            input: AttributedString(Self.bugMarkdown),
-            rendered: renderedText
-        )
-
-        #expect(String(visibleText.characters) == Self.bugMarkdown)
-    }
-
-    @Test
-    @MainActor
-    func rebuildingViewIdentityShowsLatestInputText() {
-        // Documents why forcing a new SwiftUI identity with `.id(...)` masks the
-        // bug: the state starts empty, so `_MarkdownText` falls back to the
-        // current input before any async render finishes.
-        let rebuiltVisibleText = _MarkdownText.visibleText(
-            input: AttributedString(Self.bugMarkdown),
-            rendered: nil
-        )
-        #expect(String(rebuiltVisibleText.characters) == Self.bugMarkdown)
     }
 }
 
 private extension MarkdownTextStateTests {
-    // A realistic partial stream chunk captured from the reported failure. The
-    // missing tail starts after the ticket example.
     static let partialBugMarkdown = """
     ## 翻譯與理解
 
@@ -143,8 +90,6 @@ private extension MarkdownTextStateTests {
       - チケットが欲しい人いますか？（ちけっと が ほしい ひと いますか）：有想要票的人嗎？
     """
 
-    // The final stream content. Tests compare against this value to ensure the
-    // UI-facing text never regresses to `partialBugMarkdown`.
     static let bugMarkdown = partialBugMarkdown + """
 
       - これが欲しい人は手を挙げてください（これ が ほしい ひと は て を あげて ください）：想要這個的人請舉手
