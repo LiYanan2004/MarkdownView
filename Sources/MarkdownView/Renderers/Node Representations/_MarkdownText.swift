@@ -22,12 +22,19 @@ struct _MarkdownText: View {
         Text(Self.visibleText(input: text, rendered: renderedState))
             .task(id: text) {
                 let renderedState = Self.renderedState(for: text)
+                // Streaming updates can start a new render before an older render finishes.
+                // Avoid committing work SwiftUI already cancelled for a superseded input.
                 guard !Task.isCancelled else { return }
                 self.renderedState = renderedState
             }
     }
 
     static func visibleText(input: AttributedString, rendered: RenderedState?) -> AttributedString {
+        // `renderedState` is asynchronous cache state. During streaming, an older
+        // partial input can finish after the latest input and briefly live in
+        // `@State`. Only use the cached output when it was produced from the
+        // exact input currently being displayed; otherwise fall back to `input`
+        // so the visible text cannot regress while the next render catches up.
         guard let rendered, rendered.input == input else {
             return input
         }
@@ -62,7 +69,10 @@ struct _MarkdownText: View {
     }
 
     struct RenderedState {
+        /// The source markdown text that produced `output`.
         var input: AttributedString
+
+        /// The same content after asynchronous HTML runs have been converted.
         var output: AttributedString
     }
 }
