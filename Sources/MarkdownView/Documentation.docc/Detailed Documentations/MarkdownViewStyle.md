@@ -1,5 +1,8 @@
 # ``MarkdownViewStyle``
 
+> Deprecated:
+> `MarkdownViewStyle` is deprecated and will be removed in a future release.
+
 ## Topics
 
 ### Getting built-in styles

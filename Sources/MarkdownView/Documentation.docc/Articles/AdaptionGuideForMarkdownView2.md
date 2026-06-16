@@ -14,7 +14,7 @@ MarkdownView 2 offers a new set of customization APIs, adds the most requested r
 - `TOCMenu` has been renamed to ``MarkdownTableOfContent``
 - Rendering control APIs, such as `markdownRenderingMode(_:)` and `markdownRenderingThread(_:)` has been marked as unavailable / removed
 - `MarkdownView(text:)` has been updated to `MarkdownView(_:)`
-- `markdownViewRole(_:)` has been updated to ``MarkdownView/MarkdownView/markdownViewStyle(_:)``
+- `markdownViewRole(_:)` and ``MarkdownView/MarkdownView/markdownViewStyle(_:)`` are deprecated
 - `markdownUnorderedListBullet(_:)` has been updated to ``MarkdownView/MarkdownView/markdownUnorderedListMarker(_:)``
 
 ## Math Rendering

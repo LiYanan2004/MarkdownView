@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
+import MarkdownRenderingEssentials
 
-/// A reader that provides markdown content to use across multiple views.
+/// A reader that provides a markdown content to use across multiple views.
 ///
-/// This reader offers a single source of truth for its child markdown views so
-/// the same Markdown source flows through the hierarchy.
+/// This reader offers a single source-of-truth for its child markdown views, and ensures the input is only parsed once.
 ///
 /// ```swift
 /// MarkdownReader("**Hello World**") { markdown in
@@ -21,27 +21,16 @@ import SwiftUI
 /// }
 /// ```
 public struct MarkdownReader<Content: View>: View {
-    @StateObject private var content: MarkdownContent
-    private var _body: (_ markdownContent: MarkdownContent) -> Content
-
-    public init(
-        _ text: String,
-        @ViewBuilder contents: @escaping (MarkdownContent) -> Content
-    ) {
-        _content = StateObject(wrappedValue: MarkdownContent(text))
-        self._body = contents
+    private var markdownContent: MarkdownContent
+    private var contents: (_ markdownContent: MarkdownContent) -> Content
+    
+    public init(_ text: String, @ViewBuilder contents: @escaping (MarkdownContent) -> Content) {
+        self.markdownContent = MarkdownContent(raw: .plainText(text))
+        self.contents = contents
     }
-
-    public init(
-        _ url: URL,
-        @ViewBuilder contents: @escaping (MarkdownContent) -> Content
-    ) {
-        _content = StateObject(wrappedValue: MarkdownContent(url))
-        self._body = contents
-    }
-
+    
     public var body: some View {
-        _body(content)
+        contents(markdownContent)
     }
 }
 
