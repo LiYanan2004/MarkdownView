@@ -133,6 +133,83 @@ struct MathExtractionTests {
     }
 
     @Test
+    func testPreprocessCanSkipInlineMath() async throws {
+        let markdown = #"The sample mean is $\bar{x}$."#
+        let processedMarkdown = MDMathPreprocessor()
+            .preprocess(markdown, includesInlineMath: false)
+
+        #expect(processedMarkdown == markdown)
+    }
+
+    @Test
+    func testMathPreprocessingStoresDollarDisplayMathWithDelimiters() async throws {
+        let markdown = #"""
+        Display math:
+
+        $$
+        \int_0^1 x^2\,dx = \frac{1}{3}
+        $$
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(
+            result.displayMathStorage.values.first == #"""
+            $$
+            \int_0^1 x^2\,dx = \frac{1}{3}
+            $$
+            """#
+        )
+        #expect(result.markdown.contains(#"@math(uuid: ""#))
+    }
+
+    @Test
+    func testMathPreprocessingStoresBracketDisplayMathWithDelimiters() async throws {
+        let markdown = #"""
+        \[
+        \nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
+        \]
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(
+            result.displayMathStorage.values.first == #"""
+            \[
+            \nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
+            \]
+            """#
+        )
+    }
+
+    @Test
+    func testMathPreprocessingPreservesEscapedBracketPunctuation() async throws {
+        let markdown = #"Escaped punctuation: \*literal asterisks\*, \[literal brackets\], and \`literal backticks\`."#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown == markdown)
+        #expect(result.displayMathStorage.isEmpty)
+        #expect(result.inlineMathStorage.isEmpty)
+    }
+
+    @Test
+    func testExtractsIndentedBracketDelimitedDisplayMath() async throws {
+        let markdown = #"""
+        Introductory text.
+
+            \[
+            E = mc^2
+            \]
+        """#
+
+        #expect(extractedMath(in: markdown) == [
+            #"""
+            \[
+                E = mc^2
+                \]
+            """#,
+        ])
+    }
+
+    @Test
     func testMathPreprocessingPreservesInlineCodeMathLiteral() async throws {
         let markdown = #"Lorem ipsum keeps `$x_y$` as source text while rendering $a_b$ in the same sentence."#
         let result = processMarkdownParsingRanges(in: markdown)
@@ -192,7 +269,7 @@ struct MathExtractionTests {
 
     private func processMarkdownParsingRanges(
         in markdown: String
-    ) -> MDMathPreprocessingResult {
+    ) -> MDMathPreprocessor.Result {
         MDMathPreprocessor().preprocessingResult(for: markdown)
     }
 }

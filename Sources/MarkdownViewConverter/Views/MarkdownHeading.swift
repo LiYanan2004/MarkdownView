@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Markdown
+import MarkdownRenderingEssentials
 
 struct MarkdownHeading: View {
     let heading: Heading
@@ -18,15 +19,16 @@ struct MarkdownHeading: View {
     @Environment(\.headingPaddings) private var paddings
     
     private var font: Font {
-        return switch heading.level {
-        case 1: fontGroup.h1
-        case 2: fontGroup.h2
-        case 3: fontGroup.h3
-        case 4: fontGroup.h4
-        case 5: fontGroup.h5
-        case 6: fontGroup.h6
-        default: fontGroup.body
+        let font: any CustomCTFontConvertible = switch heading.level {
+            case 1: fontGroup.h1
+            case 2: fontGroup.h2
+            case 3: fontGroup.h3
+            case 4: fontGroup.h4
+            case 5: fontGroup.h5
+            case 6: fontGroup.h6
+            default: fontGroup.body
         }
+        return Font(font.asPlatformFont)
     }
     private var foregroundStyle: AnyShapeStyle {
         return switch heading.level {

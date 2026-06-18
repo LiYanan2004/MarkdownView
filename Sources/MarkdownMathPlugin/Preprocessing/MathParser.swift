@@ -57,6 +57,11 @@ package struct MathParser {
             for type in MathRepresentation.Kind.allCases {
                 let start = type.leftTerminator
                 if remaining.hasPrefix(start) {
+                    if type.requiresLineBoundary && !text.isAtLineBoundary(index) {
+                        index = text.index(index, offsetBy: start.count)
+                        continue inputLoop
+                    }
+
                     if index > text.startIndex && text[text.index(before: index)] == "\\" {
                         index = text.index(index, offsetBy: start.count)
                         continue inputLoop
@@ -150,6 +155,15 @@ extension MathParser.MathRepresentation {
             }
         }
 
+        var requiresLineBoundary: Bool {
+            switch self {
+            case .blockEquation:
+                true
+            default:
+                false
+            }
+        }
+
         package static let allCases: [Kind] = [
             .namedNoNumberEquation,
             .namedEquation,
@@ -158,5 +172,21 @@ extension MathParser.MathRepresentation {
             .inlineEquation,
             .inlineParenthesesEquation,
         ]
+    }
+}
+
+fileprivate extension StringProtocol {
+    func isAtLineBoundary(_ index: Index) -> Bool {
+        var currentIndex = index
+        while currentIndex > startIndex {
+            let previousIndex = self.index(before: currentIndex)
+            if self[previousIndex] == "\n" {
+                let lineStartIndex = self.index(after: previousIndex)
+                return self[lineStartIndex..<index].allSatisfy(\.isWhitespace)
+            }
+            currentIndex = previousIndex
+        }
+
+        return self[startIndex..<index].allSatisfy(\.isWhitespace)
     }
 }

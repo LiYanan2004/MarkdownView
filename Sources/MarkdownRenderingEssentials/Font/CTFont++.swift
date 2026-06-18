@@ -8,7 +8,7 @@
 import CoreText
 
 extension CTFont {
-    func monospaced(_ isMonospaced: Bool = true) -> CTFont {
+    package func monospaced(_ isMonospaced: Bool = true) -> CTFont {
         guard isMonospaced else {
             return self
         }

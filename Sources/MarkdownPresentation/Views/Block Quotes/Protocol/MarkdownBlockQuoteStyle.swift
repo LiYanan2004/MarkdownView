@@ -26,38 +26,9 @@ public protocol MarkdownBlockQuoteStyle {
     typealias Configuration = MarkdownBlockQuoteStyleConfiguration
 }
 
-/// The properties of a block quote.
-public struct MarkdownBlockQuoteStyleConfiguration {
-    /// The content of a block quote.
-    public var content: Content
-    
-    /// A type-erased content of a block quote
-    public struct Content: View {
-        private var content: AnyView
-        
-        package init(@ViewBuilder _ content: () -> some View) {
-            self.content = AnyView(content())
-        }
-        
-        @_documentation(visibility: internal)
-        public var body: some View {
-            content
-        }
-    }
-}
-
-@available(*, unavailable)
-extension MarkdownBlockQuoteStyleConfiguration: Sendable {
-    
-}
-
 @_documentation(visibility: internal)
 @available(*, deprecated, renamed: "MarkdownBlockQuoteStyle")
 public typealias BlockQuoteStyle = MarkdownBlockQuoteStyle
-
-@_documentation(visibility: internal)
-@available(*, deprecated, renamed: "MarkdownBlockQuoteStyleConfiguration")
-public typealias BlockQuoteStyleConfiguration = MarkdownBlockQuoteStyleConfiguration
 
 // MARK: - Environment Value
 

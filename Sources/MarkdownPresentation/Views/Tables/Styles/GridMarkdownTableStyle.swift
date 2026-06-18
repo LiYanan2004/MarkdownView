@@ -34,7 +34,7 @@ fileprivate struct GridMarkdownTable: View {
         configuration.table
             .markdownTableCellOverlay {
                 Rectangle()
-                    .stroke(.foreground)
+                    .strokeBorder(.foreground)
             }
     }
 }

@@ -15,7 +15,7 @@ package struct MathBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
     package init() { }
 
     package func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
-        if let identifierValue = configuration.arguments.first?.value,
+        if let identifierValue = configuration.arguments.first(where: { $0.name == "uuid" })?.value,
            let identifier = UUID(uuidString: identifierValue) {
             DisplayMath(mathIdentifier: identifier)
         } else {
@@ -52,11 +52,11 @@ fileprivate struct DisplayMath: View {
         #if canImport(LaTeXSwiftUI)
         if let latexMath {
             LaTeX(latexMath)
+                .font(font.asPlatformFont)
                 .renderingStyle(.wait)
                 .renderingStyle(.empty)
                 .ignoreStringFormatting()
                 .blockMode(.blockText)
-                .font(font)
                 .frame(maxWidth: .infinity)
         }
         #else
@@ -64,3 +64,9 @@ fileprivate struct DisplayMath: View {
         #endif
     }
 }
+
+#if canImport(LaTeXSwiftUI)
+#Preview {
+    LaTeX("$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$")
+}
+#endif

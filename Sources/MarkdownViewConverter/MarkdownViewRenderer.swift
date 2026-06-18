@@ -334,11 +334,21 @@ fileprivate extension MarkdownViewRenderer {
             horizontalAlignment: cell.horizontalAlignment,
             textAlignment: cell.textAlignment,
             colspan: Int(cell.colspan),
-            content: MarkdownViewRenderer(
-                configuration: configuration,
-                elementRenderers: elementRenderers
-            )
-            .makeBody(for: cell)
+            content: MarkdownTableCellContent(cell: cell)
         )
+    }
+}
+
+private struct MarkdownTableCellContent: View {
+    var cell: Markdown.Table.Cell
+    @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownElementRenderers) private var elementRenderers
+
+    var body: some View {
+        MarkdownViewRenderer(
+            configuration: configuration,
+            elementRenderers: elementRenderers
+        )
+        .makeBody(for: cell)
     }
 }

@@ -76,14 +76,14 @@ fileprivate struct GithubMarkdownTable: View {
         .markdownTableRowBackgroundStyle(backgroundColor)
         .markdownTableCellOverlay {
             Rectangle()
-                .stroke(borderColor)
+                .strokeBorder(borderColor)
                 .opacity(0.5)
         }
         .markdownTableCellPadding(.vertical, verticalSpacing)
         .markdownTableCellPadding(.horizontal, horizontalSpacing)
         .overlay {
             Rectangle()
-                .stroke(borderColor)
+                .strokeBorder(borderColor)
                 .opacity(0.5)
         }
     }

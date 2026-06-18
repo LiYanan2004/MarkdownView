@@ -1,5 +1,5 @@
 //
-//  MathPlaceholderPreprocessor.swift
+//  MathPlaceholderSubstituter.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2026/6/2.
@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum MathPlaceholderPreprocessor {
+enum MathPlaceholderSubstituter {
     static func process(
         _ markdown: String,
         parsableRanges: [Range<String.Index>],
         includesInlineMath: Bool = true
-    ) -> MDMathPreprocessingResult {
+    ) -> MDMathPreprocessor.Result {
         var replacements: [Replacement] = []
         var inlineMathStorage: [UUID: String] = [:]
         var displayMathStorage: [UUID: String] = [:]
@@ -27,14 +27,14 @@ enum MathPlaceholderPreprocessor {
                 }
 
                 let identifier = UUID()
-                let latexText = String(markdown[math.range])
+                let matchedText = String(markdown[math.range])
                 let placeholder: String
 
                 if math.kind.inline {
-                    inlineMathStorage[identifier] = latexText
+                    inlineMathStorage[identifier] = matchedText
                     placeholder = MDMathPreprocessor.inlinePlaceholder(for: identifier)
                 } else {
-                    displayMathStorage[identifier] = latexText
+                    displayMathStorage[identifier] = matchedText
                     placeholder = MDMathPreprocessor.displayPlaceholder(for: identifier)
                 }
 
@@ -71,7 +71,7 @@ enum MathPlaceholderPreprocessor {
             )
         }
 
-        return MDMathPreprocessingResult(
+        return MDMathPreprocessor.Result(
             markdown: processedMarkdown,
             context: MDMathContext(
                 inlineMathStorage: inlineMathStorage,
@@ -81,7 +81,7 @@ enum MathPlaceholderPreprocessor {
     }
 }
 
-fileprivate extension MathPlaceholderPreprocessor {
+fileprivate extension MathPlaceholderSubstituter {
     struct Replacement {
         var range: Range<Int>
         var placeholder: String

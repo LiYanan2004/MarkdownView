@@ -19,6 +19,8 @@ extension View {
     /// - h5: 10
     /// - h6: 10
     ///
+    /// This modifier does not affect `MarkdownText`.
+    ///
     /// - parameter edges: The set of edges to pad for headings. The default is `Edge.Set.top`.
     /// - parameter length: The length of the vertical padding on each side.
     /// - parameter headingLevel: The level of the heading to use the specified padding length.
@@ -53,6 +55,8 @@ extension View {
     /// - h5: 10
     /// - h6: 10
     ///
+    /// This modifier does not affect `MarkdownText`.
+    ///
     /// - parameter length: The length of the vertical padding on each side.
     /// - parameter headingLevel: The level of the heading to use the specified padding length.
     nonisolated public func padding(
@@ -64,6 +68,9 @@ extension View {
         }
     }
     
+    /// Sets vertical paddings for specific heading.
+    ///
+    /// This modifier does not affect `MarkdownText`.
     @_disfavoredOverload
     nonisolated public func padding(
         _ insets: EdgeInsets,

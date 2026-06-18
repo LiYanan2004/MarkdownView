@@ -6,23 +6,22 @@
 //
 
 import Markdown
+import MarkdownPresentation
 import MarkdownRenderingEssentials
 
 struct MarkdownTextSemanticBuilder: MarkupVisitor {
-    var configuration: MarkdownRendererConfiguration
+    var configuration: MarkdownPresentation.MarkdownRendererConfiguration
 
-    init(configuration: MarkdownRendererConfiguration) {
+    init(configuration: MarkdownPresentation.MarkdownRendererConfiguration) {
         self.configuration = configuration
     }
 
-    func makeDocument(for markup: any Markup) -> MarkdownTextSemanticDocument {
+    func makeNodes(for markup: any Markup) -> [MarkdownTextSemanticNode] {
         if let document = markup as? Document {
-            return MarkdownTextSemanticDocument(
-                children: makeNodes(descendingInto: document)
-            )
+            return makeNodes(descendingInto: document)
         }
 
-        return MarkdownTextSemanticDocument(children: [makeNode(for: markup)])
+        return [makeNode(for: markup)]
     }
 
     func makeNodes(descendingInto markup: any Markup) -> [MarkdownTextSemanticNode] {
@@ -97,23 +96,9 @@ private extension MarkdownTextSemanticBuilder {
     }
 
     func makeListItem(from listItem: ListItem) -> MarkdownTextSemanticListItem {
-        let children = Array(listItem.children)
-        let leadingChildren: [any Markup]
-        let trailingBlocks: [any Markup]
-
-        if let firstChild = children.first {
-            leadingChildren = Array(firstChild.children)
-            trailingBlocks = Array(children.dropFirst())
-        } else {
-            leadingChildren = []
-            trailingBlocks = []
-        }
-
-        return MarkdownTextSemanticListItem(
+        MarkdownTextSemanticListItem(
             marker: makeListMarker(for: listItem),
-            sourceMarkup: listItem,
-            leadingChildren: leadingChildren,
-            trailingBlocks: trailingBlocks
+            sourceMarkup: listItem
         )
     }
 

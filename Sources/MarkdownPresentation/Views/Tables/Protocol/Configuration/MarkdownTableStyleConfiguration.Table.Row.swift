@@ -30,7 +30,7 @@ extension MarkdownTableStyleConfiguration.Table {
                 rowIndex: rowIndex,
                 cells: cells
             )
-            .font(font)
+            .font(Font(font.asPlatformFont))
         }
     }
 }

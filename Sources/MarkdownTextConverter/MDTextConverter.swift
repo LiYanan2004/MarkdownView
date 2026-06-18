@@ -5,33 +5,84 @@
 //  Created by Yanan Li on 2026/6/15.
 //
 
-import Foundation
 import SwiftUI
-import Markdown
+
+#if canImport(RichText)
+
 import RichText
+import Markdown
+import MarkdownMathPlugin
+import MarkdownPresentation
 import MarkdownRenderingEssentials
+
+#if canImport(LaTeXSwiftUI)
+import LaTeXSwiftUI
+#endif
 
 @MainActor
 package struct MDTextConverter: @MainActor MarkupVisitor {
-    package var configuration: MarkdownRendererConfiguration
+    package var configuration: MarkdownPresentation.MarkdownRendererConfiguration
+    package var elementRenderers: [MarkdownElementRendererRegistration]
+    package var fonts: AnyMarkdownFontGroup
+    package var blockQuoteStyle: any MarkdownBlockQuoteStyle
+    package var codeBlockStyle: any MarkdownCodeBlockStyle
+    package var tableStyle: any MarkdownTableStyle
 
-    package init(configuration: MarkdownRendererConfiguration) {
+    package init(
+        configuration: MarkdownPresentation.MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration],
+        fonts: AnyMarkdownFontGroup
+    ) {
+        let environmentValues = EnvironmentValues()
+
+        self.init(
+            configuration: configuration,
+            elementRenderers: elementRenderers,
+            fonts: fonts,
+            blockQuoteStyle: environmentValues.blockQuoteStyle,
+            codeBlockStyle: environmentValues.codeBlockStyle,
+            tableStyle: environmentValues.markdownTableStyle
+        )
+    }
+
+    package init(
+        configuration: MarkdownPresentation.MarkdownRendererConfiguration,
+        elementRenderers: [MarkdownElementRendererRegistration],
+        fonts: AnyMarkdownFontGroup,
+        blockQuoteStyle: any MarkdownBlockQuoteStyle,
+        codeBlockStyle: any MarkdownCodeBlockStyle,
+        tableStyle: any MarkdownTableStyle
+    ) {
         self.configuration = configuration
+        self.elementRenderers = elementRenderers
+        self.fonts = fonts
+        self.blockQuoteStyle = blockQuoteStyle
+        self.codeBlockStyle = codeBlockStyle
+        self.tableStyle = tableStyle
     }
 
     package func makeTextContent(for markup: any Markup) -> TextContent {
-        let semanticDocument = MarkdownTextSemanticBuilder(
+        let semanticNodes = MarkdownTextSemanticBuilder(
             configuration: configuration
         )
-        .makeDocument(for: markup)
+        .makeNodes(for: markup)
 
-        return render(semanticDocument)
+        return render(semanticNodes)
+    }
+
+    func makeTextContent(for markups: [any Markup]) -> TextContent {
+        render(
+            markups.flatMap {
+                MarkdownTextSemanticBuilder(configuration: configuration)
+                    .makeNodes(for: $0)
+            }
+        )
     }
 
     package func visitDocument(_ document: Document) -> TextContent {
-        render(
+        return render(
             MarkdownTextSemanticBuilder(configuration: configuration)
-                .makeDocument(for: document)
+                .makeNodes(for: document)
         )
     }
 
@@ -44,19 +95,38 @@ package struct MDTextConverter: @MainActor MarkupVisitor {
     }
 
     package func visitHeading(_ heading: Heading) -> TextContent {
-        let markdownComponent = markdownComponent(forHeadingLevel: heading.level)
+        let markdownComponent: MarkdownComponent = switch heading.level {
+            case 1: .h1
+            case 2: .h2
+            case 3: .h3
+            case 4: .h4
+            case 5: .h5
+            case 6: .h6
+            default: .body
+        }
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.paragraphSpacing = configuration.componentSpacing
-        paragraphStyle.paragraphSpacingBefore = configuration.componentSpacing
 
         let headingLevel = AttributeScopes.AccessibilityAttributes
             .HeadingLevelAttribute
             .HeadingLevel(rawValue: heading.level) ?? .unspecified
 
-        let attributes = AttributeContainer([
+        let font = switch markdownComponent {
+            case .h1: fonts.h1
+            case .h2: fonts.h2
+            case .h3: fonts.h3
+            case .h4: fonts.h4
+            case .h5: fonts.h5
+            case .h6: fonts.h6
+            case .body: fonts.body
+            default: preconditionFailure()
+        }
+
+        let platformAttributes: [NSAttributedString.Key : Any] = [
             .paragraphStyle: paragraphStyle as NSParagraphStyle,
-            .font: (configuration.fonts[markdownComponent] ?? bodyFont).asPlatformFont
-        ])
+            .font: font.asPlatformFont
+        ]
+        let attributes = AttributeContainer(platformAttributes)
             .presentationIntent(
                 .init(
                     .header(level: heading.level),
@@ -65,20 +135,28 @@ package struct MDTextConverter: @MainActor MarkupVisitor {
             )
             .accessibilityHeadingLevel(headingLevel)
 
-        return TextContent(
-            descendInto(heading).mergingAttributes(attributes).fragments + [
-                .attributedString(AttributedString("\n", attributes: attributes))
-            ]
-        )
+        return descendInto(heading).mergingAttributes(attributes)
     }
 
     package func visitText(_ text: Markdown.Text) -> TextContent {
         let plainText = text.plainText
-        guard configuration.math.shouldRender else {
-            return TextContent(.string(plainText))
+        #if canImport(LaTeXSwiftUI)
+        if configuration.math.shouldRender,
+           let inlineMathStorage = configuration.math.inlineMathStorage {
+            return inlineMathTextContent(
+                text: plainText,
+                inlineMathStorage: inlineMathStorage
+            )
         }
-
-        return TextContent(.string(plainText))
+        #endif
+        return TextContent(
+            .attributedString(
+                AttributedString(
+                    plainText,
+                    attributes: AttributeContainer([.font : fonts.body.asPlatformFont])
+                )
+            )
+        )
     }
 
     package func visitSoftBreak(_ softBreak: SoftBreak) -> TextContent {
@@ -94,7 +172,6 @@ package struct MDTextConverter: @MainActor MarkupVisitor {
             InlineView(replacement: nil, sizing: .fittingLineFragment) {
                 Divider()
             }
-            RichText.LineBreak()
         }
     }
 
@@ -172,6 +249,23 @@ package struct MDTextConverter: @MainActor MarkupVisitor {
               let url = URL(string: destination, relativeTo: configuration.preferredBaseURL)
         else { return descendInto(link) }
 
+        if let linkRenderer = linkRenderer(for: url) {
+            return MarkdownTextEmbeddingViewFactory.makeTextContent(
+                replacement: linkReplacement(for: link, url: url),
+                componentSpacing: configuration.componentSpacing,
+                sizing: .intrinsic
+            ) {
+                MarkdownCustomLink(
+                    link: link,
+                    url: url,
+                    renderer: linkRenderer,
+                    configuration: configuration,
+                    elementRenderers: elementRenderers
+                )
+                .markdownTextAttachmentEnvironment(from: self)
+            }
+        }
+
         var attributes = AttributeContainer()
             .link(url)
             .foregroundColor(configuration.tintColors[.link] ?? .accentColor)
@@ -194,47 +288,41 @@ package struct MDTextConverter: @MainActor MarkupVisitor {
     package func visitOrderedList(_ orderedList: OrderedList) -> TextContent {
         render(
             MarkdownTextSemanticBuilder(configuration: configuration)
-                .makeDocument(for: orderedList)
+                .makeNodes(for: orderedList)
         )
     }
 
     package func visitUnorderedList(_ unorderedList: UnorderedList) -> TextContent {
         render(
             MarkdownTextSemanticBuilder(configuration: configuration)
-                .makeDocument(for: unorderedList)
+                .makeNodes(for: unorderedList)
         )
     }
 
     package func visitListItem(_ listItem: ListItem) -> TextContent {
-        let children = Array(listItem.children)
-        let leadingChildren = children.first.map { Array($0.children) } ?? []
-        let trailingBlocks = Array(children.dropFirst())
-
         return renderListItem(
             MarkdownTextSemanticListItem(
                 marker: listMarker(for: listItem),
-                sourceMarkup: listItem,
-                leadingChildren: leadingChildren,
-                trailingBlocks: trailingBlocks
+                sourceMarkup: listItem
             ),
             listDepth: (listItem.parent as? ListItemContainer)?.listDepth ?? 0
         )
     }
 }
 
-private extension MDTextConverter {
-    func render(_ document: MarkdownTextSemanticDocument) -> TextContent {
-        combine(document.children.map(render))
+extension MDTextConverter {
+    func render(_ nodes: [MarkdownTextSemanticNode]) -> TextContent {
+        combineBlocks(nodes.map(render))
     }
 
     func render(_ node: MarkdownTextSemanticNode) -> TextContent {
         switch node {
         case .passthrough(let markup):
-            return renderMarkup(markup)
+            renderMarkup(markup)
         case .list(let list):
-            return renderList(list)
+            renderList(list)
         case .attachment(let attachment):
-            return renderAttachment(attachment)
+            renderAttachment(attachment)
         }
     }
 
@@ -243,256 +331,40 @@ private extension MDTextConverter {
         return converter.visit(markup)
     }
 
-    func renderList(_ list: MarkdownTextSemanticList) -> TextContent {
-        combine(
-            list.items.map {
-                renderListItem($0, listDepth: list.depth)
-            }
-        )
-    }
-
-    func renderListItem(
-        _ listItem: MarkdownTextSemanticListItem,
-        listDepth: Int
-    ) -> TextContent {
-        let indentation = CGFloat(listDepth + 1) * configuration.listConfiguration.leadingIndentation
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.headIndent = indentation
-        paragraphStyle.firstLineHeadIndent = indentation
-        paragraphStyle.paragraphSpacing = configuration.componentSpacing
-
-        let listItemAttributes = AttributeContainer([
-            .paragraphStyle: paragraphStyle as NSParagraphStyle
-        ])
-
-        var markerAttributes = listItemAttributes
-        let markerString: String?
-
-        switch listItem.marker {
-        case .checkbox(.checked):
-            markerString = nil
-        case .checkbox(.unchecked):
-            markerString = nil
-        case .text(let value, let monospaced):
-            markerString = value
-            markerAttributes = markerAttributes.merging(
-                AttributeContainer([
-                    .font: bodyFont.ctFont.monospaced(monospaced)
-                ])
-            )
-        case .none:
-            markerString = nil
-        }
-
-        let leadingContent = combine(listItem.leadingChildren.map(renderMarkup))
-        let trailingBlocks = listItem.trailingBlocks.map(renderMarkup)
-        let checkboxContent: TextContent?
-
-        if case .checkbox(let checkbox) = listItem.marker {
-            checkboxContent = checkboxViewContent(for: checkbox)
-        } else {
-            checkboxContent = nil
-        }
-
-        return TextContent {
-            if let checkboxContent {
-                checkboxContent.mergingAttributes(listItemAttributes)
-            }
-
-            if let markerString {
-                AttributedString(markerString, attributes: markerAttributes)
-            }
-
-            AttributedString(" ", attributes: listItemAttributes)
-
-            if !leadingContent.fragments.isEmpty {
-                leadingContent.mergingAttributes(listItemAttributes)
-            }
-
-            AttributedString("\n", attributes: listItemAttributes)
-
-            for trailingBlock in trailingBlocks where !trailingBlock.fragments.isEmpty {
-                trailingBlock
-            }
-        }
-    }
-
-    var bodyFont: any CustomCTFontConvertible {
-        configuration.fonts[.body] ?? PlatformFont.systemFont(ofSize: PlatformFont.systemFontSize)
-    }
-
-    func markdownComponent(forHeadingLevel headingLevel: Int) -> MarkdownComponent {
-        switch headingLevel {
-        case 1: .h1
-        case 2: .h2
-        case 3: .h3
-        case 4: .h4
-        case 5: .h5
-        case 6: .h6
-        default: .body
-        }
-    }
-
-    func checkboxViewContent(for checkbox: Checkbox) -> TextContent {
-        let replacement: AttributedString = switch checkbox {
-        case .checked: AttributedString("☑︎")
-        case .unchecked: AttributedString("☐")
-        }
-
-        return TextContent {
-            InlineView(replacement: replacement) {
-                MarkdownTextCheckbox(checkbox: checkbox)
-            }
-        }
-    }
-
-    func renderAttachment(_ attachment: MarkdownTextAttachment) -> TextContent {
-        let context = MarkdownTextAttachmentContext(
-            attachment: attachment,
-            replacement: replacement(for: attachment),
-            appendsLineBreak: appendsLineBreak(after: attachment)
-        )
-
-        switch attachment.markup {
-        case let blockQuote as BlockQuote:
-            return configuration.attachmentRenderer.makeBlockQuoteTextContent(
-                for: blockQuote,
-                context: context
-            )
-        case let blockDirective as BlockDirective:
-            return configuration.attachmentRenderer.makeBlockDirectiveTextContent(
-                for: blockDirective,
-                context: context
-            )
-        case let image as Markdown.Image:
-            return configuration.attachmentRenderer.makeImageTextContent(
-                for: image,
-                context: context
-            )
-        case let codeBlock as CodeBlock:
-            return configuration.attachmentRenderer.makeCodeBlockTextContent(
-                for: codeBlock,
-                context: context
-            )
-        case let htmlBlock as HTMLBlock:
-            return configuration.attachmentRenderer.makeHTMLBlockTextContent(
-                for: htmlBlock,
-                context: context
-            )
-        case let table as Markdown.Table:
-            return configuration.attachmentRenderer.makeTableTextContent(
-                for: table,
-                context: context
-            )
-        default:
-            return context.fallbackTextContent
-        }
-    }
-
-    func replacement(for attachment: MarkdownTextAttachment) -> AttributedString? {
-        switch attachment.markup {
-            case let blockQuote as BlockQuote:
-                let rows = Array(blockQuote.blockChildren).map {
-                    renderMarkup($0).attributedString()
-                }
-
-                guard let firstRow = rows.first else { return nil }
-
-                return rows.dropFirst().reduce(into: firstRow) { attributedString, row in
-                    attributedString += "\n"
-                    attributedString += row
-                }
-                
-            case let blockDirective as BlockDirective:
-                let wrappedString = blockDirective.children
-                    .compactMap { $0.format() }
-                    .joined(separator: "\n")
-                guard !wrappedString.isEmpty else {
-                    return nil
-                }
-                return AttributedString(wrappedString)
-                
-            case let image as Markdown.Image:
-                let alternativeText = image.plainText.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !alternativeText.isEmpty else {
-                    return nil
-                }
-                return AttributedString(alternativeText)
-                
-            case let codeBlock as CodeBlock:
-                guard !codeBlock.code.isEmpty else {
-                    return nil
-                }
-                return AttributedString(codeBlock.code)
-                
-            case let htmlBlock as HTMLBlock:
-                guard !htmlBlock.rawHTML.isEmpty else {
-                    return nil
-                }
-                return AttributedString(htmlBlock.rawHTML)
-                
-            case let table as Markdown.Table:
-                return tableRowsReplacement(for: table)
-                
-            default:
-                return nil
-        }
-    }
-    
-    func appendsLineBreak(after attachment: MarkdownTextAttachment) -> Bool {
-        switch attachment.markup {
-            case is Markdown.Image:
-                return false // image could be inline with text
-            case is Markdown.BlockQuote:
-                return true
-            default:
-                return true
-        }
-    }
-
-    func tableRowsReplacement(for table: Markdown.Table) -> AttributedString? {
-        let rowContainers: [any TableCellContainer] = [table.head] + Array(table.body.rows)
-        let rows = rowContainers.map { row in
-            Array(row.cells).reduce(into: AttributedString()) { attributedString, cell in
-                attributedString += renderMarkup(cell).attributedString()
-                attributedString += "\t"
-            }
-        }
-
-        guard !rows.isEmpty else {
-            return nil
-        }
-
-        return rows.reduce(into: AttributedString()) { attributedString, row in
-            attributedString += row
-            attributedString += "\n"
-        }
-    }
-
     func descendInto(_ markup: any Markup) -> TextContent {
         combine(markup.children.map(renderMarkup))
     }
 
     func combine(_ contents: [TextContent]) -> TextContent {
-        var combined = TextContent([])
-        for content in contents where !content.fragments.isEmpty {
-            combined += content
+        contents.reduce(into: TextContent([])) { combined, content in
+            if !content.fragments.isEmpty {
+                combined += content
+            }
         }
-        return combined
     }
 
     func paragraphTextContent(_ content: TextContent) -> TextContent {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.paragraphSpacing = configuration.componentSpacing
         let attributes = AttributeContainer([
-            .paragraphStyle: paragraphStyle as NSParagraphStyle
+            .paragraphStyle: paragraphStyle as NSParagraphStyle,
+            .font: fonts.body.asPlatformFont
         ])
 
-        return TextContent(
-            content.mergingAttributes(attributes).fragments + [
-                .attributedString(AttributedString("\n", attributes: attributes))
-            ]
-        )
+        return content.mergingAttributes(attributes)
+    }
+
+    func combineBlocks(_ contents: [TextContent]) -> TextContent {
+        contents.reduce(into: TextContent([])) { combined, content in
+            guard !content.fragments.isEmpty else {
+                return
+            }
+
+            if !combined.fragments.isEmpty {
+                combined += RichText.LineBreak().textContent
+            }
+            combined += content
+        }
     }
 
     func mergeInlinePresentationIntent(
@@ -514,86 +386,6 @@ private extension MDTextConverter {
 
         return TextContent(.attributedString(attributedString))
     }
-
-    func listMarker(for listItem: ListItem) -> MarkdownTextSemanticListMarker? {
-        if let checkbox = listItem.checkbox {
-            return .checkbox(checkbox)
-        }
-
-        if let unorderedList = listItem.parent as? UnorderedList {
-            let marker = configuration.listConfiguration.unorderedListMarker
-            return .text(
-                value: marker.marker(listDepth: unorderedList.listDepth),
-                monospaced: marker.monospaced
-            )
-        }
-
-        if let orderedList = listItem.parent as? OrderedList {
-            let marker = configuration.listConfiguration.orderedListMarker
-            return .text(
-                value: marker.marker(
-                    at: listItem.indexInParent,
-                    listDepth: orderedList.listDepth
-                ),
-                monospaced: marker.monospaced
-            )
-        }
-
-        return nil
-    }
 }
 
-private struct MarkdownTextCheckbox: View {
-    var checkbox: Checkbox
-
-    var body: some View {
-        switch checkbox {
-        case .checked:
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.tint)
-        case .unchecked:
-            Image(systemName: "circle")
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
-fileprivate extension TextContent {
-    @MainActor
-    func mergingAttributes(_ attributes: AttributeContainer) -> TextContent {
-        TextContent(
-            fragments.map { fragment in
-                switch fragment {
-                case .string(let string):
-                    .attributedString(AttributedString(string, attributes: attributes))
-                case .attributedString(let attributedString):
-                    .attributedString(attributedString.mergingAttributes(attributes))
-                case .view:
-                    .attributedString(fragment.asAttributedString().mergingAttributes(attributes))
-                }
-            }
-        )
-    }
-    
-    @MainActor
-    func attributedString(options: AttributedStringOption = []) -> AttributedString {
-        fragments.reduce(into: AttributedString()) { attributedString, fragment in
-            switch fragment {
-                case .string(let string):
-                    attributedString += AttributedString(string)
-                case .attributedString(let value):
-                    attributedString += value
-                case .view:
-                    if options.contains(.ignoresEmbeddedView) == false {
-                        attributedString += fragment.asAttributedString()
-                    }
-            }
-        }
-    }
-    
-    struct AttributedStringOption: OptionSet {
-        var rawValue: UInt8
-        
-        static let ignoresEmbeddedView = AttributedStringOption(rawValue: 1 << 0)
-    }
-}
+#endif

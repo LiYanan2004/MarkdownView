@@ -9,22 +9,22 @@ import SwiftUI
 import MarkdownRenderingEssentials
 
 extension View {
-    /// Apply a foreground style group to MarkdownView.
+    /// Sets heading styles for all heading levels in `MarkdownView`.
     ///
-    /// This is useful when you want to completely customize foreground styles.
+    /// This modifier does not affect `MarkdownText`.
     ///
-    /// - Parameter group: A style set to apply to the MarkdownView.
+    /// - Parameter group: The heading style group to apply.
     nonisolated public func headingStyleGroup(
         _ group: some HeadingStyleGroup
     ) -> some View {
         environment(\.headingStyleGroup, AnyHeadingStyleGroup(group))
     }
     
-    /// Apply a foreground style group to MarkdownView.
+    /// Sets heading styles for all heading levels in `MarkdownView`.
     ///
-    /// This is useful when you want to completely customize foreground styles.
+    /// This modifier does not affect `MarkdownText`.
     ///
-    /// - Parameter group: A style set to apply to the MarkdownView.
+    /// - Parameter group: The heading style group to apply.
     @available(*, deprecated, renamed: "headingStyleGroup")
     nonisolated public func foregroundStyleGroup(
         _ group: some HeadingStyleGroup
@@ -32,11 +32,13 @@ extension View {
         headingStyleGroup(group)
     }
     
-    /// Sets foreground style for the specific component in MarkdownView.
+    /// Sets the heading style for a specific heading level in `MarkdownView`.
+    ///
+    /// This modifier does not affect `MarkdownText`.
     ///
     /// - Parameters:
-    ///   - style: The style to apply to this type of components.
-    ///   - headingLevel: The type of components to apply the foreground style.
+    ///   - style: The style to apply to headings at the specified level.
+    ///   - headingLevel: The heading level to style.
     nonisolated public func headingStyle(
         _ style: some ShapeStyle,
         for headingLevel: HeadingLevel
@@ -54,11 +56,13 @@ extension View {
         }
     }
     
-    /// Sets foreground style for the specific component in MarkdownView.
+    /// Sets the heading style for a specific heading level in `MarkdownView`.
+    ///
+    /// This modifier does not affect `MarkdownText`.
     ///
     /// - Parameters:
-    ///   - style: The style to apply to this type of components.
-    ///   - headingLevel: The type of components to apply the foreground style.
+    ///   - style: The style to apply to headings at the specified level.
+    ///   - headingLevel: The heading level to style.
     @available(*, deprecated, renamed: "headingStyle")
     nonisolated public func foregroundStyle(
         _ style: some ShapeStyle,

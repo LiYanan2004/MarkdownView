@@ -9,15 +9,37 @@ import Foundation
 import Markdown
 
 public struct MDMathPreprocessor: Sendable, Hashable {
-    public func preprocess(_ markdown: String) -> String {
-        preprocessingResult(for: markdown).markdown
+    public struct Result: Sendable, Hashable {
+        public let markdown: String
+        public let context: MDMathContext
+
+        public init(
+            markdown: String,
+            context: MDMathContext
+        ) {
+            self.markdown = markdown
+            self.context = context
+        }
+    }
+    
+    public func preprocess(
+        _ markdown: String,
+        includesInlineMath: Bool = true
+    ) -> String {
+        preprocessingResult(
+            for: markdown,
+            includesInlineMath: includesInlineMath
+        ).markdown
     }
     
     public init() {
         
     }
 
-    public func preprocessingResult(for markdown: String) -> MDMathPreprocessingResult {
+    public func preprocessingResult(
+        for markdown: String,
+        includesInlineMath: Bool = true
+    ) -> MDMathPreprocessor.Result {
         var mathRangesResolver = MathParsableRangesResolver()
         mathRangesResolver.visit(
             Document(
@@ -26,19 +48,11 @@ public struct MDMathPreprocessor: Sendable, Hashable {
             )
         )
 
-        return MathPlaceholderPreprocessor.process(
+        return MathPlaceholderSubstituter.process(
             markdown,
             parsableRanges: mathRangesResolver.resolve(in: markdown),
             includesInlineMath: includesInlineMath
         )
-    }
-    
-    private var includesInlineMath: Bool {
-        #if canImport(LaTeXSwiftUI)
-        true
-        #else
-        false
-        #endif
     }
 }
 
@@ -48,6 +62,16 @@ extension MDMathPreprocessor {
     }
     
     static public func displayPlaceholder(for identifier: UUID) -> String {
-        "@math(uuid:\(identifier.uuidString))"
+        "@math(uuid: \"\(identifier.uuidString)\")"
+    }
+}
+
+extension MDMathPreprocessor.Result {
+    package var inlineMathStorage: [UUID: String] {
+        context.inlineMathStorage
+    }
+    
+    package var displayMathStorage: [UUID: String] {
+        context.displayMathStorage
     }
 }

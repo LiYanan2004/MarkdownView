@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import MarkdownRenderingEssentials
 
 extension View {
-    
+
     /// Apply a font group to MarkdownView.
     ///
     /// Customize fonts for multiple types of text.
@@ -19,7 +20,7 @@ extension View {
     nonisolated public func fontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
         markdownFontGroup(fontGroup)
     }
-    
+
     /// Apply a font group to MarkdownView.
     ///
     /// Customize fonts for multiple types of text.
@@ -28,12 +29,34 @@ extension View {
     nonisolated public func markdownFontGroup(_ fontGroup: some MarkdownFontGroup) -> some View {
         environment(\.markdownFontGroup, .init(fontGroup))
     }
-    
-    /// Sets the font for the specific component in MarkdownView.
+
+    /// Sets the font for the specific component for a `MarkdownView` or `MarkdownText`.
+    ///
+    /// > Note:
+    /// > Setting font only takes effect on appleOS 26 or later due to the API coverage.
+    /// > If you need to support older OS, supply custom platform font types (`NSFont` / `UIFont` / `CTFont`) via ``font(_:for:)-(CustomCTFontConvertible,_)
+    ///
     /// - Parameters:
     ///   - font: The font to apply to these components.
     ///   - type: The type of components to apply the font.
-    nonisolated public func font(_ font: Font, for type: MarkdownTextType) -> some View {
+    @_disfavoredOverload
+    @inlinable
+    nonisolated public func font(
+        _ font: Font,
+        for type: MarkdownTextType
+    ) -> some View {
+        self.font(font, for: type)
+    }
+
+    /// Sets the font for the specific component for a `MarkdownView` or `MarkdownText`.
+    ///
+    /// - Parameters:
+    ///   - font: The platform font to apply to these components.
+    ///   - type: The type of components to apply the font.
+    nonisolated public func font(
+        _ font: any CustomCTFontConvertible,
+        for type: MarkdownTextType
+    ) -> some View {
         transformEnvironment(\.markdownFontGroup) { fontGroup in
             switch type {
             case .h1: fontGroup._h1 = font
@@ -52,5 +75,4 @@ extension View {
             }
         }
     }
-    
 }

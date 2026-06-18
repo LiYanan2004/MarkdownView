@@ -26,7 +26,6 @@ MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well
 
 ### Customizing Appearances
 
-- <doc:MarkdownViewStyle>
 - <doc:MarkdownFontGroup>
 - <doc:HeadingStyleGroup>
 - <doc:MarkdownCodeBlockStyle>

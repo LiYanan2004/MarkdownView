@@ -7,9 +7,8 @@
 
 import SwiftUI
 import CoreText
-import MarkdownRenderingEssentials
 
-public protocol CustomCTFontConvertible {
+public protocol CustomCTFontConvertible: Sendable {
     var ctFont: CTFont { get }
 }
 
@@ -31,10 +30,10 @@ extension CTFont: CustomCTFontConvertible {
 
 extension SwiftUI.Font: CustomCTFontConvertible {
     public var ctFont: CTFont {
-        if #available(iOS 26, macOS 26, *) {
-            resolve(in: EnvironmentValues().fontResolutionContext).ctFont
+        if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0, visionOS 26.0, *) {
+            return resolve(in: EnvironmentValues().fontResolutionContext).ctFont
         } else {
-            preconditionFailure("Unsupported")
+            return PlatformFont.preferredFont(forTextStyle: .body).ctFont
         }
     }
 }

@@ -37,7 +37,7 @@ public struct MarkdownView: View {
             parseOptions: parseOptions(for: elementRenderers)
         )
         .erasedToAnyView()
-        .font(fonts.body)
+        .font(Font(fonts.body.asPlatformFont))
     }
 }
 
@@ -65,12 +65,23 @@ fileprivate extension MarkdownView {
         }
 
         let preprocessingResult = MDMathPreprocessor()
-            .preprocessingResult(for: content.raw.text)
+            .preprocessingResult(
+                for: content.raw.text,
+                includesInlineMath: Self.includesInlineMath
+            )
 
         return RenderingInput(
             content: MarkdownContent(raw: .plainText(preprocessingResult.markdown)),
             configuration: configuration.with(\.math.context, preprocessingResult.context)
         )
+    }
+
+    static var includesInlineMath: Bool {
+        #if canImport(LaTeXSwiftUI)
+        true
+        #else
+        false
+        #endif
     }
 }
 
@@ -81,32 +92,30 @@ fileprivate extension MarkdownView {
 @available(tvOS, unavailable)
 #Preview {
     ScrollView {
-        MarkdownView(markdown)
-    }
-}
+        MarkdownView(
+            """
+            # MarkdownView
 
-@available(iOS 17.0, macOS 14.0, *)
-@available(watchOS, unavailable)
-@available(tvOS, unavailable)
-#Preview {
-    ScrollView {
-        VStack(alignment: .leading) {
-            MarkdownView("Hello ***World***. This is [MarkdownView](https://github.com/liyanan2004/MarkdownView), a view based markdown rendering view.")
-            MarkdownView("""
-            ## Tables
-            
-            | Name | Language | Platform |
-            |------|----------|----------|
-            | Swift | Native | Apple |
-            | Rust | Systems | Cross-platform |
-            """)
-            MarkdownView("![Swift Logo](https://developer.apple.com/assets/elements/icons/swift/swift-64x64_2x.png)")
-        }
+            A view-based markdown renderer for SwiftUI.
+
+            > Block quotes are useful for callouts and quoted prose.
+
+            ## Features
+
+            - Emphasis with **bold** and *italic* text
+            - Links such as [MarkdownView](https://github.com/liyanan2004/MarkdownView)
+            - Inline code like `MarkdownText("Hello")`
+
+            ```swift
+            MarkdownView("Hello **World**")
+            ```
+            """
+        )
+        .padding()
     }
     .markdownLinksUnderlined()
     .scrollBounceBehavior(.basedOnSize)
     #if os(macOS) || os(iOS)
     .textSelection(.enabled)
     #endif
-    .padding()
 }

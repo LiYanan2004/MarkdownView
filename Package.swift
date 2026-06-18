@@ -21,7 +21,7 @@ let package = Package(
     ],
     traits: [
         "LaTeX",
-        .default(enabledTraits: ["LaTeX"])
+        .default(enabledTraits: ["LaTeX"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
@@ -71,11 +71,6 @@ let package = Package(
                     package: "swift-markdown"
                 ),
                 .product(
-                    name: "Highlightr",
-                    package: "Highlightr",
-                    condition: .when(platforms: [.iOS, .macOS])
-                ),
-                .product(
                     name: "LaTeXSwiftUI",
                     package: "LaTeXSwiftUI",
                     condition: .when(platforms: [.iOS, .macOS], traits: ["LaTeX"])
@@ -111,11 +106,6 @@ let package = Package(
                     name: "Markdown",
                     package: "swift-markdown"
                 ),
-                .product(
-                    name: "RichText",
-                    package: "RichText",
-                    condition: .when(platforms: [.iOS, .macOS])
-                ),
             ]
         ),
         .target(
@@ -125,7 +115,10 @@ let package = Package(
                 "MarkdownMathPlugin",
                 "MarkdownPresentation",
                 "MarkdownViewConverter",
-                "MarkdownTextConverter",
+                .target(
+                    name: "MarkdownTextConverter",
+                    condition: .when(platforms: [.iOS, .macOS])
+                ),
                 .product(
                     name: "RichText",
                     package: "RichText",
@@ -143,7 +136,17 @@ let package = Package(
             dependencies: [
                 "MarkdownView",
                 "MarkdownMathPlugin",
+                "MarkdownTextConverter",
                 "MarkdownViewConverter",
+                .product(
+                    name: "Markdown",
+                    package: "swift-markdown"
+                ),
+                .product(
+                    name: "RichText",
+                    package: "RichText",
+                    condition: .when(platforms: [.iOS, .macOS])
+                ),
             ],
             path: "Tests/MarkdownViewTests"
         ),

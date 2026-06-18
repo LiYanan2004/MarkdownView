@@ -7,6 +7,7 @@
 
 #if canImport(RichText)
 import Markdown
+import MarkdownPresentation
 import MarkdownTextConverter
 import RichText
 import SwiftUI
@@ -16,7 +17,11 @@ public struct MarkdownText: View {
     private var content: MarkdownContent
 
     @Environment(\.markdownRendererConfiguration) private var configuration
-    @Environment(\.markdownTextFonts) private var fonts
+    @Environment(\.markdownElementRenderers) private var elementRenderers
+    @Environment(\.markdownFontGroup) private var fonts
+    @Environment(\.blockQuoteStyle) private var blockQuoteStyle
+    @Environment(\.codeBlockStyle) private var codeBlockStyle
+    @Environment(\.markdownTableStyle) private var tableStyle
 
     /// Creates a text-based markdown view for the given markdown source.
     /// - Parameter text: The markdown source to render.
@@ -33,10 +38,12 @@ public struct MarkdownText: View {
     public var body: some View {
         let processedInput = preparedRenderingInput()
         let converter = MDTextConverter(
-            configuration: MarkdownTextConverter.MarkdownRendererConfiguration(
-                presentationConfiguration: processedInput.configuration,
-                fonts: fonts
-            )
+            configuration: processedInput.configuration,
+            elementRenderers: elementRenderers,
+            fonts: fonts,
+            blockQuoteStyle: blockQuoteStyle,
+            codeBlockStyle: codeBlockStyle,
+            tableStyle: tableStyle
         )
 
         TextView {
@@ -44,13 +51,20 @@ public struct MarkdownText: View {
                 for: processedInput.content.parse(options: parseOptions)
             )
         }
+        .environment(\.markdownRendererConfiguration, processedInput.configuration)
+        .environment(\.markdownElementRenderers, elementRenderers)
+        .environment(\.markdownFontGroup, fonts)
+        .environment(\.blockQuoteStyle, blockQuoteStyle)
+        .environment(\.codeBlockStyle, codeBlockStyle)
+        .environment(\.markdownTableStyle, tableStyle)
     }
 }
 
 fileprivate extension MarkdownText {
     var parseOptions: ParseOptions {
         var parseOptions = ParseOptions()
-        if configuration.math.shouldRender {
+        if configuration.math.shouldRender
+            || elementRenderers.contains(where: { $0.blockDirective != nil }) {
             parseOptions.insert(.parseBlockDirectives)
         }
         return parseOptions
@@ -71,138 +85,51 @@ fileprivate extension MarkdownText {
         }
 
         let preprocessingResult = MDMathPreprocessor()
-            .preprocessingResult(for: content.raw.text)
+            .preprocessingResult(
+                for: content.raw.text,
+                includesInlineMath: Self.includesInlineMath
+            )
 
         return RenderingInput(
             content: MarkdownContent(raw: .plainText(preprocessingResult.markdown)),
             configuration: configuration.with(\.math.context, preprocessingResult.context)
         )
     }
+
+    static var includesInlineMath: Bool {
+        #if canImport(LaTeXSwiftUI)
+        true
+        #else
+        false
+        #endif
+    }
 }
 
 // MARK: - Preview
-
-let markdown = #"""
-# Markdown Showcase
-
-> A blockquote with **bold**, *italic*, and `inline code`.
-
-## Text Formatting
-
-This paragraph contains:
-
-- **Bold**
-- *Italic*
-- ***Bold Italic***
-- ~~Strikethrough~~
-- `Inline code`
-- <kbd>⌘K</kbd>
-
-A link to [Apple](https://apple.com).
-
-https://swift.org
-
----
-
-## Lists
-
-### Unordered List
-
-- First item
-- Second item
-  - Nested item
-    - Deeply nested item
-
-### Ordered List
-
-1. First
-2. Second
-   1. Nested
-   2. Nested
-3. Third
-
-### Task List
-
-- [x] Completed task
-- [ ] Pending task
-
----
-
-## Code
-
-```swift
-import SwiftUI
-
-struct ContentView: View {
-    var body: some View {
-        Text("Hello, Markdown!")
-    }
-}
-```
-
-```json
-{
-  "name": "MarkdownView",
-  "version": 1
-}
-```
-
----
-
-## Tables
-
-| Name | Language | Platform |
-|------|----------|----------|
-| Swift | Native | Apple |
-| Rust | Systems | Cross-platform |
-
----
-
-## Images
-
-![Swift Logo](https://developer.apple.com/assets/elements/icons/swift/swift-64x64_2x.png)
-
----
-
-## HTML
-
-<a src="https://gituhub.com">Expandable Section</a>
-
-This content is inside a details block.
-
----
-
-## Footnotes
-
-Here is a statement with a footnote.[^1]
-
-[^1]: This is the footnote content.
-
----
-
-## Nested Structures
-
-> Quote level 1
->
-> > Quote level 2
-> > 
-> > - Nested list
-> > - Another item
-
----
-
-## Emoji
-
-😀 🚀 ✨
-"""#
 
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
 #Preview {
-    ScrollView {
-        MarkdownText(markdown)
-            .padding()
-    }
+    MarkdownText(
+        """
+        # MarkdownText
+
+        A text-based markdown renderer for SwiftUI.
+
+        > Block quotes are useful for callouts and quoted prose.
+
+        ## Features
+
+        - Emphasis with **bold** and *italic* text
+        - Links such as [MarkdownView](https://github.com/liyanan2004/MarkdownView)
+        - Inline code like `MarkdownText("Hello")`
+
+        ```swift
+        MarkdownText("Hello **World**")
+        ```
+        """
+    )
+    .padding()
 }
 #endif

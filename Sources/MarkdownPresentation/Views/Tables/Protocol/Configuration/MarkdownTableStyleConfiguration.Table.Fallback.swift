@@ -38,7 +38,7 @@ extension MarkdownTableStyleConfiguration.Table {
                     for cell in headerCells {
                         GridCellContainer(alignment: cell.horizontalAlignment) {
                             cell.content
-                                .font(headerFont)
+                                .font(Font(headerFont.asPlatformFont))
                                 .multilineTextAlignment(cell.textAlignment)
                                 ._markdownCellPadding(padding)
                         }
@@ -49,7 +49,7 @@ extension MarkdownTableStyleConfiguration.Table {
                         for cell in row.cells {
                             GridCellContainer(alignment: cell.horizontalAlignment) {
                                 cell.content
-                                    .font(bodyFont)
+                                    .font(Font(bodyFont.asPlatformFont))
                                     .multilineTextAlignment(cell.textAlignment)
                                     ._markdownCellPadding(padding)
                             }

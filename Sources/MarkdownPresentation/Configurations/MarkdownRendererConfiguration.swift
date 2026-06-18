@@ -19,20 +19,6 @@ package struct MarkdownRendererConfiguration: Hashable, AllowingModifyThroughKey
     package var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
 }
 
-// MARK: - MarkdownTintableComponent
-
-@_documentation(visibility: internal)
-@available(*, deprecated, renamed: "MarkdownTintableComponent")
-public typealias TintableComponent = MarkdownTintableComponent
-
-/// Components that can apply a tint color.
-@_documentation(visibility: internal)
-public enum MarkdownTintableComponent: Hashable, Sendable {
-    case blockQuote
-    case inlineCodeBlock
-    case link
-}
-
 // MARK: - SwiftUI Environment
 
 struct MarkdownRendererConfigurationKey: EnvironmentKey {

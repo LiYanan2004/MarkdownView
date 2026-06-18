@@ -1,20 +1,21 @@
 import SwiftUI
+import MarkdownRenderingEssentials
 
-/// A type-erased MarkdownFontGroup value.
-public struct AnyMarkdownFontGroup: Sendable, Hashable {
-    package var _h1: Font
-    package var _h2: Font
-    package var _h3: Font
-    package var _h4: Font
-    package var _h5: Font
-    package var _h6: Font
-    package var _codeBlock: Font
-    package var _blockQuote: Font
-    package var _tableHeader: Font
-    package var _tableBody: Font
-    package var _body: Font
-    package var _inlineMath: Font
-    package var _displayMath: Font
+/// A type-erased `MarkdownFontGroup` value.
+public struct AnyMarkdownFontGroup: Sendable {
+    package var _h1: any CustomCTFontConvertible
+    package var _h2: any CustomCTFontConvertible
+    package var _h3: any CustomCTFontConvertible
+    package var _h4: any CustomCTFontConvertible
+    package var _h5: any CustomCTFontConvertible
+    package var _h6: any CustomCTFontConvertible
+    package var _codeBlock: any CustomCTFontConvertible
+    package var _blockQuote: any CustomCTFontConvertible
+    package var _tableHeader: any CustomCTFontConvertible
+    package var _tableBody: any CustomCTFontConvertible
+    package var _body: any CustomCTFontConvertible
+    package var _inlineMath: any CustomCTFontConvertible
+    package var _displayMath: any CustomCTFontConvertible
     
     package init(_ group: some MarkdownFontGroup) {
         _h1 = group.h1
@@ -34,19 +35,17 @@ public struct AnyMarkdownFontGroup: Sendable, Hashable {
 }
 
 extension AnyMarkdownFontGroup: MarkdownFontGroup {
-    public var h1: Font { _h1 }
-    public var h2: Font { _h2 }
-    public var h3: Font { _h3 }
-    public var h4: Font { _h4 }
-    public var h5: Font { _h5 }
-    public var h6: Font { _h6 }
-    public var codeBlock: Font { _codeBlock }
-    public var blockQuote: Font { _blockQuote }
-    public var tableHeader: Font { _tableHeader }
-    public var tableBody: Font { _tableBody }
-    public var body: Font { _body }
-    public var inlineMath: Font { _inlineMath }
-    public var displayMath: Font { _displayMath }
+    public var h1: any CustomCTFontConvertible { _h1 }
+    public var h2: any CustomCTFontConvertible { _h2 }
+    public var h3: any CustomCTFontConvertible { _h3 }
+    public var h4: any CustomCTFontConvertible { _h4 }
+    public var h5: any CustomCTFontConvertible { _h5 }
+    public var h6: any CustomCTFontConvertible { _h6 }
+    public var codeBlock: any CustomCTFontConvertible { _codeBlock }
+    public var blockQuote: any CustomCTFontConvertible { _blockQuote }
+    public var tableHeader: any CustomCTFontConvertible { _tableHeader }
+    public var tableBody: any CustomCTFontConvertible { _tableBody }
+    public var body: any CustomCTFontConvertible { _body }
+    public var inlineMath: any CustomCTFontConvertible { _inlineMath }
+    public var displayMath: any CustomCTFontConvertible { _displayMath }
 }
-
-extension AnyMarkdownFontGroup: Equatable { }

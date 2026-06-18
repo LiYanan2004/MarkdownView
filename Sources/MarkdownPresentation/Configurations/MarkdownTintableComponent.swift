@@ -2,10 +2,8 @@
 //  MarkdownTintableComponent.swift
 //  MarkdownView
 //
-//  Created by Yanan Li on 2026/6/15.
+//  Created by LiYanan2004 on 2024/12/11.
 //
-
-import Foundation
 
 /// Components that can apply a tint color.
 @_documentation(visibility: internal)
@@ -14,3 +12,7 @@ public enum MarkdownTintableComponent: Hashable, Sendable {
     case inlineCodeBlock
     case link
 }
+
+@_documentation(visibility: internal)
+@available(*, deprecated, renamed: "MarkdownTintableComponent")
+public typealias TintableComponent = MarkdownTintableComponent
