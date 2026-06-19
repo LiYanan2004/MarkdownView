@@ -6,9 +6,6 @@
 //
 
 #if canImport(RichText)
-import Markdown
-import MarkdownPresentation
-import MarkdownTextConverter
 import RichText
 import SwiftUI
 
@@ -39,9 +36,13 @@ public struct MarkdownText: View {
     }
 
     public var body: some View {
-        let processedInput = preparedRenderingInput()
+        let renderingInput = MarkdownRenderingInput(
+            content: content,
+            configuration: configuration,
+            elementRenderers: elementRenderers
+        )
         let converter = MDTextConverter(
-            configuration: processedInput.configuration,
+            configuration: renderingInput.configuration,
             elementRenderers: elementRenderers,
             fonts: fonts,
             blockQuoteStyle: blockQuoteStyle,
@@ -51,63 +52,15 @@ public struct MarkdownText: View {
 
         TextView {
             converter.makeTextContent(
-                for: processedInput.content.parse(options: parseOptions)
+                for: renderingInput.content.parse(options: renderingInput.parseOptions)
             )
         }
-        .environment(\.markdownRendererConfiguration, processedInput.configuration)
+        .environment(\.markdownRendererConfiguration, renderingInput.configuration)
         .environment(\.markdownElementRenderers, elementRenderers)
         .environment(\.markdownFontGroup, fonts)
         .environment(\.blockQuoteStyle, blockQuoteStyle)
         .environment(\.codeBlockStyle, codeBlockStyle)
         .environment(\.markdownTableStyle, tableStyle)
-    }
-}
-
-fileprivate extension MarkdownText {
-    var parseOptions: ParseOptions {
-        var parseOptions = ParseOptions()
-        if configuration.math.shouldRender
-            || elementRenderers.contains(where: { $0.blockDirective != nil }) {
-            parseOptions.insert(.parseBlockDirectives)
-        }
-        return parseOptions
-    }
-
-    struct RenderingInput {
-        var content: MarkdownContent
-        var configuration: MarkdownPresentation.MarkdownRendererConfiguration
-    }
-
-    func preparedRenderingInput() -> RenderingInput {
-        var processedInput = RenderingInput(
-            content: content,
-            configuration: configuration
-        )
-        guard supportsMathRendering else {
-            return processedInput
-        }
-        
-        let configuration = configuration
-        guard configuration.math.shouldRender else {
-            return processedInput
-        }
-
-        let preprocessingResult = MDMathPreprocessor()
-            .preprocessingResult(for: content.raw.text)
-        processedInput = RenderingInput(
-            content: MarkdownContent(raw: .plainText(preprocessingResult.markdown)),
-            configuration: configuration.with(\.math.context, preprocessingResult.context)
-        )
-        
-        return processedInput
-    }
-
-    private var supportsMathRendering: Bool {
-        #if canImport(LaTeXSwiftUI)
-        true
-        #else
-        false
-        #endif
     }
 }
 

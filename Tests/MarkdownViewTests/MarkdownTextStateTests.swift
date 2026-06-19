@@ -9,7 +9,6 @@ import Foundation
 import Testing
 
 @testable import MarkdownView
-@testable import MarkdownViewConverter
 
 /// Regression coverage for streamed Markdown updates where `_MarkdownText`
 /// may hold rendered state from an older partial input.

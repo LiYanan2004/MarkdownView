@@ -4,7 +4,6 @@
 //
 
 import SwiftUI
-import Markdown
 
 /// A view that renders markdown content.
 public struct MarkdownView: View {
@@ -20,65 +19,28 @@ public struct MarkdownView: View {
         self.content = MarkdownContent(raw: .plainText(text))
     }
     
-    /// Creates an instance that renders from a ``MarkdownContent`` .
-    /// - Parameter content: The ``MarkdownContent`` to render.
+    /// Creates an instance that renders from a `MarkdownContent`.
+    /// - Parameter content: The `MarkdownContent` to render.
     public init(_ content: MarkdownContent) {
         self.content = content
     }
     
     public var body: some View {
-        let processedInput = preparedRenderingInput()
+        let renderingInput = MarkdownRenderingInput(
+            content: content,
+            configuration: configuration,
+            elementRenderers: elementRenderers
+        )
         let renderer = MarkdownViewRenderer(
-            configuration: processedInput.configuration,
+            configuration: renderingInput.configuration,
             elementRenderers: elementRenderers
         )
         return renderer.makeBody(
-            for: processedInput.content,
-            parseOptions: parseOptions(for: elementRenderers)
+            for: renderingInput.content,
+            parseOptions: renderingInput.parseOptions
         )
         .erasedToAnyView()
         .font(Font(fonts.body.asPlatformFont))
-    }
-}
-
-fileprivate extension MarkdownView {
-    func parseOptions(for elementRenderers: [MarkdownElementRendererRegistration]) -> ParseOptions {
-        var parseOptions = ParseOptions()
-        if elementRenderers.contains(where: { $0.blockDirective != nil }) {
-            parseOptions.insert(.parseBlockDirectives)
-        }
-        return parseOptions
-    }
-    
-    struct RenderingInput {
-        var content: MarkdownContent
-        var configuration: MarkdownPresentation.MarkdownRendererConfiguration
-    }
-
-    func preparedRenderingInput() -> RenderingInput {
-        let configuration = configuration
-        guard configuration.math.shouldRender, Self.supportsMathRendering else {
-            return RenderingInput(
-                content: content,
-                configuration: configuration
-            )
-        }
-
-        let preprocessingResult = MDMathPreprocessor()
-            .preprocessingResult(for: content.raw.text)
-
-        return RenderingInput(
-            content: MarkdownContent(raw: .plainText(preprocessingResult.markdown)),
-            configuration: configuration.with(\.math.context, preprocessingResult.context)
-        )
-    }
-
-    static var supportsMathRendering: Bool {
-        #if canImport(LaTeXSwiftUI)
-        true
-        #else
-        false
-        #endif
     }
 }
 

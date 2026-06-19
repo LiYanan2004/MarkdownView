@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import MarkdownRenderingEssentials
 
 /// A reader that provides a markdown content to use across multiple views.
 ///

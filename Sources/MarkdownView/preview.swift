@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import MarkdownPresentation
 
 let markdown = #"""
 # Markdown Showcase

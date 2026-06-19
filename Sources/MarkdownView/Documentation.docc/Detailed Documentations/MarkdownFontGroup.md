@@ -23,6 +23,7 @@
 
 ### Supporting type
 
+- ``CustomCTFontConvertible``
 - ``DefaultFontGroup``
 
 ### Substituting style group

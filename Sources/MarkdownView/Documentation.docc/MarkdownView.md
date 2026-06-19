@@ -8,11 +8,9 @@ MarkdownView offers a super easy and highly customizable way to display markdown
 
 MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well as code highlighting.
 
+On iOS and macOS, ``MarkdownText`` provides text-based rendering and continuous text selection.
+
 ## Topics
-
-### Adaption Guide
-
-- <doc:AdaptionGuideForMarkdownView2>
 
 ### Document Parsring
 
@@ -22,6 +20,7 @@ MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well
 ### Displaying Contents
 
 - ``MarkdownView/MarkdownView``
+- ``MarkdownText``
 - ``MarkdownTableOfContent``
 
 ### Customizing Appearances
@@ -41,3 +40,7 @@ MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well
 - <doc:MarkdownImageRenderer>
 - <doc:MarkdownLinkRenderer>
 - <doc:MarkdownBlockDirectiveRenderer>
+
+### Release Note
+
+- <doc:MarkdownView-3-Release-Note>

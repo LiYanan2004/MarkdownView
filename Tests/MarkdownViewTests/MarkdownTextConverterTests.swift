@@ -9,14 +9,11 @@
 
 import Foundation
 import Markdown
-import MarkdownMathPlugin
-import MarkdownRenderingEssentials
 import RichText
 import SwiftUI
 import Testing
 
-@testable import MarkdownPresentation
-@testable import MarkdownTextConverter
+@testable import MarkdownView
 
 @Suite("Markdown Text Converter")
 struct MarkdownTextConverterTests {

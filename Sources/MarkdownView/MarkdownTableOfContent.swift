@@ -1,6 +1,5 @@
 import SwiftUI
 import Markdown
-import MarkdownRenderingEssentials
 
 /// A customized view that defines its content as a function of a set of headings.
 ///

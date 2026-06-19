@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import MarkdownMathPlugin
+@testable import MarkdownView
 
 @Suite("Math Extraction")
 struct MathExtractionTests {
