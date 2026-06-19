@@ -38,20 +38,13 @@ fileprivate struct DefaultMarkdownTable: View {
     }
     
     var body: some View {
-        Group {
-            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
-                Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-                    configuration.table.header
-                    ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (_, row) in
-                        if showsRowSeparators {
-                            Divider()
-                        }
-                        row
-                    }
+        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+            configuration.table.header
+            ForEach(Array(configuration.table.rows.enumerated()), id: \.offset) { (_, row) in
+                if showsRowSeparators {
+                    Divider()
                 }
-            } else {
-                configuration.table.fallback
-                    .showsRowSeparators(showsRowSeparators)
+                row
             }
         }
         .markdownTableCellPadding(spacing)

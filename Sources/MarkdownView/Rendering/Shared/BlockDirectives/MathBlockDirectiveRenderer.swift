@@ -33,14 +33,8 @@ fileprivate struct DisplayMath: View {
     }
 
     var body: some View {
-        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-            ViewThatFits(in: .horizontal) {
-                latex
-                ScrollView(.horizontal) {
-                    latex
-                }
-            }
-        } else {
+        ViewThatFits(in: .horizontal) {
+            latex
             ScrollView(.horizontal) {
                 latex
             }

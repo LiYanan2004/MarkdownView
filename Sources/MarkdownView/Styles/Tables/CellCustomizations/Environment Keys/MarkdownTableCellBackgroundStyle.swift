@@ -12,7 +12,7 @@ struct MarkdownTableCellBackgroundStyleEnvironmentKey: EnvironmentKey {
 }
 
 struct MarkdownTableCellBackgroundShapeEnvironmentKey: EnvironmentKey {
-    static let defaultValue: _AnyShape = .init(.rect)
+    static let defaultValue: AnyShape = .init(.rect)
 }
 
 extension EnvironmentValues {
@@ -21,7 +21,7 @@ extension EnvironmentValues {
         set { self[MarkdownTableCellBackgroundStyleEnvironmentKey.self] = newValue }
     }
     
-    var markdownTableCellBackgroundShape: _AnyShape {
+    var markdownTableCellBackgroundShape: AnyShape {
         get { self[MarkdownTableCellBackgroundShapeEnvironmentKey.self] }
         set { self[MarkdownTableCellBackgroundShapeEnvironmentKey.self] = newValue }
     }

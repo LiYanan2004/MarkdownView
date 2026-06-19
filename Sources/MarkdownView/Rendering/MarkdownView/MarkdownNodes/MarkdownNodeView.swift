@@ -95,8 +95,7 @@ extension MarkdownNodeView {
                 storage = .right(AnyView(composedContents[0].body))
             }
         } else {
-            if layoutPolicy == .adaptive,
-               #available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *) {
+            if layoutPolicy == .adaptive {
                 let composedView = FlowLayout(verticleSpacing: 8) {
                     ForEach(composedContents.indices, id: \.self) {
                         composedContents[$0].body

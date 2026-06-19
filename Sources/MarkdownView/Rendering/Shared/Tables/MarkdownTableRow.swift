@@ -22,21 +22,19 @@ struct MarkdownTableRow: View {
     }
     
     var body: some View {
-        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
-            GridRow {
-                ForEach(Array(cells.enumerated()), id: \.offset) { (index, cell) in
-                    cell.content
-                        .multilineTextAlignment(cell.textAlignment)
-                        .gridColumnAlignment(cell.horizontalAlignment)
-                        .gridCellColumns(cell.colspan)
-                        ._markdownCellPadding(padding)
-                        .modifier(
-                            MarkdownTableStylePreferenceSynchronizer(
-                                row: rowIndex,
-                                column: index
-                            )
+        GridRow {
+            ForEach(Array(cells.enumerated()), id: \.offset) { (index, cell) in
+                cell.content
+                    .multilineTextAlignment(cell.textAlignment)
+                    .gridColumnAlignment(cell.horizontalAlignment)
+                    .gridCellColumns(cell.colspan)
+                    ._markdownCellPadding(padding)
+                    .modifier(
+                        MarkdownTableStylePreferenceSynchronizer(
+                            row: rowIndex,
+                            column: index
                         )
-                }
+                    )
             }
         }
     }

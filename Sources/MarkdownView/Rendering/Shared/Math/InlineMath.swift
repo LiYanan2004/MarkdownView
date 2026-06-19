@@ -18,24 +18,17 @@ struct InlineMath: View {
     }
 
     var body: some View {
-        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-            ViewThatFits(in: .horizontal) {
-                LaTeX(latexText)
-                    .font(font.asPlatformFont)
-                    .renderingStyle(.wait)
-                    .blockMode(.alwaysInline)
-                ScrollView(.horizontal) {
-                    LaTeX(latexText)
-                        .font(font.asPlatformFont)
-                        .renderingStyle(.wait)
-                        .blockMode(.alwaysInline)
-                }
-            }
-        } else {
+        ViewThatFits(in: .horizontal) {
             LaTeX(latexText)
                 .font(font.asPlatformFont)
                 .renderingStyle(.wait)
                 .blockMode(.alwaysInline)
+            ScrollView(.horizontal) {
+                LaTeX(latexText)
+                    .font(font.asPlatformFont)
+                    .renderingStyle(.wait)
+                    .blockMode(.alwaysInline)
+            }
         }
     }
 }

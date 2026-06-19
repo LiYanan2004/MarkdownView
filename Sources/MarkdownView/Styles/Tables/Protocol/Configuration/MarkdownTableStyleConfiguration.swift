@@ -11,7 +11,7 @@ import SwiftUI
 @preconcurrency
 @MainActor
 public struct MarkdownTableStyleConfiguration {
-    /// The table view, `Grid` on supported platforms and `AdaptiveGrid` otherwise.
+    /// The table view, backed by SwiftUI `Grid`.
     public var table: MarkdownTableStyleConfiguration.Table
 }
 

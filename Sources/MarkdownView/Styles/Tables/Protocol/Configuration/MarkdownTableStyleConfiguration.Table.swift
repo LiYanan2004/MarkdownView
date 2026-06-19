@@ -10,9 +10,7 @@ import SwiftUI
 extension MarkdownTableStyleConfiguration {
     /// A type-erased view of a table.
     ///
-    /// This view uses `Grid` on supported platforms, or `AdaptiveGrid` otherwise.
-    ///
-    /// Access `header`, `rows`, and `fallback` properties for further customization.
+    /// Access `header` and `rows` properties for further customization.
     @preconcurrency
     @MainActor
     public struct Table {
@@ -32,8 +30,11 @@ extension MarkdownTableStyleConfiguration {
         public var rows: [MarkdownTableStyleConfiguration.Table.Row] {
             bodyRows
         }
-        public var fallback: Fallback {
-            Fallback(headerCells: headerCells, bodyRows: bodyRows)
+        
+        typealias Fallback = EmptyView
+        @available(*, deprecated, message: "MarkdownView 3 does not use fallback any more.")
+        public var fallback: EmptyView {
+            EmptyView()
         }
     }
 }
@@ -62,15 +63,11 @@ extension MarkdownTableStyleConfiguration.Table {
 extension MarkdownTableStyleConfiguration.Table: View {
     @_documentation(visibility: internal)
     public var body: some View {
-        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
-            Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-                header
-                ForEach(Array(rows.enumerated()), id: \.offset) { (_, row) in
-                    row
-                }
+        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+            header
+            ForEach(Array(rows.enumerated()), id: \.offset) { (_, row) in
+                row
             }
-        } else {
-            fallback
         }
     }
 }

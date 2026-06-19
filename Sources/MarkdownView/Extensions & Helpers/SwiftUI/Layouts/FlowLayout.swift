@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 struct FlowLayout: Layout {
     typealias Cache = [ViewRect]
     
@@ -102,7 +101,6 @@ struct FlowLayout: Layout {
     }
 }
 
-@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 extension FlowLayout {
     struct ViewRect: Equatable {
         var element: LayoutSubviews.Element
