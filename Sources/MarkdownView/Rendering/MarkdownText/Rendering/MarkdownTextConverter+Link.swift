@@ -4,7 +4,7 @@ import Markdown
 import RichText
 import SwiftUI
 
-extension MDTextConverter {
+extension MarkdownTextConverter {
     func linkReplacement(for link: Markdown.Link, url: URL) -> AttributedString? {
         let label = descendInto(link).attributedString(options: .ignoresEmbeddedView)
         guard !label.characters.isEmpty else {

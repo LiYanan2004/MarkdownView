@@ -4,7 +4,7 @@ import Markdown
 import RichText
 import SwiftUI
 
-extension MDTextConverter {
+extension MarkdownTextConverter {
     func renderList(_ list: MarkdownTextSemanticList) -> TextContent {
         combineBlocks(list.items.map { renderListItem($0, listDepth: list.depth) })
     }
@@ -87,7 +87,7 @@ extension MDTextConverter {
     }
 }
 
-private extension MDTextConverter {
+private extension MarkdownTextConverter {
     func makeMarkerContent(
         for marker: MarkdownTextSemanticListMarker?,
         baseAttributes: AttributeContainer

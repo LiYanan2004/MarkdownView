@@ -387,7 +387,7 @@ private extension MarkdownTextConverterTests {
         fonts: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic),
         parseOptions: ParseOptions = []
     ) -> TextContent {
-        let converter = MDTextConverter(
+        let converter = MarkdownTextConverter(
             configuration: configuration,
             elementRenderers: elementRenderers,
             fonts: fonts

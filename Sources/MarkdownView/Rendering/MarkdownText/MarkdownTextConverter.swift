@@ -1,5 +1,5 @@
 //
-//  MDTextConverter.swift
+//  MarkdownTextConverter.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2026/6/15.
@@ -17,7 +17,7 @@ import LaTeXSwiftUI
 #endif
 
 @MainActor
-struct MDTextConverter: @MainActor MarkupVisitor {
+struct MarkdownTextConverter: @MainActor MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
     var elementRenderers: [MarkdownElementRendererRegistration]
     var fonts: AnyMarkdownFontGroup
@@ -259,7 +259,6 @@ struct MDTextConverter: @MainActor MarkupVisitor {
                     configuration: configuration,
                     elementRenderers: elementRenderers
                 )
-                .markdownTextAttachmentEnvironment(from: self)
             }
         }
 
@@ -307,7 +306,7 @@ struct MDTextConverter: @MainActor MarkupVisitor {
     }
 }
 
-extension MDTextConverter {
+extension MarkdownTextConverter {
     func render(_ nodes: [MarkdownTextSemanticNode]) -> TextContent {
         combineBlocks(nodes.map(render))
     }

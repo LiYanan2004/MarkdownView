@@ -23,7 +23,7 @@ struct MarkdownTextMarkupContent: View {
     @Environment(\.markdownTableStyle) private var tableStyle
 
     var body: some View {
-        let converter = MDTextConverter(
+        let converter = MarkdownTextConverter(
             configuration: rendererConfiguration,
             elementRenderers: elementRenderers,
             fonts: fonts,

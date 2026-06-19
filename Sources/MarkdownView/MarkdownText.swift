@@ -41,7 +41,7 @@ public struct MarkdownText: View {
             configuration: configuration,
             elementRenderers: elementRenderers
         )
-        let converter = MDTextConverter(
+        let converter = MarkdownTextConverter(
             configuration: renderingInput.configuration,
             elementRenderers: elementRenderers,
             fonts: fonts,

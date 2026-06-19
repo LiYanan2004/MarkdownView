@@ -5,7 +5,7 @@ import LaTeXSwiftUI
 import RichText
 import SwiftUI
 
-extension MDTextConverter {
+extension MarkdownTextConverter {
     func inlineMathTextContent(
         text: String,
         inlineMathStorage: [UUID: String]
@@ -27,7 +27,6 @@ extension MDTextConverter {
             textContent += TextContent {
                 InlineView(replacement: AttributedString(placeholderMatch.latexText)) {
                     InlineMath(latexText: placeholderMatch.latexText)
-                        .markdownTextAttachmentEnvironment(from: self)
                 }
             }
             searchRange = placeholderMatch.range.upperBound..<text.endIndex
@@ -41,7 +40,7 @@ extension MDTextConverter {
     }
 }
 
-private extension MDTextConverter {
+private extension MarkdownTextConverter {
     func firstInlineMathPlaceholderMatch(
         in text: String,
         range: Range<String.Index>,

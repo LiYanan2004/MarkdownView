@@ -4,7 +4,7 @@ import Markdown
 import RichText
 import SwiftUI
 
-extension MDTextConverter {
+extension MarkdownTextConverter {
     func renderAttachment(_ attachment: MarkdownTextAttachment) -> TextContent {
         let replacement = attachmentReplacement(for: attachment)
 
@@ -61,7 +61,7 @@ extension MDTextConverter {
     }
 }
 
-fileprivate extension MDTextConverter {
+fileprivate extension MarkdownTextConverter {
     var blockQuoteFonts: AnyMarkdownFontGroup {
         var blockQuoteFonts = fonts
         blockQuoteFonts._body = fonts.blockQuote
@@ -79,7 +79,6 @@ fileprivate extension MDTextConverter {
             sizing: sizing
         ) {
             content()
-                .markdownTextAttachmentEnvironment(from: self)
         }
     }
 

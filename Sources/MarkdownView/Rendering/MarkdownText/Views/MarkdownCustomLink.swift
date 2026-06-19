@@ -25,7 +25,7 @@ struct MarkdownCustomLink: View {
 
     var body: some View {
         let tintColor = configuration.tintColors[.link, default: .accentColor]
-        let converter = MDTextConverter(
+        let converter = MarkdownTextConverter(
             configuration: configuration,
             elementRenderers: elementRenderers,
             fonts: fonts,
