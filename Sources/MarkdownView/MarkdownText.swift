@@ -13,6 +13,9 @@ import RichText
 import SwiftUI
 
 /// A text-based view that renders markdown content.
+@available(watchOS, unavailable)
+@available(tvOS, unavailable)
+@available(visionOS, unavailable)
 public struct MarkdownText: View {
     private var content: MarkdownContent
 
@@ -76,27 +79,30 @@ fileprivate extension MarkdownText {
     }
 
     func preparedRenderingInput() -> RenderingInput {
+        var processedInput = RenderingInput(
+            content: content,
+            configuration: configuration
+        )
+        guard supportsMathRendering else {
+            return processedInput
+        }
+        
         let configuration = configuration
         guard configuration.math.shouldRender else {
-            return RenderingInput(
-                content: content,
-                configuration: configuration
-            )
+            return processedInput
         }
 
         let preprocessingResult = MDMathPreprocessor()
-            .preprocessingResult(
-                for: content.raw.text,
-                includesInlineMath: Self.includesInlineMath
-            )
-
-        return RenderingInput(
+            .preprocessingResult(for: content.raw.text)
+        processedInput = RenderingInput(
             content: MarkdownContent(raw: .plainText(preprocessingResult.markdown)),
             configuration: configuration.with(\.math.context, preprocessingResult.context)
         )
+        
+        return processedInput
     }
 
-    static var includesInlineMath: Bool {
+    private var supportsMathRendering: Bool {
         #if canImport(LaTeXSwiftUI)
         true
         #else
@@ -110,6 +116,7 @@ fileprivate extension MarkdownText {
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
+@available(visionOS, unavailable)
 #Preview {
     MarkdownText(
         """

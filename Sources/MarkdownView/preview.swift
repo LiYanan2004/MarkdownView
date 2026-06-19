@@ -206,9 +206,11 @@ starts a new rendered line.
 """#
 
 
+#if os(macOS) || os(iOS)
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
+@available(visionOS, unavailable)
 private struct MarkdownTextPreviewLinkRenderer: MarkdownLinkRenderer {
     func makeBody(configuration: Configuration) -> some View {
         Link(destination: configuration.url) {
@@ -229,6 +231,7 @@ private struct MarkdownTextPreviewLinkRenderer: MarkdownLinkRenderer {
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
+@available(visionOS, unavailable)
 private struct MarkdownTextPreviewSymbolImageRenderer: MarkdownImageRenderer {
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -258,6 +261,7 @@ private struct MarkdownTextPreviewSymbolImageRenderer: MarkdownImageRenderer {
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
+@available(visionOS, unavailable)
 private struct MarkdownTextPreviewCalloutRenderer: MarkdownBlockDirectiveRenderer {
     func makeBody(configuration: Configuration) -> some View {
         MarkdownTextPreviewCallout(configuration: configuration)
@@ -267,6 +271,7 @@ private struct MarkdownTextPreviewCalloutRenderer: MarkdownBlockDirectiveRendere
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
+@available(visionOS, unavailable)
 private struct MarkdownTextPreviewCallout: View {
     var configuration: MarkdownBlockDirectiveRendererConfiguration
 
@@ -325,6 +330,7 @@ private struct MarkdownTextPreviewCallout: View {
 @available(iOS 17.0, macOS 14.0, *)
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
+@available(visionOS, unavailable)
 private struct MarkdownTextPreviewBlockQuoteStyle: MarkdownBlockQuoteStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .top, spacing: 12) {
@@ -337,3 +343,4 @@ private struct MarkdownTextPreviewBlockQuoteStyle: MarkdownBlockQuoteStyle {
         .padding(.vertical, 6)
     }
 }
+#endif

@@ -24,12 +24,14 @@ struct DefaultMarkdownCodeBlock: View {
             Group {
                 if let attributedCode {
                     Text(attributedCode)
-                        .textSelection(.enabled)
                 } else {
                     Text(verbatim: codeBlockConfiguration.code)
                 }
             }
             .padding(16)
+            #if os(macOS) || os(iOS)
+            .textSelection(.enabled)
+            #endif
         }
         .task(id: codeHighlightingConfiguration, immediateHighlight)
         .onValueChange(codeBlockConfiguration) {

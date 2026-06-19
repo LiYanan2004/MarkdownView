@@ -10,8 +10,7 @@ import Foundation
 enum MathPlaceholderSubstituter {
     static func process(
         _ markdown: String,
-        parsableRanges: [Range<String.Index>],
-        includesInlineMath: Bool = true
+        parsableRanges: [Range<String.Index>]
     ) -> MDMathPreprocessor.Result {
         var replacements: [Replacement] = []
         var inlineMathStorage: [UUID: String] = [:]
@@ -22,10 +21,6 @@ enum MathPlaceholderSubstituter {
             let segmentParser = MathParser(text: segment)
 
             for math in segmentParser.mathRepresentations {
-                if math.kind.inline && !includesInlineMath {
-                    continue
-                }
-
                 let identifier = UUID()
                 let matchedText = String(markdown[math.range])
                 let placeholder: String

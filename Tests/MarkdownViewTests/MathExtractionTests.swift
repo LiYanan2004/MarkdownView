@@ -133,15 +133,6 @@ struct MathExtractionTests {
     }
 
     @Test
-    func testPreprocessCanSkipInlineMath() async throws {
-        let markdown = #"The sample mean is $\bar{x}$."#
-        let processedMarkdown = MDMathPreprocessor()
-            .preprocess(markdown, includesInlineMath: false)
-
-        #expect(processedMarkdown == markdown)
-    }
-
-    @Test
     func testMathPreprocessingStoresDollarDisplayMathWithDelimiters() async throws {
         let markdown = #"""
         Display math:

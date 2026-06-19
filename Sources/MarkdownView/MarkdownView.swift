@@ -57,7 +57,7 @@ fileprivate extension MarkdownView {
 
     func preparedRenderingInput() -> RenderingInput {
         let configuration = configuration
-        guard configuration.math.shouldRender else {
+        guard configuration.math.shouldRender, Self.supportsMathRendering else {
             return RenderingInput(
                 content: content,
                 configuration: configuration
@@ -65,10 +65,7 @@ fileprivate extension MarkdownView {
         }
 
         let preprocessingResult = MDMathPreprocessor()
-            .preprocessingResult(
-                for: content.raw.text,
-                includesInlineMath: Self.includesInlineMath
-            )
+            .preprocessingResult(for: content.raw.text)
 
         return RenderingInput(
             content: MarkdownContent(raw: .plainText(preprocessingResult.markdown)),
@@ -76,7 +73,7 @@ fileprivate extension MarkdownView {
         )
     }
 
-    static var includesInlineMath: Bool {
+    static var supportsMathRendering: Bool {
         #if canImport(LaTeXSwiftUI)
         true
         #else
