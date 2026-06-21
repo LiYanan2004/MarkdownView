@@ -28,7 +28,7 @@ struct MarkdownRenderingInput {
             return
         }
 
-        let preprocessingResult = MDMathPreprocessor()
+        let preprocessingResult = MarkdownMathPreprocessor()
             .preprocessingResult(for: content.raw.text)
         self.content = MarkdownContent(raw: .plainText(preprocessingResult.markdown))
         self.configuration = configuration
@@ -36,7 +36,7 @@ struct MarkdownRenderingInput {
     }
 
     private static var supportsMathRendering: Bool {
-        #if canImport(LaTeXSwiftUI)
+        #if canImport(SwiftMath)
         true
         #else
         false

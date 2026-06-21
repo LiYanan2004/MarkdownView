@@ -5,9 +5,8 @@
 //  Created by Yanan Li on 2026/6/17.
 //
 
-#if canImport(LaTeXSwiftUI)
+#if canImport(SwiftMath)
 import SwiftUI
-import LaTeXSwiftUI
 
 struct InlineMath: View {
     var latexText: String
@@ -19,15 +18,19 @@ struct InlineMath: View {
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
-            LaTeX(latexText)
-                .font(font.asPlatformFont)
-                .renderingStyle(.wait)
-                .blockMode(.alwaysInline)
+            SwiftMathView(
+                latex: latexText,
+                font: font,
+                labelMode: .text,
+                textAlignment: .left
+            )
             ScrollView(.horizontal) {
-                LaTeX(latexText)
-                    .font(font.asPlatformFont)
-                    .renderingStyle(.wait)
-                    .blockMode(.alwaysInline)
+                SwiftMathView(
+                    latex: latexText,
+                    font: font,
+                    labelMode: .text,
+                    textAlignment: .left
+                )
             }
         }
     }

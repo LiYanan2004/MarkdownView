@@ -10,7 +10,7 @@ import SwiftUI
 #if canImport(WebKit)
 import WebKit
 
-final class MDWebView: WKWebView {
+final class MarkdownWebView: WKWebView {
     #if os(macOS)
     override func scrollWheel(with event: NSEvent) {
         let isHorizontalScroll = abs(event.scrollingDeltaX) > abs(event.scrollingDeltaY)
@@ -44,16 +44,16 @@ struct HTMLView: NSViewRepresentable {
         self.onFinishLoading = onFinishLoading
     }
     
-    func makeNSView(context: Context) -> MDWebView {
+    func makeNSView(context: Context) -> MarkdownWebView {
         let webConfiguration = WKWebViewConfiguration()
-        let webView = MDWebView(frame: .zero, configuration: webConfiguration)
+        let webView = MarkdownWebView(frame: .zero, configuration: webConfiguration)
         webView.setValue(false, forKey: "drawsBackground")
         context.coordinator.configure(webView)
         webView.navigationDelegate = context.coordinator
         return webView
     }
     
-    func updateNSView(_ webView: MDWebView, context: Context) {
+    func updateNSView(_ webView: MarkdownWebView, context: Context) {
         context.coordinator.load(html: qualifiedHTML, into: webView)
     }
     
@@ -84,9 +84,9 @@ struct HTMLView: UIViewRepresentable {
         self.onFinishLoading = onFinishLoading
     }
     
-    func makeUIView(context: Context) -> MDWebView {
+    func makeUIView(context: Context) -> MarkdownWebView {
         let webConfiguration = WKWebViewConfiguration()
-        let webView = MDWebView(frame: .zero, configuration: webConfiguration)
+        let webView = MarkdownWebView(frame: .zero, configuration: webConfiguration)
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
@@ -101,7 +101,7 @@ struct HTMLView: UIViewRepresentable {
         return webView
     }
     
-    func updateUIView(_ webView: MDWebView, context: Context) {
+    func updateUIView(_ webView: MarkdownWebView, context: Context) {
         context.coordinator.load(html: qualifiedHTML, into: webView)
     }
     

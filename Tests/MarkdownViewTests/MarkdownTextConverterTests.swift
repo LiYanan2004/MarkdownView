@@ -89,11 +89,11 @@ struct MarkdownTextConverterTests {
         }
     }
 
-    #if canImport(LaTeXSwiftUI)
+    #if canImport(SwiftMath)
     @Test("Converts preprocessed inline math placeholders to embedded content")
     @MainActor
     func convertsPreprocessedInlineMathPlaceholdersToEmbeddedContent() {
-        let preprocessingResult = MDMathPreprocessor()
+        let preprocessingResult = MarkdownMathPreprocessor()
             .preprocessingResult(for: #"Value $x_y$ stays inline."#)
         let configuration = MarkdownRendererConfiguration()
             .with(\.math.context, preprocessingResult.context)
@@ -112,7 +112,7 @@ struct MarkdownTextConverterTests {
     @Test("Converts preprocessed display math placeholders to embedded content")
     @MainActor
     func convertsPreprocessedDisplayMathPlaceholdersToEmbeddedContent() {
-        let preprocessingResult = MDMathPreprocessor()
+        let preprocessingResult = MarkdownMathPreprocessor()
             .preprocessingResult(
                 for: #"""
                 Display math:

@@ -110,6 +110,47 @@ struct MathExtractionTests {
         ])
     }
 
+    @Test(
+        "Extracts standalone SwiftMath environments",
+        arguments: [
+            "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix",
+            "eqalign", "split", "aligned", "displaylines", "gather", "eqnarray", "cases",
+        ]
+    )
+    func extractsStandaloneSwiftMathEnvironment(environmentName: String) {
+        let environment = "\\begin{\(environmentName)}x & y\\end{\(environmentName)}"
+
+        #expect(extractedMath(in: "Display math: \(environment)") == [environment])
+    }
+
+    @Test
+    func extractsOuterEnvironmentContainingNestedEnvironment() {
+        let markdown = #"\begin{gather}x = \begin{pmatrix}1 & 2\end{pmatrix}\end{gather}"#
+
+        #expect(extractedMath(in: markdown) == [markdown])
+    }
+
+    @Test
+    func ignoresUnsupportedStandaloneEnvironment() {
+        let markdown = #"\begin{document}ordinary text\end{document}"#
+
+        #expect(extractedMath(in: markdown).isEmpty)
+    }
+
+    @Test
+    func recognizesDelimiterFollowingAnEvenNumberOfBackslashes() {
+        let markdown = #"Text ends with a command break \\$x$"#
+
+        #expect(extractedMath(in: markdown) == [#"$x$"#])
+    }
+
+    @Test
+    func ignoresDelimiterFollowingAnOddNumberOfBackslashes() {
+        let markdown = #"The delimiter is escaped: \$x$"#
+
+        #expect(extractedMath(in: markdown).isEmpty)
+    }
+
     @Test
     func testMathPreprocessingProtectsInlineMathUnderscores() async throws {
         let result = processMarkdownParsingRanges(in: #"Lorem ipsum dolor sit amet, $(a_n)_{n \in \mathbb{N}}$ and $(b_n)_{n \in \mathbb{N}}$ are both geometric sequences."#)
@@ -126,7 +167,7 @@ struct MathExtractionTests {
     @Test
     func testPreprocessReturnsProcessedMarkdown() async throws {
         let markdown = #"The sample mean is $\bar{x}$."#
-        let processedMarkdown = MDMathPreprocessor().preprocess(markdown)
+        let processedMarkdown = MarkdownMathPreprocessor().preprocess(markdown)
 
         #expect(processedMarkdown.contains("markdownview-inline-math-"))
         #expect(!processedMarkdown.contains(#"$\bar{x}$"#))
@@ -260,7 +301,7 @@ struct MathExtractionTests {
 
     private func processMarkdownParsingRanges(
         in markdown: String
-    ) -> MDMathPreprocessor.Result {
-        MDMathPreprocessor().preprocessingResult(for: markdown)
+    ) -> MarkdownMathPreprocessor.Result {
+        MarkdownMathPreprocessor().preprocessingResult(for: markdown)
     }
 }

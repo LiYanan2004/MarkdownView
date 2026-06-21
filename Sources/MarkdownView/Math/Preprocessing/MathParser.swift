@@ -3,7 +3,6 @@
 //  MarkdownView
 //
 //  Created by LiYanan2004 on 2025/2/24.
-//  Credits to colinc86/LaTeXSwiftUI
 //
 
 import Foundation
@@ -16,71 +15,99 @@ struct MathParser {
     }
 
     var mathRepresentations: [MathRepresentation] {
-        var stack = [MathRepresentation.Kind]()
-        var index = text.startIndex
-        var startIndex = index
-        var endIndex = index
         var representations: [MathRepresentation] = []
+        var index = text.startIndex
 
-        inputLoop: while index < text.endIndex {
-            let remaining = text[index...]
-
-            if !stack.isEmpty {
-                for type in MathRepresentation.Kind.allCases {
-                    let end = type.rightTerminator
-                    if remaining.hasPrefix(end) {
-                        if index > text.startIndex && text[text.index(before: index)] == "\\" {
-                            index = text.index(index, offsetBy: end.count)
-                            continue inputLoop
-                        }
-
-                        endIndex = text.index(index, offsetBy: end.count)
-
-                        if stack.last == type {
-                            stack.removeLast()
-
-                            if stack.isEmpty {
-                                representations.append(
-                                    MathRepresentation(
-                                        kind: type,
-                                        range: startIndex..<endIndex
-                                    )
-                                )
-                            }
-                        }
-                        index = endIndex
-                        continue inputLoop
-                    }
-                }
+        while index < text.endIndex {
+            guard !text.isEscaped(at: index) else {
+                index = text.index(after: index)
+                continue
             }
 
-            for type in MathRepresentation.Kind.allCases {
-                let start = type.leftTerminator
-                if remaining.hasPrefix(start) {
-                    if type.requiresLineBoundary && !text.isAtLineBoundary(index) {
-                        index = text.index(index, offsetBy: start.count)
-                        continue inputLoop
-                    }
-
-                    if index > text.startIndex && text[text.index(before: index)] == "\\" {
-                        index = text.index(index, offsetBy: start.count)
-                        continue inputLoop
-                    }
-
-                    if stack.isEmpty {
-                        startIndex = index
-                    }
-
-                    stack.append(type)
-                    index = text.index(index, offsetBy: start.count)
-                    continue inputLoop
-                }
+            if let representation = delimitedRepresentation(startingAt: index)
+                ?? environmentRepresentation(startingAt: index) {
+                representations.append(representation)
+                index = representation.range.upperBound
+            } else {
+                index = text.index(after: index)
             }
-
-            index = text.index(after: index)
         }
 
         return representations
+    }
+
+    private func delimitedRepresentation(
+        startingAt startIndex: String.Index
+    ) -> MathRepresentation? {
+        let remainingText = text[startIndex...]
+
+        for kind in MathRepresentation.Kind.delimitedKinds {
+            guard remainingText.hasPrefix(kind.leftTerminator) else {
+                continue
+            }
+            guard !kind.requiresLineBoundary || text.isAtLineBoundary(startIndex) else {
+                continue
+            }
+
+            var endTerminatorIndex = text.index(
+                startIndex,
+                offsetBy: kind.leftTerminator.count
+            )
+            while endTerminatorIndex < text.endIndex {
+                if !text.isEscaped(at: endTerminatorIndex),
+                   text[endTerminatorIndex...].hasPrefix(kind.rightTerminator) {
+                    let endIndex = text.index(
+                        endTerminatorIndex,
+                        offsetBy: kind.rightTerminator.count
+                    )
+                    return MathRepresentation(kind: kind, range: startIndex..<endIndex)
+                }
+                endTerminatorIndex = text.index(after: endTerminatorIndex)
+            }
+        }
+
+        return nil
+    }
+
+    private func environmentRepresentation(
+        startingAt startIndex: String.Index
+    ) -> MathRepresentation? {
+        guard let openingToken = text.environmentToken(at: startIndex),
+              openingToken.boundary == .begin,
+              let kind = MathRepresentation.Kind(environmentName: openingToken.name) else {
+            return nil
+        }
+
+        var environmentNames = [openingToken.name]
+        var index = openingToken.range.upperBound
+
+        while index < text.endIndex {
+            defer { index = text.index(after: index) }
+
+            guard !text.isEscaped(at: index),
+                  let token = text.environmentToken(at: index) else {
+                continue
+            }
+
+            switch token.boundary {
+            case .begin:
+                environmentNames.append(token.name)
+            case .end where environmentNames.last == token.name:
+                environmentNames.removeLast()
+                if environmentNames.isEmpty {
+                    return MathRepresentation(
+                        kind: kind,
+                        range: startIndex..<token.range.upperBound
+                    )
+                }
+            case .end:
+                continue
+            }
+
+            index = text.index(before: token.range.upperBound)
+        }
+
+        return nil
     }
 }
 
@@ -92,38 +119,28 @@ extension MathParser {
 }
 
 extension MathParser.MathRepresentation {
-    enum Kind: Hashable, Sendable, CaseIterable {
-        /// An inline equation component.
-        ///
-        /// - Example: `$x^2$`
+    enum Kind: Hashable, Sendable {
+        /// An inline equation delimited by `$`.
         case inlineEquation
 
-        /// An inline equation component.
-        ///
-        /// - Example: `\(x^2\)`
+        /// An inline equation delimited by `\(` and `\)`.
         case inlineParenthesesEquation
 
-        /// A TeX-style block equation.
-        ///
-        /// - Example: `$$x^2$$`.
+        /// A display equation delimited by `$$`.
         case texEquation
 
-        /// A block equation.
-        ///
-        /// - Example: `\[x^2\]`
+        /// A display equation delimited by `\[` and `\]`.
         case blockEquation
 
-        /// A named equation component.
-        ///
-        /// - Example: `\begin{equation}x^2\end{equation}`
+        /// A display equation delimited by an `equation` environment.
         case namedEquation
 
-        /// A named equation component.
-        ///
-        /// - Example: `\begin{equation*}x^2\end{equation*}`
+        /// A display equation delimited by an `equation*` environment.
         case namedNoNumberEquation
 
-        /// The component's left terminator.
+        /// A standalone environment that SwiftMath parses directly.
+        case swiftMathEnvironment(String)
+
         var leftTerminator: String {
             switch self {
             case .inlineEquation: "$"
@@ -132,10 +149,10 @@ extension MathParser.MathRepresentation {
             case .blockEquation: "\\["
             case .namedEquation: "\\begin{equation}"
             case .namedNoNumberEquation: "\\begin{equation*}"
+            case .swiftMathEnvironment(let name): "\\begin{\(name)}"
             }
         }
 
-        /// The component's right terminator.
         var rightTerminator: String {
             switch self {
             case .inlineEquation: "$"
@@ -144,38 +161,85 @@ extension MathParser.MathRepresentation {
             case .blockEquation: "\\]"
             case .namedEquation: "\\end{equation}"
             case .namedNoNumberEquation: "\\end{equation*}"
+            case .swiftMathEnvironment(let name): "\\end{\(name)}"
             }
         }
 
-        /// Whether this component is inline.
         var inline: Bool {
             switch self {
-            case .inlineEquation, .inlineParenthesesEquation: true
-            default: false
-            }
-        }
-
-        var requiresLineBoundary: Bool {
-            switch self {
-            case .blockEquation:
+            case .inlineEquation, .inlineParenthesesEquation:
                 true
             default:
                 false
             }
         }
 
-        static let allCases: [Kind] = [
-            .namedNoNumberEquation,
-            .namedEquation,
-            .blockEquation,
+        var preservesTerminatorsWhenRendering: Bool {
+            if case .swiftMathEnvironment = self {
+                return true
+            }
+            return false
+        }
+
+        fileprivate var requiresLineBoundary: Bool {
+            self == .blockEquation
+        }
+
+        fileprivate static let delimitedKinds: [Kind] = [
             .texEquation,
             .inlineEquation,
             .inlineParenthesesEquation,
+            .blockEquation,
+        ]
+
+        fileprivate init?(environmentName: String) {
+            switch environmentName {
+            case "equation":
+                self = .namedEquation
+            case "equation*":
+                self = .namedNoNumberEquation
+            case let name where Self.swiftMathEnvironmentNames.contains(name):
+                self = .swiftMathEnvironment(name)
+            default:
+                return nil
+            }
+        }
+
+        private static let swiftMathEnvironmentNames: Set<String> = [
+            "matrix",
+            "pmatrix",
+            "bmatrix",
+            "Bmatrix",
+            "vmatrix",
+            "Vmatrix",
+            "eqalign",
+            "split",
+            "aligned",
+            "displaylines",
+            "gather",
+            "eqnarray",
+            "cases",
         ]
     }
 }
 
 fileprivate extension StringProtocol {
+    func isEscaped(at index: Index) -> Bool {
+        var backslashCount = 0
+        var currentIndex = index
+
+        while currentIndex > startIndex {
+            let previousIndex = self.index(before: currentIndex)
+            guard self[previousIndex] == "\\" else {
+                break
+            }
+            backslashCount += 1
+            currentIndex = previousIndex
+        }
+
+        return !backslashCount.isMultiple(of: 2)
+    }
+
     func isAtLineBoundary(_ index: Index) -> Bool {
         var currentIndex = index
         while currentIndex > startIndex {
@@ -189,4 +253,42 @@ fileprivate extension StringProtocol {
 
         return self[startIndex..<index].allSatisfy(\.isWhitespace)
     }
+
+    func environmentToken(at index: Index) -> MathEnvironmentToken<Index>? {
+        let remainingText = self[index...]
+        let boundary: MathEnvironmentToken<Index>.Boundary
+        let nameStartIndex: Index
+
+        if remainingText.hasPrefix("\\begin{") {
+            boundary = .begin
+            nameStartIndex = self.index(index, offsetBy: 7)
+        } else if remainingText.hasPrefix("\\end{") {
+            boundary = .end
+            nameStartIndex = self.index(index, offsetBy: 5)
+        } else {
+            return nil
+        }
+
+        guard let closingBraceIndex = self[nameStartIndex...].firstIndex(of: "}") else {
+            return nil
+        }
+
+        let tokenEndIndex = self.index(after: closingBraceIndex)
+        return MathEnvironmentToken(
+            boundary: boundary,
+            name: String(self[nameStartIndex..<closingBraceIndex]),
+            range: index..<tokenEndIndex
+        )
+    }
+}
+
+fileprivate struct MathEnvironmentToken<Index: Comparable> {
+    enum Boundary {
+        case begin
+        case end
+    }
+
+    var boundary: Boundary
+    var name: String
+    var range: Range<Index>
 }

@@ -1,5 +1,5 @@
 //
-//  MDMathPreprocessor.swift
+//  MarkdownMathPreprocessor.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2026/6/16.
@@ -9,14 +9,14 @@ import Foundation
 import Markdown
 
 @_documentation(visibility: internal)
-public struct MDMathPreprocessor: Sendable, Hashable {
+public struct MarkdownMathPreprocessor: Sendable, Hashable {
     public struct Result: Sendable, Hashable {
         public let markdown: String
-        public let context: MDMathContext
+        public let context: MarkdownMathContext
 
         public init(
             markdown: String,
-            context: MDMathContext
+            context: MarkdownMathContext
         ) {
             self.markdown = markdown
             self.context = context
@@ -31,7 +31,7 @@ public struct MDMathPreprocessor: Sendable, Hashable {
         
     }
 
-    public func preprocessingResult(for markdown: String) -> MDMathPreprocessor.Result {
+    public func preprocessingResult(for markdown: String) -> MarkdownMathPreprocessor.Result {
         var mathRangesResolver = MathParsableRangesResolver()
         mathRangesResolver.visit(
             Document(
@@ -47,7 +47,7 @@ public struct MDMathPreprocessor: Sendable, Hashable {
     }
 }
 
-extension MDMathPreprocessor {
+extension MarkdownMathPreprocessor {
     static public func inlinePlaceholder(for identifier: UUID) -> String {
         "markdownview-inline-math-\(identifier.uuidString)"
     }
@@ -57,7 +57,7 @@ extension MDMathPreprocessor {
     }
 }
 
-extension MDMathPreprocessor.Result {
+extension MarkdownMathPreprocessor.Result {
     var inlineMathStorage: [UUID: String] {
         context.inlineMathStorage
     }

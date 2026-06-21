@@ -12,10 +12,6 @@ import SwiftUI
 import RichText
 import Markdown
 
-#if canImport(LaTeXSwiftUI)
-import LaTeXSwiftUI
-#endif
-
 @MainActor
 struct MarkdownTextConverter: @MainActor MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
@@ -137,7 +133,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
     func visitText(_ text: Markdown.Text) -> TextContent {
         let plainText = text.plainText
-        #if canImport(LaTeXSwiftUI)
+        #if canImport(SwiftMath)
         if configuration.math.shouldRender,
            let inlineMathStorage = configuration.math.inlineMathStorage {
             return inlineMathTextContent(

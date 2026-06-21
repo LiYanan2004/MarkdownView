@@ -1,7 +1,6 @@
-#if canImport(RichText) && canImport(LaTeXSwiftUI)
+#if canImport(RichText) && canImport(SwiftMath)
 
 import Foundation
-import LaTeXSwiftUI
 import RichText
 import SwiftUI
 
@@ -48,7 +47,7 @@ private extension MarkdownTextConverter {
     ) -> InlineMathPlaceholderMatch? {
         inlineMathStorage
             .compactMap { identifier, latexText -> InlineMathPlaceholderMatch? in
-                let placeholder = MDMathPreprocessor.inlinePlaceholder(for: identifier)
+                let placeholder = MarkdownMathPreprocessor.inlinePlaceholder(for: identifier)
                 guard let range = text.range(of: placeholder, range: range) else {
                     return nil
                 }

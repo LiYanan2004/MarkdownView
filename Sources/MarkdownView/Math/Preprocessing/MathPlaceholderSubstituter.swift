@@ -11,7 +11,7 @@ enum MathPlaceholderSubstituter {
     static func process(
         _ markdown: String,
         parsableRanges: [Range<String.Index>]
-    ) -> MDMathPreprocessor.Result {
+    ) -> MarkdownMathPreprocessor.Result {
         var replacements: [Replacement] = []
         var inlineMathStorage: [UUID: String] = [:]
         var displayMathStorage: [UUID: String] = [:]
@@ -27,10 +27,10 @@ enum MathPlaceholderSubstituter {
 
                 if math.kind.inline {
                     inlineMathStorage[identifier] = matchedText
-                    placeholder = MDMathPreprocessor.inlinePlaceholder(for: identifier)
+                    placeholder = MarkdownMathPreprocessor.inlinePlaceholder(for: identifier)
                 } else {
                     displayMathStorage[identifier] = matchedText
-                    placeholder = MDMathPreprocessor.displayPlaceholder(for: identifier)
+                    placeholder = MarkdownMathPreprocessor.displayPlaceholder(for: identifier)
                 }
 
                 let lowerBoundOffset = markdown.distance(
@@ -66,9 +66,9 @@ enum MathPlaceholderSubstituter {
             )
         }
 
-        return MDMathPreprocessor.Result(
+        return MarkdownMathPreprocessor.Result(
             markdown: processedMarkdown,
-            context: MDMathContext(
+            context: MarkdownMathContext(
                 inlineMathStorage: inlineMathStorage,
                 displayMathStorage: displayMathStorage
             )

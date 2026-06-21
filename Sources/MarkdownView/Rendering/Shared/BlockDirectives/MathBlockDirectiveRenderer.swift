@@ -7,9 +7,6 @@
 
 import Foundation
 import SwiftUI
-#if canImport(LaTeXSwiftUI)
-import LaTeXSwiftUI
-#endif
 
 struct MathBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
     init() { }
@@ -43,15 +40,16 @@ fileprivate struct DisplayMath: View {
     
     @ViewBuilder
     private var latex: some View {
-        #if canImport(LaTeXSwiftUI)
+        #if canImport(SwiftMath)
         if let latexMath {
-            LaTeX(latexMath)
-                .font(font.asPlatformFont)
-                .renderingStyle(.wait)
-                .renderingStyle(.empty)
-                .ignoreStringFormatting()
-                .blockMode(.blockText)
-                .frame(maxWidth: .infinity)
+            SwiftMathView(
+                latex: latexMath,
+                font: font,
+                labelMode: .display,
+                textAlignment: .center
+            )
+            .fixedSize()
+            .frame(maxWidth: .infinity)
         }
         #else
         EmptyView()
@@ -59,8 +57,13 @@ fileprivate struct DisplayMath: View {
     }
 }
 
-#if canImport(LaTeXSwiftUI)
+#if canImport(SwiftMath)
 #Preview {
-    LaTeX("$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$")
+    SwiftMathView(
+        latex: "$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$",
+        font: PlatformFont.preferredFont(forTextStyle: .body),
+        labelMode: .display,
+        textAlignment: .center
+    )
 }
 #endif

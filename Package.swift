@@ -22,7 +22,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
         .package(url: "https://github.com/raspu/Highlightr.git", from: "2.2.1"),
-        .package(url: "https://github.com/colinc86/LaTeXSwiftUI.git", from: "1.5.0"),
+        .package(url: "https://github.com/mgriebling/SwiftMath.git", from: "1.7.3"),
         .package(url: "https://github.com/LiYanan2004/RichText.git", branch: "main"),
     ],
     targets: [
@@ -39,8 +39,8 @@ let package = Package(
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
                 .product(
-                    name: "LaTeXSwiftUI",
-                    package: "LaTeXSwiftUI",
+                    name: "SwiftMath",
+                    package: "SwiftMath",
                     condition: .when(platforms: [.iOS, .macOS], traits: ["LaTeX"])
                 ),
                 .product(

@@ -191,5 +191,5 @@ MarkdownView(markdownText)
 
 - [swiftlang/swift-markdown](https://github.com/swiftlang/swift-markdown): Markdown parsing and tree traversal.
 - [raspu/Highlightr](https://github.com/raspu/Highlightr.git): Syntax highlighting.
-- [colinc86/LaTeXSwiftUI](https://github.com/colinc86/LaTeXSwiftUI.git): LaTeX math rendering.
+- [mgriebling/SwiftMath](https://github.com/mgriebling/SwiftMath.git): LaTeX math rendering.
 - [LiYanan2004/RichText](https://github.com/LiYanan2004/RichText.git): Text-based Markdown rendering.

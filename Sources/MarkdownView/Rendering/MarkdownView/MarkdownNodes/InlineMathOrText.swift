@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-#if canImport(LaTeXSwiftUI)
-import LaTeXSwiftUI
-import MathJaxSwift
-#endif
-
 @preconcurrency
 @MainActor
 struct InlineMathOrText {
@@ -20,7 +15,7 @@ struct InlineMathOrText {
     @preconcurrency
     @MainActor
     func makeBody(configuration: MarkdownRendererConfiguration) -> MarkdownNodeView {
-        #if canImport(LaTeXSwiftUI)
+        #if canImport(SwiftMath)
         let mathSegments = self.mathSegments(configuration: configuration)
 
         guard !mathSegments.isEmpty else {
@@ -57,7 +52,7 @@ struct InlineMathOrText {
     }
 }
 
-#if canImport(LaTeXSwiftUI)
+#if canImport(SwiftMath)
 fileprivate extension InlineMathOrText {
     struct MathSegment {
         var range: Range<String.Index>
@@ -92,7 +87,7 @@ fileprivate extension InlineMathOrText {
 
         var mathSegments: [MathSegment] = []
         for (identifier, latexText) in inlineMathStorage {
-            let placeholder = MDMathPreprocessor.inlinePlaceholder(for: identifier)
+            let placeholder = MarkdownMathPreprocessor.inlinePlaceholder(for: identifier)
             var searchRange = text.startIndex..<text.endIndex
 
             while let placeholderRange = text.range(of: placeholder, range: searchRange) {
