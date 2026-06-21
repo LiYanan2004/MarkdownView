@@ -8,13 +8,14 @@
 #if canImport(RichText)
 import RichText
 import SwiftUI
+import Markdown
 
 /// A text-based view that renders markdown content.
 @available(watchOS, unavailable)
 @available(tvOS, unavailable)
 @available(visionOS, unavailable)
 public struct MarkdownText: View {
-    private var content: MarkdownContent
+    private var source: MarkdownRenderingSource
 
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.markdownElementRenderers) private var elementRenderers
@@ -26,18 +27,18 @@ public struct MarkdownText: View {
     /// Creates a text-based markdown view for the given markdown source.
     /// - Parameter text: The markdown source to render.
     public init(_ text: String) {
-        self.content = MarkdownContent(raw: .plainText(text))
+        self.source = .rawText(text)
     }
 
-    /// Creates a text-based markdown view for the given content.
-    /// - Parameter content: The markdown content to render.
-    public init(_ content: MarkdownContent) {
-        self.content = content
+    /// Creates a text-based markdown view for the given parsed document.
+    /// - Parameter document: The parsed markdown document to render.
+    public init(_ document: Markdown.Document) {
+        self.source = .document(document)
     }
 
     public var body: some View {
         let renderingInput = MarkdownRenderingInput(
-            content: content,
+            source: source,
             configuration: configuration,
             elementRenderers: elementRenderers
         )
@@ -52,7 +53,7 @@ public struct MarkdownText: View {
 
         TextView {
             converter.makeTextContent(
-                for: renderingInput.content.parse(options: renderingInput.parseOptions)
+                for: renderingInput.document
             )
         }
         .environment(\.markdownRendererConfiguration, renderingInput.configuration)

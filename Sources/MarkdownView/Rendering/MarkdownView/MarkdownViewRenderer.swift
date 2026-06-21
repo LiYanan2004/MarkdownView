@@ -38,13 +38,6 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
             .environment(\.markdownElementRenderers, elementRenderers)
     }
 
-    func makeBody(
-        for content: MarkdownContent,
-        parseOptions: ParseOptions = ParseOptions()
-    ) -> some View {
-        makeBody(for: content.parse(options: parseOptions))
-    }
-
     func visitDocument(_ document: Document) -> MarkdownNodeView {
         var renderer = self
         let nodeViews = document.children.map {

@@ -5,22 +5,20 @@ import Markdown
 ///
 /// You should use ``MarkdownView/MarkdownReader`` to provide single source-of-truth for MarkdownView and table of content.
 public struct MarkdownTableOfContent<Content: View>: View {
-    private var markdownContent: MarkdownContent
+    private var document: Markdown.Document
     private var contents: (_ headings: [MarkdownHeading]) -> Content
 
     public init(
-        _ markdownContent: MarkdownContent,
+        _ document: Markdown.Document,
         @ViewBuilder contents: @escaping ([MarkdownHeading]) -> Content
     ) {
-        self.markdownContent = markdownContent
+        self.document = document
         self.contents = contents
     }
     
     private var headings: [MarkdownHeading] {
         var toc = TableOfContentVisitor()
-        toc.visit(
-            markdownContent.cachedDocument ?? markdownContent.parse()
-        )
+        toc.visit(document)
         return toc.headings
     }
     

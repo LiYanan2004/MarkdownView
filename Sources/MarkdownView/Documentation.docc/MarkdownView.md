@@ -15,7 +15,7 @@ On iOS and macOS, ``MarkdownText`` provides text-based rendering and continuous 
 ### Document Parsring
 
 - ``MarkdownReader``
-- ``MarkdownContent``
+- ``StreamingMarkdownReader``
 
 ### Displaying Contents
 

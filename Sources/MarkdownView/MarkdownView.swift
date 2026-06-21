@@ -4,10 +4,11 @@
 //
 
 import SwiftUI
+import Markdown
 
 /// A view that renders markdown content.
 public struct MarkdownView: View {
-    private var content: MarkdownContent
+    private var source: MarkdownRenderingSource
     
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.markdownElementRenderers) private var elementRenderers
@@ -16,18 +17,18 @@ public struct MarkdownView: View {
     /// Creates a view that renders given markdown string.
     /// - Parameter text: The markdown source to render.
     public init(_ text: String) {
-        self.content = MarkdownContent(raw: .plainText(text))
+        self.source = .rawText(text)
     }
-    
-    /// Creates an instance that renders from a `MarkdownContent`.
-    /// - Parameter content: The `MarkdownContent` to render.
-    public init(_ content: MarkdownContent) {
-        self.content = content
+
+    /// Creates a view that renders a parsed markdown document.
+    /// - Parameter document: The parsed markdown document to render.
+    public init(_ document: Markdown.Document) {
+        self.source = .document(document)
     }
     
     public var body: some View {
         let renderingInput = MarkdownRenderingInput(
-            content: content,
+            source: source,
             configuration: configuration,
             elementRenderers: elementRenderers
         )
@@ -35,12 +36,9 @@ public struct MarkdownView: View {
             configuration: renderingInput.configuration,
             elementRenderers: elementRenderers
         )
-        return renderer.makeBody(
-            for: renderingInput.content,
-            parseOptions: renderingInput.parseOptions
-        )
-        .erasedToAnyView()
-        .font(Font(fonts.body.asPlatformFont))
+        renderer.makeBody(for: renderingInput.document)
+            .erasedToAnyView()
+            .font(Font(fonts.body.asPlatformFont))
     }
 }
 

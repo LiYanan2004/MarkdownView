@@ -5,34 +5,72 @@
 
 import Markdown
 
+enum MarkdownRenderingSource {
+    case rawText(String)
+    case document(Markdown.Document)
+}
+
 struct MarkdownRenderingInput {
-    let content: MarkdownContent
+    let document: Markdown.Document
     let configuration: MarkdownRendererConfiguration
-    let parseOptions: ParseOptions
 
     init(
-        content: MarkdownContent,
+        source: MarkdownRenderingSource,
         configuration: MarkdownRendererConfiguration,
         elementRenderers: [MarkdownElementRendererRegistration]
     ) {
+        self.init(
+            source: source,
+            configuration: configuration,
+            parsesBlockDirectives: elementRenderers.contains(where: { $0.blockDirective != nil })
+        )
+    }
+
+    init(
+        source: MarkdownRenderingSource,
+        configuration: MarkdownRendererConfiguration,
+        parsesBlockDirectives: Bool
+    ) {
+        let parseOptions = Self.parseOptions(
+            configuration: configuration,
+            parsesBlockDirectives: parsesBlockDirectives
+        )
+
+        switch source {
+        case .document(let document):
+            self.document = document
+            self.configuration = configuration
+
+        case .rawText(let text):
+            if configuration.math.shouldRender, Self.supportsMathRendering {
+                let preprocessingResult = MarkdownMathPreprocessor()
+                    .preprocessingResult(for: text)
+                self.document = Markdown.Document(
+                    parsing: preprocessingResult.markdown,
+                    options: parseOptions
+                )
+                self.configuration = configuration
+                    .with(\.math.context, preprocessingResult.context)
+            } else {
+                self.document = Markdown.Document(
+                    parsing: text,
+                    options: parseOptions
+                )
+                self.configuration = configuration
+            }
+
+        }
+    }
+
+    private static func parseOptions(
+        configuration: MarkdownRendererConfiguration,
+        parsesBlockDirectives: Bool
+    ) -> ParseOptions {
         var parseOptions = ParseOptions()
-        if configuration.math.shouldRender
-            || elementRenderers.contains(where: { $0.blockDirective != nil }) {
+        if configuration.math.shouldRender || parsesBlockDirectives {
             parseOptions.insert(.parseBlockDirectives)
         }
-        self.parseOptions = parseOptions
-
-        guard configuration.math.shouldRender, MarkdownRenderingInput.supportsMathRendering else {
-            self.content = content
-            self.configuration = configuration
-            return
-        }
-
-        let preprocessingResult = MarkdownMathPreprocessor()
-            .preprocessingResult(for: content.raw.text)
-        self.content = MarkdownContent(raw: .plainText(preprocessingResult.markdown))
-        self.configuration = configuration
-            .with(\.math.context, preprocessingResult.context)
+        return parseOptions
     }
 
     private static var supportsMathRendering: Bool {
