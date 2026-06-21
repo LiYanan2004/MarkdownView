@@ -28,6 +28,14 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
         return visitor
             .visit(markup)
             .environment(\.markdownRendererConfiguration, configuration)
+            .environment(\.markdownElementRenderers, elementRenderers)
+    }
+    
+    func makeBody(forChildrenOf markup: any Markup) -> some View {
+        self
+            .descendInto(markup)
+            .environment(\.markdownRendererConfiguration, configuration)
+            .environment(\.markdownElementRenderers, elementRenderers)
     }
 
     func makeBody(

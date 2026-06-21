@@ -13,6 +13,7 @@ import SwiftUI
 enum MarkdownTextEmbeddingViewFactory {
     @MainActor
     static func makeTextContent(
+        id: MarkdownTextInlineViewIdentifier,
         replacement: AttributedString?,
         componentSpacing: CGFloat,
         sizing: HostedAttachmentSizing = .fittingLineFragment,
@@ -21,7 +22,7 @@ enum MarkdownTextEmbeddingViewFactory {
         let attributes = paragraphAttributes(componentSpacing: componentSpacing)
 
         return TextContent {
-            InlineView(replacement: replacement, sizing: sizing) {
+            InlineView(id: id, replacement: replacement, sizing: sizing) {
                 content()
                     .fixedSize(horizontal: false, vertical: true)
             }

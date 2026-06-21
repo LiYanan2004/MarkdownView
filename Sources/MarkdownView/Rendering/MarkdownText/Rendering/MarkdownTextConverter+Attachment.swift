@@ -8,72 +8,37 @@ extension MarkdownTextConverter {
     func renderAttachment(_ attachment: MarkdownTextAttachment) -> TextContent {
         let replacement = attachmentReplacement(for: attachment)
 
-        switch attachment.markup {
-        case let blockQuote as BlockQuote:
-            return makeAttachmentTextContent(replacement: replacement) {
-                MarkdownBlockQuote(
-                    content: MarkdownBlockQuoteStyleConfiguration.Content {
-                        VStack(alignment: .leading, spacing: configuration.componentSpacing) {
-                            ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
-                                MarkdownTextMarkupContent(markup: child)
-                                    .environment(\.markdownFontGroup, blockQuoteFonts)
-                            }
-                        }
-                    }
-                )
-            }
-        case let blockDirective as BlockDirective:
-            return makeAttachmentTextContent(replacement: replacement) {
-                MarkdownBlockDirective(
-                    blockDirective: blockDirective,
-                    fallbackContent: MarkdownTextMarkupContent(childrenOf: blockDirective)
-                )
-            }
-        case let image as Markdown.Image:
-            return makeAttachmentTextContent(
-                replacement: replacement,
-                sizing: .intrinsic
-            ) {
-                MarkdownImage(image: image)
-            }
-        case let codeBlock as CodeBlock:
-            return makeAttachmentTextContent(replacement: replacement) {
-                MarkdownStyledCodeBlock(
-                    configuration: MarkdownCodeBlockStyleConfiguration(
-                        language: codeBlock.language,
-                        code: codeBlock.code
-                    )
-                )
-            }
-        case let htmlBlock as HTMLBlock:
-            return makeAttachmentTextContent(replacement: replacement) {
-                HTMLBlockView(html: htmlBlock.rawHTML)
-            }
-        case let table as Markdown.Table:
-            return makeAttachmentTextContent(replacement: replacement) {
-                MarkdownTable(table: renderedTable(for: table))
-            }
-        default:
-            return replacement.map {
-                TextContent(.attributedString($0))
-            } ?? TextContent([])
+        let sizing: HostedAttachmentSizing = attachment.markup is Markdown.Image
+            ? .intrinsic
+            : .fittingLineFragment
+        let identifier = MarkdownTextInlineViewIdentifier(
+            markup: attachment.markup,
+            role: .blockAttachment
+        )
+        let viewRenderer = MarkdownViewRenderer(
+            configuration: configuration,
+            elementRenderers: elementRenderers
+        )
+        
+        return makeAttachmentTextContent(
+            id: identifier,
+            replacement: replacement,
+            sizing: sizing
+        ) {
+            viewRenderer.makeBody(for: attachment.markup)
         }
     }
 }
 
 fileprivate extension MarkdownTextConverter {
-    var blockQuoteFonts: AnyMarkdownFontGroup {
-        var blockQuoteFonts = fonts
-        blockQuoteFonts._body = fonts.blockQuote
-        return blockQuoteFonts
-    }
-
     func makeAttachmentTextContent(
+        id: MarkdownTextInlineViewIdentifier,
         replacement: AttributedString?,
         sizing: HostedAttachmentSizing = .fittingLineFragment,
         @ViewBuilder content: @MainActor @escaping () -> some View
     ) -> TextContent {
         MarkdownTextEmbeddingViewFactory.makeTextContent(
+            id: id,
             replacement: replacement,
             componentSpacing: configuration.componentSpacing,
             sizing: sizing
@@ -128,29 +93,6 @@ fileprivate extension MarkdownTextConverter {
             }
             attributedString += "\n"
         }
-    }
-
-    func renderedTable(for table: Markdown.Table) -> MarkdownTableStyleConfiguration.Table {
-        MarkdownTableStyleConfiguration.Table(
-            headerCells: Array(table.head.cells).map(renderedTableCell),
-            bodyRows: table.body.rows.map { row in
-                MarkdownTableStyleConfiguration.Table.Row(
-                    rowIndex: row.indexInParent + 1,
-                    cells: Array(row.cells).map(renderedTableCell)
-                )
-            }
-        )
-    }
-
-    func renderedTableCell(
-        _ cell: Markdown.Table.Cell
-    ) -> MarkdownTableStyleConfiguration.Table.Cell {
-        MarkdownTableStyleConfiguration.Table.Cell(
-            horizontalAlignment: cell.horizontalAlignment,
-            textAlignment: cell.textAlignment,
-            colspan: Int(cell.colspan),
-            content: MarkdownTextMarkupContent(markup: cell)
-        )
     }
 }
 

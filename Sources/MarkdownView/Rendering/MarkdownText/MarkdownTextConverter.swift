@@ -138,7 +138,8 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
            let inlineMathStorage = configuration.math.inlineMathStorage {
             return inlineMathTextContent(
                 text: plainText,
-                inlineMathStorage: inlineMathStorage
+                inlineMathStorage: inlineMathStorage,
+                sourceMarkup: text
             )
         }
         #endif
@@ -162,8 +163,16 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
     func visitThematicBreak(_ thematicBreak: ThematicBreak) -> TextContent {
         TextContent {
-            InlineView(replacement: nil, sizing: .fittingLineFragment) {
+            InlineView(
+                id: MarkdownTextInlineViewIdentifier(
+                    markup: thematicBreak,
+                    role: .thematicBreak
+                ),
+                replacement: AttributedString("---"),
+                sizing: .fittingLineFragment
+            ) {
                 Divider()
+                    .padding(.vertical, configuration.componentSpacing)
             }
         }
     }
@@ -201,19 +210,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
     }
 
     func visitInlineHTML(_ inlineHTML: InlineHTML) -> TextContent {
-        if let attributedString = try? AttributedString(
-            NSAttributedString(
-                data: Data(inlineHTML.rawHTML.utf8),
-                options: [
-                    .documentType: NSAttributedString.DocumentType.html
-                ],
-                documentAttributes: nil
-            )
-        ) {
-            return TextContent(.attributedString(attributedString))
-        }
-
-        return TextContent(.string(inlineHTML.rawHTML))
+        TextContent(.string(inlineHTML.rawHTML))
     }
 
     func visitEmphasis(_ emphasis: Markdown.Emphasis) -> TextContent {
@@ -244,6 +241,10 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
         if let linkRenderer = linkRenderer(for: url) {
             return MarkdownTextEmbeddingViewFactory.makeTextContent(
+                id: MarkdownTextInlineViewIdentifier(
+                    markup: link,
+                    role: .customLink
+                ),
                 replacement: linkReplacement(for: link, url: url),
                 componentSpacing: configuration.componentSpacing,
                 sizing: .intrinsic

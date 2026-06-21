@@ -9,7 +9,6 @@
 
 import Markdown
 import SwiftUI
-import RichText
 
 struct MarkdownCustomLink: View {
     var link: Markdown.Link
@@ -18,27 +17,17 @@ struct MarkdownCustomLink: View {
     var configuration: MarkdownRendererConfiguration
     var elementRenderers: [MarkdownElementRendererRegistration]
 
-    @Environment(\.markdownFontGroup) private var fonts
-    @Environment(\.blockQuoteStyle) private var blockQuoteStyle
-    @Environment(\.codeBlockStyle) private var codeBlockStyle
-    @Environment(\.markdownTableStyle) private var tableStyle
-
     var body: some View {
         let tintColor = configuration.tintColors[.link, default: .accentColor]
-        let converter = MarkdownTextConverter(
+        let viewRenderer = MarkdownViewRenderer(
             configuration: configuration,
-            elementRenderers: elementRenderers,
-            fonts: fonts,
-            blockQuoteStyle: blockQuoteStyle,
-            codeBlockStyle: codeBlockStyle,
-            tableStyle: tableStyle
+            elementRenderers: elementRenderers
         )
-        let label = TextView {
-            converter
-                .descendInto(link)
-                .mergingAttributes(linkLabelAttributes(tintColor: tintColor))
-        }
-        .erasedToAnyView()
+        let label = viewRenderer
+            .makeBody(forChildrenOf: link)
+            .tint(tintColor)
+            .underline(configuration.underlineLinks)
+            .erasedToAnyView()
 
         renderer
             .makeBody(
@@ -48,15 +37,6 @@ struct MarkdownCustomLink: View {
                 )
             )
             .erasedToAnyView()
-    }
-
-    private func linkLabelAttributes(tintColor: Color) -> AttributeContainer {
-        var attributes = AttributeContainer()
-            .foregroundColor(tintColor)
-
-        attributes.underlineStyle = configuration.underlineLinks ? .single : .none
-
-        return attributes
     }
 }
 

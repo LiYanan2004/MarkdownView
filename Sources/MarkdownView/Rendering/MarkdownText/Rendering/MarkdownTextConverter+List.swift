@@ -34,6 +34,7 @@ extension MarkdownTextConverter {
         ])
         let markerContent = makeMarkerContent(
             for: listItem.marker,
+            sourceMarkup: listItem.sourceMarkup,
             baseAttributes: listItemAttributes
         )
         let leadingContent = combine(listItem.leadingChildren.map(renderMarkup))
@@ -90,11 +91,16 @@ extension MarkdownTextConverter {
 private extension MarkdownTextConverter {
     func makeMarkerContent(
         for marker: MarkdownTextSemanticListMarker?,
+        sourceMarkup: ListItem,
         baseAttributes: AttributeContainer
     ) -> TextContent {
         switch marker {
         case .checkbox(let checkbox):
-            return checkboxTextContent(for: checkbox).mergingAttributes(baseAttributes)
+                return checkboxTextContent(
+                    for: checkbox,
+                    sourceMarkup: sourceMarkup
+                )
+                .mergingAttributes(baseAttributes)
         case .text(let value, let monospaced):
             return TextContent(
                 .attributedString(
@@ -113,14 +119,23 @@ private extension MarkdownTextConverter {
         }
     }
 
-    func checkboxTextContent(for checkbox: Checkbox) -> TextContent {
+    func checkboxTextContent(
+        for checkbox: Checkbox,
+        sourceMarkup: ListItem
+    ) -> TextContent {
         let replacement = switch checkbox {
         case .checked: AttributedString("☑︎")
         case .unchecked: AttributedString("☐")
         }
 
         return TextContent {
-            InlineView(replacement: replacement) {
+            InlineView(
+                id: MarkdownTextInlineViewIdentifier(
+                    markup: sourceMarkup,
+                    role: .listCheckbox
+                ),
+                replacement: replacement
+            ) {
                 MarkdownTextCheckbox(
                     checkbox: checkbox,
                     font: Font(fonts.body.asPlatformFont)
