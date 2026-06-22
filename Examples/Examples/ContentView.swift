@@ -17,6 +17,7 @@ struct ContentView: View {
     #endif
 
     @State private var isMarkdownEditorPresented = false
+    @State private var streamingTask: Task<Void, Error>?
 
     var body: some View {
         NavigationStack {
@@ -25,6 +26,35 @@ struct ContentView: View {
                 rendererKind: rendererKind
             )
             .toolbar {
+                ToolbarItem {
+                    Button(
+                        "Stream",
+                        systemImage: streamingTask == nil ? "dot.radiowaves.left.and.right" : "stop.fill"
+                    ) {
+                        if streamingTask == nil {
+                            streamingTask = Task {
+                                markdownText = ""
+                                
+                                var copy = ExampleMarkdown.showcase
+                                while !copy.isEmpty {
+                                    if Task.isCancelled {
+                                        break
+                                    }
+                                    
+                                    let char = String(copy.removeFirst())
+                                    markdownText += String(char)
+                                    
+                                    try await Task.sleep(for: .milliseconds(1))
+                                }
+                                
+                                streamingTask = nil
+                            }
+                        } else {
+                            streamingTask?.cancel()
+                        }
+                    }
+                }
+
                 ToolbarItem {
                     Button("Edit") {
                         isMarkdownEditorPresented = true

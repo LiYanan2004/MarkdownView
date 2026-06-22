@@ -24,7 +24,6 @@ enum MarkdownTextEmbeddingViewFactory {
         return TextContent {
             InlineView(id: id, replacement: replacement, sizing: sizing) {
                 content()
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .textContent
             .mergingAttributes(attributes)

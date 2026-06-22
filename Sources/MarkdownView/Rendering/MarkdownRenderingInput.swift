@@ -15,6 +15,14 @@ struct MarkdownRenderingInput {
     let configuration: MarkdownRendererConfiguration
 
     init(
+        document: Markdown.Document,
+        configuration: MarkdownRendererConfiguration
+    ) {
+        self.document = document
+        self.configuration = configuration
+    }
+
+    init(
         source: MarkdownRenderingSource,
         configuration: MarkdownRendererConfiguration,
         elementRenderers: [MarkdownElementRendererRegistration]
@@ -62,7 +70,7 @@ struct MarkdownRenderingInput {
         }
     }
 
-    private static func parseOptions(
+    static func parseOptions(
         configuration: MarkdownRendererConfiguration,
         parsesBlockDirectives: Bool
     ) -> ParseOptions {

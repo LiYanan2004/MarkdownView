@@ -5,6 +5,7 @@
 
 import MarkdownView
 import SwiftUI
+internal import RichText
 
 struct MarkdownPreview: View {
     var markdownText: String
@@ -16,6 +17,7 @@ struct MarkdownPreview: View {
                 .scenePadding()
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .defaultScrollAnchor(.bottom)
         .markdownMathRenderingEnabled()
         .markdownLinksUnderlined()
         .markdownBaseURL(Self.showcaseBaseURL)
@@ -30,13 +32,15 @@ struct MarkdownPreview: View {
 
     @ViewBuilder
     private var renderedContent: some View {
-        switch rendererKind {
-        #if os(iOS) || os(macOS)
-        case .markdownText:
-            MarkdownText(markdownText)
-        #endif
-        case .markdownView:
-            MarkdownView(markdownText)
+        StreamingMarkdownReader(markdownText) { doc in
+            switch rendererKind {
+            #if os(iOS) || os(macOS)
+            case .markdownText:
+                MarkdownText(doc)
+            #endif
+            case .markdownView:
+                MarkdownView(doc)
+            }
         }
     }
 

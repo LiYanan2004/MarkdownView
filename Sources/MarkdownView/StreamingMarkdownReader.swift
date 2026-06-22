@@ -7,12 +7,6 @@ import Markdown
 import SwiftUI
 
 /// A reader that coalesces markdown parsing to the next display update.
-///
-/// `StreamingMarkdownReader` keeps showing the last rendered document while raw
-/// source text continues to change, then reparses only the latest pending text
-/// on the next animation timeline tick.
-/// Apply parse-affecting modifiers, such as `markdownMathRenderingEnabled()`,
-/// to the reader so they can participate in parsing before the document is produced.
 public struct StreamingMarkdownReader<Content: View>: View {
     private let sourceText: String
     private let content: (Markdown.Document) -> Content
@@ -80,15 +74,31 @@ fileprivate extension StreamingMarkdownReader {
             return
         }
 
+        let incrementalParser = MarkdownIncrementalParser()
+        let parseResult = incrementalParser.parse(
+            sourceText: pendingRequest.sourceText,
+            configuration: pendingRequest.configuration,
+            parsesBlockDirectives: pendingRequest.parsesBlockDirectives,
+            previousState: renderedSnapshot?.incrementalParsingState
+        )
         renderedSnapshot = RenderedSnapshot(
             request: pendingRequest,
-            renderingInput: MarkdownRenderingInput(
-                source: .rawText(pendingRequest.sourceText),
-                configuration: pendingRequest.configuration,
-                parsesBlockDirectives: pendingRequest.parsesBlockDirectives
-            )
+            renderingInput: parseResult.renderingInput,
+            rootBlockRanges: parseResult.rootBlockRanges
         )
         self.pendingRequest = nil
+    }
+}
+
+private extension StreamingMarkdownReader.RenderedSnapshot {
+    var incrementalParsingState: MarkdownIncrementalParser.PreviousState {
+        MarkdownIncrementalParser.PreviousState(
+            sourceText: request.sourceText,
+            document: document,
+            configuration: request.configuration,
+            parsesBlockDirectives: request.parsesBlockDirectives,
+            rootBlockRanges: rootBlockRanges
+        )
     }
 }
 
@@ -103,14 +113,17 @@ extension StreamingMarkdownReader {
         let request: ParsingRequest
         let document: Markdown.Document
         let configuration: MarkdownRendererConfiguration
+        let rootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?
 
         init(
             request: ParsingRequest,
-            renderingInput: MarkdownRenderingInput
+            renderingInput: MarkdownRenderingInput,
+            rootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?
         ) {
             self.request = request
             self.document = renderingInput.document
             self.configuration = renderingInput.configuration
+            self.rootBlockRanges = rootBlockRanges
         }
     }
 }
