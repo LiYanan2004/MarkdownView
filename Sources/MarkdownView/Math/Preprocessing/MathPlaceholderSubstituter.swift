@@ -53,9 +53,8 @@ enum MathPlaceholderSubstituter {
             }
         }
 
-        let sortedReplacements = replacements.sorted { $0.range.lowerBound < $1.range.lowerBound }
         var processedReplacements: [MarkdownMathPreprocessor.Replacement] = []
-        processedReplacements.reserveCapacity(sortedReplacements.count)
+        processedReplacements.reserveCapacity(replacements.count)
 
         var processedMarkdown = ""
         processedMarkdown.reserveCapacity(markdown.count)
@@ -63,7 +62,9 @@ enum MathPlaceholderSubstituter {
         var sourceCursor = markdown.startIndex
         var processedOffset = 0
 
-        for replacement in sortedReplacements {
+        // `parsableRanges` are ordered and non-overlapping, and `MathParser` emits
+        // matches in source order, so replacements already arrive sorted.
+        for replacement in replacements {
             let replacementLowerBound = markdown.index(
                 markdown.startIndex,
                 offsetBy: replacement.range.lowerBound

@@ -174,6 +174,29 @@ struct MathExtractionTests {
     }
 
     @Test
+    func testMathPreprocessingLeavesPlainTextUntouched() async throws {
+        let markdown = "Plain prose without any supported math delimiters."
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown == markdown)
+        #expect(result.displayMathStorage.isEmpty)
+        #expect(result.inlineMathStorage.isEmpty)
+    }
+
+    @Test
+    func testMathPreprocessingLeavesHardLineBreakTextUntouched() async throws {
+        let markdown = #"""
+        Hard line break\
+        starts a new rendered line.
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown == markdown)
+        #expect(result.displayMathStorage.isEmpty)
+        #expect(result.inlineMathStorage.isEmpty)
+    }
+
+    @Test
     func testMathPreprocessingStoresDollarDisplayMathWithDelimiters() async throws {
         let markdown = #"""
         Display math:

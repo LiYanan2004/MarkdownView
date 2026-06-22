@@ -46,6 +46,13 @@ public struct MarkdownMathPreprocessor: Sendable, Hashable {
     }
 
     public func preprocessingResult(for markdown: String) -> MarkdownMathPreprocessor.Result {
+        guard Self.containsSupportedMathSyntax(in: markdown) else {
+            return MarkdownMathPreprocessor.Result(
+                markdown: markdown,
+                context: MarkdownMathContext()
+            )
+        }
+
         var mathRangesResolver = MathParsableRangesResolver()
         mathRangesResolver.visit(
             Document(
@@ -105,6 +112,13 @@ extension MarkdownMathPreprocessor {
         bytes.reduce(offsetBasis) { partialHash, byte in
             (partialHash ^ UInt64(byte)) &* 1_099_511_628_211
         }
+    }
+
+    static func containsSupportedMathSyntax(in markdown: String) -> Bool {
+        markdown.contains("$")
+            || markdown.contains(#"\("#)
+            || markdown.contains(#"\["#)
+            || markdown.contains(#"\begin{"#)
     }
 
     static public func inlinePlaceholder(for identifier: UUID) -> String {
