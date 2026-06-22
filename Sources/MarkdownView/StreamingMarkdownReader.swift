@@ -84,7 +84,9 @@ fileprivate extension StreamingMarkdownReader {
         renderedSnapshot = RenderedSnapshot(
             request: pendingRequest,
             renderingInput: parseResult.renderingInput,
-            rootBlockRanges: parseResult.rootBlockRanges
+            processedSourceText: parseResult.processedSourceText,
+            rootBlockRanges: parseResult.rootBlockRanges,
+            processedRootBlockRanges: parseResult.processedRootBlockRanges
         )
         self.pendingRequest = nil
     }
@@ -94,10 +96,13 @@ private extension StreamingMarkdownReader.RenderedSnapshot {
     var incrementalParsingState: MarkdownIncrementalParser.PreviousState {
         MarkdownIncrementalParser.PreviousState(
             sourceText: request.sourceText,
+            processedSourceText: processedSourceText,
             document: document,
             configuration: request.configuration,
+            mathContext: configuration.math.context,
             parsesBlockDirectives: request.parsesBlockDirectives,
-            rootBlockRanges: rootBlockRanges
+            rootBlockRanges: rootBlockRanges,
+            processedRootBlockRanges: processedRootBlockRanges
         )
     }
 }
@@ -113,17 +118,23 @@ extension StreamingMarkdownReader {
         let request: ParsingRequest
         let document: Markdown.Document
         let configuration: MarkdownRendererConfiguration
+        let processedSourceText: String
         let rootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?
+        let processedRootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?
 
         init(
             request: ParsingRequest,
             renderingInput: MarkdownRenderingInput,
-            rootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?
+            processedSourceText: String,
+            rootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?,
+            processedRootBlockRanges: [MarkdownIncrementalParser.RootBlockRange]?
         ) {
             self.request = request
             self.document = renderingInput.document
             self.configuration = renderingInput.configuration
+            self.processedSourceText = processedSourceText
             self.rootBlockRanges = rootBlockRanges
+            self.processedRootBlockRanges = processedRootBlockRanges
         }
     }
 }

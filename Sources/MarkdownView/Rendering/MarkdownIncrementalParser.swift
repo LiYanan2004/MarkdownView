@@ -9,15 +9,20 @@ import Markdown
 struct MarkdownIncrementalParser {
     struct PreviousState {
         let sourceText: String
+        let processedSourceText: String
         let document: Markdown.Document
         let configuration: MarkdownRendererConfiguration
+        let mathContext: MarkdownMathContext?
         let parsesBlockDirectives: Bool
         let rootBlockRanges: [RootBlockRange]?
+        let processedRootBlockRanges: [RootBlockRange]?
     }
 
     struct ParseResult {
         let renderingInput: MarkdownRenderingInput
         let rootBlockRanges: [RootBlockRange]?
+        let processedSourceText: String
+        let processedRootBlockRanges: [RootBlockRange]?
         let usedIncrementalParsing: Bool
         let stablePrefixRootBlockCount: Int?
     }
@@ -33,14 +38,6 @@ struct MarkdownIncrementalParser {
         parsesBlockDirectives: Bool,
         previousState: PreviousState?
     ) -> ParseResult {
-        guard configuration.math.shouldRender == false else {
-            return fullParse(
-                sourceText: sourceText,
-                configuration: configuration,
-                parsesBlockDirectives: parsesBlockDirectives
-            )
-        }
-
         guard let previousState,
               previousState.configuration == configuration,
               previousState.parsesBlockDirectives == parsesBlockDirectives,
@@ -63,22 +60,28 @@ struct MarkdownIncrementalParser {
 }
 
 private extension MarkdownIncrementalParser {
+    struct PreparedParse {
+        let renderingInput: MarkdownRenderingInput
+        let processedSourceText: String
+        let sourceRootBlockRanges: [RootBlockRange]
+        let processedRootBlockRanges: [RootBlockRange]
+    }
+
     func fullParse(
         sourceText: String,
         configuration: MarkdownRendererConfiguration,
         parsesBlockDirectives: Bool
     ) -> ParseResult {
-        let renderingInput = MarkdownRenderingInput(
-            source: .rawText(sourceText),
+        let preparedParse = prepareParse(
+            sourceText: sourceText,
             configuration: configuration,
             parsesBlockDirectives: parsesBlockDirectives
         )
         return ParseResult(
-            renderingInput: renderingInput,
-            rootBlockRanges: parseRootBlockRanges(
-                in: sourceText,
-                document: renderingInput.document
-            ),
+            renderingInput: preparedParse.renderingInput,
+            rootBlockRanges: preparedParse.sourceRootBlockRanges,
+            processedSourceText: preparedParse.processedSourceText,
+            processedRootBlockRanges: preparedParse.processedRootBlockRanges,
             usedIncrementalParsing: false,
             stablePrefixRootBlockCount: nil
         )
@@ -107,13 +110,19 @@ private extension MarkdownIncrementalParser {
         )
         let stableRootBlockCount = reparsedRootBlockIndex
         let reparsedStartIndex = previousRanges[reparsedRootBlockIndex].startIndex
+        guard let previousProcessedRanges = previousState.processedRootBlockRanges,
+              previousProcessedRanges.isEmpty == false
+        else {
+            return nil
+        }
+        let reparsedProcessedStartIndex = previousProcessedRanges[reparsedRootBlockIndex].startIndex
 
         let stablePrefixText = previousSourceText[..<reparsedStartIndex]
         guard newSourceText.starts(with: stablePrefixText) else { return nil }
 
         let tailSourceText = String(newSourceText[reparsedStartIndex...])
-        let tailRenderingInput = MarkdownRenderingInput(
-            source: .rawText(tailSourceText),
+        let tailPreparedParse = prepareParse(
+            sourceText: tailSourceText,
             configuration: configuration,
             parsesBlockDirectives: parsesBlockDirectives
         )
@@ -121,34 +130,259 @@ private extension MarkdownIncrementalParser {
         let mergedChildren = previousRootBlocks
             .prefix(stableRootBlockCount)
             .map(\.detachedFromParent)
-            + Array(tailRenderingInput.document.children).map(\.detachedFromParent)
+            + Array(tailPreparedParse.renderingInput.document.children).map(\.detachedFromParent)
         guard let mergedDocument = previousState.document
             .withUncheckedChildren(mergedChildren) as? Markdown.Document
         else {
             return nil
         }
 
-        let tailRanges = parseRootBlockRanges(
-            in: tailSourceText,
-            document: tailRenderingInput.document
+        let mergedProcessedSourceText = String(
+            previousState.processedSourceText[..<reparsedProcessedStartIndex]
+        ) + tailPreparedParse.processedSourceText
+        let mergedRenderedConfiguration = mergedConfiguration(
+            previousState: previousState,
+            configuration: configuration,
+            stablePrefixProcessedEndIndex: reparsedProcessedStartIndex,
+            tailPreparedParse: tailPreparedParse
         )
         let mergedRanges = Array(previousRanges.prefix(stableRootBlockCount))
             + shiftRootBlockRanges(
-                tailRanges,
+                tailPreparedParse.sourceRootBlockRanges,
                 from: tailSourceText,
                 into: newSourceText,
                 at: reparsedStartIndex
+            )
+        let mergedProcessedRanges = Array(previousProcessedRanges.prefix(stableRootBlockCount))
+            + shiftRootBlockRanges(
+                tailPreparedParse.processedRootBlockRanges,
+                from: tailPreparedParse.processedSourceText,
+                into: mergedProcessedSourceText,
+                at: reparsedProcessedStartIndex
             )
 
         return ParseResult(
             renderingInput: MarkdownRenderingInput(
                 document: mergedDocument,
-                configuration: tailRenderingInput.configuration
+                configuration: mergedRenderedConfiguration
             ),
             rootBlockRanges: mergedRanges,
+            processedSourceText: mergedProcessedSourceText,
+            processedRootBlockRanges: mergedProcessedRanges,
             usedIncrementalParsing: true,
             stablePrefixRootBlockCount: stableRootBlockCount
         )
+    }
+
+    func prepareParse(
+        sourceText: String,
+        configuration: MarkdownRendererConfiguration,
+        parsesBlockDirectives: Bool
+    ) -> PreparedParse {
+        let parseOptions = MarkdownRenderingInput.parseOptions(
+            configuration: configuration,
+            parsesBlockDirectives: parsesBlockDirectives
+        )
+
+        if configuration.math.shouldRender,
+           supportsMathRendering {
+            let preprocessingResult = MarkdownMathPreprocessor()
+                .preprocessingResult(for: sourceText)
+            let processedSourceText = preprocessingResult.markdown
+            let document = Markdown.Document(
+                parsing: processedSourceText,
+                options: parseOptions
+            )
+            let processedRootBlockRanges = parseRootBlockRanges(
+                in: processedSourceText,
+                document: document
+            )
+            let sourceRootBlockRanges = rawRootBlockRanges(
+                from: processedRootBlockRanges,
+                sourceText: sourceText,
+                processedSourceText: processedSourceText,
+                replacements: preprocessingResult.replacements
+            )
+            let renderedConfiguration = configuration
+                .with(\.math.context, preprocessingResult.context)
+
+            return PreparedParse(
+                renderingInput: MarkdownRenderingInput(
+                    document: document,
+                    configuration: renderedConfiguration
+                ),
+                processedSourceText: processedSourceText,
+                sourceRootBlockRanges: sourceRootBlockRanges,
+                processedRootBlockRanges: processedRootBlockRanges
+            )
+        }
+
+        let document = Markdown.Document(
+            parsing: sourceText,
+            options: parseOptions
+        )
+        let rootBlockRanges = parseRootBlockRanges(
+            in: sourceText,
+            document: document
+        )
+
+        return PreparedParse(
+            renderingInput: MarkdownRenderingInput(
+                document: document,
+                configuration: configuration
+            ),
+            processedSourceText: sourceText,
+            sourceRootBlockRanges: rootBlockRanges,
+            processedRootBlockRanges: rootBlockRanges
+        )
+    }
+
+    func mergedConfiguration(
+        previousState: PreviousState,
+        configuration: MarkdownRendererConfiguration,
+        stablePrefixProcessedEndIndex: String.Index,
+        tailPreparedParse: PreparedParse
+    ) -> MarkdownRendererConfiguration {
+        guard configuration.math.shouldRender,
+              supportsMathRendering,
+              let previousMathContext = previousState.mathContext,
+              let tailMathContext = tailPreparedParse.renderingInput.configuration.math.context
+        else {
+            return tailPreparedParse.renderingInput.configuration
+        }
+
+        let stablePrefixProcessedText = previousState.processedSourceText[
+            ..<stablePrefixProcessedEndIndex
+        ]
+        let stableMathContext = mathContext(
+            from: previousMathContext,
+            containedIn: stablePrefixProcessedText
+        )
+
+        return configuration.with(
+            \.math.context,
+            MarkdownMathContext(
+                inlineMathStorage: stableMathContext.inlineMathStorage.merging(
+                    tailMathContext.inlineMathStorage,
+                    uniquingKeysWith: { _, tailValue in tailValue }
+                ),
+                displayMathStorage: stableMathContext.displayMathStorage.merging(
+                    tailMathContext.displayMathStorage,
+                    uniquingKeysWith: { _, tailValue in tailValue }
+                )
+            )
+        )
+    }
+
+    func mathContext(
+        from context: MarkdownMathContext,
+        containedIn processedSourceText: Substring
+    ) -> MarkdownMathContext {
+        let inlineMathStorage = context.inlineMathStorage.filter { identifier, _ in
+            processedSourceText.contains(
+                MarkdownMathPreprocessor.inlinePlaceholder(for: identifier)
+            )
+        }
+        let displayMathStorage = context.displayMathStorage.filter { identifier, _ in
+            processedSourceText.contains(
+                MarkdownMathPreprocessor.displayPlaceholder(for: identifier)
+            )
+        }
+
+        return MarkdownMathContext(
+            inlineMathStorage: inlineMathStorage,
+            displayMathStorage: displayMathStorage
+        )
+    }
+
+    func rawRootBlockRanges(
+        from processedRootBlockRanges: [RootBlockRange],
+        sourceText: String,
+        processedSourceText: String,
+        replacements: [MarkdownMathPreprocessor.Replacement]
+    ) -> [RootBlockRange] {
+        let sourceRootBlockRanges: [RootBlockRange] = processedRootBlockRanges.compactMap {
+            range -> RootBlockRange? in
+            guard let sourceStartIndex = sourceIndex(
+                forProcessedIndex: range.startIndex,
+                sourceText: sourceText,
+                processedSourceText: processedSourceText,
+                replacements: replacements
+            ),
+            let sourceEndIndex = sourceIndex(
+                forProcessedIndex: range.endIndex,
+                sourceText: sourceText,
+                processedSourceText: processedSourceText,
+                replacements: replacements
+            ) else {
+                return nil
+            }
+
+            return RootBlockRange(
+                startIndex: sourceStartIndex,
+                endIndex: sourceEndIndex
+            )
+        }
+
+        guard sourceRootBlockRanges.count == processedRootBlockRanges.count else {
+            return []
+        }
+
+        return sourceRootBlockRanges
+    }
+
+    func sourceIndex(
+        forProcessedIndex processedIndex: String.Index,
+        sourceText: String,
+        processedSourceText: String,
+        replacements: [MarkdownMathPreprocessor.Replacement]
+    ) -> String.Index? {
+        let processedOffset = processedSourceText.distance(
+            from: processedSourceText.startIndex,
+            to: processedIndex
+        )
+        guard let sourceOffset = sourceOffset(
+            forProcessedOffset: processedOffset,
+            replacements: replacements
+        ) else {
+            return nil
+        }
+        return sourceText.index(sourceText.startIndex, offsetBy: sourceOffset)
+    }
+
+    func sourceOffset(
+        forProcessedOffset processedOffset: Int,
+        replacements: [MarkdownMathPreprocessor.Replacement]
+    ) -> Int? {
+        var sourceOffset = processedOffset
+
+        for replacement in replacements {
+            if processedOffset < replacement.processedRange.lowerBound {
+                break
+            }
+
+            if processedOffset <= replacement.processedRange.upperBound {
+                if processedOffset == replacement.processedRange.lowerBound {
+                    return replacement.sourceRange.lowerBound
+                }
+                if processedOffset == replacement.processedRange.upperBound {
+                    return replacement.sourceRange.upperBound
+                }
+                return nil
+            }
+
+            sourceOffset += replacement.sourceRange.count - replacement.processedRange.count
+        }
+
+        return sourceOffset
+    }
+
+    var supportsMathRendering: Bool {
+        #if canImport(SwiftMath)
+        true
+        #else
+        false
+        #endif
     }
 
     func parseRootBlockRanges(

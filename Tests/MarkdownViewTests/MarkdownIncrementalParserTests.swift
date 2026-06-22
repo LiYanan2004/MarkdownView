@@ -247,10 +247,10 @@ struct MarkdownIncrementalParserTests {
         #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: markdown))
     }
 
-    @Test("Falls back when math rendering is enabled")
-    func fallsBackWhenMathRenderingIsEnabled() {
-        let previous = "Alpha\n\nBravo"
-        let new = previous + "\n\nInline math: $x$"
+    @Test("Uses incremental parsing when math rendering is enabled for inline math")
+    func usesIncrementalParsingWhenMathRenderingIsEnabledForInlineMath() {
+        let previous = "Inline math: $x$\n\nBravo"
+        let new = previous + "\n\nTrailing math: $y$"
         let configuration = MarkdownRendererConfiguration()
             .with(\.math.shouldRender, true)
 
@@ -266,12 +266,65 @@ struct MarkdownIncrementalParserTests {
             parsesBlockDirectives: true,
             previousState: makePreviousState(
                 sourceText: previous,
-                parseResult: previousResult
+                parseResult: previousResult,
+                configuration: configuration,
+                parsesBlockDirectives: true
             )
         )
 
-        #expect(result.usedIncrementalParsing == false)
-        #expect(result.stablePrefixRootBlockCount == nil)
+        #expect(result.usedIncrementalParsing)
+        #expect(result.stablePrefixRootBlockCount == 1)
+        #expect(result.renderingInput.configuration.math.inlineMathStorage?.count == 2)
+        #expect(result.renderingInput.configuration.math.inlineMathStorage?.values.contains("$x$") == true)
+        #expect(result.renderingInput.configuration.math.inlineMathStorage?.values.contains("$y$") == true)
+        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(
+            markdown: new,
+            configuration: configuration,
+            parsesBlockDirectives: true
+        ))
+    }
+
+    @Test("Uses incremental parsing when math rendering is enabled for display math")
+    func usesIncrementalParsingWhenMathRenderingIsEnabledForDisplayMath() {
+        let previous = """
+        Alpha
+
+        $$
+        x
+        $$
+        """
+        let new = previous + """
+
+        $$
+        y
+        $$
+        """
+        let configuration = MarkdownRendererConfiguration()
+            .with(\.math.shouldRender, true)
+
+        let previousResult = incrementalParser.parse(
+            sourceText: previous,
+            configuration: configuration,
+            parsesBlockDirectives: true,
+            previousState: nil
+        )
+        let result = incrementalParser.parse(
+            sourceText: new,
+            configuration: configuration,
+            parsesBlockDirectives: true,
+            previousState: makePreviousState(
+                sourceText: previous,
+                parseResult: previousResult,
+                configuration: configuration,
+                parsesBlockDirectives: true
+            )
+        )
+
+        #expect(result.usedIncrementalParsing)
+        #expect(result.stablePrefixRootBlockCount == 1)
+        #expect(result.renderingInput.configuration.math.displayMathStorage?.count == 2)
+        #expect(result.renderingInput.configuration.math.displayMathStorage?.values.contains("$$\nx\n$$") == true)
+        #expect(result.renderingInput.configuration.math.displayMathStorage?.values.contains("$$\ny\n$$") == true)
         #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(
             markdown: new,
             configuration: configuration,
@@ -297,15 +350,18 @@ private extension MarkdownIncrementalParserTests {
     func makePreviousState(
         sourceText: String,
         parseResult: MarkdownIncrementalParser.ParseResult,
-        configuration: MarkdownRendererConfiguration = .init(),
+        configuration: MarkdownRendererConfiguration? = nil,
         parsesBlockDirectives: Bool = false
     ) -> MarkdownIncrementalParser.PreviousState {
         MarkdownIncrementalParser.PreviousState(
             sourceText: sourceText,
+            processedSourceText: parseResult.processedSourceText,
             document: parseResult.renderingInput.document,
-            configuration: configuration,
+            configuration: configuration ?? .init(),
+            mathContext: parseResult.renderingInput.configuration.math.context,
             parsesBlockDirectives: parsesBlockDirectives,
-            rootBlockRanges: parseResult.rootBlockRanges
+            rootBlockRanges: parseResult.rootBlockRanges,
+            processedRootBlockRanges: parseResult.processedRootBlockRanges
         )
     }
 

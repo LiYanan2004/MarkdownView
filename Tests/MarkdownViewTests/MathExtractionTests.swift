@@ -213,6 +213,29 @@ struct MathExtractionTests {
     }
 
     @Test
+    func testMathPreprocessingKeepsExistingDisplayMathIdentifierWhenAppendingTrailingContent() async throws {
+        let previousMarkdown = #"""
+        Alpha
+
+        $$
+        y
+        $$
+        """#
+        let appendedMarkdown = previousMarkdown + #"""
+
+        Beta
+        """#
+
+        let previousResult = processMarkdownParsingRanges(in: previousMarkdown)
+        let appendedResult = processMarkdownParsingRanges(in: appendedMarkdown)
+
+        #expect(
+            Set(previousResult.displayMathStorage.keys)
+                .isSubset(of: Set(appendedResult.displayMathStorage.keys))
+        )
+    }
+
+    @Test
     func testMathPreprocessingPreservesEscapedBracketPunctuation() async throws {
         let markdown = #"Escaped punctuation: \*literal asterisks\*, \[literal brackets\], and \`literal backticks\`."#
         let result = processMarkdownParsingRanges(in: markdown)

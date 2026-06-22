@@ -135,6 +135,23 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
         let plainText = text.plainText
         #if canImport(SwiftMath)
         if configuration.math.shouldRender,
+           let mathIdentifier = MarkdownMathPreprocessor.displayPlaceholderIdentifier(
+               in: plainText
+           ) {
+            return MarkdownTextEmbeddingViewFactory.makeTextContent(
+                id: MarkdownTextInlineViewIdentifier(
+                    markup: text,
+                    role: .blockAttachment
+                ),
+                replacement: nil,
+                componentSpacing: configuration.componentSpacing,
+                sizing: .fittingLineFragment
+            ) {
+                MarkdownDisplayMathView(mathIdentifier: mathIdentifier)
+                    .id(mathIdentifier)
+            }
+        }
+        if configuration.math.shouldRender,
            let inlineMathStorage = configuration.math.inlineMathStorage {
             return inlineMathTextContent(
                 text: plainText,

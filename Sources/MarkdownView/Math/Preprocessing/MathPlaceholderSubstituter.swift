@@ -21,8 +21,20 @@ enum MathPlaceholderSubstituter {
             let segmentParser = MathParser(text: segment)
 
             for math in segmentParser.mathRepresentations {
-                let identifier = UUID()
                 let matchedText = String(markdown[math.range])
+                let lowerBoundOffset = markdown.distance(
+                    from: markdown.startIndex,
+                    to: math.range.lowerBound
+                )
+                let upperBoundOffset = markdown.distance(
+                    from: markdown.startIndex,
+                    to: math.range.upperBound
+                )
+                let sourceRange = lowerBoundOffset..<upperBoundOffset
+                let identifier = MarkdownMathPreprocessor.stableIdentifier(
+                    matchedText: matchedText,
+                    sourceRange: sourceRange
+                )
                 let placeholder: String
 
                 if math.kind.inline {
@@ -32,46 +44,62 @@ enum MathPlaceholderSubstituter {
                     displayMathStorage[identifier] = matchedText
                     placeholder = MarkdownMathPreprocessor.displayPlaceholder(for: identifier)
                 }
-
-                let lowerBoundOffset = markdown.distance(
-                    from: markdown.startIndex,
-                    to: math.range.lowerBound
-                )
-                let upperBoundOffset = markdown.distance(
-                    from: markdown.startIndex,
-                    to: math.range.upperBound
-                )
                 replacements.append(
                     Replacement(
-                        range: lowerBoundOffset..<upperBoundOffset,
+                        range: sourceRange,
                         placeholder: placeholder
                     )
                 )
             }
         }
 
-        var processedMarkdown = markdown
-        for replacement in replacements.sorted(by: { $0.range.lowerBound > $1.range.lowerBound }) {
-            let lowerBound = processedMarkdown.index(
-                processedMarkdown.startIndex,
+        let sortedReplacements = replacements.sorted { $0.range.lowerBound < $1.range.lowerBound }
+        var processedReplacements: [MarkdownMathPreprocessor.Replacement] = []
+        processedReplacements.reserveCapacity(sortedReplacements.count)
+
+        var processedMarkdown = ""
+        processedMarkdown.reserveCapacity(markdown.count)
+
+        var sourceCursor = markdown.startIndex
+        var processedOffset = 0
+
+        for replacement in sortedReplacements {
+            let replacementLowerBound = markdown.index(
+                markdown.startIndex,
                 offsetBy: replacement.range.lowerBound
             )
-            let upperBound = processedMarkdown.index(
-                processedMarkdown.startIndex,
+            let replacementUpperBound = markdown.index(
+                markdown.startIndex,
                 offsetBy: replacement.range.upperBound
             )
-            processedMarkdown.replaceSubrange(
-                lowerBound..<upperBound,
-                with: replacement.placeholder
+            let unchangedSegment = markdown[sourceCursor..<replacementLowerBound]
+            processedMarkdown.append(contentsOf: unchangedSegment)
+            processedOffset += markdown.distance(
+                from: sourceCursor,
+                to: replacementLowerBound
             )
+
+            let placeholderRange = processedOffset..<(processedOffset + replacement.placeholder.count)
+            processedMarkdown.append(replacement.placeholder)
+            processedReplacements.append(
+                MarkdownMathPreprocessor.Replacement(
+                    sourceRange: replacement.range,
+                    processedRange: placeholderRange
+                )
+            )
+            processedOffset = placeholderRange.upperBound
+            sourceCursor = replacementUpperBound
         }
+
+        processedMarkdown.append(contentsOf: markdown[sourceCursor...])
 
         return MarkdownMathPreprocessor.Result(
             markdown: processedMarkdown,
             context: MarkdownMathContext(
                 inlineMathStorage: inlineMathStorage,
                 displayMathStorage: displayMathStorage
-            )
+            ),
+            replacements: processedReplacements
         )
     }
 }

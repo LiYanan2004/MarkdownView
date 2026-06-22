@@ -14,14 +14,15 @@ struct MathBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
     func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
         if let identifierValue = configuration.arguments.first(where: { $0.name == "uuid" })?.value,
            let identifier = UUID(uuidString: identifierValue) {
-            DisplayMath(mathIdentifier: identifier)
+            MarkdownDisplayMathView(mathIdentifier: identifier)
+                .id(identifier)
         } else {
             EmptyView()
         }
     }
 }
 
-fileprivate struct DisplayMath: View {
+struct MarkdownDisplayMathView: View {
     var mathIdentifier: UUID
     @Environment(\.markdownFontGroup.displayMath) private var font
     @Environment(\.markdownRendererConfiguration.math) private var math
