@@ -18,16 +18,20 @@ enum MathPlaceholderSubstituter {
 
         for parsableRange in parsableRanges {
             let segment = markdown[parsableRange]
+            let parsableRangeStartOffset = markdown.distance(
+                from: markdown.startIndex,
+                to: parsableRange.lowerBound
+            )
             let segmentParser = MathParser(text: segment)
 
             for math in segmentParser.mathRepresentations {
-                let matchedText = String(markdown[math.range])
-                let lowerBoundOffset = markdown.distance(
-                    from: markdown.startIndex,
+                let matchedText = String(segment[math.range])
+                let lowerBoundOffset = parsableRangeStartOffset + segment.distance(
+                    from: segment.startIndex,
                     to: math.range.lowerBound
                 )
-                let upperBoundOffset = markdown.distance(
-                    from: markdown.startIndex,
+                let upperBoundOffset = parsableRangeStartOffset + segment.distance(
+                    from: segment.startIndex,
                     to: math.range.upperBound
                 )
                 let sourceRange = lowerBoundOffset..<upperBoundOffset

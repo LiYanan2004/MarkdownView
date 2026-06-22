@@ -8,84 +8,118 @@
 import Foundation
 
 struct MathParser {
-    var text: any StringProtocol
+    var text: Substring
 
-    init(text: some StringProtocol) {
+    init(text: String) {
+        self.text = text[...]
+    }
+
+    init(text: Substring) {
         self.text = text
     }
 
     var mathRepresentations: [MathRepresentation] {
-        var representations: [MathRepresentation] = []
-        var index = text.startIndex
+        mergedNonOverlappingRepresentations(
+            from: delimitedRepresentations() + environmentRepresentations()
+        )
+    }
 
-        while index < text.endIndex {
-            guard !text.isEscaped(at: index) else {
-                index = text.index(after: index)
-                continue
+    private func delimitedRepresentations() -> [MathRepresentation] {
+        let copiedText = String(text)
+        let searchRange = NSRange(copiedText.startIndex..<copiedText.endIndex, in: copiedText)
+        var representations: [MathRepresentation] = []
+        representations.reserveCapacity(4)
+
+        Self.delimitedRegularExpression.enumerateMatches(
+            in: copiedText,
+            options: [],
+            range: searchRange
+        ) { match, _, _ in
+            guard let match else {
+                return
             }
 
-            if let representation = delimitedRepresentation(startingAt: index)
-                ?? environmentRepresentation(startingAt: index) {
-                representations.append(representation)
-                index = representation.range.upperBound
-            } else {
-                index = text.index(after: index)
+            let groups: [(rangeIndex: Int, kind: MathRepresentation.Kind)] = [
+                (1, .texEquation),
+                (2, .inlineParenthesesEquation),
+                (3, .blockEquation),
+                (4, .inlineEquation),
+            ]
+
+            for group in groups {
+                let nsRange = match.range(at: group.rangeIndex)
+                guard nsRange.location != NSNotFound,
+                      let copiedRange = Range(nsRange, in: copiedText),
+                      let sourceRange = originalRange(
+                          fromCopiedRange: copiedRange,
+                          in: copiedText
+                      ),
+                      isValidDelimitedMatch(
+                          kind: group.kind,
+                          range: sourceRange
+                      )
+                else {
+                    continue
+                }
+
+                representations.append(
+                    MathRepresentation(
+                        kind: group.kind,
+                        range: sourceRange
+                    )
+                )
+                break
             }
         }
 
         return representations
     }
 
-    private func delimitedRepresentation(
-        startingAt startIndex: String.Index
-    ) -> MathRepresentation? {
-        let remainingText = text[startIndex...]
+    private func environmentRepresentations() -> [MathRepresentation] {
+        var representations: [MathRepresentation] = []
+        var currentIndex = text.startIndex
 
-        for kind in MathRepresentation.Kind.delimitedKinds {
-            guard remainingText.hasPrefix(kind.leftTerminator) else {
-                continue
-            }
-            guard !kind.requiresLineBoundary || text.isAtLineBoundary(startIndex) else {
+        while currentIndex < text.endIndex {
+            guard !text.isEscaped(at: currentIndex) else {
+                currentIndex = text.index(after: currentIndex)
                 continue
             }
 
-            var endTerminatorIndex = text.index(
-                startIndex,
-                offsetBy: kind.leftTerminator.count
-            )
-            while endTerminatorIndex < text.endIndex {
-                if !text.isEscaped(at: endTerminatorIndex),
-                   text[endTerminatorIndex...].hasPrefix(kind.rightTerminator) {
-                    let endIndex = text.index(
-                        endTerminatorIndex,
-                        offsetBy: kind.rightTerminator.count
+            guard let openingToken = text.environmentToken(at: currentIndex),
+                  openingToken.boundary == .begin,
+                  let kind = MathRepresentation.Kind(environmentName: openingToken.name)
+            else {
+                currentIndex = text.index(after: currentIndex)
+                continue
+            }
+
+            if let environmentRange = environmentRange(startingWith: openingToken) {
+                representations.append(
+                    MathRepresentation(
+                        kind: kind,
+                        range: environmentRange
                     )
-                    return MathRepresentation(kind: kind, range: startIndex..<endIndex)
-                }
-                endTerminatorIndex = text.index(after: endTerminatorIndex)
+                )
+                currentIndex = environmentRange.upperBound
+            } else {
+                currentIndex = openingToken.range.upperBound
             }
         }
 
-        return nil
+        return representations
     }
 
-    private func environmentRepresentation(
-        startingAt startIndex: String.Index
-    ) -> MathRepresentation? {
-        guard let openingToken = text.environmentToken(at: startIndex),
-              openingToken.boundary == .begin,
-              let kind = MathRepresentation.Kind(environmentName: openingToken.name) else {
-            return nil
-        }
-
+    private func environmentRange(
+        startingWith openingToken: MathEnvironmentToken<String.Index>
+    ) -> Range<String.Index>? {
         var environmentNames = [openingToken.name]
-        var index = openingToken.range.upperBound
+        var currentIndex = openingToken.range.upperBound
 
-        while index < text.endIndex {
-            defer { index = text.index(after: index) }
+        while currentIndex < text.endIndex {
+            defer { currentIndex = text.index(after: currentIndex) }
 
-            guard !text.isEscaped(at: index),
-                  let token = text.environmentToken(at: index) else {
+            guard !text.isEscaped(at: currentIndex),
+                  let token = text.environmentToken(at: currentIndex) else {
                 continue
             }
 
@@ -95,19 +129,94 @@ struct MathParser {
             case .end where environmentNames.last == token.name:
                 environmentNames.removeLast()
                 if environmentNames.isEmpty {
-                    return MathRepresentation(
-                        kind: kind,
-                        range: startIndex..<token.range.upperBound
-                    )
+                    return openingToken.range.lowerBound..<token.range.upperBound
                 }
             case .end:
                 continue
             }
 
-            index = text.index(before: token.range.upperBound)
+            currentIndex = text.index(before: token.range.upperBound)
         }
 
         return nil
+    }
+
+    private func mergedNonOverlappingRepresentations(
+        from representations: [MathRepresentation]
+    ) -> [MathRepresentation] {
+        let sortedRepresentations = representations.sorted { leftHandRepresentation, rightHandRepresentation in
+            if leftHandRepresentation.range.lowerBound != rightHandRepresentation.range.lowerBound {
+                return leftHandRepresentation.range.lowerBound < rightHandRepresentation.range.lowerBound
+            }
+
+            return leftHandRepresentation.range.upperBound > rightHandRepresentation.range.upperBound
+        }
+
+        var mergedRepresentations: [MathRepresentation] = []
+        mergedRepresentations.reserveCapacity(sortedRepresentations.count)
+
+        for representation in sortedRepresentations {
+            if let previousRepresentation = mergedRepresentations.last,
+               previousRepresentation.range.overlaps(representation.range) {
+                continue
+            }
+
+            mergedRepresentations.append(representation)
+        }
+
+        return mergedRepresentations
+    }
+
+    private func originalRange(
+        fromCopiedRange copiedRange: Range<String.Index>,
+        in copiedText: String
+    ) -> Range<String.Index>? {
+        let lowerBoundOffset = copiedText.distance(
+            from: copiedText.startIndex,
+            to: copiedRange.lowerBound
+        )
+        let upperBoundOffset = copiedText.distance(
+            from: copiedText.startIndex,
+            to: copiedRange.upperBound
+        )
+
+        guard let lowerBound = text.index(
+            text.startIndex,
+            offsetBy: lowerBoundOffset,
+            limitedBy: text.endIndex
+        ),
+        let upperBound = text.index(
+            text.startIndex,
+            offsetBy: upperBoundOffset,
+            limitedBy: text.endIndex
+        ) else {
+            return nil
+        }
+
+        return lowerBound..<upperBound
+    }
+
+    private func isValidDelimitedMatch(
+        kind: MathRepresentation.Kind,
+        range: Range<String.Index>
+    ) -> Bool {
+        guard !text.isEscaped(at: range.lowerBound) else {
+            return false
+        }
+
+        let closingTerminatorStartIndex = text.index(
+            range.upperBound,
+            offsetBy: -kind.rightTerminator.count
+        )
+        guard !text.isEscaped(at: closingTerminatorStartIndex) else {
+            return false
+        }
+
+        if kind == .blockEquation {
+            return text.isAtLineBoundary(range.lowerBound)
+        }
+
+        return true
     }
 }
 
@@ -185,13 +294,6 @@ extension MathParser.MathRepresentation {
             self == .blockEquation
         }
 
-        fileprivate static let delimitedKinds: [Kind] = [
-            .texEquation,
-            .inlineEquation,
-            .inlineParenthesesEquation,
-            .blockEquation,
-        ]
-
         fileprivate init?(environmentName: String) {
             switch environmentName {
             case "equation":
@@ -221,6 +323,18 @@ extension MathParser.MathRepresentation {
             "cases",
         ]
     }
+}
+
+private extension MathParser {
+    static let delimitedRegularExpression = try! NSRegularExpression(
+            pattern: [
+                #"(\$\$[\s\S]*?\$\$)"#,
+                #"(\\\([\s\S]*?\\\))"#,
+                #"(?:(?<=^)|(?<=\n))[ \t]*(\\\[[\s\S]*?\\\])"#,
+                #"(\$(?!\s)([^\r\n$]+?)(?<!\s)\$(?!\d))"#,
+            ].joined(separator: "|"),
+            options: []
+        )
 }
 
 fileprivate extension StringProtocol {

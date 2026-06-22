@@ -152,6 +152,27 @@ struct MathExtractionTests {
     }
 
     @Test
+    func ignoresUnterminatedInlineDollarMathBeforeLaterCompletedExpression() {
+        let markdown = #"Price moved from $73.00 and the valid equation is $x$."#
+
+        #expect(extractedMath(in: markdown) == [#"$x$"#])
+    }
+
+    @Test
+    func ignoresUnterminatedBracketDisplayMathDuringStreaming() {
+        let markdown = #"""
+        \[
+        E = mc^2
+        """#
+
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown == markdown)
+        #expect(result.displayMathStorage.isEmpty)
+        #expect(result.inlineMathStorage.isEmpty)
+    }
+
+    @Test
     func testMathPreprocessingProtectsInlineMathUnderscores() async throws {
         let result = processMarkdownParsingRanges(in: #"Lorem ipsum dolor sit amet, $(a_n)_{n \in \mathbb{N}}$ and $(b_n)_{n \in \mathbb{N}}$ are both geometric sequences."#)
 
