@@ -145,9 +145,7 @@ fileprivate struct _BackDeployedOnChangeViewModifier<Value: Equatable>: ViewModi
             content
                 .onAppear(perform: performInitialAction)
                 .onChange(of: value) { [value] newValue in
-                    Task { @MainActor in
-                        action(before: value, after: newValue)
-                    }
+                    action(before: value, after: newValue)
                 }
         }
     }

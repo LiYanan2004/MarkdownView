@@ -331,6 +331,24 @@ struct MarkdownIncrementalParserTests {
             parsesBlockDirectives: true
         ))
     }
+
+    @Test("Preserves a streamed emoji tail")
+    func preservesAStreamedEmojiTail() {
+        assertStreamingMatchesFullParse(markdown: """
+        # Title
+
+        Final line with emoji: 😀 🚀 ✨
+        """)
+    }
+
+    @Test("Preserves a streamed CJK tail")
+    func preservesAStreamedCJKTail() {
+        assertStreamingMatchesFullParse(markdown: """
+        # 标题
+
+        最后一行包含中文字符：叶子与结果
+        """)
+    }
 }
 
 private extension MarkdownIncrementalParserTests {
@@ -380,5 +398,38 @@ private extension MarkdownIncrementalParserTests {
 
     func documentDebugDescription(_ document: Markdown.Document) -> String {
         document.debugDescription()
+    }
+
+    func assertStreamingMatchesFullParse(
+        markdown: String,
+        configuration: MarkdownRendererConfiguration = .init(),
+        parsesBlockDirectives: Bool = false
+    ) {
+        var streamedText = ""
+        var previousState: MarkdownIncrementalParser.PreviousState?
+
+        for character in markdown {
+            streamedText.append(character)
+
+            let result = incrementalParser.parse(
+                sourceText: streamedText,
+                configuration: configuration,
+                parsesBlockDirectives: parsesBlockDirectives,
+                previousState: previousState
+            )
+
+            #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(
+                markdown: streamedText,
+                configuration: configuration,
+                parsesBlockDirectives: parsesBlockDirectives
+            ))
+
+            previousState = makePreviousState(
+                sourceText: streamedText,
+                parseResult: result,
+                configuration: configuration,
+                parsesBlockDirectives: parsesBlockDirectives
+            )
+        }
     }
 }
