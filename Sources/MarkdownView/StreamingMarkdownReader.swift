@@ -134,7 +134,7 @@ extension StreamingMarkdownReader {
                     request: request,
                     onUpdate: onUpdate
                 )
-                #elseif canImport(UIKit)
+                #elseif os(iOS) || os(tvOS) || os(visionOS)
                 UIKitRequestObserverRepresentable(
                     request: request,
                     onUpdate: onUpdate
@@ -198,7 +198,7 @@ private struct MacRequestObserverRepresentable<Request: Hashable>: NSViewReprese
         var lastRequest: Request?
     }
 }
-#elseif canImport(UIKit)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
 private struct UIKitRequestObserverRepresentable<Request: Hashable>: UIViewRepresentable {
     let request: Request
     let onUpdate: (Request) -> Void
