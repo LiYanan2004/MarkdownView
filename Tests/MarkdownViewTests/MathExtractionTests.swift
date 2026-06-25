@@ -190,7 +190,7 @@ struct MathExtractionTests {
         let markdown = #"The sample mean is $\bar{x}$."#
         let processedMarkdown = MarkdownMathPreprocessor().preprocess(markdown)
 
-        #expect(processedMarkdown.contains("markdownview-inline-math-"))
+        #expect(processedMarkdown.contains("markdownview-math(inline:"))
         #expect(!processedMarkdown.contains(#"$\bar{x}$"#))
     }
 
@@ -235,7 +235,7 @@ struct MathExtractionTests {
             $$
             """#
         )
-        #expect(result.markdown.contains(#"@math(uuid: ""#))
+        #expect(result.markdown.contains("markdownview-math(display:"))
     }
 
     @Test
@@ -276,6 +276,32 @@ struct MathExtractionTests {
         #expect(
             Set(previousResult.displayMathStorage.keys)
                 .isSubset(of: Set(appendedResult.displayMathStorage.keys))
+        )
+    }
+
+    @Test
+    func testMathPreprocessingUsesUnifiedParsableMarkers() async throws {
+        let markdown = #"""
+        Inline math: $x$
+
+        $$
+        y
+        $$
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        let inlineIdentifier = try #require(result.inlineMathStorage.keys.first)
+        let displayIdentifier = try #require(result.displayMathStorage.keys.first)
+
+        #expect(
+            MarkdownMathPreprocessor.placeholderMatch(
+                in: MarkdownMathPreprocessor.inlinePlaceholder(for: inlineIdentifier)
+            ) == .init(kind: .inline, identifier: inlineIdentifier)
+        )
+        #expect(
+            MarkdownMathPreprocessor.placeholderMatch(
+                in: MarkdownMathPreprocessor.displayPlaceholder(for: displayIdentifier)
+            ) == .init(kind: .display, identifier: displayIdentifier)
         )
     }
 

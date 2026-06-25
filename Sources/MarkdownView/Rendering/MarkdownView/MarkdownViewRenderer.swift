@@ -61,12 +61,22 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     }
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
-        if configuration.math.shouldRender {
-            InlineMathOrText(text: text.plainText)
-                .makeBody(configuration: configuration)
-        } else {
-            MarkdownNodeView(text.plainText)
+        if configuration.math.shouldRender,
+           let mathIdentifier = MarkdownMathPreprocessor.displayPlaceholderIdentifier(
+               in: text.plainText
+           ) {
+            return MarkdownNodeView {
+                MarkdownDisplayMathView(mathIdentifier: mathIdentifier)
+                    .id(mathIdentifier)
+            }
         }
+
+        if configuration.math.shouldRender {
+            return InlineMathOrText(text: text.plainText)
+                .makeBody(configuration: configuration)
+        }
+
+        return MarkdownNodeView(text.plainText)
     }
     
     func visitBlockDirective(_ blockDirective: BlockDirective) -> MarkdownNodeView {

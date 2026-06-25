@@ -45,7 +45,10 @@ public struct MarkdownMathPreprocessor: Sendable, Hashable {
         
     }
 
-    public func preprocessingResult(for markdown: String) -> MarkdownMathPreprocessor.Result {
+    public func preprocessingResult(
+        for markdown: String,
+        requiresBlockDirectiveParsing: Bool = false
+    ) -> MarkdownMathPreprocessor.Result {
         guard Self.containsSupportedMathSyntax(in: markdown) else {
             return MarkdownMathPreprocessor.Result(
                 markdown: markdown,
@@ -53,11 +56,14 @@ public struct MarkdownMathPreprocessor: Sendable, Hashable {
             )
         }
 
+        let parseOptions: ParseOptions = requiresBlockDirectiveParsing
+            ? [.parseBlockDirectives]
+            : []
         var mathRangesResolver = MathParsableRangesResolver()
         mathRangesResolver.visit(
             Document(
                 parsing: markdown,
-                options: ParseOptions().union(.parseBlockDirectives)
+                options: parseOptions
             )
         )
 
@@ -69,10 +75,23 @@ public struct MarkdownMathPreprocessor: Sendable, Hashable {
 }
 
 extension MarkdownMathPreprocessor {
+    enum PlaceholderKind: String, Sendable, Hashable {
+        case inline
+        case display
+    }
+
+    struct PlaceholderMatch: Sendable, Hashable {
+        let kind: PlaceholderKind
+        let identifier: UUID
+    }
+
     struct Replacement: Sendable, Hashable {
         let sourceRange: Range<Int>
         let processedRange: Range<Int>
     }
+
+    private static let placeholderPrefix = "markdownview-math("
+    private static let placeholderSuffix = ")"
 
     static func stableIdentifier(
         matchedText: String,
@@ -121,34 +140,61 @@ extension MarkdownMathPreprocessor {
             || markdown.contains(#"\begin{"#)
     }
 
+    static func placeholder(
+        for identifier: UUID,
+        kind: PlaceholderKind
+    ) -> String {
+        "\(placeholderPrefix)\(kind.rawValue):\(identifier.uuidString)\(placeholderSuffix)"
+    }
+
     static public func inlinePlaceholder(for identifier: UUID) -> String {
-        "markdownview-inline-math-\(identifier.uuidString)"
+        placeholder(for: identifier, kind: .inline)
     }
-    
+
     static public func displayPlaceholder(for identifier: UUID) -> String {
-        "@math(uuid: \"\(identifier.uuidString)\")"
+        placeholder(for: identifier, kind: .display)
     }
 
-    static func displayPlaceholderIdentifier(in text: String) -> UUID? {
+    static func placeholderMatch(in text: String) -> PlaceholderMatch? {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let prefix = "@math(uuid: \""
-        let suffix = "\")"
-
-        guard trimmedText.hasPrefix(prefix),
-              trimmedText.hasSuffix(suffix)
+        guard trimmedText.hasPrefix(placeholderPrefix),
+              trimmedText.hasSuffix(placeholderSuffix)
         else {
             return nil
         }
 
-        let identifierStartIndex = trimmedText.index(
+        let payloadStartIndex = trimmedText.index(
             trimmedText.startIndex,
-            offsetBy: prefix.count
+            offsetBy: placeholderPrefix.count
         )
-        let identifierEndIndex = trimmedText.index(
+        let payloadEndIndex = trimmedText.index(
             trimmedText.endIndex,
-            offsetBy: -suffix.count
+            offsetBy: -placeholderSuffix.count
         )
-        return UUID(uuidString: String(trimmedText[identifierStartIndex..<identifierEndIndex]))
+        let payload = trimmedText[payloadStartIndex..<payloadEndIndex]
+        let components = payload.split(
+            separator: ":",
+            maxSplits: 1,
+            omittingEmptySubsequences: false
+        )
+        guard components.count == 2,
+              let kind = PlaceholderKind(rawValue: String(components[0])),
+              let identifier = UUID(uuidString: String(components[1]))
+        else {
+            return nil
+        }
+
+        return PlaceholderMatch(kind: kind, identifier: identifier)
+    }
+
+    static func displayPlaceholderIdentifier(in text: String) -> UUID? {
+        guard let placeholderMatch = placeholderMatch(in: text),
+              placeholderMatch.kind == .display
+        else {
+            return nil
+        }
+
+        return placeholderMatch.identifier
     }
 }
 

@@ -104,7 +104,7 @@ struct MarkdownTextConverterTests {
         )
 
         #expect(textContent.embeddedViewCount == 1)
-        #expect(!textContent.plainText.contains("markdownview-inline-math-"))
+        #expect(!textContent.plainText.contains("markdownview-math(inline:"))
         #expect(textContent.plainText == "Value \u{FFFC} stays inline.")
     }
     #endif
@@ -128,11 +128,11 @@ struct MarkdownTextConverterTests {
         let textContent = Self.makeTextContent(
             markdown: preprocessingResult.markdown,
             configuration: configuration,
-            parseOptions: [.parseBlockDirectives]
+            parseOptions: []
         )
 
         #expect(textContent.embeddedViewCount == 1)
-        #expect(!textContent.plainText.contains("@math"))
+        #expect(!textContent.plainText.contains("markdownview-math(display:"))
         #expect(!textContent.plainText.contains("$$"))
     }
 

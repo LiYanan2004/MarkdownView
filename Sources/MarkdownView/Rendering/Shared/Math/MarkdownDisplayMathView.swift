@@ -1,26 +1,11 @@
 //
-//  MathBlockDirectiveRenderer.swift
+//  MarkdownDisplayMathView.swift
 //  MarkdownView
 //
 //  Created by Yanan Li on 2025/4/12.
 //
 
-import Foundation
 import SwiftUI
-
-struct MathBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
-    init() { }
-
-    func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
-        if let identifierValue = configuration.arguments.first(where: { $0.name == "uuid" })?.value,
-           let identifier = UUID(uuidString: identifierValue) {
-            MarkdownDisplayMathView(mathIdentifier: identifier)
-                .id(identifier)
-        } else {
-            EmptyView()
-        }
-    }
-}
 
 struct MarkdownDisplayMathView: View {
     var mathIdentifier: UUID

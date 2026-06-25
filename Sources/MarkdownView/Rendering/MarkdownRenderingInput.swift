@@ -30,18 +30,17 @@ struct MarkdownRenderingInput {
         self.init(
             source: source,
             configuration: configuration,
-            parsesBlockDirectives: elementRenderers.contains(where: { $0.blockDirective != nil })
+            requiresBlockDirectiveParsing: elementRenderers.contains(where: { $0.blockDirective != nil })
         )
     }
 
     init(
         source: MarkdownRenderingSource,
         configuration: MarkdownRendererConfiguration,
-        parsesBlockDirectives: Bool
+        requiresBlockDirectiveParsing: Bool
     ) {
         let parseOptions = Self.parseOptions(
-            configuration: configuration,
-            parsesBlockDirectives: parsesBlockDirectives
+            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
         )
 
         switch source {
@@ -52,7 +51,10 @@ struct MarkdownRenderingInput {
         case .rawText(let text):
             if configuration.math.shouldRender, Self.supportsMathRendering {
                 let preprocessingResult = MarkdownMathPreprocessor()
-                    .preprocessingResult(for: text)
+                    .preprocessingResult(
+                        for: text,
+                        requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+                    )
                 self.document = Markdown.Document(
                     parsing: preprocessingResult.markdown,
                     options: parseOptions
@@ -70,12 +72,9 @@ struct MarkdownRenderingInput {
         }
     }
 
-    static func parseOptions(
-        configuration: MarkdownRendererConfiguration,
-        parsesBlockDirectives: Bool
-    ) -> ParseOptions {
+    static func parseOptions(requiresBlockDirectiveParsing: Bool) -> ParseOptions {
         var parseOptions = ParseOptions()
-        if configuration.math.shouldRender || parsesBlockDirectives {
+        if requiresBlockDirectiveParsing {
             parseOptions.insert(.parseBlockDirectives)
         }
         return parseOptions

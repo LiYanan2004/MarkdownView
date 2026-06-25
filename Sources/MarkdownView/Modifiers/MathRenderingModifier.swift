@@ -26,10 +26,5 @@ fileprivate struct MarkdownMathRenderingModifier: ViewModifier {
             .transformEnvironment(\.markdownRendererConfiguration) { configuration in
                 configuration.math.shouldRender = isEnabled
             }
-            .transformEnvironment(\.markdownElementRenderers) { renderers in
-                if isEnabled {
-                    renderers.register(.blockDirective(MathBlockDirectiveRenderer(), name: "math"))
-                }
-            }
     }
 }

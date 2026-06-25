@@ -29,7 +29,7 @@ public struct StreamingMarkdownReader<Content: View>: View {
         let parsingRequest = ParsingRequest(
             sourceText: sourceText,
             configuration: configuration,
-            parsesBlockDirectives: elementRenderers.contains(where: { $0.blockDirective != nil })
+            requiresBlockDirectiveParsing: elementRenderers.contains(where: { $0.blockDirective != nil })
         )
 
         content(currentDocument)
@@ -62,7 +62,7 @@ private extension StreamingMarkdownReader.RenderedSnapshot {
             document: document,
             configuration: request.configuration,
             mathContext: configuration.math.context,
-            parsesBlockDirectives: request.parsesBlockDirectives,
+            requiresBlockDirectiveParsing: request.requiresBlockDirectiveParsing,
             rootBlockRanges: rootBlockRanges,
             processedRootBlockRanges: processedRootBlockRanges
         )
@@ -103,7 +103,7 @@ extension StreamingMarkdownReader {
             let parseResult = incrementalParser.parse(
                 sourceText: request.sourceText,
                 configuration: request.configuration,
-                parsesBlockDirectives: request.parsesBlockDirectives,
+                requiresBlockDirectiveParsing: request.requiresBlockDirectiveParsing,
                 previousState: renderedSnapshot?.incrementalParsingState
             )
             renderedSnapshot = RenderedSnapshot(
@@ -119,7 +119,7 @@ extension StreamingMarkdownReader {
     struct ParsingRequest: Hashable {
         let sourceText: String
         let configuration: MarkdownRendererConfiguration
-        let parsesBlockDirectives: Bool
+        let requiresBlockDirectiveParsing: Bool
     }
 
     // Both `onChange` and `task` modifier may drop some value change callbacks.

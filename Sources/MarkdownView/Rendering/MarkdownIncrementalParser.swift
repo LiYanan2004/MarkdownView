@@ -13,7 +13,7 @@ struct MarkdownIncrementalParser {
         let document: Markdown.Document
         let configuration: MarkdownRendererConfiguration
         let mathContext: MarkdownMathContext?
-        let parsesBlockDirectives: Bool
+        let requiresBlockDirectiveParsing: Bool
         let rootBlockRanges: [RootBlockRange]?
         let processedRootBlockRanges: [RootBlockRange]?
     }
@@ -35,23 +35,23 @@ struct MarkdownIncrementalParser {
     func parse(
         sourceText: String,
         configuration: MarkdownRendererConfiguration,
-        parsesBlockDirectives: Bool,
+        requiresBlockDirectiveParsing: Bool,
         previousState: PreviousState?
     ) -> ParseResult {
         guard let previousState,
               previousState.configuration == configuration,
-              previousState.parsesBlockDirectives == parsesBlockDirectives,
+              previousState.requiresBlockDirectiveParsing == requiresBlockDirectiveParsing,
               let incrementalResult = parseIncremental(
                   previousState: previousState,
                   newSourceText: sourceText,
                   configuration: configuration,
-                  parsesBlockDirectives: parsesBlockDirectives
+                  requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
               )
         else {
             return fullParse(
                 sourceText: sourceText,
                 configuration: configuration,
-                parsesBlockDirectives: parsesBlockDirectives
+                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
             )
         }
 
@@ -70,12 +70,12 @@ private extension MarkdownIncrementalParser {
     func fullParse(
         sourceText: String,
         configuration: MarkdownRendererConfiguration,
-        parsesBlockDirectives: Bool
+        requiresBlockDirectiveParsing: Bool
     ) -> ParseResult {
         let preparedParse = prepareParse(
             sourceText: sourceText,
             configuration: configuration,
-            parsesBlockDirectives: parsesBlockDirectives
+            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
         )
         return ParseResult(
             renderingInput: preparedParse.renderingInput,
@@ -91,7 +91,7 @@ private extension MarkdownIncrementalParser {
         previousState: PreviousState,
         newSourceText: String,
         configuration: MarkdownRendererConfiguration,
-        parsesBlockDirectives: Bool
+        requiresBlockDirectiveParsing: Bool
     ) -> ParseResult? {
         let previousSourceText = previousState.sourceText
         guard previousSourceText.isEmpty == false else { return nil }
@@ -124,7 +124,7 @@ private extension MarkdownIncrementalParser {
         let tailPreparedParse = prepareParse(
             sourceText: tailSourceText,
             configuration: configuration,
-            parsesBlockDirectives: parsesBlockDirectives
+            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
         )
 
         let mergedChildren = previousRootBlocks
@@ -177,17 +177,19 @@ private extension MarkdownIncrementalParser {
     func prepareParse(
         sourceText: String,
         configuration: MarkdownRendererConfiguration,
-        parsesBlockDirectives: Bool
+        requiresBlockDirectiveParsing: Bool
     ) -> PreparedParse {
         let parseOptions = MarkdownRenderingInput.parseOptions(
-            configuration: configuration,
-            parsesBlockDirectives: parsesBlockDirectives
+            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
         )
 
         if configuration.math.shouldRender,
            supportsMathRendering {
             let preprocessingResult = MarkdownMathPreprocessor()
-                .preprocessingResult(for: sourceText)
+                .preprocessingResult(
+                    for: sourceText,
+                    requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+                )
             let processedSourceText = preprocessingResult.markdown
             let document = Markdown.Document(
                 parsing: processedSourceText,
