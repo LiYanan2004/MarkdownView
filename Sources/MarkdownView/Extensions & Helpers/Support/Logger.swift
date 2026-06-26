@@ -11,3 +11,7 @@ let logger = Logger(
     subsystem: "com.liyanan2004.MarkdownView",
     category: "Internal"
 )
+
+extension Logger {
+    static let runtime = Logger(subsystem: "com.apple.runtime-issues", category: "MarkdownView")
+}

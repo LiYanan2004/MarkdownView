@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreText
+import OSLog
 
 /// A value that provides a custom `CTFont` representation.
 public protocol CustomCTFontConvertible: Sendable {
@@ -36,6 +37,7 @@ extension SwiftUI.Font: CustomCTFontConvertible {
         if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0, visionOS 26.0, *) {
             return resolve(in: EnvironmentValues().fontResolutionContext).ctFont
         } else {
+            Logger.runtime.warning("`SwiftUI.Font` can't be resolved as Platform font (requires OS 26 or later). Use preferred body font instead.")
             return PlatformFont.preferredFont(forTextStyle: .body).ctFont
         }
     }
