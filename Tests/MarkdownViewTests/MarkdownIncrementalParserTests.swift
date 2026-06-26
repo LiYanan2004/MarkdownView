@@ -25,15 +25,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 5)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Reparses the last root block for closed code fence append")
@@ -47,15 +43,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 5)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Reparses the last root block for open code fence append")
@@ -69,15 +61,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 5)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Reparses the last root block for list continuation")
@@ -91,15 +79,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 5)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Reparses the trailing table for the first table body row")
@@ -114,19 +98,15 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 6)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 6))
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
-    @Test("Reparses the trailing table for another table body row")
-    func reparsesTheTrailingTableForAnotherTableBodyRow() {
+    @Test("Falls back for another trailing table body row")
+    func fallsBackForAnotherTrailingTableBodyRow() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let base = paragraphs.joined(separator: "\n\n")
         let previous = base + """
@@ -142,15 +122,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 6)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .full)
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Reparses the whole trailing table when a partial body row becomes a valid table row")
@@ -169,15 +145,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 1)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Falls back when an edit touches the stable prefix")
@@ -192,15 +164,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing == false)
-        #expect(result.stablePrefixRootBlockCount == nil)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .full)
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Falls back for deletion")
@@ -215,15 +183,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing == false)
-        #expect(result.stablePrefixRootBlockCount == nil)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: new))
+        #expect(result.mode == .full)
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
     @Test("Falls back for identical resend")
@@ -236,15 +200,11 @@ struct MarkdownIncrementalParserTests {
             sourceText: markdown,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: markdown,
-                parseResult: previousResult
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing == false)
-        #expect(result.stablePrefixRootBlockCount == nil)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(markdown: markdown))
+        #expect(result.mode == .full)
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: markdown))
     }
 
     @Test("Uses incremental parsing when math rendering is enabled for inline math")
@@ -264,20 +224,14 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: configuration,
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult,
-                configuration: configuration,
-                requiresBlockDirectiveParsing: false
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 1)
-        #expect(result.renderingInput.configuration.math.inlineMathStorage?.count == 2)
-        #expect(result.renderingInput.configuration.math.inlineMathStorage?.values.contains("$x$") == true)
-        #expect(result.renderingInput.configuration.math.inlineMathStorage?.values.contains("$y$") == true)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.renderingConfiguration.math.inlineMathStorage?.count == 2)
+        #expect(result.renderingConfiguration.math.inlineMathStorage?.values.contains("$x$") == true)
+        #expect(result.renderingConfiguration.math.inlineMathStorage?.values.contains("$y$") == true)
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
             markdown: new,
             configuration: configuration,
             requiresBlockDirectiveParsing: false
@@ -312,20 +266,14 @@ struct MarkdownIncrementalParserTests {
             sourceText: new,
             configuration: configuration,
             requiresBlockDirectiveParsing: false,
-            previousState: makePreviousState(
-                sourceText: previous,
-                parseResult: previousResult,
-                configuration: configuration,
-                requiresBlockDirectiveParsing: false
-            )
+            previousState: previousResult.state
         )
 
-        #expect(result.usedIncrementalParsing)
-        #expect(result.stablePrefixRootBlockCount == 1)
-        #expect(result.renderingInput.configuration.math.displayMathStorage?.count == 2)
-        #expect(result.renderingInput.configuration.math.displayMathStorage?.values.contains("$$\nx\n$$") == true)
-        #expect(result.renderingInput.configuration.math.displayMathStorage?.values.contains("$$\ny\n$$") == true)
-        #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(
+        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.renderingConfiguration.math.displayMathStorage?.count == 2)
+        #expect(result.renderingConfiguration.math.displayMathStorage?.values.contains("$$\nx\n$$") == true)
+        #expect(result.renderingConfiguration.math.displayMathStorage?.values.contains("$$\ny\n$$") == true)
+        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
             markdown: new,
             configuration: configuration,
             requiresBlockDirectiveParsing: false
@@ -365,24 +313,6 @@ private extension MarkdownIncrementalParserTests {
         )
     }
 
-    func makePreviousState(
-        sourceText: String,
-        parseResult: MarkdownIncrementalParser.ParseResult,
-        configuration: MarkdownRendererConfiguration? = nil,
-        requiresBlockDirectiveParsing: Bool = false
-    ) -> MarkdownIncrementalParser.PreviousState {
-        MarkdownIncrementalParser.PreviousState(
-            sourceText: sourceText,
-            processedSourceText: parseResult.processedSourceText,
-            document: parseResult.renderingInput.document,
-            configuration: configuration ?? .init(),
-            mathContext: parseResult.renderingInput.configuration.math.context,
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing,
-            rootBlockRanges: parseResult.rootBlockRanges,
-            processedRootBlockRanges: parseResult.processedRootBlockRanges
-        )
-    }
-
     func fullParseDocumentDescription(
         markdown: String,
         configuration: MarkdownRendererConfiguration = .init(),
@@ -406,7 +336,7 @@ private extension MarkdownIncrementalParserTests {
         requiresBlockDirectiveParsing: Bool = false
     ) {
         var streamedText = ""
-        var previousState: MarkdownIncrementalParser.PreviousState?
+        var previousState: MarkdownIncrementalParser.ParseResult?
 
         for character in markdown {
             streamedText.append(character)
@@ -418,18 +348,13 @@ private extension MarkdownIncrementalParserTests {
                 previousState: previousState
             )
 
-            #expect(documentDebugDescription(result.renderingInput.document) == fullParseDocumentDescription(
+            #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
                 markdown: streamedText,
                 configuration: configuration,
                 requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
             ))
 
-            previousState = makePreviousState(
-                sourceText: streamedText,
-                parseResult: result,
-                configuration: configuration,
-                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
-            )
+            previousState = result.state
         }
     }
 }

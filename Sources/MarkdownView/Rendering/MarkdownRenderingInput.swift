@@ -10,7 +10,7 @@ enum MarkdownRenderingSource {
     case document(Markdown.Document)
 }
 
-struct MarkdownRenderingInput {
+struct MarkdownRenderingInput: Sendable {
     let document: Markdown.Document
     let configuration: MarkdownRendererConfiguration
 
