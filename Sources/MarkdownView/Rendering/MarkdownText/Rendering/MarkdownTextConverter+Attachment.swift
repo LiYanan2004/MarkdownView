@@ -17,6 +17,7 @@ extension MarkdownTextConverter {
         )
         let viewRenderer = MarkdownViewRenderer(
             configuration: configuration,
+            mathContext: mathContext,
             elementRenderers: elementRenderers
         )
         

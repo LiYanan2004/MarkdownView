@@ -8,28 +8,30 @@ import Testing
 struct MarkdownRenderingInputTests {
     @Test("Math rendering alone does not enable block directive parsing")
     func mathRenderingAloneDoesNotEnableBlockDirectiveParsing() {
-        let configuration = MarkdownRendererConfiguration()
-            .with(\.math.shouldRender, true)
         let renderingInput = MarkdownRenderingInput(
-            source: .rawText("@Note()"),
-            configuration: configuration,
+            sourceText: "@Note()",
+            mathContext: MarkdownMathContext(),
             elementRenderers: []
         )
+        let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
 
-        #expect(Array(renderingInput.document.children).first is Markdown.Paragraph)
+        #expect(renderingInput.parsingOptions.contains(.parsesBlockDirectives) == false)
+        #expect(Array(renderingOutput.document.children).first is Markdown.Paragraph)
     }
 
     @Test("Custom block directive renderers enable block directive parsing")
     func customBlockDirectiveRenderersEnableBlockDirectiveParsing() {
         let renderingInput = MarkdownRenderingInput(
-            source: .rawText("@Note()"),
-            configuration: .init(),
+            sourceText: "@Note()",
+            mathContext: nil,
             elementRenderers: [
                 .blockDirective(TestBlockDirectiveRenderer(), name: "Note")
             ]
         )
+        let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
 
-        #expect(Array(renderingInput.document.children).first is Markdown.BlockDirective)
+        #expect(renderingInput.parsingOptions.contains(.parsesBlockDirectives))
+        #expect(Array(renderingOutput.document.children).first is Markdown.BlockDirective)
     }
 }
 

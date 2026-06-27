@@ -12,14 +12,17 @@ import Markdown
 @preconcurrency
 struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
+    var mathContext: MarkdownMathContext?
     var elementRenderers: [MarkdownElementRendererRegistration]
     private var activeInlineIntent: InlinePresentationIntent = []
     
     init(
         configuration: MarkdownRendererConfiguration,
+        mathContext: MarkdownMathContext?,
         elementRenderers: [MarkdownElementRendererRegistration]
     ) {
         self.configuration = configuration
+        self.mathContext = mathContext
         self.elementRenderers = elementRenderers
     }
     
@@ -27,14 +30,14 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
         var visitor = self
         return visitor
             .visit(markup)
-            .environment(\.markdownRendererConfiguration, configuration)
+            .environment(\.markdownMathContext, mathContext)
             .environment(\.markdownElementRenderers, elementRenderers)
     }
     
     func makeBody(forChildrenOf markup: any Markup) -> some View {
         self
             .descendInto(markup)
-            .environment(\.markdownRendererConfiguration, configuration)
+            .environment(\.markdownMathContext, mathContext)
             .environment(\.markdownElementRenderers, elementRenderers)
     }
 
@@ -61,7 +64,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     }
     
     func visitText(_ text: Markdown.Text) -> MarkdownNodeView {
-        if configuration.math.shouldRender,
+        if mathContext != nil,
            let mathIdentifier = MarkdownMathPreprocessor.displayPlaceholderIdentifier(
                in: text.plainText
            ) {
@@ -71,9 +74,9 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
             }
         }
 
-        if configuration.math.shouldRender {
+        if mathContext != nil {
             return InlineMathOrText(text: text.plainText)
-                .makeBody(configuration: configuration)
+                .makeBody(mathContext: mathContext)
         }
 
         return MarkdownNodeView(text.plainText)
@@ -95,6 +98,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
                 ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
                     MarkdownViewRenderer(
                         configuration: configuration,
+                        mathContext: mathContext,
                         elementRenderers: elementRenderers
                     )
                     .makeBody(for: child)
@@ -213,7 +217,11 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     func visitTableCell(_ cell: Markdown.Table.Cell) -> MarkdownNodeView {
         var cellViews = [MarkdownNodeView]()
         for child in cell.children {
-            var renderer = MarkdownViewRenderer(configuration: configuration, elementRenderers: elementRenderers)
+            var renderer = MarkdownViewRenderer(
+                configuration: configuration,
+                mathContext: mathContext,
+                elementRenderers: elementRenderers
+            )
             let cellView = renderer.visit(child)
             cellViews.append(cellView)
         }
@@ -341,6 +349,7 @@ fileprivate extension MarkdownViewRenderer {
     func renderedTableCell(_ cell: Markdown.Table.Cell) -> MarkdownTableStyleConfiguration.Table.Cell {
         let content = MarkdownViewRenderer(
             configuration: configuration,
+            mathContext: mathContext,
             elementRenderers: elementRenderers
         )
         .makeBody(for: cell)

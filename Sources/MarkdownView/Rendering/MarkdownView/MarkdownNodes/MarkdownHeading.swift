@@ -12,6 +12,7 @@ struct MarkdownHeading: View {
     let heading: Heading
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.markdownFontGroup) private var fontGroup
     @Environment(\.headingStyleGroup) private var headingStyleGroup
@@ -53,12 +54,16 @@ struct MarkdownHeading: View {
     }
     
     var body: some View {
-        MarkdownViewRenderer(configuration: configuration, elementRenderers: elementRenderers)
-            .descendInto(heading)
-            .font(font)
-            .foregroundStyle(foregroundStyle)
-            .accessibilityHeading(accessibilityHeadingLevel)
-            .padding(paddings[heading.level])
-            .accessibilityAddTraits(.isHeader)
+        MarkdownViewRenderer(
+            configuration: configuration,
+            mathContext: mathContext,
+            elementRenderers: elementRenderers
+        )
+        .descendInto(heading)
+        .font(font)
+        .foregroundStyle(foregroundStyle)
+        .accessibilityHeading(accessibilityHeadingLevel)
+        .padding(paddings[heading.level])
+        .accessibilityAddTraits(.isHeader)
     }
 }

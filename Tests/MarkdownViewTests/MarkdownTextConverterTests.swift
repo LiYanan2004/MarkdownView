@@ -95,12 +95,10 @@ struct MarkdownTextConverterTests {
     func convertsPreprocessedInlineMathPlaceholdersToEmbeddedContent() {
         let preprocessingResult = MarkdownMathPreprocessor()
             .preprocessingResult(for: #"Value $x_y$ stays inline."#)
-        let configuration = MarkdownRendererConfiguration()
-            .with(\.math.context, preprocessingResult.context)
 
         let textContent = Self.makeTextContent(
             markdown: preprocessingResult.markdown,
-            configuration: configuration
+            mathContext: preprocessingResult.context
         )
 
         #expect(textContent.embeddedViewCount == 1)
@@ -122,12 +120,10 @@ struct MarkdownTextConverterTests {
                 $$
                 """#
             )
-        let configuration = MarkdownRendererConfiguration()
-            .with(\.math.context, preprocessingResult.context)
 
         let textContent = Self.makeTextContent(
             markdown: preprocessingResult.markdown,
-            configuration: configuration,
+            mathContext: preprocessingResult.context,
             parseOptions: []
         )
 
@@ -383,12 +379,14 @@ private extension MarkdownTextConverterTests {
     @MainActor static func makeTextContent(
         markdown: String,
         configuration: MarkdownRendererConfiguration = MarkdownRendererConfiguration(),
+        mathContext: MarkdownMathContext? = nil,
         elementRenderers: [MarkdownElementRendererRegistration] = [],
         fonts: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic),
         parseOptions: ParseOptions = []
     ) -> TextContent {
         let converter = MarkdownTextConverter(
             configuration: configuration,
+            mathContext: mathContext,
             elementRenderers: elementRenderers,
             fonts: fonts
         )

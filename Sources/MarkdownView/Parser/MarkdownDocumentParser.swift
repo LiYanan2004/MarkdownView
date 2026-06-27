@@ -8,53 +8,34 @@ import Markdown
 
 struct MarkdownDocumentParser {
     static func parse(
-        sourceText: String,
-        configuration: MarkdownRendererConfiguration,
-        requiresBlockDirectiveParsing: Bool,
-        previousState: ParseResult?
-    ) -> ParseResult {
-        var parseOptions: ParseOptions = []
-        if configuration.math.shouldRender, supportsMathRendering {
-            parseOptions.insert(.rendersMath)
-        }
-        if requiresBlockDirectiveParsing {
-            parseOptions.insert(.parsesBlockDirectives)
-        }
-        
-        var result: ParseResult?
+        _ input: MarkdownRenderingInput,
+        previousState: ParseResult? = nil
+    ) -> MarkdownRenderingOutput {
+        let parseResult: ParseResult
 
         if let previousState,
-           previousState.parseOptions == parseOptions {
-            result = parseIncremental(
-                newSourceText: sourceText,
-                configuration: configuration,
-                parseOptions: parseOptions,
-                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing,
+           previousState.parseOptions == input.parsingOptions,
+           let incrementalParseResult = parseIncremental(
+                newSourceText: input.sourceText,
+                parseOptions: input.parsingOptions,
                 previousState: previousState
+           ) {
+            parseResult = incrementalParseResult
+        } else {
+            parseResult = fullParse(
+                sourceText: input.sourceText,
+                parseOptions: input.parsingOptions
             )
         }
 
-        return result ?? fullParse(
-            sourceText: sourceText,
-            configuration: configuration,
-            parseOptions: parseOptions,
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+        return MarkdownRenderingOutput(
+            mathContext: parseResult.mathContext,
+            parseResult: parseResult
         )
     }
 }
 
 extension MarkdownDocumentParser {
-    struct ParseOptions: OptionSet, Sendable, Hashable {
-        let rawValue: UInt8
-
-        static let rendersMath = ParseOptions(rawValue: 1 << 0)
-        static let parsesBlockDirectives = ParseOptions(rawValue: 1 << 1)
-
-        init(rawValue: UInt8) {
-            self.rawValue = rawValue
-        }
-    }
-
     enum ParsingStrategy: Sendable, Hashable {
         /// Reuses the previous parse result without additional parsing.
         case retained
@@ -69,7 +50,7 @@ extension MarkdownDocumentParser {
     struct ParseResult: Sendable {
         let sourceSnapshot: MarkdownSnapshot
         let processedSnapshot: MarkdownSnapshot
-        var parseOptions: ParseOptions
+        var parseOptions: MarkdownDocumentParsingOptions
         var document: Markdown.Document
         var mathContext: MarkdownMathContext?
         var mode: ParsingStrategy
@@ -90,14 +71,11 @@ extension MarkdownDocumentParser {
 extension MarkdownDocumentParser {
     static func fullParse(
         sourceText: String,
-        configuration: MarkdownRendererConfiguration,
-        parseOptions: ParseOptions,
-        requiresBlockDirectiveParsing: Bool
+        parseOptions: MarkdownDocumentParsingOptions
     ) -> ParseResult {
         let preparedParse = prepareParse(
             sourceText: sourceText,
-            configuration: configuration,
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+            parseOptions: parseOptions
         )
         return ParseResult(
             sourceSnapshot: preparedParse.sourceSnapshot,
@@ -111,9 +89,7 @@ extension MarkdownDocumentParser {
 
     static func parseIncremental(
         newSourceText: String,
-        configuration: MarkdownRendererConfiguration,
-        parseOptions: ParseOptions,
-        requiresBlockDirectiveParsing: Bool,
+        parseOptions: MarkdownDocumentParsingOptions,
         previousState: ParseResult
     ) -> ParseResult? {
         let previousSourceText = previousState.sourceSnapshot.text
@@ -148,12 +124,11 @@ extension MarkdownDocumentParser {
         let tailSourceText = String(newSourceText[reparsedStartIndex...])
         let tailPreparedParse = prepareParse(
             sourceText: tailSourceText,
-            configuration: configuration,
+            parseOptions: parseOptions,
             sourceOffset: newSourceText.distance(
                 from: newSourceText.startIndex,
                 to: reparsedStartIndex
-            ),
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+            )
         )
 
         var mergedChildren = previousRootBlocks
@@ -168,7 +143,7 @@ extension MarkdownDocumentParser {
         let mergedProcessedSourceText: String = previousState.processedSnapshot.text[..<reparsedProcessedStartIndex] + tailPreparedParse.processedSnapshot.text
         let mergedMathContext = mergedMathContext(
             previousState: previousState,
-            configuration: configuration,
+            parseOptions: parseOptions,
             stablePrefixProcessedEndIndex: reparsedProcessedStartIndex,
             tailPreparedParse: tailPreparedParse
         )
@@ -212,19 +187,16 @@ extension MarkdownDocumentParser {
 
     static func prepareParse(
         sourceText: String,
-        configuration: MarkdownRendererConfiguration,
+        parseOptions: MarkdownDocumentParsingOptions,
         sourceOffset: Int = 0,
-        requiresBlockDirectiveParsing: Bool
     ) -> PreparedParse {
-        let parseOptions = MarkdownRenderingInput.parseOptions(
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
-        )
+        let markdownParseOptions = parseOptions.markdownParseOptions
 
-        if configuration.math.shouldRender, supportsMathRendering {
+        if parseOptions.contains(.rendersMath) && canProcessMath {
             let preprocessingResult = MarkdownMathPreprocessor()
                 .preprocessingResult(
                     for: sourceText,
-                    requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+                    requiresBlockDirectiveParsing: parseOptions.contains(.parsesBlockDirectives)
                 )
             let remappedPreprocessingResult = remappedMathPreprocessingResult(
                 preprocessingResult,
@@ -233,7 +205,7 @@ extension MarkdownDocumentParser {
             let processedSourceText = remappedPreprocessingResult.markdown
             let document = Markdown.Document(
                 parsing: processedSourceText,
-                options: parseOptions
+                options: markdownParseOptions
             )
             let processedRootBlockRanges = parseRootBlockRanges(
                 in: processedSourceText,
@@ -262,7 +234,7 @@ extension MarkdownDocumentParser {
 
         let document = Markdown.Document(
             parsing: sourceText,
-            options: parseOptions
+            options: markdownParseOptions
         )
         let rootBlockRanges = parseRootBlockRanges(
             in: sourceText,
@@ -285,12 +257,11 @@ extension MarkdownDocumentParser {
 
     static func mergedMathContext(
         previousState: ParseResult,
-        configuration: MarkdownRendererConfiguration,
+        parseOptions: MarkdownDocumentParsingOptions,
         stablePrefixProcessedEndIndex: String.Index,
         tailPreparedParse: PreparedParse
     ) -> MarkdownMathContext? {
-        guard configuration.math.shouldRender,
-              supportsMathRendering,
+        guard parseOptions.contains(.rendersMath) && canProcessMath,
               let previousMathContext = previousState.mathContext,
               let tailMathContext = tailPreparedParse.mathContext
         else { return tailPreparedParse.mathContext }
@@ -485,14 +456,13 @@ extension MarkdownDocumentParser {
         return sourceOffset
     }
 
-    static var supportsMathRendering: Bool {
-        #if canImport(SwiftMath)
+    static var canProcessMath: Bool {
+        #if LaTeX && canImport(SwiftMath)
         true
         #else
         false
         #endif
     }
-
     static func parseRootBlockRanges(
         in markdown: String,
         document: Markdown.Document
@@ -579,22 +549,6 @@ extension MarkdownDocumentParser {
     }
 
     
-}
-
-private extension MarkdownDocumentParser.ParseResult {
-    func withParseMetadata(
-        parseOptions: MarkdownDocumentParser.ParseOptions,
-        mode: MarkdownDocumentParser.ParsingStrategy
-    ) -> Self {
-        Self(
-            sourceSnapshot: sourceSnapshot,
-            processedSnapshot: processedSnapshot,
-            parseOptions: parseOptions,
-            document: document,
-            mathContext: mathContext,
-            mode: mode
-        )
-    }
 }
 
 extension String {

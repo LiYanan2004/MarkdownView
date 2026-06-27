@@ -11,6 +11,7 @@ public struct MarkdownView: View {
     private var source: MarkdownRenderingSource
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.markdownFontGroup) private var fonts
     
@@ -27,18 +28,39 @@ public struct MarkdownView: View {
     }
     
     public var body: some View {
-        let renderingInput = MarkdownRenderingInput(
-            source: source,
-            configuration: configuration,
-            elementRenderers: elementRenderers
-        )
+        let resolvedSource = self.resolvedSource
+
         let renderer = MarkdownViewRenderer(
-            configuration: renderingInput.configuration,
+            configuration: configuration,
+            mathContext: resolvedSource.mathContext,
             elementRenderers: elementRenderers
         )
-        renderer.makeBody(for: renderingInput.document)
+        renderer.makeBody(for: resolvedSource.document)
             .erasedToAnyView()
             .font(Font(fonts.body.asPlatformFont))
+    }
+    
+    private var resolvedSource: (document: Markdown.Document, mathContext: MarkdownMathContext?) {
+        let document: Markdown.Document
+        let mathContext: MarkdownMathContext?
+        
+        switch source {
+            case .rawText(let sourceText):
+                let renderingInput = MarkdownRenderingInput(
+                    sourceText: sourceText,
+                    mathContext: self.mathContext,
+                    elementRenderers: elementRenderers
+                )
+                let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
+                document = renderingOutput.document
+                mathContext = renderingOutput.mathContext
+                
+            case .document(let parsedDocument):
+                document = parsedDocument
+                mathContext = self.mathContext
+        }
+        
+        return (document, mathContext)
     }
 }
 

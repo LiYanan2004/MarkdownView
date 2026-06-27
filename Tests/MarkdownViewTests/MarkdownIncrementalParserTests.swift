@@ -6,6 +6,7 @@
 //
 
 import Markdown
+import SwiftUI
 import Testing
 
 @testable import MarkdownView
@@ -20,9 +21,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -38,9 +37,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -56,9 +53,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -74,9 +69,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -93,9 +86,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -117,9 +108,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -140,9 +129,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -159,9 +146,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -178,9 +163,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new),
             previousState: previousResult
         )
 
@@ -195,9 +178,7 @@ struct MarkdownIncrementalParserTests {
 
         let previousResult = makeParseResult(markdown: markdown)
         let result = MarkdownDocumentParser.parse(
-            sourceText: markdown,
-            configuration: .init(),
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: markdown),
             previousState: previousResult
         )
 
@@ -209,29 +190,22 @@ struct MarkdownIncrementalParserTests {
     func usesIncrementalParsingWhenMathRenderingIsEnabledForInlineMath() {
         let previous = "Inline math: $x$\n\nBravo"
         let new = previous + "\n\nTrailing math: $y$"
-        let configuration = MarkdownRendererConfiguration()
-            .with(\.math.shouldRender, true)
 
         let previousResult = MarkdownDocumentParser.parse(
-            sourceText: previous,
-            configuration: configuration,
-            requiresBlockDirectiveParsing: false,
-            previousState: nil
-        )
+            renderingInput(markdown: previous, mathContext: MarkdownMathContext())
+        ).parseResult
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: configuration,
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new, mathContext: MarkdownMathContext()),
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.mode == MarkdownDocumentParser.ParsingStrategy.incremental(stablePrefixRootBlockCount: 1))
         #expect(result.mathContext?.inlineMathStorage.count == 2)
         #expect(result.mathContext?.inlineMathStorage.values.contains("$x$") == true)
         #expect(result.mathContext?.inlineMathStorage.values.contains("$y$") == true)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
             markdown: new,
-            configuration: configuration,
+            mathContext: MarkdownMathContext(),
             requiresBlockDirectiveParsing: false
         ))
     }
@@ -251,29 +225,21 @@ struct MarkdownIncrementalParserTests {
         y
         $$
         """
-        let configuration = MarkdownRendererConfiguration()
-            .with(\.math.shouldRender, true)
-
         let previousResult = MarkdownDocumentParser.parse(
-            sourceText: previous,
-            configuration: configuration,
-            requiresBlockDirectiveParsing: false,
-            previousState: nil
-        )
+            renderingInput(markdown: previous, mathContext: MarkdownMathContext())
+        ).parseResult
         let result = MarkdownDocumentParser.parse(
-            sourceText: new,
-            configuration: configuration,
-            requiresBlockDirectiveParsing: false,
+            renderingInput(markdown: new, mathContext: MarkdownMathContext()),
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.mode == MarkdownDocumentParser.ParsingStrategy.incremental(stablePrefixRootBlockCount: 1))
         #expect(result.mathContext?.displayMathStorage.count == 2)
         #expect(result.mathContext?.displayMathStorage.values.contains("$$\nx\n$$") == true)
         #expect(result.mathContext?.displayMathStorage.values.contains("$$\ny\n$$") == true)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
             markdown: new,
-            configuration: configuration,
+            mathContext: MarkdownMathContext(),
             requiresBlockDirectiveParsing: false
         ))
     }
@@ -300,28 +266,31 @@ struct MarkdownIncrementalParserTests {
 private extension MarkdownIncrementalParserTests {
     func makeParseResult(
         markdown: String,
-        configuration: MarkdownRendererConfiguration = .init(),
+        mathContext: MarkdownMathContext? = nil,
         requiresBlockDirectiveParsing: Bool = false
     ) -> MarkdownDocumentParser.ParseResult {
         MarkdownDocumentParser.parse(
-            sourceText: markdown,
-            configuration: configuration,
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing,
-            previousState: nil
-        )
+            renderingInput(
+                markdown: markdown,
+                mathContext: mathContext,
+                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+            )
+        ).parseResult
     }
 
     func fullParseDocumentDescription(
         markdown: String,
-        configuration: MarkdownRendererConfiguration = .init(),
+        mathContext: MarkdownMathContext? = nil,
         requiresBlockDirectiveParsing: Bool = false
     ) -> String {
-        let renderingInput = MarkdownRenderingInput(
-            source: .rawText(markdown),
-            configuration: configuration,
-            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+        let renderingOutput = MarkdownDocumentParser.parse(
+            renderingInput(
+                markdown: markdown,
+                mathContext: mathContext,
+                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+            )
         )
-        return documentDebugDescription(renderingInput.document)
+        return documentDebugDescription(renderingOutput.document)
     }
 
     func documentDebugDescription(_ document: Markdown.Document) -> String {
@@ -330,7 +299,7 @@ private extension MarkdownIncrementalParserTests {
 
     func assertStreamingMatchesFullParse(
         markdown: String,
-        configuration: MarkdownRendererConfiguration = .init(),
+        mathContext: MarkdownMathContext? = nil,
         requiresBlockDirectiveParsing: Bool = false
     ) {
         var streamedText = ""
@@ -340,19 +309,48 @@ private extension MarkdownIncrementalParserTests {
             streamedText.append(character)
 
             let result = MarkdownDocumentParser.parse(
-                sourceText: streamedText,
-                configuration: configuration,
-                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing,
+                renderingInput(
+                    markdown: streamedText,
+                    mathContext: mathContext,
+                    requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+                ),
                 previousState: previousState
             )
 
             #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
                 markdown: streamedText,
-                configuration: configuration,
+                mathContext: mathContext,
                 requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
             ))
 
-            previousState = result
+            previousState = result.parseResult
         }
+    }
+
+    func renderingInput(
+        markdown: String,
+        mathContext: MarkdownMathContext? = nil,
+        requiresBlockDirectiveParsing: Bool = false
+    ) -> MarkdownRenderingInput {
+        let elementRenderers: [MarkdownElementRendererRegistration]
+        if requiresBlockDirectiveParsing {
+            elementRenderers = [
+                .blockDirective(IncrementalParserTestBlockDirectiveRenderer(), name: "Note")
+            ]
+        } else {
+            elementRenderers = []
+        }
+
+        return MarkdownRenderingInput(
+            sourceText: markdown,
+            mathContext: mathContext,
+            elementRenderers: elementRenderers
+        )
+    }
+}
+
+private struct IncrementalParserTestBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
+    func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
+        EmptyView()
     }
 }

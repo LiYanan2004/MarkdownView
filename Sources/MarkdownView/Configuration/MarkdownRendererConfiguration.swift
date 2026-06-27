@@ -12,7 +12,6 @@ struct MarkdownRendererConfiguration: Hashable, AllowingModifyThroughKeyPath, Se
     var preferredBaseURL: URL?
     var componentSpacing: CGFloat = 8
     
-    var math: Math = Math()
     var tintColors: [MarkdownTintableComponent : Color] = [:]
     var underlineLinks: Bool = false
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()

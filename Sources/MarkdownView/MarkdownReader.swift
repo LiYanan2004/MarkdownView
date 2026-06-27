@@ -24,7 +24,7 @@ public struct MarkdownReader<Content: View>: View {
     private var sourceText: String
     private var contents: (_ document: Markdown.Document) -> Content
 
-    @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
 
     public init(_ text: String, @ViewBuilder contents: @escaping (Markdown.Document) -> Content) {
@@ -34,12 +34,14 @@ public struct MarkdownReader<Content: View>: View {
     
     public var body: some View {
         let renderingInput = MarkdownRenderingInput(
-            source: .rawText(sourceText),
-            configuration: configuration,
+            sourceText: sourceText,
+            mathContext: mathContext,
             elementRenderers: elementRenderers
         )
-        contents(renderingInput.document)
-            .environment(\.markdownRendererConfiguration, renderingInput.configuration)
+        let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
+
+        contents(renderingOutput.document)
+            .environment(\.markdownMathContext, renderingOutput.mathContext)
     }
 }
 

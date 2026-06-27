@@ -15,6 +15,7 @@ import Markdown
 @MainActor
 struct MarkdownTextConverter: @MainActor MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
+    var mathContext: MarkdownMathContext?
     var elementRenderers: [MarkdownElementRendererRegistration]
     var fonts: AnyMarkdownFontGroup
     var blockQuoteStyle: any MarkdownBlockQuoteStyle
@@ -23,6 +24,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
     init(
         configuration: MarkdownRendererConfiguration,
+        mathContext: MarkdownMathContext?,
         elementRenderers: [MarkdownElementRendererRegistration],
         fonts: AnyMarkdownFontGroup
     ) {
@@ -30,6 +32,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
         self.init(
             configuration: configuration,
+            mathContext: mathContext,
             elementRenderers: elementRenderers,
             fonts: fonts,
             blockQuoteStyle: environmentValues.blockQuoteStyle,
@@ -40,6 +43,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
     init(
         configuration: MarkdownRendererConfiguration,
+        mathContext: MarkdownMathContext?,
         elementRenderers: [MarkdownElementRendererRegistration],
         fonts: AnyMarkdownFontGroup,
         blockQuoteStyle: any MarkdownBlockQuoteStyle,
@@ -47,6 +51,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
         tableStyle: any MarkdownTableStyle
     ) {
         self.configuration = configuration
+        self.mathContext = mathContext
         self.elementRenderers = elementRenderers
         self.fonts = fonts
         self.blockQuoteStyle = blockQuoteStyle
@@ -134,7 +139,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
     func visitText(_ text: Markdown.Text) -> TextContent {
         let plainText = text.plainText
         #if canImport(SwiftMath)
-        if configuration.math.shouldRender,
+        if mathContext != nil,
            let mathIdentifier = MarkdownMathPreprocessor.displayPlaceholderIdentifier(
                in: plainText
            ) {
@@ -151,8 +156,8 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
                     .id(mathIdentifier)
             }
         }
-        if configuration.math.shouldRender,
-           let inlineMathStorage = configuration.math.inlineMathStorage {
+        if mathContext != nil,
+           let inlineMathStorage = mathContext?.inlineMathStorage {
             return inlineMathTextContent(
                 text: plainText,
                 inlineMathStorage: inlineMathStorage,

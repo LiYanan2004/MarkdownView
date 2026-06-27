@@ -14,9 +14,9 @@ struct InlineMathOrText {
 
     @preconcurrency
     @MainActor
-    func makeBody(configuration: MarkdownRendererConfiguration) -> MarkdownNodeView {
+    func makeBody(mathContext: MarkdownMathContext?) -> MarkdownNodeView {
         #if canImport(SwiftMath)
-        let mathSegments = self.mathSegments(configuration: configuration)
+        let mathSegments = self.mathSegments(mathContext: mathContext)
 
         guard !mathSegments.isEmpty else {
             return MarkdownNodeView(text)
@@ -59,8 +59,8 @@ fileprivate extension InlineMathOrText {
         var latexText: String
     }
 
-    func mathSegments(configuration: MarkdownRendererConfiguration) -> [MathSegment] {
-        let placeholderSegments = inlinePlaceholderSegments(configuration: configuration)
+    func mathSegments(mathContext: MarkdownMathContext?) -> [MathSegment] {
+        let placeholderSegments = inlinePlaceholderSegments(mathContext: mathContext)
         let parsedSegments = MathParser(text: text)
             .mathRepresentations
             .lazy
@@ -80,8 +80,8 @@ fileprivate extension InlineMathOrText {
             .sorted { $0.range.lowerBound < $1.range.lowerBound }
     }
 
-    func inlinePlaceholderSegments(configuration: MarkdownRendererConfiguration) -> [MathSegment] {
-        guard let inlineMathStorage = configuration.math.inlineMathStorage else {
+    func inlinePlaceholderSegments(mathContext: MarkdownMathContext?) -> [MathSegment] {
+        guard let inlineMathStorage = mathContext?.inlineMathStorage else {
             return []
         }
 

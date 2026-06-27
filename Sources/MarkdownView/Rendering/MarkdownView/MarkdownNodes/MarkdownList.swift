@@ -5,6 +5,7 @@ struct MarkdownList<List: ListItemContainer>: View {
     var listItemsContainer: List
     
     @Environment(\.markdownRendererConfiguration) private var configuration
+    @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
     
     private var marker: Either<AnyUnorderedListMarkerProtocol, AnyOrderedListMarkerProtocol> {
@@ -29,8 +30,12 @@ struct MarkdownList<List: ListItemContainer>: View {
                 HStack(alignment: .firstTextBaseline) {
                     CheckboxOrMarker(list: self, listItem: listItem, index: index)
                         .padding(.leading, depth == 0 ? configuration.listConfiguration.leadingIndentation : 0)
-                    MarkdownViewRenderer(configuration: configuration, elementRenderers: elementRenderers)
-                        .makeBody(for: listItem)
+                    MarkdownViewRenderer(
+                        configuration: configuration,
+                        mathContext: mathContext,
+                        elementRenderers: elementRenderers
+                    )
+                    .makeBody(for: listItem)
                 }
             }
         }

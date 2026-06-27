@@ -16,11 +16,13 @@ struct MarkdownCustomLink: View {
     var renderer: any MarkdownLinkRenderer
     var configuration: MarkdownRendererConfiguration
     var elementRenderers: [MarkdownElementRendererRegistration]
+    @Environment(\.markdownMathContext) private var mathContext
 
     var body: some View {
         let tintColor = configuration.tintColors[.link, default: .accentColor]
         let viewRenderer = MarkdownViewRenderer(
             configuration: configuration,
+            mathContext: mathContext,
             elementRenderers: elementRenderers
         )
         let label = viewRenderer

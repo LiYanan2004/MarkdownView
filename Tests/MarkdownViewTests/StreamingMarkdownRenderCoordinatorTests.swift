@@ -22,8 +22,8 @@ struct StreamingMarkdownRenderCoordinatorTests {
             coordinator.cancel()
         }
 
-        coordinator.submit(request("# Emoji")) { parserState in
-            renderedSourceTexts.append(parserState.sourceSnapshot.text)
+        coordinator.submit(request("# Emoji")) { renderingOutput in
+            renderedSourceTexts.append(renderingOutput.sourceSnapshot.text)
         }
 
         try await waitUntil {
@@ -32,8 +32,8 @@ struct StreamingMarkdownRenderCoordinatorTests {
         #expect(renderedSourceTexts == ["# Emoji"])
 
         let finalSourceText = "😀 🚀 ✨"
-        coordinator.submit(request(finalSourceText)) { parserState in
-            renderedSourceTexts.append(parserState.sourceSnapshot.text)
+        coordinator.submit(request(finalSourceText)) { renderingOutput in
+            renderedSourceTexts.append(renderingOutput.sourceSnapshot.text)
         }
 
         try await Task.sleep(for: renderInterval + .milliseconds(100))
@@ -43,11 +43,11 @@ struct StreamingMarkdownRenderCoordinatorTests {
     }
 }
 
-private func request(_ sourceText: String) -> StreamingMarkdownParsingRequest {
-    StreamingMarkdownParsingRequest(
+private func request(_ sourceText: String) -> MarkdownRenderingInput {
+    MarkdownRenderingInput(
         sourceText: sourceText,
-        configuration: MarkdownRendererConfiguration(),
-        requiresBlockDirectiveParsing: false
+        mathContext: nil,
+        elementRenderers: []
     )
 }
 

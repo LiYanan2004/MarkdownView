@@ -9,10 +9,12 @@ import SwiftUI
 
 struct MarkdownDisplayMathView: View {
     var mathIdentifier: UUID
+    
+    @Environment(\.markdownMathContext) var mathContext
     @Environment(\.markdownFontGroup.displayMath) private var font
-    @Environment(\.markdownRendererConfiguration.math) private var math
+    
     private var latexMath: String? {
-        math.displayMathStorage?[mathIdentifier]
+        mathContext?.displayMathStorage[mathIdentifier]
     }
 
     var body: some View {
