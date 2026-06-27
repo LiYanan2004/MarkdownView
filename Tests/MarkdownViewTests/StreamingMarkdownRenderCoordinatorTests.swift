@@ -23,7 +23,7 @@ struct StreamingMarkdownRenderCoordinatorTests {
         }
 
         coordinator.submit(request("# Emoji")) { parserState in
-            renderedSourceTexts.append(parserState.sourceText)
+            renderedSourceTexts.append(parserState.sourceSnapshot.text)
         }
 
         try await waitUntil {
@@ -33,7 +33,7 @@ struct StreamingMarkdownRenderCoordinatorTests {
 
         let finalSourceText = "😀 🚀 ✨"
         coordinator.submit(request(finalSourceText)) { parserState in
-            renderedSourceTexts.append(parserState.sourceText)
+            renderedSourceTexts.append(parserState.sourceSnapshot.text)
         }
 
         try await Task.sleep(for: renderInterval + .milliseconds(100))

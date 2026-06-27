@@ -12,8 +12,6 @@ import Testing
 
 @Suite("Markdown Incremental Parser")
 struct MarkdownIncrementalParserTests {
-    private let incrementalParser = MarkdownIncrementalParser()
-
     @Test("Uses incremental parsing for trailing plain text append")
     func usesIncrementalParsingForTrailingPlainTextAppend() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
@@ -21,11 +19,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + " extended"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
@@ -39,11 +37,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + "\n\n```swift\nlet value = 1\n```"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
@@ -57,11 +55,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + "\n\n```swift\nlet value = 1"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
@@ -75,11 +73,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + "\n\n- item"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
@@ -94,11 +92,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + "\n| Swift | Native |"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 6))
@@ -118,11 +116,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + "\n| Rust | Systems |"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .full)
@@ -141,11 +139,11 @@ struct MarkdownIncrementalParserTests {
         let new = previous + "Swift"
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
@@ -160,11 +158,11 @@ struct MarkdownIncrementalParserTests {
             .joined(separator: "\n\n")
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .full)
@@ -179,31 +177,31 @@ struct MarkdownIncrementalParserTests {
             .joined(separator: "\n\n")
 
         let previousResult = makeParseResult(markdown: previous)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .full)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
-    @Test("Falls back for identical resend")
-    func fallsBackForIdenticalResend() {
+    @Test("Uses incremental parsing for identical resend")
+    func usesIncrementalParsingForIdenticalResend() {
         let markdown = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
             .joined(separator: "\n\n")
 
         let previousResult = makeParseResult(markdown: markdown)
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: markdown,
             configuration: .init(),
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
-        #expect(result.mode == .full)
+        #expect(result.mode == .retained)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: markdown))
     }
 
@@ -214,23 +212,23 @@ struct MarkdownIncrementalParserTests {
         let configuration = MarkdownRendererConfiguration()
             .with(\.math.shouldRender, true)
 
-        let previousResult = incrementalParser.parse(
+        let previousResult = MarkdownDocumentParser.parse(
             sourceText: previous,
             configuration: configuration,
             requiresBlockDirectiveParsing: false,
             previousState: nil
         )
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: configuration,
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
-        #expect(result.renderingConfiguration.math.inlineMathStorage?.count == 2)
-        #expect(result.renderingConfiguration.math.inlineMathStorage?.values.contains("$x$") == true)
-        #expect(result.renderingConfiguration.math.inlineMathStorage?.values.contains("$y$") == true)
+        #expect(result.mathContext?.inlineMathStorage.count == 2)
+        #expect(result.mathContext?.inlineMathStorage.values.contains("$x$") == true)
+        #expect(result.mathContext?.inlineMathStorage.values.contains("$y$") == true)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
             markdown: new,
             configuration: configuration,
@@ -256,23 +254,23 @@ struct MarkdownIncrementalParserTests {
         let configuration = MarkdownRendererConfiguration()
             .with(\.math.shouldRender, true)
 
-        let previousResult = incrementalParser.parse(
+        let previousResult = MarkdownDocumentParser.parse(
             sourceText: previous,
             configuration: configuration,
             requiresBlockDirectiveParsing: false,
             previousState: nil
         )
-        let result = incrementalParser.parse(
+        let result = MarkdownDocumentParser.parse(
             sourceText: new,
             configuration: configuration,
             requiresBlockDirectiveParsing: false,
-            previousState: previousResult.state
+            previousState: previousResult
         )
 
         #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
-        #expect(result.renderingConfiguration.math.displayMathStorage?.count == 2)
-        #expect(result.renderingConfiguration.math.displayMathStorage?.values.contains("$$\nx\n$$") == true)
-        #expect(result.renderingConfiguration.math.displayMathStorage?.values.contains("$$\ny\n$$") == true)
+        #expect(result.mathContext?.displayMathStorage.count == 2)
+        #expect(result.mathContext?.displayMathStorage.values.contains("$$\nx\n$$") == true)
+        #expect(result.mathContext?.displayMathStorage.values.contains("$$\ny\n$$") == true)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
             markdown: new,
             configuration: configuration,
@@ -304,8 +302,8 @@ private extension MarkdownIncrementalParserTests {
         markdown: String,
         configuration: MarkdownRendererConfiguration = .init(),
         requiresBlockDirectiveParsing: Bool = false
-    ) -> MarkdownIncrementalParser.ParseResult {
-        incrementalParser.parse(
+    ) -> MarkdownDocumentParser.ParseResult {
+        MarkdownDocumentParser.parse(
             sourceText: markdown,
             configuration: configuration,
             requiresBlockDirectiveParsing: requiresBlockDirectiveParsing,
@@ -336,12 +334,12 @@ private extension MarkdownIncrementalParserTests {
         requiresBlockDirectiveParsing: Bool = false
     ) {
         var streamedText = ""
-        var previousState: MarkdownIncrementalParser.ParseResult?
+        var previousState: MarkdownDocumentParser.ParseResult?
 
         for character in markdown {
             streamedText.append(character)
 
-            let result = incrementalParser.parse(
+            let result = MarkdownDocumentParser.parse(
                 sourceText: streamedText,
                 configuration: configuration,
                 requiresBlockDirectiveParsing: requiresBlockDirectiveParsing,
@@ -354,7 +352,7 @@ private extension MarkdownIncrementalParserTests {
                 requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
             ))
 
-            previousState = result.state
+            previousState = result
         }
     }
 }

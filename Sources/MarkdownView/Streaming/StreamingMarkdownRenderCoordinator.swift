@@ -9,8 +9,8 @@ final class StreamingMarkdownRenderCoordinator {
 
     private var renderTask: Task<Void, Never>?
     private var pendingRequest: StreamingMarkdownParsingRequest?
-    private var renderedParserState: MarkdownIncrementalParser.ParseResult?
-    private var renderHandler: (@MainActor (MarkdownIncrementalParser.ParseResult) -> Void)?
+    private var renderedParserState: MarkdownDocumentParser.ParseResult?
+    private var renderHandler: (@MainActor (MarkdownDocumentParser.ParseResult) -> Void)?
 
     init(renderInterval: Duration = .milliseconds(50)) {
         self.renderInterval = renderInterval
@@ -22,7 +22,7 @@ final class StreamingMarkdownRenderCoordinator {
     
     func submit(
         _ request: StreamingMarkdownParsingRequest,
-        onRender: @escaping @MainActor (MarkdownIncrementalParser.ParseResult) -> Void
+        onRender: @escaping @MainActor (MarkdownDocumentParser.ParseResult) -> Void
     ) {
         renderHandler = onRender
         pendingRequest = request
@@ -79,8 +79,7 @@ final class StreamingMarkdownRenderCoordinator {
     private func render(_ request: StreamingMarkdownParsingRequest) async {
         let previousState = renderedParserState
         let parseTask = Task.detached(priority: .userInitiated) {
-            let incrementalParser = MarkdownIncrementalParser()
-            let parseResult = incrementalParser.parse(
+            let parseResult = MarkdownDocumentParser.parse(
                 sourceText: request.sourceText,
                 configuration: request.configuration,
                 requiresBlockDirectiveParsing: request.requiresBlockDirectiveParsing,

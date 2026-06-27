@@ -14,7 +14,7 @@ public struct StreamingMarkdownReader<Content: View>: View {
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.markdownElementRenderers) private var elementRenderers
 
-    @State private var lastParsedResult: MarkdownIncrementalParser.ParseResult?
+    @State private var lastParsedResult: MarkdownDocumentParser.ParseResult?
     @State private var renderCoordinator = StreamingMarkdownRenderCoordinator()
 
     public init(
@@ -50,7 +50,13 @@ public struct StreamingMarkdownReader<Content: View>: View {
     }
 
     private var resolvedConfiguration: MarkdownRendererConfiguration {
-        lastParsedResult?.renderingConfiguration ?? configuration
+        guard configuration.math.shouldRender else { return configuration }
+        
+        guard let mathContext = lastParsedResult?.mathContext else {
+            return configuration
+        }
+        
+        return configuration.with(\.math.context, mathContext)
     }
     
     private var currentDocument: Markdown.Document {
