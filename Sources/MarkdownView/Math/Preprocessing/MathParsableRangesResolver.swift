@@ -30,7 +30,7 @@ struct MathParsableRangesResolver: MarkupWalker {
             if let range = child.range {
                 resolvableIncludedRanges.append(range)
             }
-            descendInto(child)
+            visit(child)
         }
     }
 
@@ -65,6 +65,11 @@ struct MathParsableRangesResolver: MarkupWalker {
 
     mutating func visitHTMLBlock(_ htmlBlock: HTMLBlock) {
         guard let range = htmlBlock.range else { return }
+        resolvableExcludedRanges.append(range)
+    }
+
+    mutating func visitBlockDirective(_ blockDirective: BlockDirective) {
+        guard let range = blockDirective.range else { return }
         resolvableExcludedRanges.append(range)
     }
 }

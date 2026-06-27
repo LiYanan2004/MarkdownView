@@ -344,6 +344,47 @@ struct MathExtractionTests {
     }
 
     @Test
+    func testMathPreprocessingPreservesFencedCodeBlockMathLiteral() async throws {
+        let markdown = #"""
+        ```latex
+        $x^2 + y^2 = c^2$
+        ```
+
+        Inline math still renders: $z^2$.
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+
+        #expect(result.markdown.contains(#"""
+        ```latex
+        $x^2 + y^2 = c^2$
+        ```
+        """#))
+        #expect(Array(result.inlineMathStorage.values) == [#"$z^2$"#])
+    }
+
+    @Test
+    func testMathPreprocessingPreservesBlockDirectiveMathLiteral() async throws {
+        let markdown = #"""
+        @callout {
+        $x^2 + y^2 = c^2$
+        }
+
+        Inline math still renders: $z^2$.
+        """#
+        let result = processMarkdownParsingRanges(
+            in: markdown,
+            requiresBlockDirectiveParsing: true
+        )
+
+        #expect(result.markdown.contains(#"""
+        @callout {
+        $x^2 + y^2 = c^2$
+        }
+        """#))
+        #expect(Array(result.inlineMathStorage.values) == [#"$z^2$"#])
+    }
+
+    @Test
     func testMathPreprocessingPreservesLinkMetadataLiterals() async throws {
         let markdown = #"Read [Apple Developer](https://developer.apple.com/documentation/swift "$release$ notes") before rendering $x_y$ in the paragraph."#
         let result = processMarkdownParsingRanges(in: markdown)
@@ -393,8 +434,12 @@ struct MathExtractionTests {
     }
 
     private func processMarkdownParsingRanges(
-        in markdown: String
+        in markdown: String,
+        requiresBlockDirectiveParsing: Bool = false
     ) -> MarkdownMathPreprocessor.Result {
-        MarkdownMathPreprocessor().preprocessingResult(for: markdown)
+        MarkdownMathPreprocessor().preprocessingResult(
+            for: markdown,
+            requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
+        )
     }
 }
