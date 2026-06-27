@@ -4,9 +4,9 @@ Display markdown content with SwiftUI.
 
 ## Overview
 
-MarkdownView offers a super easy and highly customizable way to display markdown content in your app. It leverages [swift-markdown](https://github.com/swiftlang/swift-markdown) to parse markdown content, fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
+MarkdownView offers a highly customizable way to display markdown content in your app. It leverages [swift-markdown](https://github.com/swiftlang/swift-markdown) to parse markdown content, fully compliant with the [CommonMark Spec](https://spec.commonmark.org/current/).
 
-MarkdownView supports adavanced rendering features like SVG, LaTeX math, as well as code highlighting.
+MarkdownView supports advanced rendering features like SVG, code highlighting on iOS and macOS, and LaTeX math rendering on iOS and macOS.
 
 On iOS and macOS, ``MarkdownText`` provides text-based rendering and continuous text selection.
 

@@ -27,6 +27,11 @@ public struct MarkdownReader<Content: View>: View {
     @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
 
+    /// Creates a reader that parses a markdown string once and passes the parsed document to `contents`.
+    ///
+    /// - Parameters:
+    ///   - text: The markdown source to parse.
+    ///   - contents: A view builder that receives the parsed document.
     public init(_ text: String, @ViewBuilder contents: @escaping (Markdown.Document) -> Content) {
         self.sourceText = text
         self.contents = contents

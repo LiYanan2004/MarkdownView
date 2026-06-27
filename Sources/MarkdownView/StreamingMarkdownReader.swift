@@ -6,7 +6,7 @@
 import Markdown
 import SwiftUI
 
-/// A markdown reader that incrementally parse the input string and build the content from its content builder.
+/// A markdown reader that incrementally parses the input string and builds content from the latest parsed document.
 public struct StreamingMarkdownReader<Content: View>: View {
     private var sourceText: String
     private let content: (Markdown.Document) -> Content
@@ -17,6 +17,11 @@ public struct StreamingMarkdownReader<Content: View>: View {
     @State private var lastRenderingOutput: MarkdownRenderingOutput?
     @State private var renderCoordinator = StreamingMarkdownRenderCoordinator()
 
+    /// Creates a reader that incrementally parses a markdown string and passes the latest parsed document to `content`.
+    ///
+    /// - Parameters:
+    ///   - text: The markdown source to parse incrementally.
+    ///   - content: A view builder that receives the latest parsed document.
     public init(
         _ text: String,
         @ViewBuilder content: @escaping (Markdown.Document) -> Content

@@ -5,7 +5,7 @@
 
 Render Markdown in SwiftUI with native views, configurable styling, and extensible renderers.
 
-MarkdownView uses [swift-markdown](https://github.com/swiftlang/swift-markdown) for parsing and supports CommonMark content, tables, task lists, code blocks, images, links, block directives, and math rendering.
+MarkdownView uses [swift-markdown](https://github.com/swiftlang/swift-markdown) for parsing and supports CommonMark content, tables, task lists, code blocks, images, links, block directives, and LaTeX math rendering on iOS and macOS.
 
 ## Platforms
 
@@ -19,10 +19,10 @@ MarkdownView uses [swift-markdown](https://github.com/swiftlang/swift-markdown) 
 
 - CommonMark rendering with tables, task lists, images, links, block quotes, headings, and code blocks.
 - LaTeX math rendering for inline and display math on iOS and macOS.
-- Syntax-highlighted code blocks with configurable light and dark Highlightr themes.
-- SVG and network image rendering.
+- Syntax-highlighted code blocks with configurable light and dark Highlightr themes on iOS and macOS.
+- SVG, network, asset catalog, and relative-path image rendering.
 - `MarkdownText` for text-based rendering with continuous text selection on iOS and macOS.
-- `MarkdownReader` and `MarkdownTableOfContentReader` for sharing parsed content and building navigation.
+- `MarkdownReader`, `StreamingMarkdownReader`, and `MarkdownTableOfContentReader` for sharing parsed content, streaming updates, and building navigation.
 - Custom fonts, heading styles, list markers, tint colors, component spacing, block quote styles, code block styles, and table styles.
 - Custom renderers for images, links, and block directives.
 
@@ -87,6 +87,8 @@ Enable LaTeX math rendering with `markdownMathRenderingEnabled()`.
 MarkdownView("Inline math: $E = mc^2$")
     .markdownMathRenderingEnabled()
 ```
+
+Math rendering is available on iOS and macOS when the package includes the default `LaTeX` trait.
 
 Display math is also supported:
 
@@ -186,6 +188,8 @@ MarkdownView(markdownText)
     .markdownElementRenderer(.link(CustomLinkRenderer(), urlScheme: "app"))
     .markdownElementRenderer(.blockDirective(CustomBlockDirectiveRenderer(), name: "note"))
 ```
+
+Registering another renderer with the same block directive name or URL scheme replaces the previous registration in the same view hierarchy.
 
 ## Dependencies
 

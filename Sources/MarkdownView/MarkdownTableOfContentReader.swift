@@ -15,6 +15,11 @@ public struct MarkdownTableOfContentReader<Content: View>: View, @MainActor Equa
     private var document: Markdown.Document
     private var content: (_ headings: [Markdown.Heading]) -> Content
 
+    /// Creates a table-of-contents reader from a parsed markdown document.
+    ///
+    /// - Parameters:
+    ///   - document: The parsed markdown document to inspect.
+    ///   - content: A view builder that receives the headings extracted from the document.
     public init(
         _ document: Markdown.Document,
         @ViewBuilder content: @escaping ([Markdown.Heading]) -> Content
@@ -23,6 +28,11 @@ public struct MarkdownTableOfContentReader<Content: View>: View, @MainActor Equa
         self.content = content
     }
     
+    /// Creates a table-of-contents reader from a markdown string.
+    ///
+    /// - Parameters:
+    ///   - string: The markdown source to parse.
+    ///   - content: A view builder that receives the headings extracted from the parsed document.
     public init(
         _ string: String,
         @ViewBuilder content: @escaping ([Markdown.Heading]) -> Content
