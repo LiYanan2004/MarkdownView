@@ -37,7 +37,7 @@ struct DefaultMarkdownCodeBlock: View {
             debouncedHighlight()
         }
         .lineSpacing(4)
-        .font(Font(font.asPlatformFont))
+        .font(font._swiftUIFont)
         .frame(maxWidth: .infinity, alignment: .leading)
         #if os(macOS) || os(iOS)
         .safeAreaInset(edge: .top, spacing: 0) {

@@ -28,7 +28,7 @@ struct MarkdownHeading: View {
             case 6: fontGroup.h6
             default: fontGroup.body
         }
-        return Font(font.asPlatformFont)
+        return font._swiftUIFont
     }
     private var foregroundStyle: AnyShapeStyle {
         return switch heading.level {

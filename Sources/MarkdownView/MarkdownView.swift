@@ -37,7 +37,7 @@ public struct MarkdownView: View {
         )
         renderer.makeBody(for: resolvedSource.document)
             .erasedToAnyView()
-            .font(Font(fonts.body.asPlatformFont))
+            .font(fonts.body._swiftUIFont)
     }
     
     private var resolvedSource: (document: Markdown.Document, mathContext: MarkdownMathContext?) {

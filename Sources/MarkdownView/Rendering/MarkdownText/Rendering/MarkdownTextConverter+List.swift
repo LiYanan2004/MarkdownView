@@ -138,7 +138,7 @@ private extension MarkdownTextConverter {
             ) {
                 MarkdownTextCheckbox(
                     checkbox: checkbox,
-                    font: Font(fonts.body.asPlatformFont)
+                    font: fonts.body._swiftUIFont
                 )
             }
         }

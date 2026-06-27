@@ -17,7 +17,7 @@ public struct MarkdownBlockQuoteStyleConfiguration {
         @_documentation(visibility: internal)
         public var body: some View {
             content
-                .font(Font(font.asPlatformFont))
+                .font(font._swiftUIFont)
         }
     }
 }

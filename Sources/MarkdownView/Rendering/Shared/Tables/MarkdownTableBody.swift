@@ -10,7 +10,7 @@ struct MarkdownTableBody: View {
     
     var body: some View {
         ForEach(Array(rows.enumerated()), id: \.offset) { (_, row) in
-            row.font(Font(font.asPlatformFont))
+            row.font(font._swiftUIFont)
         }
     }
 }

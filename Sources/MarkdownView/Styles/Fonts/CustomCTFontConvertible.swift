@@ -13,12 +13,18 @@ import OSLog
 public protocol CustomCTFontConvertible: Sendable {
     /// A `CTFont` representation of this type.
     var ctFont: CTFont { get }
+    
+    var _swiftUIFont: Font { get }
 }
 
 extension CustomCTFontConvertible {
     /// The platform font representation of this type.
     public var asPlatformFont: PlatformFont {
         ctFont as PlatformFont
+    }
+    
+    public var _swiftUIFont: Font {
+        Font(asPlatformFont)
     }
 }
 
@@ -33,6 +39,10 @@ extension CTFont: CustomCTFontConvertible {
 }
 
 extension SwiftUI.Font: CustomCTFontConvertible {
+    public var _swiftUIFont: Font {
+        self
+    }
+    
     public var ctFont: CTFont {
         if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0, visionOS 26.0, *) {
             return resolve(in: EnvironmentValues().fontResolutionContext).ctFont

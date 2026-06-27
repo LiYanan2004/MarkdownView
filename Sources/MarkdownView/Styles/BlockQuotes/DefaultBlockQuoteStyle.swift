@@ -30,7 +30,7 @@ fileprivate struct DefaultBlockQuoteView: View {
         configuration.content
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .font(Font(font.asPlatformFont))
+            .font(font._swiftUIFont)
             .padding(.horizontal, 20)
             .background {
                 tintColor.opacity(0.1)

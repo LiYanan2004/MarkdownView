@@ -25,7 +25,7 @@ extension MarkdownTableStyleConfiguration.Table {
                 rowIndex: 0,
                 cells: cells
             )
-            .font(Font(font.asPlatformFont))
+            .font(font._swiftUIFont)
         }
     }
 }
