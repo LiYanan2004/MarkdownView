@@ -22,7 +22,7 @@ MarkdownView uses [swift-markdown](https://github.com/swiftlang/swift-markdown) 
 - Syntax-highlighted code blocks with configurable light and dark Highlightr themes.
 - SVG and network image rendering.
 - `MarkdownText` for text-based rendering with continuous text selection on iOS and macOS.
-- `MarkdownReader` and `MarkdownTableOfContent` for sharing parsed content and building navigation.
+- `MarkdownReader` and `MarkdownTableOfContentReader` for sharing parsed content and building navigation.
 - Custom fonts, heading styles, list markers, tint colors, component spacing, block quote styles, code block styles, and table styles.
 - Custom renderers for images, links, and block directives.
 
@@ -141,9 +141,9 @@ Use `MarkdownReader` when multiple views need the same parsed document.
 MarkdownReader(markdownText) { markdownContent in
     MarkdownView(markdownContent)
 
-    MarkdownTableOfContent(markdownContent) { headings in
-        ForEach(headings, id: \.self) { heading in
-            Text(heading.plainText)
+    MarkdownTableOfContentReader(markdownContent) { headings in
+        ForEach(headings.indices, id: \.self) { index in
+            Text(headings[index].plainText)
         }
     }
 }

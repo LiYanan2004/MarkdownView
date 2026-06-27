@@ -12,6 +12,10 @@ Review these changes before updating a package that uses MarkdownView 2.
 
 - `MarkdownViewStyle` and `markdownViewStyle(_:)` have been removed.
   - If you need a combination, use SwiftUI's `ViewModifier`.
+- `MarkdownTableOfContent` has been renamed to ``MarkdownTableOfContentReader``.
+  - A deprecated typealias keeps existing call sites compiling while you migrate to the new name.
+- ``MarkdownTableOfContentReader`` now passes `[Markdown.Heading]` to its content builder.
+  - If you need a stable identifier for `ForEach`, iterate over `headings.indices` or another identifier you own.
 - The minimum supported platforms are now macOS 13, iOS 16, tvOS 16, and watchOS 9.
 
 ## New features
@@ -26,6 +30,24 @@ MarkdownText("Hello **MarkdownText**")
 ```
 
 `MarkdownText` uses platform specific text view to render its content. Due to the API availability, you might need to use the new `font(_:for:)` API that with platform fonts or `CTFont` instead of using SwiftUI's `Font` (reference [Font configuration](#font-configuration) for more information)
+
+### ``MarkdownTableOfContentReader``
+
+Use ``MarkdownTableOfContentReader`` to derive a table of contents from a parsed markdown document.
+
+```swift
+MarkdownReader(markdownText) { markdown in
+    MarkdownView(markdown)
+
+    MarkdownTableOfContentReader(markdown) { headings in
+        ForEach(headings.indices, id: \.self) { index in
+            Text(headings[index].plainText)
+        }
+    }
+}
+```
+
+``MarkdownTableOfContentReader`` conforms to `Equatable`. You can add `.equatable()` when the rendered content depends only on the parsed `Markdown.Document` and the derived headings, so SwiftUI can skip recomputing the view body when document identity stays the same.
 
 ### Link underlines
 

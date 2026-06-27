@@ -10,14 +10,12 @@ import SwiftUI
 
 /// A reader that provides a parsed markdown document to use across multiple views.
 ///
-/// This reader offers a single source-of-truth for its child markdown views, and ensures the input is only parsed once.
-/// Apply parse-affecting modifiers, such as `markdownMathRenderingEnabled()`,
-/// to the reader so they can participate in parsing before the document is produced.
+/// This reader offers a single source-of-truth for its child markdown views, and ensures the input is only parsed once. Apply parse-affecting modifiers, such as `markdownMathRenderingEnabled()`, to the reader so they can participate in parsing before the document is produced.
 ///
 /// ```swift
 /// MarkdownReader("**Hello World**") { markdown in
 ///     MarkdownView(markdown)
-///     MarkdownTableOfContent(markdown) { headings in
+///     MarkdownTableOfContentReader(markdown) { headings in
 ///         // ...
 ///     }
 /// }
@@ -48,7 +46,7 @@ public struct MarkdownReader<Content: View>: View {
 #Preview {
     MarkdownReader("**Hello World**") { markdown in
         MarkdownView(markdown)
-        MarkdownTableOfContent(markdown) { headings in
+        MarkdownTableOfContentReader(markdown) { headings in
             
         }
     }

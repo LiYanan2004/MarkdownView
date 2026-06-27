@@ -21,7 +21,7 @@ On iOS and macOS, ``MarkdownText`` provides text-based rendering and continuous 
 
 - ``MarkdownView/MarkdownView``
 - ``MarkdownText``
-- ``MarkdownTableOfContent``
+- ``MarkdownTableOfContentReader``
 
 ### Customizing Appearances
 
