@@ -1,11 +1,11 @@
 //
-//  MarkdownRenderingInput.swift
+//  MarkdownParseRequest.swift
 //  MarkdownView
 //
 
 import Foundation
 
-struct MarkdownRenderingInput: Sendable, Hashable {
+struct MarkdownParseRequest: Sendable, Hashable {
     let sourceText: String
     let parsingOptions: MarkdownDocumentParsingOptions
 

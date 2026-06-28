@@ -8,9 +8,9 @@ final class StreamingMarkdownRenderCoordinator {
     private let renderInterval: Duration
 
     private var renderTask: Task<Void, Never>?
-    private var pendingInput: MarkdownRenderingInput?
-    private var renderedParserState: MarkdownDocumentParser.ParseResult?
-    private var renderHandler: (@MainActor (MarkdownRenderingOutput) -> Void)?
+    private var pendingRequest: MarkdownParseRequest?
+    private var parsedResult: MarkdownParseResult?
+    private var renderHandler: (@MainActor (MarkdownParseResult) -> Void)?
 
     init(renderInterval: Duration = .milliseconds(50)) {
         self.renderInterval = renderInterval
@@ -21,18 +21,24 @@ final class StreamingMarkdownRenderCoordinator {
     }
     
     func submit(
-        _ input: MarkdownRenderingInput,
-        onRender: @escaping @MainActor (MarkdownRenderingOutput) -> Void
+        _ request: MarkdownParseRequest,
+        onRender: @escaping @MainActor (MarkdownParseResult) -> Void
     ) {
         renderHandler = onRender
-        pendingInput = input
+        pendingRequest = request
         startRenderLoopIfNeeded()
     }
 
     func cancel() {
         renderTask?.cancel()
         renderTask = nil
-        pendingInput = nil
+        pendingRequest = nil
+    }
+
+    func reset() {
+        cancel()
+        parsedResult = nil
+        renderHandler = nil
     }
 
     private func startRenderLoopIfNeeded() {
@@ -45,15 +51,15 @@ final class StreamingMarkdownRenderCoordinator {
 
     private func renderLoop() async {
         while Task.isCancelled == false {
-            guard let request = pendingInput else {
+            guard let request = pendingRequest else {
                 finishRenderLoop()
                 return
             }
 
-            pendingInput = nil
+            pendingRequest = nil
             await render(request)
 
-            guard pendingInput != nil else {
+            guard pendingRequest != nil else {
                 finishRenderLoop()
                 return
             }
@@ -76,15 +82,15 @@ final class StreamingMarkdownRenderCoordinator {
         renderTask = nil
     }
 
-    private func render(_ input: MarkdownRenderingInput) async {
-        let previousState = renderedParserState
+    private func render(_ request: MarkdownParseRequest) async {
+        let previousState = self.parsedResult
         let parseTask = Task.detached(priority: .userInitiated) {
             MarkdownDocumentParser.parse(
-                input,
+                request,
                 previousState: previousState
             )
         }
-        let renderingOutput = await withTaskCancellationHandler {
+        let parseResult = await withTaskCancellationHandler {
             await parseTask.value
         } onCancel: {
             parseTask.cancel()
@@ -93,7 +99,7 @@ final class StreamingMarkdownRenderCoordinator {
             return
         }
 
-        renderedParserState = renderingOutput.parseResult
-        renderHandler?(renderingOutput)
+        self.parsedResult = parseResult
+        renderHandler?(parseResult)
     }
 }

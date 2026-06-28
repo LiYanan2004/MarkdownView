@@ -5,10 +5,9 @@
 
 import MarkdownView
 import SwiftUI
-internal import RichText
 
 struct MarkdownPreview: View {
-    var markdownText: String
+    var source: StreamingMarkdownSource
     var rendererKind: MarkdownRendererKind
 
     var body: some View {
@@ -32,14 +31,14 @@ struct MarkdownPreview: View {
 
     @ViewBuilder
     private var renderedContent: some View {
-        StreamingMarkdownReader(markdownText) { doc in
+        StreamingMarkdownReader(source) { parseResult in
             switch rendererKind {
             #if os(iOS) || os(macOS)
             case .markdownText:
-                MarkdownText(doc)
+                MarkdownText(parseResult)
             #endif
             case .markdownView:
-                MarkdownView(doc)
+                MarkdownView(parseResult)
             }
         }
     }
@@ -47,18 +46,18 @@ struct MarkdownPreview: View {
     private static let showcaseBaseURL = URL(string: "https://developer.apple.com")!
 }
 
-#Preview {
-    MarkdownPreview(
-        markdownText: ExampleMarkdown.showcase,
-        rendererKind: .markdownView
-    )
-}
-
-#if os(iOS) || os(macOS)
-#Preview("MarkdownText") {
-    MarkdownPreview(
-        markdownText: ExampleMarkdown.showcase,
-        rendererKind: .markdownText
-    )
-}
-#endif
+//#Preview {
+//    MarkdownPreview(
+//        markdownText: ExampleMarkdown.showcase,
+//        rendererKind: .markdownView
+//    )
+//}
+//
+//#if os(iOS) || os(macOS)
+//#Preview("MarkdownText") {
+//    MarkdownPreview(
+//        markdownText: ExampleMarkdown.showcase,
+//        rendererKind: .markdownText
+//    )
+//}
+//#endif

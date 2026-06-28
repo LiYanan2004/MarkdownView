@@ -12,7 +12,7 @@ public struct MarkdownMathContext: Sendable, Hashable {
     public var inlineMathStorage: [UUID: String]
     public var displayMathStorage: [UUID: String]
 
-    public init(
+    init(
         inlineMathStorage: [UUID: String] = [:],
         displayMathStorage: [UUID: String] = [:]
     ) {

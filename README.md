@@ -137,13 +137,13 @@ MarkdownView(markdownText)
 
 ### Share Parsed Content
 
-Use `MarkdownReader` when multiple views need the same parsed document.
+Use `MarkdownReader` when multiple views need the same parse result.
 
 ```swift
-MarkdownReader(markdownText) { markdownContent in
-    MarkdownView(markdownContent)
+MarkdownReader(markdownText) { parseResult in
+    MarkdownView(parseResult)
 
-    MarkdownTableOfContentReader(markdownContent) { headings in
+    MarkdownTableOfContentReader(parseResult) { headings in
         ForEach(headings.indices, id: \.self) { index in
             Text(headings[index].plainText)
         }

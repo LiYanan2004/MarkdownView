@@ -8,63 +8,27 @@ import Markdown
 
 struct MarkdownDocumentParser {
     static func parse(
-        _ input: MarkdownRenderingInput,
-        previousState: ParseResult? = nil
-    ) -> MarkdownRenderingOutput {
-        let parseResult: ParseResult
+        _ request: MarkdownParseRequest,
+        previousState: MarkdownParseResult? = nil
+    ) -> MarkdownParseResult {
+        let parseResult: MarkdownParseResult
 
         if let previousState,
-           previousState.parseOptions == input.parsingOptions,
+           previousState.parseOptions == request.parsingOptions,
            let incrementalParseResult = parseIncremental(
-                newSourceText: input.sourceText,
-                parseOptions: input.parsingOptions,
+                newSourceText: request.sourceText,
+                parseOptions: request.parsingOptions,
                 previousState: previousState
            ) {
             parseResult = incrementalParseResult
         } else {
             parseResult = fullParse(
-                sourceText: input.sourceText,
-                parseOptions: input.parsingOptions
+                sourceText: request.sourceText,
+                parseOptions: request.parsingOptions
             )
         }
 
-        return MarkdownRenderingOutput(
-            mathContext: parseResult.mathContext,
-            parseResult: parseResult
-        )
-    }
-}
-
-extension MarkdownDocumentParser {
-    enum ParsingStrategy: Sendable, Hashable {
-        /// Reuses the previous parse result without additional parsing.
-        case retained
-
-        /// Performs incremental parsing.
-        case incremental(stablePrefixRootBlockCount: Int)
-
-        /// Performs a full parse.
-        case full
-    }
-    
-    struct ParseResult: Sendable {
-        let sourceSnapshot: MarkdownSnapshot
-        let processedSnapshot: MarkdownSnapshot
-        var parseOptions: MarkdownDocumentParsingOptions
-        var document: Markdown.Document
-        var mathContext: MarkdownMathContext?
-        var mode: ParsingStrategy
-        
-        func retained() -> ParseResult {
-            var copy = self
-            copy.mode = .retained
-            return copy
-        }
-    }
-
-    struct MarkdownSnapshot: Sendable {
-        let text: String
-        let blockRanges: [Range<String.Index>]
+        return parseResult
     }
 }
 
@@ -72,26 +36,26 @@ extension MarkdownDocumentParser {
     static func fullParse(
         sourceText: String,
         parseOptions: MarkdownDocumentParsingOptions
-    ) -> ParseResult {
+    ) -> MarkdownParseResult {
         let preparedParse = prepareParse(
             sourceText: sourceText,
             parseOptions: parseOptions
         )
-        return ParseResult(
+        return MarkdownParseResult(
+            document: preparedParse.document,
+            mode: .full,
             sourceSnapshot: preparedParse.sourceSnapshot,
             processedSnapshot: preparedParse.processedSnapshot,
             parseOptions: parseOptions,
-            document: preparedParse.document,
             mathContext: preparedParse.mathContext,
-            mode: .full
         )
     }
 
     static func parseIncremental(
         newSourceText: String,
         parseOptions: MarkdownDocumentParsingOptions,
-        previousState: ParseResult
-    ) -> ParseResult? {
+        previousState: MarkdownParseResult
+    ) -> MarkdownParseResult? {
         let previousSourceText = previousState.sourceSnapshot.text
         
         // Reuse previous state if the input text is the same
@@ -160,19 +124,19 @@ extension MarkdownDocumentParser {
             at: reparsedProcessedStartIndex
         )
 
-        return ParseResult(
-            sourceSnapshot: MarkdownSnapshot(
+        return MarkdownParseResult(
+            document: mergedDocument,
+            mode: .incremental(stablePrefixRootBlockCount: stableRootBlockCount),
+            sourceSnapshot: MarkdownParseResult.Snapshot(
                 text: newSourceText,
                 blockRanges: Array(mergedRanges)
             ),
-            processedSnapshot: MarkdownSnapshot(
+            processedSnapshot: MarkdownParseResult.Snapshot(
                 text: mergedProcessedSourceText,
                 blockRanges: Array(mergedProcessedRanges)
             ),
             parseOptions: parseOptions,
-            document: mergedDocument,
-            mathContext: mergedMathContext,
-            mode: .incremental(stablePrefixRootBlockCount: stableRootBlockCount)
+            mathContext: mergedMathContext
         )
     }
 }
@@ -180,8 +144,8 @@ extension MarkdownDocumentParser {
 extension MarkdownDocumentParser {
     struct PreparedParse: Sendable {
         let document: Markdown.Document
-        let sourceSnapshot: MarkdownSnapshot
-        let processedSnapshot: MarkdownSnapshot
+        let sourceSnapshot: MarkdownParseResult.Snapshot
+        let processedSnapshot: MarkdownParseResult.Snapshot
         let mathContext: MarkdownMathContext?
     }
 
@@ -220,11 +184,11 @@ extension MarkdownDocumentParser {
 
             return PreparedParse(
                 document: document,
-                sourceSnapshot: MarkdownSnapshot(
+                sourceSnapshot: MarkdownParseResult.Snapshot(
                     text: sourceText,
                     blockRanges: sourceRootBlockRanges
                 ),
-                processedSnapshot: MarkdownSnapshot(
+                processedSnapshot: MarkdownParseResult.Snapshot(
                     text: processedSourceText,
                     blockRanges: processedRootBlockRanges
                 ),
@@ -243,11 +207,11 @@ extension MarkdownDocumentParser {
 
         return PreparedParse(
             document: document,
-            sourceSnapshot: MarkdownSnapshot(
+            sourceSnapshot: MarkdownParseResult.Snapshot(
                 text: sourceText,
                 blockRanges: rootBlockRanges
             ),
-            processedSnapshot: MarkdownSnapshot(
+            processedSnapshot: MarkdownParseResult.Snapshot(
                 text: sourceText,
                 blockRanges: rootBlockRanges
             ),
@@ -256,7 +220,7 @@ extension MarkdownDocumentParser {
     }
 
     static func mergedMathContext(
-        previousState: ParseResult,
+        previousState: MarkdownParseResult,
         parseOptions: MarkdownDocumentParsingOptions,
         stablePrefixProcessedEndIndex: String.Index,
         tailPreparedParse: PreparedParse
@@ -546,42 +510,5 @@ extension MarkdownDocumentParser {
         }
 
         return reparsedRootBlockIndex
-    }
-
-    
-}
-
-extension String {
-    func stringIndex(
-        forLine targetLine: Int,
-        column targetColumn: Int
-    ) -> String.Index? {
-        guard targetLine > 0, targetColumn > 0 else { return nil }
-
-        var currentLine = 1
-        var lineStartIndex = self.startIndex
-
-        while currentLine < targetLine {
-            guard let newlineIndex = self[lineStartIndex...].firstIndex(of: "\n") else {
-                return nil
-            }
-            lineStartIndex = self.index(after: newlineIndex)
-            currentLine += 1
-        }
-
-        let targetOffset = targetColumn - 1
-        let lineEndIndex: String.Index
-        if let newlineIndex = self[lineStartIndex...].firstIndex(of: "\n") {
-            lineEndIndex = newlineIndex
-        } else {
-            lineEndIndex = self.endIndex
-        }
-
-        let maximumOffset = self.distance(from: lineStartIndex, to: lineEndIndex)
-        if targetOffset > maximumOffset {
-            return lineEndIndex
-        }
-
-        return self.index(lineStartIndex, offsetBy: targetOffset)
     }
 }

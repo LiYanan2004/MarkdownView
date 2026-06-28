@@ -6,9 +6,9 @@
 import SwiftUI
 import Markdown
 
-/// Reads headings from a parsed markdown document and builds a custom table of contents view.
+/// Reads headings from a parsed markdown result or document and builds a custom table of contents view.
 ///
-/// Use ``MarkdownReader`` when ``MarkdownView`` and ``MarkdownTableOfContentReader`` should share the same parsed document instance.
+/// Use ``MarkdownReader`` when ``MarkdownView`` and ``MarkdownTableOfContentReader`` should share the same parse result instance.
 ///
 /// ``MarkdownTableOfContentReader`` conforms to `Equatable`, so you can add `.equatable()` view modifier when the content builder depends only on the provided `Markdown.Document` and the derived headings, so SwiftUI can skip recomputing the view body when document identity stays the same.
 public struct MarkdownTableOfContentReader<Content: View>: View, @MainActor Equatable {
@@ -26,6 +26,18 @@ public struct MarkdownTableOfContentReader<Content: View>: View, @MainActor Equa
     ) {
         self.document = document
         self.content = content
+    }
+    
+    /// Creates a table-of-contents reader from a parsed markdown result.
+    ///
+    /// - Parameters:
+    ///   - parseResult: The parsed markdown result to inspect.
+    ///   - content: A view builder that receives the headings extracted from the result document.
+    public init(
+        _ parseResult: MarkdownParseResult,
+        @ViewBuilder content: @escaping ([Markdown.Heading]) -> Content
+    ) {
+        self.init(parseResult.document, content: content)
     }
     
     /// Creates a table-of-contents reader from a markdown string.

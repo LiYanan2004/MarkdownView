@@ -14,4 +14,5 @@ let logger = Logger(
 
 extension Logger {
     static let runtime = Logger(subsystem: "com.apple.runtime-issues", category: "MarkdownView")
+    static let streaming = Logger(subsystem: "com.liyanan2004.MarkdownView", category: "Streaming")
 }

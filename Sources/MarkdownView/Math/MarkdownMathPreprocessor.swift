@@ -8,14 +8,13 @@
 import Foundation
 import Markdown
 
-@_documentation(visibility: internal)
-public struct MarkdownMathPreprocessor: Sendable, Hashable {
-    public struct Result: Sendable, Hashable {
-        public let markdown: String
-        public let context: MarkdownMathContext
+struct MarkdownMathPreprocessor: Sendable, Hashable {
+    struct Result: Sendable, Hashable {
+        let markdown: String
+        let context: MarkdownMathContext
         let replacements: [Replacement]
 
-        public init(
+        init(
             markdown: String,
             context: MarkdownMathContext
         ) {
@@ -37,15 +36,11 @@ public struct MarkdownMathPreprocessor: Sendable, Hashable {
         }
     }
     
-    public func preprocess(_ markdown: String) -> String {
+    func preprocess(_ markdown: String) -> String {
         preprocessingResult(for: markdown).markdown
     }
-    
-    public init() {
-        
-    }
 
-    public func preprocessingResult(
+    func preprocessingResult(
         for markdown: String,
         requiresBlockDirectiveParsing: Bool = false
     ) -> MarkdownMathPreprocessor.Result {
@@ -147,11 +142,11 @@ extension MarkdownMathPreprocessor {
         "\(placeholderPrefix)\(kind.rawValue):\(identifier.uuidString)\(placeholderSuffix)"
     }
 
-    static public func inlinePlaceholder(for identifier: UUID) -> String {
+    static func inlinePlaceholder(for identifier: UUID) -> String {
         placeholder(for: identifier, kind: .inline)
     }
 
-    static public func displayPlaceholder(for identifier: UUID) -> String {
+    static func displayPlaceholder(for identifier: UUID) -> String {
         placeholder(for: identifier, kind: .display)
     }
 

@@ -8,30 +8,30 @@ import Testing
 struct MarkdownRenderingInputTests {
     @Test("Math rendering alone does not enable block directive parsing")
     func mathRenderingAloneDoesNotEnableBlockDirectiveParsing() {
-        let renderingInput = MarkdownRenderingInput(
+        let request = MarkdownParseRequest(
             sourceText: "@Note()",
             mathContext: MarkdownMathContext(),
             elementRenderers: []
         )
-        let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
+        let parseResult = MarkdownDocumentParser.parse(request)
 
-        #expect(renderingInput.parsingOptions.contains(.parsesBlockDirectives) == false)
-        #expect(Array(renderingOutput.document.children).first is Markdown.Paragraph)
+        #expect(request.parsingOptions.contains(.parsesBlockDirectives) == false)
+        #expect(Array(parseResult.document.children).first is Markdown.Paragraph)
     }
 
     @Test("Custom block directive renderers enable block directive parsing")
     func customBlockDirectiveRenderersEnableBlockDirectiveParsing() {
-        let renderingInput = MarkdownRenderingInput(
+        let request = MarkdownParseRequest(
             sourceText: "@Note()",
             mathContext: nil,
             elementRenderers: [
                 .blockDirective(TestBlockDirectiveRenderer(), name: "Note")
             ]
         )
-        let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
+        let parseResult = MarkdownDocumentParser.parse(request)
 
-        #expect(renderingInput.parsingOptions.contains(.parsesBlockDirectives))
-        #expect(Array(renderingOutput.document.children).first is Markdown.BlockDirective)
+        #expect(request.parsingOptions.contains(.parsesBlockDirectives))
+        #expect(Array(parseResult.document.children).first is Markdown.BlockDirective)
     }
 }
 

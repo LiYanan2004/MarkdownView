@@ -8,7 +8,7 @@ import Markdown
 
 /// A view that renders markdown content.
 public struct MarkdownView: View {
-    private var source: MarkdownRenderingSource
+    private var content: MarkdownContent
     
     @Environment(\.markdownRendererConfiguration) private var configuration
     @Environment(\.markdownMathContext) private var mathContext
@@ -16,51 +16,34 @@ public struct MarkdownView: View {
     @Environment(\.markdownFontGroup) private var fonts
     
     /// Creates a view that renders given markdown string.
+    /// 
     /// - Parameter text: The markdown source to render.
     public init(_ text: String) {
-        self.source = .rawText(text)
+        self.content = .rawText(text)
     }
 
-    /// Creates a view that renders a parsed markdown document.
-    /// - Parameter document: The parsed markdown document to render.
-    public init(_ document: Markdown.Document) {
-        self.source = .document(document)
+    /// Creates a view that renders a parsed markdown result.
+    ///
+    /// - Parameter parseResult: The parsed markdown result to render.
+    public init(_ parseResult: MarkdownParseResult) {
+        self.content = .parsedDocument(parseResult)
     }
     
     public var body: some View {
-        let resolvedSource = self.resolvedSource
-
-        let renderer = MarkdownViewRenderer(
+        let parseResult = content.parse(
+            with: MarkdownDocumentParsingOptions(
+                mathContext: mathContext,
+                elementRenderers: elementRenderers
+            )
+        )
+        
+        MarkdownViewRenderer(
             configuration: configuration,
-            mathContext: resolvedSource.mathContext,
+            mathContext: parseResult.mathContext,
             elementRenderers: elementRenderers
         )
-        renderer.makeBody(for: resolvedSource.document)
-            .erasedToAnyView()
-            .font(fonts.body._swiftUIFont)
-    }
-    
-    private var resolvedSource: (document: Markdown.Document, mathContext: MarkdownMathContext?) {
-        let document: Markdown.Document
-        let mathContext: MarkdownMathContext?
-        
-        switch source {
-            case .rawText(let sourceText):
-                let renderingInput = MarkdownRenderingInput(
-                    sourceText: sourceText,
-                    mathContext: self.mathContext,
-                    elementRenderers: elementRenderers
-                )
-                let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
-                document = renderingOutput.document
-                mathContext = renderingOutput.mathContext
-                
-            case .document(let parsedDocument):
-                document = parsedDocument
-                mathContext = self.mathContext
-        }
-        
-        return (document, mathContext)
+        .makeBody(for: parseResult.document)
+        .font(fonts.body._swiftUIFont)
     }
 }
 

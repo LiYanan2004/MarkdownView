@@ -6,15 +6,11 @@
 //
 
 import SwiftUI
+import MarkdownView
 
 struct ContentView: View {
-    @State private var markdownText = ExampleMarkdown.showcase
-
-    #if os(iOS) || os(macOS)
-    @State private var rendererKind = MarkdownRendererKind.markdownText
-    #else
+    @State private var source = StreamingMarkdownSource(ExampleMarkdown.showcase)
     @State private var rendererKind = MarkdownRendererKind.markdownView
-    #endif
 
     @State private var isMarkdownEditorPresented = false
     @State private var streamingTask: Task<Void, Error>?
@@ -22,60 +18,61 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             MarkdownPreview(
-                markdownText: markdownText,
+                source: source,
                 rendererKind: rendererKind
             )
-            .toolbar {
-                ToolbarItem {
-                    Button(
-                        "Stream",
-                        systemImage: streamingTask == nil ? "dot.radiowaves.left.and.right" : "stop.fill"
-                    ) {
-                        if streamingTask == nil {
-                            streamingTask = Task {
-                                markdownText = ""
-                                
-                                var copy = ExampleMarkdown.showcase
-                                while !copy.isEmpty {
-                                    if Task.isCancelled {
-                                        break
-                                    }
-                                    
-                                    let char = String(copy.removeFirst())
-                                    markdownText += String(char)
-                                    
-                                    try await Task.sleep(for: .milliseconds(1))
-                                }
-                                
-                                streamingTask = nil
+            .toolbar(content: toolbarContent)
+        }
+    }
+    
+    @ToolbarContentBuilder
+    private func toolbarContent() -> some ToolbarContent {
+        ToolbarItem {
+            Button(
+                "Stream",
+                systemImage: streamingTask == nil ? "dot.radiowaves.left.and.right" : "stop.fill"
+            ) {
+                if streamingTask == nil {
+                    streamingTask = Task {
+                        source.text = ""
+                        
+                        for character in ExampleMarkdown.showcase {
+                            if Task.isCancelled {
+                                break
                             }
-                        } else {
-                            streamingTask?.cancel()
+                            
+                            source.text += String(character)
+                            
+                            try await Task.sleep(for: .milliseconds(1))
                         }
+                        
+                        streamingTask = nil
                     }
-                }
-
-                ToolbarItem {
-                    Button("Edit") {
-                        isMarkdownEditorPresented = true
-                    }
-                    .popover(isPresented: $isMarkdownEditorPresented) {
-                        MarkdownEditor(markdownText: $markdownText)
-                            .scrollContentBackground(.hidden)
-                            .frame(idealWidth: 400)
-                    }
-                }
-                
-                ToolbarItem(placement: .navigation) {
-                    Picker("Renderer", selection: $rendererKind) {
-                        ForEach(MarkdownRendererKind.allCases) { rendererKind in
-                            Text(rendererKind.title)
-                                .tag(rendererKind)
-                        }
-                    }
-                    .fixedSize()
+                } else {
+                    streamingTask?.cancel()
                 }
             }
+        }
+
+        ToolbarItem {
+            Button("Edit") {
+                isMarkdownEditorPresented = true
+            }
+            .popover(isPresented: $isMarkdownEditorPresented) {
+                MarkdownEditor(markdownText: $source.text)
+                    .scrollContentBackground(.hidden)
+                    .frame(idealWidth: 400)
+            }
+        }
+        
+        ToolbarItem(placement: .navigation) {
+            Picker("Renderer", selection: $rendererKind) {
+                ForEach(MarkdownRendererKind.allCases) { rendererKind in
+                    Text(rendererKind.title)
+                        .tag(rendererKind)
+                }
+            }
+            .fixedSize()
         }
     }
 }

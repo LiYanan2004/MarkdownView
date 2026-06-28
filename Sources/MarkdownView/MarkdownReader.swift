@@ -8,52 +8,52 @@
 import Markdown
 import SwiftUI
 
-/// A reader that provides a parsed markdown document to use across multiple views.
+/// A reader that provides a parsed markdown result to use across multiple views.
 ///
-/// This reader offers a single source-of-truth for its child markdown views, and ensures the input is only parsed once. Apply parse-affecting modifiers, such as `markdownMathRenderingEnabled()`, to the reader so they can participate in parsing before the document is produced.
+/// This reader offers a single source-of-truth for its child markdown views, and ensures the input is only parsed once. Apply parse-affecting modifiers, such as `markdownMathRenderingEnabled()`, to the reader so they can participate in parsing before the parse result is produced.
 ///
 /// ```swift
-/// MarkdownReader("**Hello World**") { markdown in
-///     MarkdownView(markdown)
-///     MarkdownTableOfContentReader(markdown) { headings in
+/// MarkdownReader("**Hello World**") { parseResult in
+///     MarkdownView(parseResult)
+///     MarkdownTableOfContentReader(parseResult) { headings in
 ///         // ...
 ///     }
 /// }
 /// ```
 public struct MarkdownReader<Content: View>: View {
     private var sourceText: String
-    private var contents: (_ document: Markdown.Document) -> Content
+    private var content: (_ parseResult: MarkdownParseResult) -> Content
 
     @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
 
-    /// Creates a reader that parses a markdown string once and passes the parsed document to `contents`.
+    /// Creates a reader that parses a markdown string once and passes the parse result to `content`.
     ///
     /// - Parameters:
     ///   - text: The markdown source to parse.
-    ///   - contents: A view builder that receives the parsed document.
-    public init(_ text: String, @ViewBuilder contents: @escaping (Markdown.Document) -> Content) {
+    ///   - content: A view builder that receives the parse result.
+    public init(_ text: String, @ViewBuilder content: @escaping (MarkdownParseResult) -> Content) {
         self.sourceText = text
-        self.contents = contents
+        self.content = content
     }
     
     public var body: some View {
-        let renderingInput = MarkdownRenderingInput(
+        let request = MarkdownParseRequest(
             sourceText: sourceText,
             mathContext: mathContext,
             elementRenderers: elementRenderers
         )
-        let renderingOutput = MarkdownDocumentParser.parse(renderingInput)
+        let parseResult = MarkdownDocumentParser.parse(request)
 
-        contents(renderingOutput.document)
-            .environment(\.markdownMathContext, renderingOutput.mathContext)
+        content(parseResult)
+            .environment(\.markdownMathContext, parseResult.mathContext)
     }
 }
 
 #Preview {
-    MarkdownReader("**Hello World**") { markdown in
-        MarkdownView(markdown)
-        MarkdownTableOfContentReader(markdown) { headings in
+    MarkdownReader("**Hello World**") { parseResult in
+        MarkdownView(parseResult)
+        MarkdownTableOfContentReader(parseResult) { headings in
             
         }
     }
