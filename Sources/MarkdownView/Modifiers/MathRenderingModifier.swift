@@ -23,13 +23,8 @@ fileprivate struct MarkdownMathRenderingModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .transformEnvironment(\.markdownRendererConfiguration) { configuration in
-                configuration.math.shouldRender = isEnabled
-            }
-            .transformEnvironment(\.markdownElementRenderers) { renderers in
-                if isEnabled {
-                    renderers.register(.blockDirective(MathBlockDirectiveRenderer(), name: "math"))
-                }
+            .transformEnvironment(\.markdownMathContext) { mathContext in
+                mathContext = isEnabled ? (mathContext ?? MarkdownMathContext()) : nil
             }
     }
 }

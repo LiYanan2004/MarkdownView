@@ -23,6 +23,9 @@ extension View {
     ///     }
     /// }
     /// ```
+    ///
+    /// When using `MarkdownText`, apply this modifier inside a `MarkdownTableStyle`.
+    /// Applying it directly to `MarkdownText` has no effect.
     nonisolated public func markdownTableCellOverlay<Content: View>(
         @ViewBuilder _ content: @escaping () -> Content
     ) -> some View {

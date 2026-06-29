@@ -6,23 +6,25 @@
 
 - ``MarkdownFontGroup/automatic``
 
-### Creating foreground style groups
+### Creating font groups
 
-- ``MarkdownFontGroup/h1-nw8b``
-- ``MarkdownFontGroup/h2-8joj3``
-- ``MarkdownFontGroup/h3-41hxd``
-- ``MarkdownFontGroup/h4-6miiq``
-- ``MarkdownFontGroup/h5-42vqr``
-- ``MarkdownFontGroup/h6-5vjsh``
-- ``MarkdownFontGroup/blockQuote-46lkt``
-- ``MarkdownFontGroup/codeBlock-37foh``
-- ``MarkdownFontGroup/tableHeader-5y44k``
-- ``MarkdownFontGroup/tableBody-5ywif``
-- ``MarkdownFontGroup/body-6f162``
+- ``MarkdownFontGroup/h1``
+- ``MarkdownFontGroup/h2``
+- ``MarkdownFontGroup/h3``
+- ``MarkdownFontGroup/h4``
+- ``MarkdownFontGroup/h5``
+- ``MarkdownFontGroup/h6``
+- ``MarkdownFontGroup/body``
+- ``MarkdownFontGroup/blockQuote``
+- ``MarkdownFontGroup/codeBlock``
+- ``MarkdownFontGroup/tableHeader``
+- ``MarkdownFontGroup/tableBody``
 - ``MarkdownFontGroup/inlineMath``
+- ``MarkdownFontGroup/displayMath``
 
 ### Supporting type
 
+- ``CustomCTFontConvertible``
 - ``DefaultFontGroup``
 
 ### Substituting style group

@@ -8,35 +8,49 @@
 import SwiftUI
 
 extension View {
-    /// Apply a foreground style group to MarkdownView.
+    /// Sets heading styles for all heading levels in `MarkdownView`.
     ///
-    /// This is useful when you want to completely customize foreground styles.
+    /// This modifier does not affect `MarkdownText`.
     ///
-    /// - Parameter group: A style set to apply to the MarkdownView.
-    nonisolated public func headingStyleGroup(
+    /// - Parameter group: The heading style group to apply.
+    nonisolated public func markdownHeadingStyleGroup(
         _ group: some HeadingStyleGroup
     ) -> some View {
         environment(\.headingStyleGroup, AnyHeadingStyleGroup(group))
     }
     
-    /// Apply a foreground style group to MarkdownView.
+    /// Sets heading styles for all heading levels in `MarkdownView`.
     ///
-    /// This is useful when you want to completely customize foreground styles.
+    /// This modifier does not affect `MarkdownText`.
     ///
-    /// - Parameter group: A style set to apply to the MarkdownView.
-    @available(*, deprecated, renamed: "headingStyleGroup")
+    /// - Parameter group: The heading style group to apply.
+    @available(*, deprecated, renamed: "markdownHeadingStyleGroup")
+    nonisolated public func headingStyleGroup(
+        _ group: some HeadingStyleGroup
+    ) -> some View {
+        markdownHeadingStyleGroup(group)
+    }
+    
+    /// Sets heading styles for all heading levels in `MarkdownView`.
+    ///
+    /// This modifier does not affect `MarkdownText`.
+    ///
+    /// - Parameter group: The heading style group to apply.
+    @available(*, deprecated, renamed: "markdownHeadingStyleGroup")
     nonisolated public func foregroundStyleGroup(
         _ group: some HeadingStyleGroup
     ) -> some View {
-        headingStyleGroup(group)
+        markdownHeadingStyleGroup(group)
     }
     
-    /// Sets foreground style for the specific component in MarkdownView.
+    /// Sets the heading style for a specific heading level in `MarkdownView`.
+    ///
+    /// This modifier does not affect `MarkdownText`.
     ///
     /// - Parameters:
-    ///   - style: The style to apply to this type of components.
-    ///   - headingLevel: The type of components to apply the foreground style.
-    nonisolated public func headingStyle(
+    ///   - style: The style to apply to headings at the specified level.
+    ///   - headingLevel: The heading level to style.
+    nonisolated public func markdownHeadingStyle(
         _ style: some ShapeStyle,
         for headingLevel: HeadingLevel
     ) -> some View {
@@ -53,16 +67,33 @@ extension View {
         }
     }
     
-    /// Sets foreground style for the specific component in MarkdownView.
+    /// Sets the heading style for a specific heading level in `MarkdownView`.
+    ///
+    /// This modifier does not affect `MarkdownText`.
     ///
     /// - Parameters:
-    ///   - style: The style to apply to this type of components.
-    ///   - headingLevel: The type of components to apply the foreground style.
-    @available(*, deprecated, renamed: "headingStyle")
+    ///   - style: The style to apply to headings at the specified level.
+    ///   - headingLevel: The heading level to style.
+    @available(*, deprecated, renamed: "markdownHeadingStyle")
+    nonisolated public func headingStyle(
+        _ style: some ShapeStyle,
+        for headingLevel: HeadingLevel
+    ) -> some View {
+        markdownHeadingStyle(style, for: headingLevel)
+    }
+    
+    /// Sets the heading style for a specific heading level in `MarkdownView`.
+    ///
+    /// This modifier does not affect `MarkdownText`.
+    ///
+    /// - Parameters:
+    ///   - style: The style to apply to headings at the specified level.
+    ///   - headingLevel: The heading level to style.
+    @available(*, deprecated, renamed: "markdownHeadingStyle")
     nonisolated public func foregroundStyle(
         _ style: some ShapeStyle,
         for headingLevel: HeadingLevel
     ) -> some View {
-        headingStyle(style, for: headingLevel)
+        markdownHeadingStyle(style, for: headingLevel)
     }
 }

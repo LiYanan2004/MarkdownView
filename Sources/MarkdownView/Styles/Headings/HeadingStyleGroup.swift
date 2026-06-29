@@ -1,0 +1,100 @@
+import SwiftUI
+
+/// A type that applies foreground styles to markdown headings.
+public protocol HeadingStyleGroup {
+    @_documentation(visibility: internal)
+    associatedtype H1Style: ShapeStyle
+    @_documentation(visibility: internal)
+    associatedtype H2Style: ShapeStyle
+    @_documentation(visibility: internal)
+    associatedtype H3Style: ShapeStyle
+    @_documentation(visibility: internal)
+    associatedtype H4Style: ShapeStyle
+    @_documentation(visibility: internal)
+    associatedtype H5Style: ShapeStyle
+    @_documentation(visibility: internal)
+    associatedtype H6Style: ShapeStyle
+    
+    /// The style for displaying h1 text.
+    var h1: H1Style { get }
+    /// The style for displaying h2 text.
+    var h2: H2Style { get }
+    /// The style for displaying h3 text.
+    var h3: H3Style { get }
+    /// The style for displaying h4 text.
+    var h4: H4Style { get }
+    /// The style for displaying h5 text.
+    var h5: H5Style { get }
+    /// The style for displaying h6 text.
+    var h6: H6Style { get }
+    
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownCodeBlockStyle` instead.")
+    @_documentation(visibility: internal)
+    associatedtype CodeBlockStyle: ShapeStyle
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownBlockQuoteStyle` instead.")
+    @_documentation(visibility: internal)
+    associatedtype BlockQuoteStyle: ShapeStyle
+    
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownCodeBlockStyle` instead.")
+    @_documentation(visibility: internal)
+    var codeBlock: CodeBlockStyle { get }
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownBlockQuoteStyle` instead.")
+    @_documentation(visibility: internal)
+    var blockQuote: BlockQuoteStyle { get }
+    
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownTableStyle` instead.")
+    @_documentation(visibility: internal)
+    associatedtype TableHeaderStyle: ShapeStyle
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownTableStyle` instead.")
+    @_documentation(visibility: internal)
+    associatedtype TableBodyStyle: ShapeStyle
+    
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownTableStyle` instead.")
+    @_documentation(visibility: internal)
+    var tableHeader: TableHeaderStyle { get }
+    @available(*, deprecated, message: "This style will take no effect in current release and will be removed in the future. Implement a custom `MarkdownTableStyle` instead.")
+    @_documentation(visibility: internal)
+    var tableBody: TableBodyStyle { get }
+}
+
+extension HeadingStyleGroup {
+    /// The default foreground style for level-one headings.
+    public var h1: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-two headings.
+    public var h2: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-three headings.
+    public var h3: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-four headings.
+    public var h4: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-five headings.
+    public var h5: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-six headings.
+    public var h6: some ShapeStyle { .foreground }
+    
+    @_documentation(visibility: internal)
+    public var codeBlock: some ShapeStyle { .foreground }
+    @_documentation(visibility: internal)
+    public var blockQuote: some ShapeStyle { .foreground }
+    @_documentation(visibility: internal)
+    public var tableHeader: some ShapeStyle { .foreground }
+    @_documentation(visibility: internal)
+    public var tableBody: some ShapeStyle { .foreground }
+}
+
+// MARK: - Environment Value
+
+struct HeadingStyleGroupEnvironmentKey: EnvironmentKey {
+    static let defaultValue: AnyHeadingStyleGroup = .init(.automatic)
+}
+
+extension EnvironmentValues {
+    var headingStyleGroup: AnyHeadingStyleGroup {
+        get { self[HeadingStyleGroupEnvironmentKey.self] }
+        set { self[HeadingStyleGroupEnvironmentKey.self] = newValue }
+    }
+}

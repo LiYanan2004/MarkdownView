@@ -29,13 +29,16 @@ extension View {
     ///     }
     /// }
     /// ```
+    ///
+    /// When using `MarkdownText`, apply this modifier inside a `MarkdownTableStyle`.
+    /// Applying it directly to `MarkdownText` has no effect.
     nonisolated public func markdownTableRowBackgroundStyle(
         _ background: some ShapeStyle,
         in shape: some Shape
     ) -> some View {
         transformEnvironment(\.self) { environmentValues in
             environmentValues.markdownTableRowBackgroundStyle = AnyShapeStyle(background)
-            environmentValues.markdownTableRowBackgroundShape = _AnyShape(shape)
+            environmentValues.markdownTableRowBackgroundShape = AnyShape(shape)
         }
     }
     
@@ -60,6 +63,9 @@ extension View {
     ///     }
     /// }
     /// ```
+    ///
+    /// When using `MarkdownText`, apply this modifier inside a `MarkdownTableStyle`.
+    /// Applying it directly to `MarkdownText` has no effect.
     nonisolated public func markdownTableRowBackgroundStyle(
         _ background: some ShapeStyle
     ) -> some View {
