@@ -5,7 +5,7 @@
 ### Reading parsed content
 
 - ``MarkdownParseResult/document``
-- ``MarkdownParseResult/mode``
+- ``MarkdownParseResult/parseOptions``
 - ``MarkdownParseResult/sourceSnapshot``
 - ``MarkdownParseResult/processedSnapshot``
 - ``MarkdownParseResult/parseOptions``

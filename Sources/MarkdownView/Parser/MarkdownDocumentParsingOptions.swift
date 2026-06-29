@@ -44,7 +44,7 @@ extension MarkdownDocumentParsingOptions {
 
 extension MarkdownDocumentParsingOptions {
     /// The `swift-markdown` parse options represented by this value.
-    public var markdownParseOptions: ParseOptions {
+    package var markdownParseOptions: ParseOptions {
         var markdownParseOptions = ParseOptions()
 
         if contains(.parsesBlockDirectives) {

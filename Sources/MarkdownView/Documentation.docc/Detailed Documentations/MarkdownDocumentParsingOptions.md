@@ -11,7 +11,3 @@
 
 - ``MarkdownDocumentParsingOptions/rendersMath``
 - ``MarkdownDocumentParsingOptions/parsesBlockDirectives``
-
-### Bridging to swift-markdown
-
-- ``MarkdownDocumentParsingOptions/markdownParseOptions``
