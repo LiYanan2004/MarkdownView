@@ -23,6 +23,7 @@ extension View {
     /// - parameter edges: The set of edges to pad for headings. The default is `Edge.Set.top`.
     /// - parameter length: The length of the vertical padding on each side.
     /// - parameter headingLevels: The heading levels to use the specified padding length.
+    @_disfavoredOverload
     nonisolated public func padding(
         _ edges: Edge.Set = .top,
         _ length: CGFloat,
