@@ -5,7 +5,7 @@
 //  Created by Yanan Li on 2026/6/17.
 //
 
-#if canImport(SwiftMath)
+#if ENABLE_MATH_RENDERING
 import SwiftUI
 
 struct InlineMath: View {

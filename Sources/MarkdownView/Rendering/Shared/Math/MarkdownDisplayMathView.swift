@@ -28,7 +28,7 @@ struct MarkdownDisplayMathView: View {
     
     @ViewBuilder
     private var latex: some View {
-        #if canImport(SwiftMath)
+        #if ENABLE_MATH_RENDERING
         if let latexMath {
             SwiftMathView(
                 latex: latexMath,
@@ -45,7 +45,7 @@ struct MarkdownDisplayMathView: View {
     }
 }
 
-#if canImport(SwiftMath)
+#if ENABLE_MATH_RENDERING
 #Preview {
     SwiftMathView(
         latex: "$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$",

@@ -138,7 +138,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
     func visitText(_ text: Markdown.Text) -> TextContent {
         let plainText = text.plainText
-        #if canImport(SwiftMath)
+        #if ENABLE_MATH_RENDERING
         if mathContext != nil,
            let mathIdentifier = MarkdownMathPreprocessor.displayPlaceholderIdentifier(
                in: plainText

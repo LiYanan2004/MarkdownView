@@ -89,7 +89,7 @@ struct MarkdownTextConverterTests {
         }
     }
 
-    #if canImport(SwiftMath)
+    #if ENABLE_MATH_RENDERING
     @Test("Converts preprocessed inline math placeholders to embedded content")
     @MainActor
     func convertsPreprocessedInlineMathPlaceholdersToEmbeddedContent() {
@@ -105,8 +105,6 @@ struct MarkdownTextConverterTests {
         #expect(!textContent.plainText.contains("markdownview-math(inline:"))
         #expect(textContent.plainText == "Value \u{FFFC} stays inline.")
     }
-    #endif
-
     @Test("Converts preprocessed display math placeholders to embedded content")
     @MainActor
     func convertsPreprocessedDisplayMathPlaceholdersToEmbeddedContent() {
@@ -131,6 +129,7 @@ struct MarkdownTextConverterTests {
         #expect(!textContent.plainText.contains("markdownview-math(display:"))
         #expect(!textContent.plainText.contains("$$"))
     }
+    #endif
 
     @Test("Aligns list continuation paragraphs with item body")
     @MainActor

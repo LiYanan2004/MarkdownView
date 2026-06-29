@@ -5,7 +5,7 @@
 //  Created by Yanan Li on 2026/6/21.
 //
 
-#if canImport(SwiftMath)
+#if ENABLE_MATH_RENDERING
 
 import SwiftMath
 import SwiftUI

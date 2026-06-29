@@ -23,6 +23,8 @@ import SwiftUI
 public struct MarkdownReader<Content: View>: View {
     private var sourceText: String
     private var content: (_ parseResult: MarkdownParseResult) -> Content
+    
+    @State private var parseStorage = ParseStorage()
 
     @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
@@ -43,10 +45,36 @@ public struct MarkdownReader<Content: View>: View {
             mathContext: mathContext,
             elementRenderers: elementRenderers
         )
-        let parseResult = MarkdownDocumentParser.parse(request)
+        let parseResult = parseResult(for: request)
 
         content(parseResult)
             .environment(\.markdownMathContext, parseResult.mathContext)
+    }
+    
+    private func parseResult(for request: MarkdownParseRequest) -> MarkdownParseResult {
+        if let lastParseState = parseStorage.lastParseState, lastParseState.request == request {
+            return lastParseState.result
+        }
+        
+        let state = ParseState(
+            request: request,
+            result: MarkdownDocumentParser.parse(request)
+        )
+        self.parseStorage.lastParseState = state
+        return state.result
+    }
+}
+
+// MARK: - Supplementary
+
+extension MarkdownReader {
+    struct ParseState: Sendable {
+        var request: MarkdownParseRequest
+        var result: MarkdownParseResult
+    }
+    
+    @MainActor final class ParseStorage {
+        var lastParseState: ParseState? = nil
     }
 }
 

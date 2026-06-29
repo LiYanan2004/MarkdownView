@@ -15,7 +15,7 @@ struct InlineMathOrText {
     @preconcurrency
     @MainActor
     func makeBody(mathContext: MarkdownMathContext?) -> MarkdownNodeView {
-        #if canImport(SwiftMath)
+        #if ENABLE_MATH_RENDERING
         let mathSegments = self.mathSegments(mathContext: mathContext)
 
         guard !mathSegments.isEmpty else {
@@ -52,7 +52,7 @@ struct InlineMathOrText {
     }
 }
 
-#if canImport(SwiftMath)
+#if ENABLE_MATH_RENDERING
 fileprivate extension InlineMathOrText {
     struct MathSegment {
         var range: Range<String.Index>

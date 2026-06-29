@@ -1,4 +1,4 @@
-#if canImport(RichText) && canImport(SwiftMath)
+#if canImport(RichText) && ENABLE_MATH_RENDERING
 
 import Foundation
 import RichText

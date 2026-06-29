@@ -186,6 +186,7 @@ struct MarkdownIncrementalParserTests {
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: markdown))
     }
 
+    #if ENABLE_MATH_RENDERING
     @Test("Uses incremental parsing when math rendering is enabled for inline math")
     func usesIncrementalParsingWhenMathRenderingIsEnabledForInlineMath() {
         let previous = "Inline math: $x$\n\nBravo"
@@ -243,6 +244,7 @@ struct MarkdownIncrementalParserTests {
             requiresBlockDirectiveParsing: false
         ))
     }
+    #endif
 
     @Test("Preserves a streamed emoji tail")
     func preservesAStreamedEmojiTail() {
@@ -260,6 +262,19 @@ struct MarkdownIncrementalParserTests {
 
         最后一行包含中文字符：叶子与结果
         """)
+    }
+
+    @MainActor
+    @Test("Parses from detached work without main-actor isolation")
+    func parsesFromDetachedWorkWithoutMainActorIsolation() async {
+        let request = parseRequest(markdown: "# Title\n\nBody")
+
+        let parseResult = await Task.detached(priority: .userInitiated) {
+            MarkdownDocumentParser.parse(request)
+        }.value
+
+        #expect(parseResult.mode == .full)
+        #expect(documentDebugDescription(parseResult.document) == fullParseDocumentDescription(markdown: "# Title\n\nBody"))
     }
 }
 

@@ -421,7 +421,7 @@ extension MarkdownDocumentParser {
     }
 
     static var canProcessMath: Bool {
-        #if LaTeX && canImport(SwiftMath)
+        #if ENABLE_MATH_RENDERING
         true
         #else
         false
