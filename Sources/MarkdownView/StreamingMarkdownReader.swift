@@ -64,9 +64,18 @@ public struct StreamingMarkdownReader<Content: View>: View {
             .task(id: ObjectIdentifier(source)) {
                 renderCoordinator.reset()
                 
+                var latestStreamedText = source.text
                 for await text in source.updates() {
+                    latestStreamedText = text
                     submitMarkdown(text)
                 }
+                
+                guard Task.isCancelled == false else { return }
+                
+                // Perform a full parse to make sure the content renders correctly.
+                // This helps fix any potential issues caused by incremental parsing.
+                renderCoordinator.reset()
+                submitMarkdown(latestStreamedText)
             }
             .onChange(of: parsingOptions) { options in
                 submitMarkdown(source.text)
@@ -98,11 +107,12 @@ public struct StreamingMarkdownReader<Content: View>: View {
 fileprivate extension MarkdownParseResult {
     static let empty = MarkdownParseResult(
         document: Markdown.Document(parsing: ""),
-        mode: .full,
+        parsingStrategy: .full,
         sourceSnapshot: .init(text: "", blockRanges: []),
         processedSnapshot: .init(text: "", blockRanges: []),
         parseOptions: [],
-        mathContext: nil
+        mathContext: nil,
+        processedBlockStartLocations: []
     )
 }
 

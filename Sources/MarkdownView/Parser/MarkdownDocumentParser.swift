@@ -43,11 +43,12 @@ extension MarkdownDocumentParser {
         )
         return MarkdownParseResult(
             document: preparedParse.document,
-            mode: .full,
+            parsingStrategy: .full,
             sourceSnapshot: preparedParse.sourceSnapshot,
             processedSnapshot: preparedParse.processedSnapshot,
             parseOptions: parseOptions,
             mathContext: preparedParse.mathContext,
+            processedBlockStartLocations: preparedParse.processedBlockStartLocations
         )
     }
 
@@ -68,7 +69,6 @@ extension MarkdownDocumentParser {
         
         // Assume that the incremental parsing is always tail appending.
         guard newSourceText.hasPrefix(previousSourceText) else { return nil }
-
         let previousRootBlocks = Array(previousState.document.children)
         guard previousRootBlocks.isEmpty == false else { return nil }
 
@@ -84,11 +84,18 @@ extension MarkdownDocumentParser {
         let previousProcessedRanges = previousState.processedSnapshot.blockRanges
         guard previousProcessedRanges.isEmpty == false else { return nil }
         let reparsedProcessedStartIndex = previousProcessedRanges[reparsedRootBlockIndex].lowerBound
+        guard previousState.processedBlockStartLocations.indices.contains(reparsedRootBlockIndex) else {
+            return nil
+        }
 
         let tailSourceText = String(newSourceText[reparsedStartIndex...])
+
+        // Cache the absolute tail origin so incremental appends avoid rescanning the stable prefix.
+        let tailParseStartLocation = previousState.processedBlockStartLocations[reparsedRootBlockIndex]
         let tailPreparedParse = prepareParse(
             sourceText: tailSourceText,
             parseOptions: parseOptions,
+            parseStartLocation: tailParseStartLocation,
             sourceOffset: newSourceText.distance(
                 from: newSourceText.startIndex,
                 to: reparsedStartIndex
@@ -126,7 +133,7 @@ extension MarkdownDocumentParser {
 
         return MarkdownParseResult(
             document: mergedDocument,
-            mode: .incremental(stablePrefixRootBlockCount: stableRootBlockCount),
+            parsingStrategy: .incremental(stablePrefixRootBlockCount: stableRootBlockCount),
             sourceSnapshot: MarkdownParseResult.Snapshot(
                 text: newSourceText,
                 blockRanges: Array(mergedRanges)
@@ -136,7 +143,10 @@ extension MarkdownDocumentParser {
                 blockRanges: Array(mergedProcessedRanges)
             ),
             parseOptions: parseOptions,
-            mathContext: mergedMathContext
+            mathContext: mergedMathContext,
+            processedBlockStartLocations: Array(
+                previousState.processedBlockStartLocations.prefix(stableRootBlockCount)
+            ) + tailPreparedParse.processedBlockStartLocations
         )
     }
 }
@@ -147,14 +157,22 @@ extension MarkdownDocumentParser {
         let sourceSnapshot: MarkdownParseResult.Snapshot
         let processedSnapshot: MarkdownParseResult.Snapshot
         let mathContext: MarkdownMathContext?
+        let processedBlockStartLocations: [SourceLocation]
+    }
+
+    struct RootBlockMetadata: Sendable {
+        let range: Range<String.Index>
+        let startLocation: SourceLocation
     }
 
     static func prepareParse(
         sourceText: String,
         parseOptions: MarkdownDocumentParsingOptions,
-        sourceOffset: Int = 0,
+        parseStartLocation: SourceLocation = .start,
+        sourceOffset: Int = 0
     ) -> PreparedParse {
         let markdownParseOptions = parseOptions.markdownParseOptions
+        let parsePadding = parsePadding(for: parseStartLocation)
 
         if parseOptions.contains(.rendersMath) && canProcessMath {
             let preprocessingResult = MarkdownMathPreprocessor()
@@ -167,13 +185,25 @@ extension MarkdownDocumentParser {
                 sourceOffset: sourceOffset
             )
             let processedSourceText = remappedPreprocessingResult.markdown
+
+            let rangeCorrectedSourceText = parsePadding + processedSourceText
             let document = Markdown.Document(
-                parsing: processedSourceText,
+                parsing: rangeCorrectedSourceText,
                 options: markdownParseOptions
             )
-            let processedRootBlockRanges = parseRootBlockRanges(
-                in: processedSourceText,
-                document: document
+            let paddedProcessedRootBlocks = parseRootBlocks(
+                in: rangeCorrectedSourceText,
+                document: document,
+                upperBound: rangeCorrectedSourceText.index(
+                    rangeCorrectedSourceText.startIndex,
+                    offsetBy: parsePadding.count + processedSourceText.count
+                )
+            )
+            let processedRootBlockRanges = trimPrefixedRootBlockRanges(
+                paddedProcessedRootBlocks.map(\.range),
+                in: rangeCorrectedSourceText,
+                prefix: parsePadding,
+                into: processedSourceText
             )
             let sourceRootBlockRanges = rawRootBlockRanges(
                 from: processedRootBlockRanges,
@@ -192,17 +222,29 @@ extension MarkdownDocumentParser {
                     text: processedSourceText,
                     blockRanges: processedRootBlockRanges
                 ),
-                mathContext: remappedPreprocessingResult.context
+                mathContext: remappedPreprocessingResult.context,
+                processedBlockStartLocations: paddedProcessedRootBlocks.map(\.startLocation)
             )
         }
 
+        let parseSourceText = parsePadding + sourceText
         let document = Markdown.Document(
-            parsing: sourceText,
+            parsing: parseSourceText,
             options: markdownParseOptions
         )
-        let rootBlockRanges = parseRootBlockRanges(
-            in: sourceText,
-            document: document
+        let paddedRootBlocks = parseRootBlocks(
+            in: parseSourceText,
+            document: document,
+            upperBound: parseSourceText.index(
+                parseSourceText.startIndex,
+                offsetBy: parsePadding.count + sourceText.count
+            )
+        )
+        let rootBlockRanges = trimPrefixedRootBlockRanges(
+            paddedRootBlocks.map(\.range),
+            in: parseSourceText,
+            prefix: parsePadding,
+            into: sourceText
         )
 
         return PreparedParse(
@@ -215,7 +257,8 @@ extension MarkdownDocumentParser {
                 text: sourceText,
                 blockRanges: rootBlockRanges
             ),
-            mathContext: nil
+            mathContext: nil,
+            processedBlockStartLocations: paddedRootBlocks.map(\.startLocation)
         )
     }
 
@@ -427,31 +470,76 @@ extension MarkdownDocumentParser {
         false
         #endif
     }
-    static func parseRootBlockRanges(
+    
+    static func parseRootBlocks(
         in markdown: String,
-        document: Markdown.Document
-    ) -> [Range<String.Index>] {
-        var rootBlockRanges: [Range<String.Index>] = []
-        rootBlockRanges.reserveCapacity(document.childCount)
+        document: Markdown.Document,
+        upperBound: String.Index
+    ) -> [RootBlockMetadata] {
+        var rootBlocks: [RootBlockMetadata] = []
+        rootBlocks.reserveCapacity(document.childCount)
 
         for child in document.children {
-            guard let range = child.range,
-                  let startIndex = markdown.stringIndex(
-                      forLine: range.lowerBound.line,
-                      column: range.lowerBound.column
-                  ),
-                  let endIndex = markdown.stringIndex(
-                      forLine: range.upperBound.line,
-                      column: range.upperBound.column
-                  )
-            else { return [] }
+            guard let range = child.range else { return [] }
+            
+            let startIndex = markdown.stringIndex(
+                forLine: range.lowerBound.line,
+                column: range.lowerBound.column
+            )
+            let endIndex = markdown.stringIndex(
+                forLine: range.upperBound.line,
+                column: range.upperBound.column
+            )
+            guard let startIndex, let endIndex else { return [] }
+            guard endIndex <= upperBound else { break }
 
-            rootBlockRanges.append(
-                startIndex..<endIndex
+            rootBlocks.append(
+                RootBlockMetadata(
+                    range: startIndex..<endIndex,
+                    startLocation: range.lowerBound
+                )
             )
         }
 
-        return rootBlockRanges
+        return rootBlocks
+    }
+
+    static func parsePadding(
+        for parseStartLocation: SourceLocation
+    ) -> String {
+        guard parseStartLocation.line > 1 || parseStartLocation.column > 1 else {
+            return ""
+        }
+
+        return String(repeating: "\n", count: parseStartLocation.line - 1)
+            + String(repeating: " ", count: parseStartLocation.column - 1)
+    }
+
+    static func trimPrefixedRootBlockRanges(
+        _ ranges: [Range<String.Index>],
+        in prefixedSource: String,
+        prefix: String,
+        into destination: String
+    ) -> [Range<String.Index>] {
+        guard prefix.isEmpty == false else { return ranges }
+
+        let prefixEndIndex = prefixedSource.index(
+            prefixedSource.startIndex,
+            offsetBy: prefix.count
+        )
+        return ranges.map { range in
+            shiftedIndex(
+                range.lowerBound,
+                from: prefixedSource,
+                prefixEndIndex: prefixEndIndex,
+                into: destination
+            )..<shiftedIndex(
+                range.upperBound,
+                from: prefixedSource,
+                prefixEndIndex: prefixEndIndex,
+                into: destination
+            )
+        }
     }
 
     static func shiftRootBlockRanges(
@@ -483,6 +571,16 @@ extension MarkdownDocumentParser {
     ) -> String.Index {
         let offset = source.distance(from: source.startIndex, to: index)
         return destination.index(destinationStartIndex, offsetBy: offset)
+    }
+
+    static func shiftedIndex(
+        _ index: String.Index,
+        from source: String,
+        prefixEndIndex: String.Index,
+        into destination: String
+    ) -> String.Index {
+        let offset = source.distance(from: prefixEndIndex, to: index)
+        return destination.index(destination.startIndex, offsetBy: offset)
     }
 
     static func reparsedRootBlockIndex(

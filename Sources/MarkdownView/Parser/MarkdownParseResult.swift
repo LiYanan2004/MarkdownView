@@ -14,7 +14,7 @@ public struct MarkdownParseResult: Sendable {
     public var document: Markdown.Document
 
     /// The parsing strategy used to produce the document.
-    public var mode: ParsingStrategy
+    public var parsingStrategy: ParsingStrategy
 
     /// A snapshot of the original source text.
     public let sourceSnapshot: Snapshot
@@ -27,10 +27,13 @@ public struct MarkdownParseResult: Sendable {
 
     /// The math context produced during parsing.
     public var mathContext: MarkdownMathContext?
-    
-    func retained() -> MarkdownParseResult {
+
+    /// The absolute processed-text start location for each root block.
+    package let processedBlockStartLocations: [SourceLocation]
+
+    package func retained() -> MarkdownParseResult {
         var copy = self
-        copy.mode = .retained
+        copy.parsingStrategy = .retained
         return copy
     }
 }
@@ -64,10 +67,11 @@ extension MarkdownParseResult: Equatable {
     /// Returns whether two parse results describe the same parsed document and parsing metadata.
     public static func == (lhs: MarkdownParseResult, rhs: MarkdownParseResult) -> Bool {
         lhs.document.isIdentical(to: rhs.document) &&
-        lhs.mode == rhs.mode &&
+        lhs.parsingStrategy == rhs.parsingStrategy &&
         lhs.sourceSnapshot == rhs.sourceSnapshot &&
         lhs.processedSnapshot == rhs.processedSnapshot &&
         lhs.parseOptions == rhs.parseOptions &&
-        lhs.mathContext == rhs.mathContext
+        lhs.mathContext == rhs.mathContext &&
+        lhs.processedBlockStartLocations == rhs.processedBlockStartLocations
     }
 }

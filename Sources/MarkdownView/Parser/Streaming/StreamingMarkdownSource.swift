@@ -90,6 +90,7 @@ public final class StreamingMarkdownSource: @unchecked Sendable {
     /// Call this method when no more markdown updates will arrive.
     ///
     /// This finishes the source's internal update stream so ``StreamingMarkdownReader`` stops receiving new values from this source.
+    /// After the stream finishes, ``StreamingMarkdownReader`` may still perform one final full parse from the last emitted text value so the final rendered document reflects fully resolved markdown structure.
     ///
     /// Once this method is called, this source instance will store future ``text`` changes but will not emit them.
     public func finishStreaming() {

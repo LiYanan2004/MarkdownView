@@ -25,7 +25,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -41,7 +41,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -57,7 +57,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -73,7 +73,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 5))
+        #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -90,7 +90,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 6))
+        #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 6))
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -112,7 +112,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .full)
+        #expect(result.parsingStrategy == .full)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -133,7 +133,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 1))
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -150,7 +150,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .full)
+        #expect(result.parsingStrategy == .full)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -167,7 +167,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .full)
+        #expect(result.parsingStrategy == .full)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
     }
 
@@ -182,7 +182,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == .retained)
+        #expect(result.parsingStrategy == .retained)
         #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: markdown))
     }
 
@@ -200,7 +200,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == MarkdownParseResult.ParsingStrategy.incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.parsingStrategy == MarkdownParseResult.ParsingStrategy.incremental(stablePrefixRootBlockCount: 1))
         #expect(result.mathContext?.inlineMathStorage.count == 2)
         #expect(result.mathContext?.inlineMathStorage.values.contains("$x$") == true)
         #expect(result.mathContext?.inlineMathStorage.values.contains("$y$") == true)
@@ -234,7 +234,7 @@ struct MarkdownIncrementalParserTests {
             previousState: previousResult
         )
 
-        #expect(result.mode == MarkdownParseResult.ParsingStrategy.incremental(stablePrefixRootBlockCount: 1))
+        #expect(result.parsingStrategy == MarkdownParseResult.ParsingStrategy.incremental(stablePrefixRootBlockCount: 1))
         #expect(result.mathContext?.displayMathStorage.count == 2)
         #expect(result.mathContext?.displayMathStorage.values.contains("$$\nx\n$$") == true)
         #expect(result.mathContext?.displayMathStorage.values.contains("$$\ny\n$$") == true)
@@ -243,6 +243,44 @@ struct MarkdownIncrementalParserTests {
             mathContext: MarkdownMathContext(),
             requiresBlockDirectiveParsing: false
         ))
+    }
+
+    @Test("Preserves heading ranges when appending after stable display math")
+    func preservesHeadingRangesWhenAppendingAfterStableDisplayMath() {
+        let previous = """
+        $$
+        x
+        $$
+
+        ## Existing Section
+
+        Body
+        """
+        let new = previous + """
+
+        ### Appended Section
+
+        Tail
+        """
+
+        let previousResult = makeParseResult(
+            markdown: previous,
+            mathContext: MarkdownMathContext()
+        )
+        let incrementalResult = MarkdownDocumentParser.parse(
+            parseRequest(
+                markdown: new,
+                mathContext: MarkdownMathContext()
+            ),
+            previousState: previousResult
+        )
+        let fullResult = makeParseResult(
+            markdown: new,
+            mathContext: MarkdownMathContext()
+        )
+
+        #expect(incrementalResult.parsingStrategy == .incremental(stablePrefixRootBlockCount: 2))
+        #expect(headingRanges(incrementalResult.document) == headingRanges(fullResult.document))
     }
     #endif
 
@@ -264,6 +302,31 @@ struct MarkdownIncrementalParserTests {
         """)
     }
 
+    @Test("Preserves heading ranges when appending a tail parse")
+    func preservesHeadingRangesWhenAppendingATailParse() {
+        let previous = """
+        # Title
+
+        Intro
+        """
+        let new = previous + """
+
+        ## Appended Section
+
+        Body
+        """
+
+        let previousResult = makeParseResult(markdown: previous)
+        let incrementalResult = MarkdownDocumentParser.parse(
+            parseRequest(markdown: new),
+            previousState: previousResult
+        )
+        let fullResult = makeParseResult(markdown: new)
+
+        #expect(incrementalResult.parsingStrategy == .incremental(stablePrefixRootBlockCount: 1))
+        #expect(headingRanges(incrementalResult.document) == headingRanges(fullResult.document))
+    }
+
     @MainActor
     @Test("Parses from detached work without main-actor isolation")
     func parsesFromDetachedWorkWithoutMainActorIsolation() async {
@@ -273,7 +336,7 @@ struct MarkdownIncrementalParserTests {
             MarkdownDocumentParser.parse(request)
         }.value
 
-        #expect(parseResult.mode == .full)
+        #expect(parseResult.parsingStrategy == .full)
         #expect(documentDebugDescription(parseResult.document) == fullParseDocumentDescription(markdown: "# Title\n\nBody"))
     }
 }
@@ -310,6 +373,18 @@ private extension MarkdownIncrementalParserTests {
 
     func documentDebugDescription(_ document: Markdown.Document) -> String {
         document.debugDescription()
+    }
+
+    func headingRanges(_ document: Markdown.Document) -> [SourceRange?] {
+        var headingCollector = HeadingRangeCollector()
+        headingCollector.visit(document)
+        return headingCollector.headingRanges
+    }
+
+    func linkDestinations(_ document: Markdown.Document) -> [String?] {
+        var linkCollector = LinkDestinationCollector()
+        linkCollector.visit(document)
+        return linkCollector.linkDestinations
     }
 
     func assertStreamingMatchesFullParse(
@@ -367,5 +442,23 @@ private extension MarkdownIncrementalParserTests {
 private struct IncrementalParserTestBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
     func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
         EmptyView()
+    }
+}
+
+private struct HeadingRangeCollector: MarkupWalker {
+    private(set) var headingRanges: [SourceRange?] = []
+
+    mutating func visitHeading(_ heading: Markdown.Heading) {
+        headingRanges.append(heading.range)
+        descendInto(heading)
+    }
+}
+
+private struct LinkDestinationCollector: MarkupWalker {
+    private(set) var linkDestinations: [String?] = []
+
+    mutating func visitLink(_ link: Markdown.Link) {
+        linkDestinations.append(link.destination)
+        descendInto(link)
     }
 }

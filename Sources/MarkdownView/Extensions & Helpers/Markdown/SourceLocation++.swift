@@ -22,4 +22,10 @@ extension SourceLocation {
             .count
         return text.index(text.startIndex, offsetBy: previousLinesTotalCharacterCount + colIndex + 1)
     }
+    
+    static let start = SourceLocation(
+        line: 1,
+        column: 1,
+        source: nil
+    )
 }
