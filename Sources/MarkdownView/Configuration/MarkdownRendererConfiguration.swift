@@ -15,6 +15,10 @@ struct MarkdownRendererConfiguration: Hashable, AllowingModifyThroughKeyPath, Se
     var tintColors: [MarkdownTintableComponent : Color] = [:]
     var underlineLinks: Bool = false
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
+
+    func resolvedMarkdownURL(for destination: String) -> URL? {
+        URL(string: destination, relativeTo: preferredBaseURL)
+    }
 }
 
 // MARK: - SwiftUI Environment

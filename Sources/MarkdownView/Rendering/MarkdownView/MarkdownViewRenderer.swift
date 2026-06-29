@@ -255,7 +255,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     
     func visitLink(_ link: Markdown.Link) -> MarkdownNodeView {
         guard let destination = link.destination,
-              let url = URL(string: destination)
+              let url = configuration.resolvedMarkdownURL(for: destination)
         else { return descendInto(link) }
         
         let tintColor = configuration.tintColors[.link, default: .accentColor]

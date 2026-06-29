@@ -258,7 +258,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 
     func visitLink(_ link: Markdown.Link) -> TextContent {
         guard let destination = link.destination,
-              let url = URL(string: destination, relativeTo: configuration.preferredBaseURL)
+              let url = configuration.resolvedMarkdownURL(for: destination)
         else { return descendInto(link) }
 
         if let linkRenderer = linkRenderer(for: url) {
