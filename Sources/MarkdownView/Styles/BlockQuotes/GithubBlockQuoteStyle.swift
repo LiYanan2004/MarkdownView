@@ -41,9 +41,9 @@ fileprivate struct GithubBlockQuoteView: View {
     var body: some View {
         configuration.content
             .frame(maxWidth: .infinity, alignment: .leading)
-            .headingStyleGroup(_SecondaryForegroundStyleGroup())
+            .markdownHeadingStyleGroup(_SecondaryForegroundStyleGroup())
             .foregroundStyle(.secondary)
-            ._zeroPaddingForAllHeadings()
+            .padding(EdgeInsets(), for: .h1, .h2, .h3, .h4, .h5, .h6)
             .padding(.horizontal, fontSize)
             .safeAreaInset(edge: .leading, spacing: 0) {
                 Rectangle()
