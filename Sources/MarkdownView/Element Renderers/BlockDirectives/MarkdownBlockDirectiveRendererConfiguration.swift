@@ -1,12 +1,13 @@
 import Markdown
 
-/// The properties of a block directive.
+/// The values that describe a block directive.
 @preconcurrency
 @MainActor
 public struct MarkdownBlockDirectiveRendererConfiguration: Sendable {
-    /// The string wrapped in a block directive.
+    /// The markdown source wrapped in the block directive.
     public var wrappedString: String
-    /// The arguments of a block directive.
+
+    /// The named arguments supplied by the block directive.
     public var arguments: [Argument]
 
     init(wrappedString: String, arguments: [Argument]) {
@@ -14,7 +15,7 @@ public struct MarkdownBlockDirectiveRendererConfiguration: Sendable {
         self.arguments = arguments
     }
     
-    /// Directive Block arguments represented from `swift-markdown/DirectiveArgument`.
+    /// A named argument supplied by a block directive.
     public struct Argument {
         /// The name of the argument.
         public var name: String
@@ -22,7 +23,8 @@ public struct MarkdownBlockDirectiveRendererConfiguration: Sendable {
         /// The value of that argument.
         public var value: String
         
-        /// An argument that represented from ``Markdown/DirectiveArgument``.
+        /// Creates an argument from a Swift Markdown directive argument.
+        ///
         /// - Parameter directiveArgument: The `DirectiveArgument` of the directive block.
         init(_ directiveArgument: DirectiveArgument) {
             name = directiveArgument.name

@@ -25,7 +25,7 @@ Review these changes before updating a package that uses MarkdownView 2.
   - If you need a stable identifier for `ForEach`, iterate over `headings.indices` or another identifier you own.
 - ``MarkdownFontGroup`` now uses ``CustomCTFontConvertible`` values.
   - Return platform fonts, `CTFont`, or another ``CustomCTFontConvertible`` type from custom font groups if the group can also be attached to ``MarkdownText``.
-- The minimum supported platforms are now macOS 13, iOS 16, tvOS 16, and watchOS 9.
+- The minimum supported platforms are now macOS 13, iOS 16, tvOS 16, watchOS 9, and visionOS 1.
 
 ## New features
 

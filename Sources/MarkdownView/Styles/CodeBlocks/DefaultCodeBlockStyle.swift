@@ -12,6 +12,9 @@ public struct DefaultCodeBlockStyle: MarkdownCodeBlockStyle {
     /// Theme configuration in the current context.
     public var highlighterTheme: CodeHighlighterTheme
     
+    /// Creates a default code block style.
+    ///
+    /// - Parameter highlighterTheme: The syntax highlighting theme configuration.
     public init(
         highlighterTheme: CodeHighlighterTheme = CodeHighlighterTheme(
             lightModeThemeName: "xcode",

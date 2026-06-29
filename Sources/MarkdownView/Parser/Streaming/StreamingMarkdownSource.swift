@@ -12,12 +12,39 @@ import OSLog
 ///
 /// Updating ``text`` does not trigger any SwiftUI view updates by itself. `StreamingMarkdownSource` stores the latest value and delivers it through its own update stream.
 ///
-/// `StreamingMarkdownSource` also owns its update cycle. `StreamingMarkdownReader` consumes values from this source independently from SwiftUI view updates. This matters when markdown arrives faster than SwiftUI can reliably observe through
-/// view-driven mechanisms such as `onChange` or `task`.
+/// `StreamingMarkdownSource` also owns its update cycle. `StreamingMarkdownReader` consumes values from this source independently from SwiftUI view updates. This matters when markdown arrives faster than SwiftUI can reliably observe through view-driven mechanisms such as `onChange` or `task`.
 ///
 /// For example, if content updates once every 1 millisecond, SwiftUI view updates can coalesce those changes and some callback deliveries can be skipped, resulting in incomplete markdown document rendering.
 ///
 /// `StreamingMarkdownSource` keeps those source updates in its own stream so the ``StreamingMarkdownReader`` can continue processing the latest values without depending on SwiftUI's view update timing.
+///
+/// The following example appends chunks from an async sequence into a source.
+///
+/// ```swift
+/// import SwiftUI
+/// import MarkdownView
+///
+/// struct StreamingResponseView: View {
+///     @State private var markdownSource = StreamingMarkdownSource()
+///
+///     let chunks: AsyncStream<String>
+///
+///     var body: some View {
+///         StreamingMarkdownReader(markdownSource) { parseResult in
+///             MarkdownView(parseResult)
+///         }
+///         .task {
+///             for await chunk in chunks {
+///                 markdownSource.text += chunk
+///             }
+///
+///             markdownSource.finishStreaming()
+///         }
+///     }
+/// }
+/// ```
+///
+/// Call ``finishStreaming()`` when the response is complete. A finished source keeps storing new ``text`` values, but it stops emitting updates; create a new source for a new streaming response after finishing the current one.
 public final class StreamingMarkdownSource: @unchecked Sendable {
     @OSUnfairLockProtected private var storage: StreamingMarkdownSourceStorage
 

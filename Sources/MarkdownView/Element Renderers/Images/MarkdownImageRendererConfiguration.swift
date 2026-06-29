@@ -1,9 +1,10 @@
 import Foundation
 
-/// The properties of a markdown image.
+/// The values that describe a markdown image.
 public struct MarkdownImageRendererConfiguration: Sendable {
-    /// The source url of an image.
+    /// The resolved source URL of the image.
     public var url: URL
-    /// The alternative text of an image.
+
+    /// The alternative text from the image label, when one is present.
     public var alternativeText: String?
 }

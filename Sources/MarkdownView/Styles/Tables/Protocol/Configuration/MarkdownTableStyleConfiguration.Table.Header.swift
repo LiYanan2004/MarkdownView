@@ -9,8 +9,6 @@ import SwiftUI
 
 extension MarkdownTableStyleConfiguration.Table {
     /// A type-erased header row of a table.
-    ///
-    /// On platforms that does not supports `Grid`, it would be `EmptyView`.
     public struct Header: View {
         var cells: [MarkdownTableStyleConfiguration.Table.Cell]
         @Environment(\.markdownFontGroup.tableHeader) private var font

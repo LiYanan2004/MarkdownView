@@ -10,7 +10,7 @@
 ### Creating custom markers
 
 - ``MarkdownOrderedListMarkerProtocol/marker(at:listDepth:)``
-- ``MarkdownOrderedListMarkerProtocol/monospaced-5h6jl``
+- ``MarkdownOrderedListMarkerProtocol/monospaced``
 
 ### Supporting types
 

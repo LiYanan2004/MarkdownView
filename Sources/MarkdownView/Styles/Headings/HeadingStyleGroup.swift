@@ -58,11 +58,22 @@ public protocol HeadingStyleGroup {
 }
 
 extension HeadingStyleGroup {
+    /// The default foreground style for level-one headings.
     public var h1: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-two headings.
     public var h2: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-three headings.
     public var h3: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-four headings.
     public var h4: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-five headings.
     public var h5: some ShapeStyle { .foreground }
+
+    /// The default foreground style for level-six headings.
     public var h6: some ShapeStyle { .foreground }
     
     @_documentation(visibility: internal)

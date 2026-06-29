@@ -7,6 +7,31 @@ import Markdown
 import SwiftUI
 
 /// A markdown reader that incrementally parses markdown from a ``StreamingMarkdownSource`` and builds content from the latest parse result.
+///
+/// Keep one source instance for the lifetime of the view and pass each parsed result to a renderer.
+///
+/// ```swift
+/// import SwiftUI
+/// import MarkdownView
+///
+/// struct StreamingPreview: View {
+///     @State private var markdownSource = StreamingMarkdownSource("# Response")
+///
+///     var body: some View {
+///         StreamingMarkdownReader(markdownSource) { parseResult in
+///             MarkdownView(parseResult)
+///         }
+///         .task {
+///             for word in ["\n\nThis", " content", " streams", " in."] {
+///                 try? await Task.sleep(for: .milliseconds(200))
+///                 markdownSource.text += word
+///             }
+///
+///             markdownSource.finishStreaming()
+///         }
+///     }
+/// }
+/// ```
 public struct StreamingMarkdownReader<Content: View>: View {
     let source: StreamingMarkdownSource
     private let content: (MarkdownParseResult) -> Content
@@ -31,6 +56,7 @@ public struct StreamingMarkdownReader<Content: View>: View {
         self.content = content
     }
 
+    /// The content produced from the latest streaming parse result.
     public var body: some View {
         content(currentParseResult)
             .environment(\.markdownMathContext, lastParseResult?.mathContext)

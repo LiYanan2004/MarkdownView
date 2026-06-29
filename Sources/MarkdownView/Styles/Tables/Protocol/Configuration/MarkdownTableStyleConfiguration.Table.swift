@@ -32,6 +32,7 @@ extension MarkdownTableStyleConfiguration {
         }
         
         typealias Fallback = EmptyView
+        /// An empty fallback view kept for source compatibility.
         @available(*, deprecated, message: "MarkdownView 3 does not use fallback any more.")
         public var fallback: EmptyView {
             EmptyView()

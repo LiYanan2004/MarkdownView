@@ -34,17 +34,42 @@ public struct AnyMarkdownFontGroup: Sendable {
 }
 
 extension AnyMarkdownFontGroup: MarkdownFontGroup {
+    /// The erased font used for level-one headings.
     public var h1: any CustomCTFontConvertible { _h1 }
+
+    /// The erased font used for level-two headings.
     public var h2: any CustomCTFontConvertible { _h2 }
+
+    /// The erased font used for level-three headings.
     public var h3: any CustomCTFontConvertible { _h3 }
+
+    /// The erased font used for level-four headings.
     public var h4: any CustomCTFontConvertible { _h4 }
+
+    /// The erased font used for level-five headings.
     public var h5: any CustomCTFontConvertible { _h5 }
+
+    /// The erased font used for level-six headings.
     public var h6: any CustomCTFontConvertible { _h6 }
+
+    /// The erased font used for fenced code blocks.
     public var codeBlock: any CustomCTFontConvertible { _codeBlock }
+
+    /// The erased font used for block quotes.
     public var blockQuote: any CustomCTFontConvertible { _blockQuote }
+
+    /// The erased font used for table header cells.
     public var tableHeader: any CustomCTFontConvertible { _tableHeader }
+
+    /// The erased font used for table body cells.
     public var tableBody: any CustomCTFontConvertible { _tableBody }
+
+    /// The erased font used for body text.
     public var body: any CustomCTFontConvertible { _body }
+
+    /// The erased font used for inline math.
     public var inlineMath: any CustomCTFontConvertible { _inlineMath }
+
+    /// The erased font used for display math.
     public var displayMath: any CustomCTFontConvertible { _displayMath }
 }

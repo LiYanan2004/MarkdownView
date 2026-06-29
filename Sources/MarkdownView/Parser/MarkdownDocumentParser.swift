@@ -6,7 +6,7 @@
 import Foundation
 import Markdown
 
-struct MarkdownDocumentParser {
+nonisolated struct MarkdownDocumentParser {
     static func parse(
         _ request: MarkdownParseRequest,
         previousState: MarkdownParseResult? = nil

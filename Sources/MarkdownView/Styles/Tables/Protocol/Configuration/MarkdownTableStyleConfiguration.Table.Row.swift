@@ -8,9 +8,7 @@
 import SwiftUI
 
 extension MarkdownTableStyleConfiguration.Table {
-    /// A type-erased header row of a table.
-    ///
-    /// On platforms that does not supports `Grid`, it would be `EmptyView`.
+    /// A type-erased body row of a table.
     public struct Row: View {
         var rowIndex: Int
         var cells: [MarkdownTableStyleConfiguration.Table.Cell]
