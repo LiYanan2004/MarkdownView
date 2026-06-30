@@ -41,7 +41,7 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
             .environment(\.markdownElementRenderers, elementRenderers)
     }
 
-    func visitDocument(_ document: Document) -> MarkdownNodeView {
+    func visitDocument(_ document: Markdown.Document) -> MarkdownNodeView {
         var renderer = self
         let nodeViews = document.children.map {
             renderer.visit($0)

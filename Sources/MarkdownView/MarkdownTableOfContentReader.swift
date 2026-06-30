@@ -49,7 +49,7 @@ public struct MarkdownTableOfContentReader<Content: View>: View, @MainActor Equa
         _ string: String,
         @ViewBuilder content: @escaping ([Markdown.Heading]) -> Content
     ) {
-        self.init(Document(parsing: string), content: content)
+        self.init(Markdown.Document(parsing: string), content: content)
     }
     
     private var headings: [Heading] {

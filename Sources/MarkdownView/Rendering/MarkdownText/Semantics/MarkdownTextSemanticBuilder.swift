@@ -15,7 +15,7 @@ struct MarkdownTextSemanticBuilder: MarkupVisitor {
     }
 
     func makeNodes(for markup: any Markup) -> [MarkdownTextSemanticNode] {
-        if let document = markup as? Document {
+        if let document = markup as? Markdown.Document {
             return makeNodes(descendingInto: document)
         }
 

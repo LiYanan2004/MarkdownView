@@ -25,7 +25,7 @@ struct MathParsableRangesResolver: MarkupWalker {
         }
     }
 
-    mutating func visitDocument(_ document: Document) {
+    mutating func visitDocument(_ document: Markdown.Document) {
         for child in document.children {
             if let range = child.range {
                 resolvableIncludedRanges.append(range)
