@@ -5,16 +5,12 @@
 
 @MainActor
 final class StreamingMarkdownRenderCoordinator {
-    private let renderInterval: Duration
+    private var renderInterval: Duration = .milliseconds(50)
 
     private var renderTask: Task<Void, Never>?
     private var pendingRequest: MarkdownParseRequest?
     private var parsedResult: MarkdownParseResult?
     private var renderHandler: (@MainActor (MarkdownParseResult) -> Void)?
-
-    init(renderInterval: Duration = .milliseconds(50)) {
-        self.renderInterval = renderInterval
-    }
 
     @MainActor deinit {
         cancel()
@@ -39,6 +35,10 @@ final class StreamingMarkdownRenderCoordinator {
         cancel()
         parsedResult = nil
         renderHandler = nil
+    }
+
+    func setRenderInterval(_ renderInterval: Duration) {
+        self.renderInterval = renderInterval
     }
 
     private func startRenderLoopIfNeeded() {

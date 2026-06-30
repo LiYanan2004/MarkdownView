@@ -38,6 +38,7 @@ public struct StreamingMarkdownReader<Content: View>: View {
 
     @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
+    @Environment(\.markdownStreamingRenderThrottle) private var streamingRenderThrottle
     
     @State var lastParseResult: MarkdownParseResult? // actually triggers view updates
     @State var renderCoordinator = StreamingMarkdownRenderCoordinator()
@@ -62,6 +63,7 @@ public struct StreamingMarkdownReader<Content: View>: View {
             .environment(\.markdownMathContext, lastParseResult?.mathContext)
             .onDisappear(perform: renderCoordinator.cancel)
             .task(id: ObjectIdentifier(source)) {
+                renderCoordinator.setRenderInterval(streamingRenderThrottle)
                 renderCoordinator.reset()
                 
                 var latestStreamedText = source.text
@@ -73,11 +75,16 @@ public struct StreamingMarkdownReader<Content: View>: View {
                 guard Task.isCancelled == false else { return }
                 
                 // Perform a full parse to make sure the content renders correctly.
-                // This helps fix any potential issues caused by incremental parsing.
+                // This helps fix any potential issues (e.g. link reference, etc.) caused by incremental parsing.
                 renderCoordinator.reset()
                 submitMarkdown(latestStreamedText)
             }
             .onChange(of: parsingOptions) { options in
+                submitMarkdown(source.text)
+            }
+            .onChange(of: streamingRenderThrottle) { throttle in
+                renderCoordinator.setRenderInterval(throttle)
+                renderCoordinator.reset()
                 submitMarkdown(source.text)
             }
     }
