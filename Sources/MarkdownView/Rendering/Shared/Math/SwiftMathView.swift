@@ -10,7 +10,7 @@
 import SwiftMath
 import SwiftUI
 
-struct SwiftMathView {
+struct SwiftMathView: View {
     var latex: String
     var font: any CustomCTFontConvertible
     var labelMode: MTMathUILabelMode
@@ -36,20 +36,48 @@ struct SwiftMathView {
         return String(latex[contentStartIndex..<contentEndIndex])
     }
 
+    private var textColor: MTColor {
+        MTColor(colorScheme == .dark ? Color.white : Color.black)
+    }
+    
+    var body: some View {
+        SwiftMathPlatformView(
+            equation: equation,
+            fontSize: font.asPlatformFont.pointSize,
+            labelMode: labelMode,
+            textAlignment: textAlignment,
+            textColor: textColor
+        )
+        .alignmentGuide(.firstTextBaseline) { dimensions in
+            font.asPlatformFont.ascender
+        }
+        .alignmentGuide(.lastTextBaseline) { dimensions in
+            font.asPlatformFont.ascender
+        }
+    }
+}
+
+fileprivate struct SwiftMathPlatformView {
+    var equation: String
+    var fontSize: CGFloat
+    var labelMode: MTMathUILabelMode
+    var textAlignment: MTTextAlignment
+    var textColor: MTColor
+    
     @MainActor
-    private func configure(_ mathLabel: MTMathUILabel) {
+    private func apply(to mathLabel: MTMathUILabel) {
         mathLabel.latex = equation
-        mathLabel.fontSize = font.asPlatformFont.pointSize
+        mathLabel.fontSize = fontSize
         mathLabel.labelMode = labelMode
         mathLabel.textAlignment = textAlignment
-        mathLabel.textColor = MTColor(colorScheme == .dark ? Color.white : Color.black)
+        mathLabel.textColor = textColor
         mathLabel.displayErrorInline = false
     }
 }
 
 #if canImport(UIKit)
 
-extension SwiftMathView: UIViewRepresentable {
+extension SwiftMathPlatformView: UIViewRepresentable {
     func makeUIView(context: Context) -> MTMathUILabel {
         let mathLabel = MTMathUILabel()
         mathLabel.setContentHuggingPriority(.required, for: .vertical)
@@ -58,7 +86,7 @@ extension SwiftMathView: UIViewRepresentable {
     }
 
     func updateUIView(_ mathLabel: MTMathUILabel, context: Context) {
-        configure(mathLabel)
+        apply(to: mathLabel)
     }
 
     func sizeThatFits(
@@ -72,7 +100,7 @@ extension SwiftMathView: UIViewRepresentable {
 
 #elseif canImport(AppKit)
 
-extension SwiftMathView: NSViewRepresentable {
+extension SwiftMathPlatformView: NSViewRepresentable {
     func makeNSView(context: Context) -> MTMathUILabel {
         let mathLabel = MTMathUILabel()
         mathLabel.setContentHuggingPriority(.required, for: .vertical)
@@ -81,7 +109,7 @@ extension SwiftMathView: NSViewRepresentable {
     }
 
     func updateNSView(_ mathLabel: MTMathUILabel, context: Context) {
-        configure(mathLabel)
+        apply(to: mathLabel)
     }
 
     func sizeThatFits(
@@ -96,12 +124,15 @@ extension SwiftMathView: NSViewRepresentable {
 #endif
 
 #Preview {
-    SwiftMathView(
-        latex: #"\(\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}\)"#,
-        font: PlatformFont.preferredFont(forTextStyle: .body),
-        labelMode: .text,
-        textAlignment: .left
-    )
+    HStack(alignment: .firstTextBaseline) {
+        Text("Hello World: ")
+        SwiftMathView(
+            latex: #"\(\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}\)"#,
+            font: PlatformFont.preferredFont(forTextStyle: .body),
+            labelMode: .text,
+            textAlignment: .left
+        )
+    }
 }
 
 #endif
