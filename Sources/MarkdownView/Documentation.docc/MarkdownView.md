@@ -22,6 +22,7 @@ On iOS and macOS, ``MarkdownText`` provides text-based rendering and continuous 
 
 ### Displaying content
 
+- <doc:Rendering-Streaming-Markdown-Content>
 - ``MarkdownView/MarkdownView``
 - ``MarkdownText``
 - ``MarkdownTableOfContentReader``
