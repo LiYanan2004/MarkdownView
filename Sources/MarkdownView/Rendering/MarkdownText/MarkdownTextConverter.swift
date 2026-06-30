@@ -77,7 +77,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
         )
     }
 
-    func visitDocument(_ document: Document) -> TextContent {
+    func visitDocument(_ document: Markdown.Document) -> TextContent {
         return render(
             MarkdownTextSemanticBuilder(configuration: configuration)
                 .makeNodes(for: document)
