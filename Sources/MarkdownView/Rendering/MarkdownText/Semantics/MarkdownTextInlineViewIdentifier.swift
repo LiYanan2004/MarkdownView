@@ -8,11 +8,16 @@
 import Markdown
 
 struct MarkdownTextInlineViewIdentifier: Hashable {
+    enum MathKind: Hashable {
+        case inline
+        case display
+    }
+
     enum Role: Hashable {
         case blockAttachment
         case customLink
-        case inlineMath(occurrence: Int)
         case listCheckbox
+        case math(kind: MathKind, occurrence: Int)
         case thematicBreak
     }
 

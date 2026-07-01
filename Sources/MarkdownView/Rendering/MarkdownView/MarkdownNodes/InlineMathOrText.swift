@@ -31,11 +31,19 @@ struct InlineMathOrText {
                 nodeViews.append(MarkdownNodeView(normalText))
             }
 
-            nodeViews.append(
-                MarkdownNodeView {
+            switch mathSegment.kind {
+            case .inline:
+                nodeViews.append(MarkdownNodeView {
                     InlineMath(latexText: mathSegment.latexText)
+                })
+            case .display:
+                if let identifier = mathSegment.identifier {
+                    nodeViews.append(MarkdownNodeView {
+                        MarkdownDisplayMathView(mathIdentifier: identifier)
+                            .id(identifier)
+                    })
                 }
-            )
+            }
 
             processingIndex = mathSegment.range.upperBound
         }
@@ -55,19 +63,23 @@ struct InlineMathOrText {
 #if ENABLE_MATH_RENDERING
 fileprivate extension InlineMathOrText {
     struct MathSegment {
+        var kind: MarkdownMathPreprocessor.PlaceholderKind
         var range: Range<String.Index>
         var latexText: String
+        var identifier: UUID?
     }
 
     func mathSegments(mathContext: MarkdownMathContext?) -> [MathSegment] {
-        let placeholderSegments = inlinePlaceholderSegments(mathContext: mathContext)
+        let placeholderSegments = mathPlaceholderSegments(mathContext: mathContext)
         let parsedSegments = MathParser(text: text)
             .mathRepresentations
             .lazy
             .map {
                 MathSegment(
+                    kind: .inline,
                     range: $0.range,
-                    latexText: String(text[$0.range])
+                    latexText: String(text[$0.range]),
+                    identifier: nil
                 )
             }
             .filter { parsedSegment in
@@ -80,28 +92,33 @@ fileprivate extension InlineMathOrText {
             .sorted { $0.range.lowerBound < $1.range.lowerBound }
     }
 
-    func inlinePlaceholderSegments(mathContext: MarkdownMathContext?) -> [MathSegment] {
-        guard let inlineMathStorage = mathContext?.inlineMathStorage else {
-            return []
-        }
+    func mathPlaceholderSegments(mathContext: MarkdownMathContext?) -> [MathSegment] {
+        MarkdownMathPreprocessor.placeholderSegments(in: text).compactMap { placeholderSegment in
+            switch placeholderSegment.match.kind {
+            case .inline:
+                guard let latexText = mathContext?.inlineMathStorage[placeholderSegment.match.identifier] else {
+                    return nil
+                }
 
-        var mathSegments: [MathSegment] = []
-        for (identifier, latexText) in inlineMathStorage {
-            let placeholder = MarkdownMathPreprocessor.inlinePlaceholder(for: identifier)
-            var searchRange = text.startIndex..<text.endIndex
-
-            while let placeholderRange = text.range(of: placeholder, range: searchRange) {
-                mathSegments.append(
-                    MathSegment(
-                        range: placeholderRange,
-                        latexText: latexText
-                    )
+                return MathSegment(
+                    kind: .inline,
+                    range: placeholderSegment.range,
+                    latexText: latexText,
+                    identifier: placeholderSegment.match.identifier
                 )
-                searchRange = placeholderRange.upperBound..<text.endIndex
+            case .display:
+                guard let latexText = mathContext?.displayMathStorage[placeholderSegment.match.identifier] else {
+                    return nil
+                }
+
+                return MathSegment(
+                    kind: .display,
+                    range: placeholderSegment.range,
+                    latexText: latexText,
+                    identifier: placeholderSegment.match.identifier
+                )
             }
         }
-
-        return mathSegments
     }
 }
 #endif

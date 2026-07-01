@@ -129,6 +129,52 @@ struct MarkdownTextConverterTests {
         #expect(!textContent.plainText.contains("markdownview-math(display:"))
         #expect(!textContent.plainText.contains("$$"))
     }
+
+    @Test("Converts display math followed by inline text to embedded content")
+    @MainActor
+    func convertsDisplayMathFollowedByInlineTextToEmbeddedContent() {
+        let preprocessingResult = MarkdownMathPreprocessor()
+            .preprocessingResult(
+                for: #"""
+                1. **Sum of a Geometric Series**:
+                    \[ S_n = a \frac{1-r^n}{1-r} \] (for \( r \neq 1 \))
+                """#
+            )
+
+        let textContent = Self.makeTextContent(
+            markdown: preprocessingResult.markdown,
+            mathContext: preprocessingResult.context,
+            parseOptions: []
+        )
+
+        #expect(textContent.embeddedViewCount == 2)
+        #expect(!textContent.plainText.contains("markdownview-math(display:"))
+        #expect(textContent.plainText.contains("(for "))
+    }
+
+    @Test("Distinguishes math embedding identities by kind and occurrence")
+    @MainActor
+    func distinguishesMathEmbeddingIdentitiesByKindAndOccurrence() throws {
+        let document = Document(parsing: "Math placeholders")
+        let paragraph = try #require(Array(document.children).first as? Paragraph)
+        let text = try #require(Array(paragraph.children).first as? Markdown.Text)
+
+        let firstDisplayIdentifier = MarkdownTextInlineViewIdentifier(
+            markup: text,
+            role: .math(kind: .display, occurrence: 0)
+        )
+        let secondDisplayIdentifier = MarkdownTextInlineViewIdentifier(
+            markup: text,
+            role: .math(kind: .display, occurrence: 1)
+        )
+        let firstInlineIdentifier = MarkdownTextInlineViewIdentifier(
+            markup: text,
+            role: .math(kind: .inline, occurrence: 0)
+        )
+
+        #expect(firstDisplayIdentifier != secondDisplayIdentifier)
+        #expect(firstDisplayIdentifier != firstInlineIdentifier)
+    }
     #endif
 
     @Test("Aligns list continuation paragraphs with item body")
