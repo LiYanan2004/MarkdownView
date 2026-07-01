@@ -6,39 +6,71 @@ import SwiftUI
 import Markdown
 
 extension MarkdownTextConverter {
-    func inlineMathTextContent(
+    func mathPlaceholderTextContent(
         text: String,
-        inlineMathStorage: [UUID: String],
+        mathContext: MarkdownMathContext,
         sourceMarkup: Markdown.Text
     ) -> TextContent {
         var textContent = TextContent([])
         var searchRange = text.startIndex..<text.endIndex
         var inlineMathOccurrence = 0
+        var displayMathOccurrence = 0
 
-        while let placeholderMatch = firstInlineMathPlaceholderMatch(
-            in: text,
-            range: searchRange,
-            inlineMathStorage: inlineMathStorage
-        ) {
-            if searchRange.lowerBound < placeholderMatch.range.lowerBound {
+        for placeholderSegment in MarkdownMathPreprocessor.placeholderSegments(in: text) {
+            guard placeholderSegment.range.lowerBound >= searchRange.lowerBound else {
+                continue
+            }
+
+            if searchRange.lowerBound < placeholderSegment.range.lowerBound {
                 textContent += TextContent(
-                    .string(String(text[searchRange.lowerBound..<placeholderMatch.range.lowerBound]))
+                    .string(String(text[searchRange.lowerBound..<placeholderSegment.range.lowerBound]))
                 )
             }
 
-            textContent += TextContent {
-                InlineView(
+            switch placeholderSegment.match.kind {
+            case .inline:
+                guard let latexText = mathContext.inlineMathStorage[placeholderSegment.match.identifier] else {
+                    textContent += TextContent(.string(String(text[placeholderSegment.range])))
+                    searchRange = placeholderSegment.range.upperBound..<text.endIndex
+                    continue
+                }
+
+                textContent += TextContent {
+                    InlineView(
+                        id: MarkdownTextInlineViewIdentifier(
+                            markup: sourceMarkup,
+                            role: .math(kind: .inline, occurrence: inlineMathOccurrence)
+                        ),
+                        replacement: AttributedString(latexText)
+                    ) {
+                        InlineMath(latexText: latexText)
+                    }
+                }
+                inlineMathOccurrence += 1
+            case .display:
+                let identifier = placeholderSegment.match.identifier
+                guard mathContext.displayMathStorage[identifier] != nil else {
+                    textContent += TextContent(.string(String(text[placeholderSegment.range])))
+                    searchRange = placeholderSegment.range.upperBound..<text.endIndex
+                    continue
+                }
+
+                textContent += MarkdownTextEmbeddingViewFactory.makeTextContent(
                     id: MarkdownTextInlineViewIdentifier(
                         markup: sourceMarkup,
-                        role: .inlineMath(occurrence: inlineMathOccurrence)
+                        role: .math(kind: .display, occurrence: displayMathOccurrence)
                     ),
-                    replacement: AttributedString(placeholderMatch.latexText)
+                    replacement: nil,
+                    componentSpacing: configuration.componentSpacing,
+                    sizing: .fittingLineFragment
                 ) {
-                    InlineMath(latexText: placeholderMatch.latexText)
+                    MarkdownDisplayMathView(mathIdentifier: identifier)
+                        .id(identifier)
                 }
+                displayMathOccurrence += 1
             }
-            inlineMathOccurrence += 1
-            searchRange = placeholderMatch.range.upperBound..<text.endIndex
+
+            searchRange = placeholderSegment.range.upperBound..<text.endIndex
         }
 
         if searchRange.lowerBound < text.endIndex {
@@ -47,30 +79,6 @@ extension MarkdownTextConverter {
 
         return textContent
     }
-}
-
-private extension MarkdownTextConverter {
-    func firstInlineMathPlaceholderMatch(
-        in text: String,
-        range: Range<String.Index>,
-        inlineMathStorage: [UUID: String]
-    ) -> InlineMathPlaceholderMatch? {
-        inlineMathStorage
-            .compactMap { identifier, latexText -> InlineMathPlaceholderMatch? in
-                let placeholder = MarkdownMathPreprocessor.inlinePlaceholder(for: identifier)
-                guard let range = text.range(of: placeholder, range: range) else {
-                    return nil
-                }
-
-                return InlineMathPlaceholderMatch(range: range, latexText: latexText)
-            }
-            .min { $0.range.lowerBound < $1.range.lowerBound }
-    }
-}
-
-private struct InlineMathPlaceholderMatch {
-    var range: Range<String.Index>
-    var latexText: String
 }
 
 #endif

@@ -80,6 +80,11 @@ extension MarkdownMathPreprocessor {
         let identifier: UUID
     }
 
+    struct PlaceholderSegment: Sendable, Hashable {
+        let match: PlaceholderMatch
+        let range: Range<String.Index>
+    }
+
     struct Replacement: Sendable, Hashable {
         let sourceRange: Range<Int>
         let processedRange: Range<Int>
@@ -180,6 +185,33 @@ extension MarkdownMathPreprocessor {
         }
 
         return PlaceholderMatch(kind: kind, identifier: identifier)
+    }
+
+    static func placeholderSegments(in text: String) -> [PlaceholderSegment] {
+        var segments: [PlaceholderSegment] = []
+        var searchRange = text.startIndex..<text.endIndex
+
+        while let prefixRange = text.range(of: placeholderPrefix, range: searchRange) {
+            let payloadRange = prefixRange.upperBound..<text.endIndex
+            guard let suffixRange = text.range(of: placeholderSuffix, range: payloadRange) else {
+                break
+            }
+
+            let placeholderRange = prefixRange.lowerBound..<suffixRange.upperBound
+            if let placeholderMatch = placeholderMatch(in: String(text[placeholderRange])) {
+                segments.append(
+                    PlaceholderSegment(
+                        match: placeholderMatch,
+                        range: placeholderRange
+                    )
+                )
+                searchRange = placeholderRange.upperBound..<text.endIndex
+            } else {
+                searchRange = prefixRange.upperBound..<text.endIndex
+            }
+        }
+
+        return segments
     }
 
     static func displayPlaceholderIdentifier(in text: String) -> UUID? {

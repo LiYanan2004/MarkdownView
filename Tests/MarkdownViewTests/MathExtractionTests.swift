@@ -306,6 +306,20 @@ struct MathExtractionTests {
     }
 
     @Test
+    func testMathPreprocessingFindsDisplayPlaceholderWithTrailingInlineText() async throws {
+        let markdown = #"""
+        1. **Sum of a Geometric Series**:
+            \[ S_n = a \frac{1-r^n}{1-r} \] (for \( r \neq 1 \))
+        """#
+        let result = processMarkdownParsingRanges(in: markdown)
+        let placeholderSegments = MarkdownMathPreprocessor.placeholderSegments(in: result.markdown)
+
+        #expect(result.displayMathStorage.count == 1)
+        #expect(result.inlineMathStorage.count == 1)
+        #expect(placeholderSegments.map(\.match.kind) == [.display, .inline])
+    }
+
+    @Test
     func testMathPreprocessingPreservesEscapedBracketPunctuation() async throws {
         let markdown = #"Escaped punctuation: \*literal asterisks\*, \[literal brackets\], and \`literal backticks\`."#
         let result = processMarkdownParsingRanges(in: markdown)

@@ -146,7 +146,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
             return MarkdownTextEmbeddingViewFactory.makeTextContent(
                 id: MarkdownTextInlineViewIdentifier(
                     markup: text,
-                    role: .blockAttachment
+                    role: .math(kind: .display, occurrence: 0)
                 ),
                 replacement: nil,
                 componentSpacing: configuration.componentSpacing,
@@ -156,11 +156,10 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
                     .id(mathIdentifier)
             }
         }
-        if mathContext != nil,
-           let inlineMathStorage = mathContext?.inlineMathStorage {
-            return inlineMathTextContent(
+        if let mathContext {
+            return mathPlaceholderTextContent(
                 text: plainText,
-                inlineMathStorage: inlineMathStorage,
+                mathContext: mathContext,
                 sourceMarkup: text
             )
         }
