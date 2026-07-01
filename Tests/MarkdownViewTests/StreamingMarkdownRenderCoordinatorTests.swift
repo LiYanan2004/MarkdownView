@@ -15,7 +15,8 @@ struct StreamingMarkdownRenderCoordinatorTests {
     @Test("Renders latest submitted request after input stops")
     func rendersLatestSubmittedRequestAfterInputStops() async throws {
         let renderInterval: Duration = .milliseconds(100)
-        let coordinator = StreamingMarkdownRenderCoordinator(renderInterval: renderInterval)
+        let coordinator = StreamingMarkdownRenderCoordinator()
+        coordinator.setRenderInterval(renderInterval)
         var renderedSourceTexts: [String] = []
 
         defer {
