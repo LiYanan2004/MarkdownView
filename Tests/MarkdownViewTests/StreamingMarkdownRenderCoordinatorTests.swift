@@ -12,7 +12,10 @@ import Testing
 @Suite("Streaming Markdown Render Coordinator")
 @MainActor
 struct StreamingMarkdownRenderCoordinatorTests {
-    @Test("Renders latest submitted request after input stops")
+    @Test(
+        "Renders the latest submitted request after input stops",
+        .tags(.streaming, .rendering)
+    )
     func rendersLatestSubmittedRequestAfterInputStops() async throws {
         let renderInterval: Duration = .milliseconds(100)
         let coordinator = StreamingMarkdownRenderCoordinator()
@@ -23,17 +26,21 @@ struct StreamingMarkdownRenderCoordinatorTests {
             coordinator.cancel()
         }
 
-        coordinator.submit(parseRequest("# Emoji")) { parseResult in
+        coordinator.submit(
+            MarkdownViewTestSupport.makeParseRequest(markdown: "# Emoji")
+        ) { parseResult in
             renderedSourceTexts.append(parseResult.sourceSnapshot.text)
         }
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             renderedSourceTexts.count == 1
         }
         #expect(renderedSourceTexts == ["# Emoji"])
 
         let finalSourceText = "😀 🚀 ✨"
-        coordinator.submit(parseRequest(finalSourceText)) { parseResult in
+        coordinator.submit(
+            MarkdownViewTestSupport.makeParseRequest(markdown: finalSourceText)
+        ) { parseResult in
             renderedSourceTexts.append(parseResult.sourceSnapshot.text)
         }
 
@@ -41,30 +48,5 @@ struct StreamingMarkdownRenderCoordinatorTests {
 
         #expect(renderedSourceTexts.count >= 2)
         #expect(renderedSourceTexts.last == finalSourceText)
-    }
-}
-
-private func parseRequest(_ sourceText: String) -> MarkdownParseRequest {
-    MarkdownParseRequest(
-        sourceText: sourceText,
-        mathContext: nil,
-        elementRenderers: []
-    )
-}
-
-@MainActor
-private func waitUntil(
-    timeout: Duration = .seconds(1),
-    pollInterval: Duration = .milliseconds(10),
-    condition: () -> Bool
-) async throws {
-    let clock = ContinuousClock()
-    let deadline = clock.now.advanced(by: timeout)
-
-    while condition() == false {
-        if clock.now >= deadline {
-            break
-        }
-        try await Task.sleep(for: pollInterval)
     }
 }

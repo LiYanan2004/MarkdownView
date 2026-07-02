@@ -1,5 +1,5 @@
 //
-//  MarkdownTextStateTests.swift
+//  _MarkdownTextStateTests.swift
 //  MarkdownView
 //
 //  Created by Codex on 2026/6/15.
@@ -10,11 +10,12 @@ import Testing
 
 @testable import MarkdownView
 
-/// Regression coverage for streamed Markdown updates where `_MarkdownText`
-/// may hold rendered state from an older partial input.
 @Suite("Markdown Text State")
-struct MarkdownTextStateTests {
-    @Test
+struct _MarkdownTextStateTests {
+    @Test(
+        "Uses rendered output when rendered state matches the current input",
+        .tags(.state, .rendering)
+    )
     @MainActor
     func visibleTextUsesRenderedOutputForMatchingInput() {
         // Normal path: when rendered state belongs to the current input, display
@@ -30,24 +31,25 @@ struct MarkdownTextStateTests {
         #expect(visibleText == output)
     }
 
-    @Test
+    @Test(
+        "Falls back to the latest input when rendered state is stale",
+        .tags(.state, .streaming, .regression)
+    )
     @MainActor
     func visibleTextFallsBackToLatestInputForStaleRenderedState() {
         // Streaming can leave a rendered result from an older partial input in
         // state. That stale output must not replace the latest input.
         let visibleText = _MarkdownText.visibleText(
-            input: AttributedString(Self.bugMarkdown),
+            input: AttributedString(_MarkdownTextStateTests.bugMarkdown),
             rendered: _MarkdownText.RenderedState(
-                input: AttributedString(Self.partialBugMarkdown),
-                output: AttributedString(Self.partialBugMarkdown)
+                input: AttributedString(_MarkdownTextStateTests.partialBugMarkdown),
+                output: AttributedString(_MarkdownTextStateTests.partialBugMarkdown)
             )
         )
 
-        #expect(String(visibleText.characters) == Self.bugMarkdown)
+        #expect(String(visibleText.characters) == _MarkdownTextStateTests.bugMarkdown)
     }
-}
 
-private extension MarkdownTextStateTests {
     static let partialBugMarkdown = """
     ## 翻譯與理解
 

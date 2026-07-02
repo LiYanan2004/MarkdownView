@@ -12,7 +12,10 @@ import Testing
 @Suite("Streaming Markdown Source")
 @MainActor
 struct StreamingMarkdownSourceTests {
-    @Test("New subscription receives latest text after previous subscription is cancelled")
+    @Test(
+        "Delivers the latest text to a new subscription after cancellation",
+        .tags(.streaming)
+    )
     func newSubscriptionReceivesLatestTextAfterPreviousSubscriptionIsCancelled() async throws {
         let source = StreamingMarkdownSource("Initial")
         var firstSubscriptionValues: [String] = []
@@ -23,7 +26,7 @@ struct StreamingMarkdownSourceTests {
             }
         }
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             firstSubscriptionValues == ["Initial"]
         }
 
@@ -40,13 +43,13 @@ struct StreamingMarkdownSourceTests {
             secondSubscription.cancel()
         }
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             secondSubscriptionValues == ["Updated while hidden"]
         }
 
         source.text = "Updated after reappear"
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             secondSubscriptionValues == [
                 "Updated while hidden",
                 "Updated after reappear",
@@ -54,7 +57,10 @@ struct StreamingMarkdownSourceTests {
         }
     }
 
-    @Test("Finish streaming completes active and future subscriptions")
+    @Test(
+        "Finishes active and future subscriptions after streaming ends",
+        .tags(.streaming)
+    )
     func finishStreamingCompletesActiveAndFutureSubscriptions() async throws {
         let source = StreamingMarkdownSource("Initial")
         var activeSubscriptionValues: [String] = []
@@ -70,13 +76,13 @@ struct StreamingMarkdownSourceTests {
             activeSubscription.cancel()
         }
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             activeSubscriptionValues == ["Initial"]
         }
 
         source.finishStreaming()
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             didFinishActiveSubscription
         }
 
@@ -92,29 +98,10 @@ struct StreamingMarkdownSourceTests {
             futureSubscription.cancel()
         }
 
-        try await waitUntil {
+        try await MarkdownViewTestSupport.waitUntil {
             didFinishFutureSubscription
         }
 
         #expect(futureSubscriptionValues.isEmpty)
     }
-}
-
-@MainActor
-private func waitUntil(
-    timeout: Duration = .seconds(1),
-    pollInterval: Duration = .milliseconds(10),
-    condition: () -> Bool
-) async throws {
-    let clock = ContinuousClock()
-    let deadline = clock.now.advanced(by: timeout)
-
-    while condition() == false {
-        if clock.now >= deadline {
-            break
-        }
-        try await Task.sleep(for: pollInterval)
-    }
-
-    #expect(condition(), "Timed out waiting for condition.")
 }

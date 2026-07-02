@@ -12,7 +12,10 @@ import Testing
 
 @Suite("Markdown Renderer Configuration")
 struct MarkdownRendererConfigurationTests {
-    @Test("Resolves relative markdown destinations against the preferred base URL")
+    @Test(
+        "Resolves relative markdown destinations against the preferred base URL",
+        .tags(.configuration, .links, .rendering)
+    )
     func resolvesRelativeMarkdownDestinationsAgainstPreferredBaseURL() throws {
         let baseURL = URL(string: "https://example.com/articles/")!
         let configuration = MarkdownRendererConfiguration()

@@ -13,88 +13,121 @@ import Testing
 
 @Suite("Markdown Incremental Parser")
 struct MarkdownIncrementalParserTests {
-    @Test("Uses incremental parsing for trailing plain text append")
+    @Test(
+        "Uses incremental parsing for a trailing plain-text append",
+        .tags(.parsing, .incrementalParsing)
+    )
     func usesIncrementalParsingForTrailingPlainTextAppend() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let previous = paragraphs.joined(separator: "\n\n")
         let new = previous + " extended"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Reparses the last root block for closed code fence append")
+    @Test(
+        "Reparses the last root block for a closed code-fence append",
+        .tags(.parsing, .incrementalParsing)
+    )
     func reparsesTheLastRootBlockForClosedCodeFenceAppend() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let previous = paragraphs.joined(separator: "\n\n")
         let new = previous + "\n\n```swift\nlet value = 1\n```"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Reparses the last root block for open code fence append")
+    @Test(
+        "Reparses the last root block for an open code-fence append",
+        .tags(.parsing, .incrementalParsing)
+    )
     func reparsesTheLastRootBlockForOpenCodeFenceAppend() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let previous = paragraphs.joined(separator: "\n\n")
         let new = previous + "\n\n```swift\nlet value = 1"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Reparses the last root block for list continuation")
+    @Test(
+        "Reparses the last root block for a list continuation append",
+        .tags(.parsing, .incrementalParsing, .lists)
+    )
     func reparsesTheLastRootBlockForListContinuation() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let previous = paragraphs.joined(separator: "\n\n")
         let new = previous + "\n\n- item"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 5))
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Reparses the trailing table for the first table body row")
+    @Test(
+        "Reparses the trailing table for the first appended body row",
+        .tags(.parsing, .incrementalParsing)
+    )
     func reparsesTheTrailingTableForTheFirstTableBodyRow() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let base = paragraphs.joined(separator: "\n\n")
         let previous = base + "\n\n| Name | Language |\n| --- | --- |"
         let new = previous + "\n| Swift | Native |"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 6))
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Falls back for another trailing table body row")
+    @Test(
+        "Falls back to a full parse for another trailing table body row",
+        .tags(.parsing, .incrementalParsing)
+    )
     func fallsBackForAnotherTrailingTableBodyRow() {
         let paragraphs = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         let base = paragraphs.joined(separator: "\n\n")
@@ -106,17 +139,23 @@ struct MarkdownIncrementalParserTests {
         """
         let new = previous + "\n| Rust | Systems |"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .full)
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Reparses the whole trailing table when a partial body row becomes a valid table row")
+    @Test(
+        "Reparses the full trailing table when a partial body row becomes valid",
+        .tags(.parsing, .incrementalParsing)
+    )
     func reparsesTheWholeTrailingTableWhenAPartialBodyRowBecomesAValidTableRow() {
         let previous = """
         ## Tables
@@ -127,76 +166,106 @@ struct MarkdownIncrementalParserTests {
         """
         let new = previous + "Swift"
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .incremental(stablePrefixRootBlockCount: 1))
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Falls back when an edit touches the stable prefix")
+    @Test(
+        "Falls back to a full parse when an edit touches the stable prefix",
+        .tags(.parsing, .incrementalParsing)
+    )
     func fallsBackWhenEditTouchesStablePrefix() {
         let previous = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
             .joined(separator: "\n\n")
         let new = ["Alpha updated", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
             .joined(separator: "\n\n")
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .full)
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Falls back for deletion")
+    @Test(
+        "Falls back to a full parse for deletions",
+        .tags(.parsing, .incrementalParsing)
+    )
     func fallsBackForDeletion() {
         let previous = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
             .joined(separator: "\n\n")
         let new = ["Alpha", "Bravo", "Charlie", "Delta", "Echo"]
             .joined(separator: "\n\n")
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .full)
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: new))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: new)
+        )
     }
 
-    @Test("Uses incremental parsing for identical resend")
+    @Test(
+        "Retains the previous parse result for an identical resend",
+        .tags(.parsing, .incrementalParsing)
+    )
     func usesIncrementalParsingForIdenticalResend() {
         let markdown = ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
             .joined(separator: "\n\n")
 
-        let previousResult = makeParseResult(markdown: markdown)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: markdown)
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: markdown),
+            MarkdownViewTestSupport.makeParseRequest(markdown: markdown),
             previousState: previousResult
         )
 
         #expect(result.parsingStrategy == .retained)
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(markdown: markdown))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(markdown: markdown)
+        )
     }
 
     #if ENABLE_MATH_RENDERING
-    @Test("Uses incremental parsing when math rendering is enabled for inline math")
+    @Test(
+        "Uses incremental parsing with inline math rendering enabled",
+        .tags(.parsing, .incrementalParsing, .math)
+    )
     func usesIncrementalParsingWhenMathRenderingIsEnabledForInlineMath() {
         let previous = "Inline math: $x$\n\nBravo"
         let new = previous + "\n\nTrailing math: $y$"
 
         let previousResult = MarkdownDocumentParser.parse(
-            parseRequest(markdown: previous, mathContext: MarkdownMathContext())
+            MarkdownViewTestSupport.makeParseRequest(
+                markdown: previous,
+                mathContext: MarkdownMathContext()
+            )
         )
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new, mathContext: MarkdownMathContext()),
+            MarkdownViewTestSupport.makeParseRequest(
+                markdown: new,
+                mathContext: MarkdownMathContext()
+            ),
             previousState: previousResult
         )
 
@@ -204,14 +273,20 @@ struct MarkdownIncrementalParserTests {
         #expect(result.mathContext?.inlineMathStorage.count == 2)
         #expect(result.mathContext?.inlineMathStorage.values.contains("$x$") == true)
         #expect(result.mathContext?.inlineMathStorage.values.contains("$y$") == true)
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
-            markdown: new,
-            mathContext: MarkdownMathContext(),
-            requiresBlockDirectiveParsing: false
-        ))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(
+                    markdown: new,
+                    mathContext: MarkdownMathContext(),
+                    requiresBlockDirectiveParsing: false
+                )
+        )
     }
 
-    @Test("Uses incremental parsing when math rendering is enabled for display math")
+    @Test(
+        "Uses incremental parsing with display math rendering enabled",
+        .tags(.parsing, .incrementalParsing, .math)
+    )
     func usesIncrementalParsingWhenMathRenderingIsEnabledForDisplayMath() {
         let previous = """
         Alpha
@@ -227,10 +302,16 @@ struct MarkdownIncrementalParserTests {
         $$
         """
         let previousResult = MarkdownDocumentParser.parse(
-            parseRequest(markdown: previous, mathContext: MarkdownMathContext())
+            MarkdownViewTestSupport.makeParseRequest(
+                markdown: previous,
+                mathContext: MarkdownMathContext()
+            )
         )
         let result = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new, mathContext: MarkdownMathContext()),
+            MarkdownViewTestSupport.makeParseRequest(
+                markdown: new,
+                mathContext: MarkdownMathContext()
+            ),
             previousState: previousResult
         )
 
@@ -238,14 +319,20 @@ struct MarkdownIncrementalParserTests {
         #expect(result.mathContext?.displayMathStorage.count == 2)
         #expect(result.mathContext?.displayMathStorage.values.contains("$$\nx\n$$") == true)
         #expect(result.mathContext?.displayMathStorage.values.contains("$$\ny\n$$") == true)
-        #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
-            markdown: new,
-            mathContext: MarkdownMathContext(),
-            requiresBlockDirectiveParsing: false
-        ))
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(result.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(
+                    markdown: new,
+                    mathContext: MarkdownMathContext(),
+                    requiresBlockDirectiveParsing: false
+                )
+        )
     }
 
-    @Test("Preserves heading ranges when appending after stable display math")
+    @Test(
+        "Preserves heading ranges when appending after stable display math",
+        .tags(.parsing, .incrementalParsing, .math)
+    )
     func preservesHeadingRangesWhenAppendingAfterStableDisplayMath() {
         let previous = """
         $$
@@ -263,46 +350,43 @@ struct MarkdownIncrementalParserTests {
         Tail
         """
 
-        let previousResult = makeParseResult(
+        let previousResult = MarkdownViewTestSupport.makeParseResult(
             markdown: previous,
             mathContext: MarkdownMathContext()
         )
         let incrementalResult = MarkdownDocumentParser.parse(
-            parseRequest(
+            MarkdownViewTestSupport.makeParseRequest(
                 markdown: new,
                 mathContext: MarkdownMathContext()
             ),
             previousState: previousResult
         )
-        let fullResult = makeParseResult(
+        let fullResult = MarkdownViewTestSupport.makeParseResult(
             markdown: new,
             mathContext: MarkdownMathContext()
         )
 
         #expect(incrementalResult.parsingStrategy == .incremental(stablePrefixRootBlockCount: 2))
-        #expect(headingRanges(incrementalResult.document) == headingRanges(fullResult.document))
+        #expect(
+            MarkdownViewTestSupport.headingRanges(in: incrementalResult.document)
+                == MarkdownViewTestSupport.headingRanges(in: fullResult.document)
+        )
     }
     #endif
 
-    @Test("Preserves a streamed emoji tail")
-    func preservesAStreamedEmojiTail() {
-        assertStreamingMatchesFullParse(markdown: """
-        # Title
-
-        Final line with emoji: 😀 🚀 ✨
-        """)
+    @Test(
+        "Preserves streamed Unicode tails",
+        .tags(.parsing, .incrementalParsing, .streaming),
+        arguments: StreamedUnicodeTailCase.allCases
+    )
+    func preservesStreamedUnicodeTails(testCase: StreamedUnicodeTailCase) {
+        MarkdownViewTestSupport.assertStreamingMatchesFullParse(markdown: testCase.markdown)
     }
 
-    @Test("Preserves a streamed CJK tail")
-    func preservesAStreamedCJKTail() {
-        assertStreamingMatchesFullParse(markdown: """
-        # 标题
-
-        最后一行包含中文字符：叶子与结果
-        """)
-    }
-
-    @Test("Preserves heading ranges when appending a tail parse")
+    @Test(
+        "Preserves heading ranges when appending a tail parse",
+        .tags(.parsing, .incrementalParsing)
+    )
     func preservesHeadingRangesWhenAppendingATailParse() {
         let previous = """
         # Title
@@ -316,149 +400,60 @@ struct MarkdownIncrementalParserTests {
         Body
         """
 
-        let previousResult = makeParseResult(markdown: previous)
+        let previousResult = MarkdownViewTestSupport.makeParseResult(markdown: previous)
         let incrementalResult = MarkdownDocumentParser.parse(
-            parseRequest(markdown: new),
+            MarkdownViewTestSupport.makeParseRequest(markdown: new),
             previousState: previousResult
         )
-        let fullResult = makeParseResult(markdown: new)
+        let fullResult = MarkdownViewTestSupport.makeParseResult(markdown: new)
 
         #expect(incrementalResult.parsingStrategy == .incremental(stablePrefixRootBlockCount: 1))
-        #expect(headingRanges(incrementalResult.document) == headingRanges(fullResult.document))
+        #expect(
+            MarkdownViewTestSupport.headingRanges(in: incrementalResult.document)
+                == MarkdownViewTestSupport.headingRanges(in: fullResult.document)
+        )
     }
 
     @MainActor
-    @Test("Parses from detached work without main-actor isolation")
+    @Test(
+        "Parses from detached work without main-actor isolation",
+        .tags(.parsing, .concurrency)
+    )
     func parsesFromDetachedWorkWithoutMainActorIsolation() async {
-        let request = parseRequest(markdown: "# Title\n\nBody")
+        let request = MarkdownViewTestSupport.makeParseRequest(markdown: "# Title\n\nBody")
 
         let parseResult = await Task.detached(priority: .userInitiated) {
             MarkdownDocumentParser.parse(request)
         }.value
 
         #expect(parseResult.parsingStrategy == .full)
-        #expect(documentDebugDescription(parseResult.document) == fullParseDocumentDescription(markdown: "# Title\n\nBody"))
-    }
-}
-
-private extension MarkdownIncrementalParserTests {
-    func makeParseResult(
-        markdown: String,
-        mathContext: MarkdownMathContext? = nil,
-        requiresBlockDirectiveParsing: Bool = false
-    ) -> MarkdownParseResult {
-        MarkdownDocumentParser.parse(
-            parseRequest(
-                markdown: markdown,
-                mathContext: mathContext,
-                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
-            )
+        #expect(
+            MarkdownViewTestSupport.documentDebugDescription(parseResult.document)
+                == MarkdownViewTestSupport.fullParseDocumentDescription(
+                    markdown: "# Title\n\nBody"
+                )
         )
     }
 
-    func fullParseDocumentDescription(
-        markdown: String,
-        mathContext: MarkdownMathContext? = nil,
-        requiresBlockDirectiveParsing: Bool = false
-    ) -> String {
-        let parseResult = MarkdownDocumentParser.parse(
-            parseRequest(
-                markdown: markdown,
-                mathContext: mathContext,
-                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
-            )
-        )
-        return documentDebugDescription(parseResult.document)
-    }
+    enum StreamedUnicodeTailCase: CaseIterable {
+        case emoji
+        case cjk
 
-    func documentDebugDescription(_ document: Markdown.Document) -> String {
-        document.debugDescription()
-    }
+        var markdown: String {
+            switch self {
+            case .emoji:
+                """
+                # Title
 
-    func headingRanges(_ document: Markdown.Document) -> [SourceRange?] {
-        var headingCollector = HeadingRangeCollector()
-        headingCollector.visit(document)
-        return headingCollector.headingRanges
-    }
+                Final line with emoji: 😀 🚀 ✨
+                """
+            case .cjk:
+                """
+                # 标题
 
-    func linkDestinations(_ document: Markdown.Document) -> [String?] {
-        var linkCollector = LinkDestinationCollector()
-        linkCollector.visit(document)
-        return linkCollector.linkDestinations
-    }
-
-    func assertStreamingMatchesFullParse(
-        markdown: String,
-        mathContext: MarkdownMathContext? = nil,
-        requiresBlockDirectiveParsing: Bool = false
-    ) {
-        var streamedText = ""
-        var previousState: MarkdownParseResult?
-
-        for character in markdown {
-            streamedText.append(character)
-
-            let result = MarkdownDocumentParser.parse(
-                parseRequest(
-                    markdown: streamedText,
-                    mathContext: mathContext,
-                    requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
-                ),
-                previousState: previousState
-            )
-
-            #expect(documentDebugDescription(result.document) == fullParseDocumentDescription(
-                markdown: streamedText,
-                mathContext: mathContext,
-                requiresBlockDirectiveParsing: requiresBlockDirectiveParsing
-            ))
-
-            previousState = result
+                最后一行包含中文字符：叶子与结果
+                """
+            }
         }
-    }
-
-    func parseRequest(
-        markdown: String,
-        mathContext: MarkdownMathContext? = nil,
-        requiresBlockDirectiveParsing: Bool = false
-    ) -> MarkdownParseRequest {
-        let elementRenderers: [MarkdownElementRendererRegistration]
-        if requiresBlockDirectiveParsing {
-            elementRenderers = [
-                .blockDirective(IncrementalParserTestBlockDirectiveRenderer(), name: "Note")
-            ]
-        } else {
-            elementRenderers = []
-        }
-
-        return MarkdownParseRequest(
-            sourceText: markdown,
-            mathContext: mathContext,
-            elementRenderers: elementRenderers
-        )
-    }
-}
-
-private struct IncrementalParserTestBlockDirectiveRenderer: MarkdownBlockDirectiveRenderer {
-    func makeBody(configuration: MarkdownBlockDirectiveRendererConfiguration) -> some View {
-        EmptyView()
-    }
-}
-
-private struct HeadingRangeCollector: MarkupWalker {
-    private(set) var headingRanges: [SourceRange?] = []
-
-    mutating func visitHeading(_ heading: Markdown.Heading) {
-        headingRanges.append(heading.range)
-        descendInto(heading)
-    }
-}
-
-private struct LinkDestinationCollector: MarkupWalker {
-    private(set) var linkDestinations: [String?] = []
-
-    mutating func visitLink(_ link: Markdown.Link) {
-        linkDestinations.append(link.destination)
-        descendInto(link)
     }
 }

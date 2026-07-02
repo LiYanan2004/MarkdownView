@@ -17,57 +17,78 @@ import Testing
 
 @Suite("Markdown Text Converter")
 struct MarkdownTextConverterTests {
-    @Test("Converts basic markdown nodes to plain text content")
+    @Test(
+        "Converts basic Markdown nodes to plain text",
+        .tags(.textConversion)
+    )
     @MainActor
     func convertsBasicMarkdownNodesToPlainTextContent() {
         for fixture in PlainTextFixture.allCases {
-            let textContent = Self.makeTextContent(markdown: fixture.markdown)
+            let textContent = MarkdownViewTestSupport.makeTextContent(markdown: fixture.markdown)
+            let plainText = MarkdownViewTestSupport.plainText(in: textContent)
 
             #expect(
-                textContent.plainText == fixture.expectedPlainText,
-                "\(fixture.rawValue) converted to \(textContent.plainText.debugDescription)"
+                plainText == fixture.expectedPlainText,
+                "\(fixture.rawValue) converted to \(plainText.debugDescription)"
             )
         }
     }
 
-    @Test("Applies link attributes")
+    @Test(
+        "Applies configured link attributes",
+        .tags(.textConversion, .links)
+    )
     @MainActor
     func appliesLinkAttributes() {
         let configuration = MarkdownRendererConfiguration()
             .with(\.preferredBaseURL, URL(string: "https://example.com/articles/"))
             .with(\.underlineLinks, true)
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: "[Read more](guide)",
             configuration: configuration
         )
-        let attributedString = textContent.attributedStringForTesting
+        let attributedString = MarkdownViewTestSupport.attributedString(in: textContent)
 
-        #expect(attributedString.link(for: "Read more")?.absoluteString == "https://example.com/articles/guide")
-        #expect(attributedString.underlineLineStyle(for: "Read more") == SwiftUI.Text.LineStyle.single)
+        #expect(
+            MarkdownViewTestSupport.link(in: attributedString, matching: "Read more")?.absoluteString
+                == "https://example.com/articles/guide"
+        )
+        #expect(
+            MarkdownViewTestSupport.underlineLineStyle(in: attributedString, matching: "Read more")
+                == SwiftUI.Text.LineStyle.single
+        )
     }
 
-    @Test("Embeds custom rendered links")
+    @Test(
+        "Embeds custom rendered links",
+        .tags(.textConversion, .links)
+    )
     @MainActor
     func embedsCustomRenderedLinks() {
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: "[Read more](custom://guide)",
             elementRenderers: [
-                .link(TestMarkdownLinkRenderer(), urlScheme: "custom")
+                .link(MarkdownViewTestSupport.LinkRendererStub(), urlScheme: "custom")
             ]
         )
 
-        #expect(textContent.embeddedViewCount == 1)
-        #expect(textContent.plainText == "\u{FFFC}")
+        #expect(MarkdownViewTestSupport.embeddedViewCount(in: textContent) == 1)
+        #expect(MarkdownViewTestSupport.plainText(in: textContent) == "\u{FFFC}")
     }
 
-    @Test("Preserves inline presentation intents")
+    @Test(
+        "Preserves inline presentation intents",
+        .tags(.textConversion)
+    )
     @MainActor
     func preservesInlinePresentationIntents() {
         for fixture in InlinePresentationIntentFixture.allCases {
-            let textContent = Self.makeTextContent(markdown: fixture.markdown)
-            let inlinePresentationIntent = textContent
-                .attributedStringForTesting
-                .inlinePresentationIntent(for: fixture.plainText)
+            let textContent = MarkdownViewTestSupport.makeTextContent(markdown: fixture.markdown)
+            let attributedString = MarkdownViewTestSupport.attributedString(in: textContent)
+            let inlinePresentationIntent = MarkdownViewTestSupport.inlinePresentationIntent(
+                in: attributedString,
+                matching: fixture.plainText
+            )
 
             #expect(
                 inlinePresentationIntent?.contains(fixture.expectedIntent) == true,
@@ -76,36 +97,48 @@ struct MarkdownTextConverterTests {
         }
     }
 
-    @Test("Embeds block attachments")
+    @Test(
+        "Embeds block attachments",
+        .tags(.textConversion, .attachments)
+    )
     @MainActor
     func embedsBlockAttachments() {
         for fixture in AttachmentFixture.allCases {
-            let textContent = Self.makeTextContent(markdown: fixture.markdown)
+            let textContent = MarkdownViewTestSupport.makeTextContent(markdown: fixture.markdown)
+            let embeddedViewCount = MarkdownViewTestSupport.embeddedViewCount(in: textContent)
 
             #expect(
-                textContent.embeddedViewCount == fixture.expectedEmbeddedViewCount,
-                "\(fixture.rawValue) embedded \(textContent.embeddedViewCount) view fragments"
+                embeddedViewCount == fixture.expectedEmbeddedViewCount,
+                "\(fixture.rawValue) embedded \(embeddedViewCount) view fragments"
             )
         }
     }
 
     #if ENABLE_MATH_RENDERING
-    @Test("Converts preprocessed inline math placeholders to embedded content")
+    @Test(
+        "Converts preprocessed inline math placeholders to embedded content",
+        .tags(.textConversion, .math)
+    )
     @MainActor
     func convertsPreprocessedInlineMathPlaceholdersToEmbeddedContent() {
         let preprocessingResult = MarkdownMathPreprocessor()
             .preprocessingResult(for: #"Value $x_y$ stays inline."#)
 
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: preprocessingResult.markdown,
             mathContext: preprocessingResult.context
         )
+        let plainText = MarkdownViewTestSupport.plainText(in: textContent)
 
-        #expect(textContent.embeddedViewCount == 1)
-        #expect(!textContent.plainText.contains("markdownview-math(inline:"))
-        #expect(textContent.plainText == "Value \u{FFFC} stays inline.")
+        #expect(MarkdownViewTestSupport.embeddedViewCount(in: textContent) == 1)
+        #expect(!plainText.contains("markdownview-math(inline:"))
+        #expect(plainText == "Value \u{FFFC} stays inline.")
     }
-    @Test("Converts preprocessed display math placeholders to embedded content")
+
+    @Test(
+        "Converts preprocessed display math placeholders to embedded content",
+        .tags(.textConversion, .math)
+    )
     @MainActor
     func convertsPreprocessedDisplayMathPlaceholdersToEmbeddedContent() {
         let preprocessingResult = MarkdownMathPreprocessor()
@@ -119,18 +152,22 @@ struct MarkdownTextConverterTests {
                 """#
             )
 
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: preprocessingResult.markdown,
             mathContext: preprocessingResult.context,
             parseOptions: []
         )
+        let plainText = MarkdownViewTestSupport.plainText(in: textContent)
 
-        #expect(textContent.embeddedViewCount == 1)
-        #expect(!textContent.plainText.contains("markdownview-math(display:"))
-        #expect(!textContent.plainText.contains("$$"))
+        #expect(MarkdownViewTestSupport.embeddedViewCount(in: textContent) == 1)
+        #expect(!plainText.contains("markdownview-math(display:"))
+        #expect(!plainText.contains("$$"))
     }
 
-    @Test("Converts display math followed by inline text to embedded content")
+    @Test(
+        "Converts display math followed by inline text to embedded content",
+        .tags(.textConversion, .math)
+    )
     @MainActor
     func convertsDisplayMathFollowedByInlineTextToEmbeddedContent() {
         let preprocessingResult = MarkdownMathPreprocessor()
@@ -141,18 +178,22 @@ struct MarkdownTextConverterTests {
                 """#
             )
 
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: preprocessingResult.markdown,
             mathContext: preprocessingResult.context,
             parseOptions: []
         )
+        let plainText = MarkdownViewTestSupport.plainText(in: textContent)
 
-        #expect(textContent.embeddedViewCount == 2)
-        #expect(!textContent.plainText.contains("markdownview-math(display:"))
-        #expect(textContent.plainText.contains("(for "))
+        #expect(MarkdownViewTestSupport.embeddedViewCount(in: textContent) == 2)
+        #expect(!plainText.contains("markdownview-math(display:"))
+        #expect(plainText.contains("(for "))
     }
 
-    @Test("Distinguishes math embedding identities by kind and occurrence")
+    @Test(
+        "Distinguishes math embedding identities by kind and occurrence",
+        .tags(.textConversion, .math)
+    )
     @MainActor
     func distinguishesMathEmbeddingIdentitiesByKindAndOccurrence() throws {
         let document = Document(parsing: "Math placeholders")
@@ -177,19 +218,30 @@ struct MarkdownTextConverterTests {
     }
     #endif
 
-    @Test("Aligns list continuation paragraphs with item body")
+    @Test(
+        "Aligns list continuation paragraphs with the list item body",
+        .tags(.textConversion, .lists)
+    )
     @MainActor
     func alignsListContinuationParagraphsWithItemBody() {
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: """
             - First paragraph
 
               Continuation paragraph
             """
         )
-        let attributedString = NSAttributedString(textContent.attributedStringForTesting)
-        let listItemParagraphStyle = attributedString.paragraphStyle(for: "First paragraph")
-        let continuationParagraphStyle = attributedString.paragraphStyle(for: "Continuation paragraph")
+        let attributedString = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        )
+        let listItemParagraphStyle = MarkdownViewTestSupport.paragraphStyle(
+            in: attributedString,
+            matching: "First paragraph"
+        )
+        let continuationParagraphStyle = MarkdownViewTestSupport.paragraphStyle(
+            in: attributedString,
+            matching: "Continuation paragraph"
+        )
 
         #expect(listItemParagraphStyle?.firstLineHeadIndent == 12)
         #expect(listItemParagraphStyle?.headIndent == 24)
@@ -197,65 +249,83 @@ struct MarkdownTextConverterTests {
         #expect(continuationParagraphStyle?.headIndent == 24)
     }
 
-    @Test("Applies body font to list item first paragraph")
+    @Test(
+        "Applies the body font to list content",
+        .tags(.textConversion, .lists),
+        arguments: BodyFontFixture.allCases
+    )
     @MainActor
-    func appliesBodyFontToListItemFirstParagraph() {
+    func appliesBodyFontToListContent(fixture: BodyFontFixture) {
         let bodyFont = PlatformFont.systemFont(ofSize: 30)
-        let textContent = Self.makeTextContent(
-            markdown: "- First paragraph",
-            fonts: AnyMarkdownFontGroup(TestMarkdownFontGroup(bodyFont: bodyFont))
+        let textContent = MarkdownViewTestSupport.makeTextContent(
+            markdown: fixture.markdown,
+            fonts: AnyMarkdownFontGroup(
+                MarkdownViewTestSupport.FontGroupStub(bodyFont: bodyFont)
+            )
         )
-        let attributedString = NSAttributedString(textContent.attributedStringForTesting)
+        let attributedString = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        )
 
-        #expect(attributedString.font(for: "First paragraph")?.pointSize == bodyFont.pointSize)
+        for substring in fixture.fontTrackedSubstrings {
+            #expect(
+                MarkdownViewTestSupport.font(in: attributedString, matching: substring)?.pointSize
+                    == bodyFont.pointSize
+            )
+        }
     }
 
-    @Test("Applies body font to task list row")
-    @MainActor
-    func appliesBodyFontToTaskListRow() {
-        let bodyFont = PlatformFont.systemFont(ofSize: 30)
-        let textContent = Self.makeTextContent(
-            markdown: "- [x] Completed task",
-            fonts: AnyMarkdownFontGroup(TestMarkdownFontGroup(bodyFont: bodyFont))
-        )
-        let attributedString = NSAttributedString(textContent.attributedStringForTesting)
-
-        #expect(attributedString.font(for: "\u{FFFC}")?.pointSize == bodyFont.pointSize)
-        #expect(attributedString.font(for: "Completed task")?.pointSize == bodyFont.pointSize)
-    }
-
-    @Test("Applies list paragraph style to task list checkbox")
+    @Test(
+        "Applies list paragraph styling to the task-list checkbox",
+        .tags(.textConversion, .lists)
+    )
     @MainActor
     func appliesListParagraphStyleToTaskListCheckbox() {
-        let textContent = Self.makeTextContent(markdown: "- [x] Done")
-        let attributedString = NSAttributedString(textContent.attributedStringForTesting)
-        let checkboxParagraphStyle = attributedString.paragraphStyle(for: "\u{FFFC}")
+        let textContent = MarkdownViewTestSupport.makeTextContent(markdown: "- [x] Done")
+        let attributedString = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        )
+        let checkboxParagraphStyle = MarkdownViewTestSupport.paragraphStyle(
+            in: attributedString,
+            matching: "\u{FFFC}"
+        )
 
         #expect(checkboxParagraphStyle?.firstLineHeadIndent == 12)
         #expect(checkboxParagraphStyle?.headIndent == 24)
         #expect(checkboxParagraphStyle?.paragraphSpacing == 8)
     }
 
-    @Test("Applies paragraph spacing to code block attachment")
+    @Test(
+        "Applies paragraph spacing to code-block attachments",
+        .tags(.textConversion, .attachments)
+    )
     @MainActor
     func appliesParagraphSpacingToCodeBlockAttachment() {
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: """
             ```swift
             let value = 1
             ```
             """
         )
-        let attributedString = NSAttributedString(textContent.attributedStringForTesting)
-        let codeBlockParagraphStyle = attributedString.paragraphStyle(for: "\u{FFFC}")
+        let attributedString = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        )
+        let codeBlockParagraphStyle = MarkdownViewTestSupport.paragraphStyle(
+            in: attributedString,
+            matching: "\u{FFFC}"
+        )
 
         #expect(codeBlockParagraphStyle?.paragraphSpacing == 8)
     }
 
-    @Test("Preserves list item that starts with block attachment")
+    @Test(
+        "Preserves a list item that starts with a block attachment",
+        .tags(.textConversion, .lists, .attachments)
+    )
     @MainActor
     func preservesListItemThatStartsWithBlockAttachment() {
-        let textContent = Self.makeTextContent(
+        let textContent = MarkdownViewTestSupport.makeTextContent(
             markdown: """
             -
               ```swift
@@ -264,12 +334,9 @@ struct MarkdownTextConverterTests {
             """
         )
 
-        #expect(textContent.embeddedViewCount == 1)
+        #expect(MarkdownViewTestSupport.embeddedViewCount(in: textContent) == 1)
     }
 
-}
-
-private extension MarkdownTextConverterTests {
     enum PlainTextFixture: String, CaseIterable {
         case paragraph
         case paragraphs
@@ -421,136 +488,26 @@ private extension MarkdownTextConverterTests {
         }
     }
 
-    @MainActor static func makeTextContent(
-        markdown: String,
-        configuration: MarkdownRendererConfiguration = MarkdownRendererConfiguration(),
-        mathContext: MarkdownMathContext? = nil,
-        elementRenderers: [MarkdownElementRendererRegistration] = [],
-        fonts: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic),
-        parseOptions: ParseOptions = []
-    ) -> TextContent {
-        let converter = MarkdownTextConverter(
-            configuration: configuration,
-            mathContext: mathContext,
-            elementRenderers: elementRenderers,
-            fonts: fonts
-        )
-        return converter.makeTextContent(for: Document(parsing: markdown, options: parseOptions))
-    }
-}
+    enum BodyFontFixture: CaseIterable {
+        case listItem
+        case taskListRow
 
-private struct TestMarkdownFontGroup: MarkdownFontGroup {
-    var bodyFont: PlatformFont
-    var blockQuoteFont = PlatformFont.systemFont(ofSize: 13)
-    var tableHeaderFont = PlatformFont.systemFont(ofSize: 13)
-    var tableBodyFont = PlatformFont.systemFont(ofSize: 13)
-
-    var body: any CustomCTFontConvertible {
-        bodyFont
-    }
-
-    var blockQuote: any CustomCTFontConvertible {
-        blockQuoteFont
-    }
-
-    var tableHeader: any CustomCTFontConvertible {
-        tableHeaderFont
-    }
-
-    var tableBody: any CustomCTFontConvertible {
-        tableBodyFont
-    }
-}
-
-private struct TestMarkdownLinkRenderer: MarkdownLinkRenderer {
-    func makeBody(configuration: MarkdownLinkRendererConfiguration) -> some View {
-        configuration.label
-    }
-}
-
-private extension AttributedString {
-    func inlinePresentationIntent(
-        for substring: String
-    ) -> InlinePresentationIntent? {
-        guard let range = range(of: substring) else {
-            return nil
+        var markdown: String {
+            switch self {
+            case .listItem:
+                "- First paragraph"
+            case .taskListRow:
+                "- [x] Completed task"
+            }
         }
 
-        return firstRun(overlapping: range)?.inlinePresentationIntent
-    }
-
-    func link(for substring: String) -> URL? {
-        guard let range = range(of: substring) else {
-            return nil
-        }
-
-        return firstRun(overlapping: range)?.link
-    }
-
-    func underlineLineStyle(
-        for substring: String
-    ) -> SwiftUI.Text.LineStyle? {
-        guard let range = range(of: substring) else {
-            return nil
-        }
-
-        return firstRun(overlapping: range)?.underlineStyle
-    }
-
-    func firstRun(
-        overlapping range: Range<AttributedString.Index>
-    ) -> AttributedString.Runs.Run? {
-        runs.first { run in
-            run.range.overlaps(range)
-        }
-    }
-}
-
-private extension NSAttributedString {
-    func font(for substring: String) -> PlatformFont? {
-        let range = (string as NSString).range(of: substring)
-        guard range.location != NSNotFound else {
-            return nil
-        }
-
-        return attribute(
-            .font,
-            at: range.location,
-            effectiveRange: nil
-        ) as? PlatformFont
-    }
-
-    func paragraphStyle(for substring: String) -> NSParagraphStyle? {
-        let range = (string as NSString).range(of: substring)
-        guard range.location != NSNotFound else {
-            return nil
-        }
-
-        return attribute(
-            .paragraphStyle,
-            at: range.location,
-            effectiveRange: nil
-        ) as? NSParagraphStyle
-    }
-}
-
-private extension TextContent {
-    @MainActor
-    var plainText: String {
-        String(attributedStringForTesting.characters)
-    }
-
-    @MainActor
-    var embeddedViewCount: Int {
-        String(attributedStringForTesting.characters)
-            .filter { $0 == "\u{FFFC}" }
-            .count
-    }
-
-    @MainActor
-    var attributedStringForTesting: AttributedString {
-        fragments.reduce(into: AttributedString()) { attributedString, fragment in
-            attributedString += fragment.asAttributedString()
+        var fontTrackedSubstrings: [String] {
+            switch self {
+            case .listItem:
+                ["First paragraph"]
+            case .taskListRow:
+                ["\u{FFFC}", "Completed task"]
+            }
         }
     }
 }
