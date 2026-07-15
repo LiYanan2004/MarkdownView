@@ -93,6 +93,19 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     }
     
     func visitBlockQuote(_ blockQuote: BlockQuote) -> MarkdownNodeView {
+        let children = Array(blockQuote.children)
+        if let firstParagraph = children.first as? Paragraph,
+           let alert = MarkdownQuoteAlertType.detect(
+            from: Self.plainText(of: firstParagraph)
+           ) {
+            return visitQuoteAlertBlockQuote(
+                blockQuote,
+                children: children,
+                alertType: alert.type,
+                title: alert.title
+            )
+        }
+
         let content = MarkdownBlockQuoteStyleConfiguration.Content {
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
@@ -108,6 +121,34 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
         return MarkdownNodeView {
             MarkdownBlockQuote(content: content)
                 .tint(configuration.tintColors[.blockQuote, default: .accentColor])
+        }
+    }
+
+    func visitQuoteAlertBlockQuote(
+        _ blockQuote: BlockQuote,
+        children: [any Markup],
+        alertType: MarkdownQuoteAlertType,
+        title: String
+    ) -> MarkdownNodeView {
+        let bodyChildren = Array(children.dropFirst())
+        let content = MarkdownBlockQuoteStyleConfiguration.Content {
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(Array(bodyChildren.enumerated()), id: \.offset) { _, child in
+                    MarkdownViewRenderer(
+                        configuration: configuration,
+                        mathContext: mathContext,
+                        elementRenderers: elementRenderers
+                    )
+                    .makeBody(for: child)
+                }
+            }
+        }
+        return MarkdownNodeView {
+            MarkdownQuoteAlert(
+                alertType: alertType,
+                title: title,
+                content: AnyView(content)
+            )
         }
     }
     
@@ -353,12 +394,43 @@ fileprivate extension MarkdownViewRenderer {
             elementRenderers: elementRenderers
         )
         .makeBody(for: cell)
-        
+
         return MarkdownTableStyleConfiguration.Table.Cell(
             horizontalAlignment: cell.horizontalAlignment,
             textAlignment: cell.textAlignment,
             colspan: Int(cell.colspan),
             content: content
         )
+    }
+}
+
+// MARK: - Utilities
+
+extension MarkdownViewRenderer {
+    /// Collects the plain text from a markup node and its inline children,
+    /// without any formatting prefixes from ancestral elements.
+    static func plainText(of markup: any Markup) -> String {
+        if let text = markup as? Markdown.Text {
+            return text.string
+        }
+        if let inlineCode = markup as? InlineCode {
+            return inlineCode.code
+        }
+        if let softBreak = markup as? SoftBreak {
+            return softBreak.plainText
+        }
+        if let lineBreak = markup as? LineBreak {
+            return lineBreak.plainText
+        }
+        if let inlineHTML = markup as? InlineHTML {
+            return inlineHTML.plainText
+        }
+        if let symbolLink = markup as? SymbolLink {
+            return symbolLink.plainText
+        }
+        if let customInline = markup as? CustomInline {
+            return customInline.plainText
+        }
+        return markup.children.reduce(into: "") { $0 += plainText(of: $1) }
     }
 }
