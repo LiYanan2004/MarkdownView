@@ -89,6 +89,17 @@ StreamingMarkdownReader(markdownSource) { parseResult in
 
 Create one `StreamingMarkdownSource` for each response and keep it alive for the lifetime of that stream. Update `markdownSource.text` as new chunks arrive, then call `finishStreaming()` when the stream finishes.
 
+#### With animation
+
+```Swift
+StreamingMarkdownReader(markdownSource) { parseResult in
+    MarkdownView(parseResult)
+}
+.markdownStreamingAnimation(.blur)
+```
+
+`markdownStreamingAnimation` supports 3 defined animation: `.blur`, `.gradient` and `.opacity`. Also, you can define custom animations by `StreamingTextAnimation` protocol.
+
 ### Text selection
 
 Use `MarkdownText` when text selection behavior is more important than full view-based layout.
