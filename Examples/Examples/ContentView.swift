@@ -17,12 +17,14 @@ struct ContentView: View {
     @State private var streamingTask: Task<Void, Error>?
     @State private var streamingIntervalMilliseconds = 1.0
     @State private var charactersPerChunk = 1.0
+    @State private var quoteAlertEnabled = true
 
     var body: some View {
         NavigationStack {
             MarkdownPreview(
                 source: source,
-                rendererKind: rendererKind
+                rendererKind: rendererKind,
+                quoteAlertEnabled: $quoteAlertEnabled
             )
             .toolbar(content: toolbarContent)
         }
@@ -101,6 +103,10 @@ struct ContentView: View {
                     value: $charactersPerChunk,
                     in: 1 ... 32
                 )
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Quote Alert", isOn: $quoteAlertEnabled)
             }
         }
         .formStyle(.grouped)

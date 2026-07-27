@@ -148,7 +148,6 @@ enum ExampleMarkdown {
     > Maybe you should solve it.
 
     > [!NOTE]
-    >
     > Note
     
     > [!TIP]

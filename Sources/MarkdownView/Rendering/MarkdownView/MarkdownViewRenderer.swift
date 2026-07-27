@@ -14,16 +14,19 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
     var mathContext: MarkdownMathContext?
     var elementRenderers: [MarkdownElementRendererRegistration]
+    var quoteAlertEnabled: Bool
     private var activeInlineIntent: InlinePresentationIntent = []
-    
+
     init(
         configuration: MarkdownRendererConfiguration,
         mathContext: MarkdownMathContext?,
-        elementRenderers: [MarkdownElementRendererRegistration]
+        elementRenderers: [MarkdownElementRendererRegistration],
+        quoteAlertEnabled: Bool = false
     ) {
         self.configuration = configuration
         self.mathContext = mathContext
         self.elementRenderers = elementRenderers
+        self.quoteAlertEnabled = quoteAlertEnabled
     }
     
     func makeBody(for markup: any Markup) -> some View {
@@ -94,7 +97,8 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     
     func visitBlockQuote(_ blockQuote: BlockQuote) -> MarkdownNodeView {
         let children = Array(blockQuote.children)
-        if let firstParagraph = children.first as? Paragraph,
+        if quoteAlertEnabled,
+           let firstParagraph = children.first as? Paragraph,
            let alert = MarkdownQuoteAlertType.detect(
             from: Self.plainText(of: firstParagraph)
            ) {
@@ -130,7 +134,24 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
         alertType: MarkdownQuoteAlertType,
         title: String
     ) -> MarkdownNodeView {
-        let bodyChildren = Array(children.dropFirst())
+        let bodyChildren: [any Markup]
+        if children.count > 1 {
+            // Blank line separates marker and body.
+            bodyChildren = Array(children.dropFirst())
+        } else if let firstParagraph = children.first {
+            // No blank line: [\!TYPE] and body are in the same paragraph.
+            // Strip the [\!TYPE] prefix from the paragraph's inline children.
+            let inlineChildren = Array(firstParagraph.children)
+            let prefix = "[!\(alertType.rawValue)]"
+            let bodyInlineChildren = MarkdownViewRenderer.stripCalloutPrefix(
+                from: inlineChildren,
+                prefix: prefix
+            )
+            bodyChildren = bodyInlineChildren
+        } else {
+            bodyChildren = []
+        }
+
         let content = MarkdownBlockQuoteStyleConfiguration.Content {
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(Array(bodyChildren.enumerated()), id: \.offset) { _, child in
@@ -432,5 +453,36 @@ extension MarkdownViewRenderer {
             return customInline.plainText
         }
         return markup.children.reduce(into: "") { $0 += plainText(of: $1) }
+    }
+
+    /// Strips the `[!TYPE]` marker from the first Text child of a paragraph's inline children.
+    /// Returns the remaining inline children after the marker (and its trailing soft break).
+    static func stripCalloutPrefix(
+        from inlineChildren: [any Markup],
+        prefix: String
+    ) -> [any Markup] {
+        var result: [any Markup] = []
+        var skippedMarker = false
+
+        for child in inlineChildren {
+            if !skippedMarker {
+                if let text = child as? Markdown.Text, text.string.uppercased().hasPrefix(prefix.uppercased()) {
+                    let remaining = String(text.string.dropFirst(prefix.count))
+                        .trimmingCharacters(in: .whitespaces)
+                    if !remaining.isEmpty {
+                        result.append(Markdown.Text(remaining))
+                    }
+                    skippedMarker = true
+                    continue
+                }
+            }
+            // Skip the soft/line break immediately after the marker
+            if skippedMarker && result.isEmpty && (child is SoftBreak || child is LineBreak) {
+                continue
+            }
+            result.append(child)
+        }
+
+        return result
     }
 }
