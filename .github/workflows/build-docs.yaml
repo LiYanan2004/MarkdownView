@@ -3,18 +3,21 @@ name: Generate Documentations
 on:
   push:
     branches: ["main"]
+    tags: ['[0-9]*.[0-9]*.[0-9]*']
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   publish-docs:
-    env: # Environment Variables
-      SCHEME_NAME: MarkdownView
-      HOSTING_BASE_PATH: MarkdownView
-    environment: # Github Page environments
+    environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: macos-latest
@@ -22,29 +25,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Restore versioned documentation cache
+        uses: actions/cache@v6
+        with:
+          path: .docs/cache/versioned-docc
+          key: versioned-docc-${{ runner.os }}-${{ hashFiles('.vdc.json', 'Package.resolved') }}-${{ github.ref_type }}-${{ github.sha }}
+          restore-keys: |
+            versioned-docc-${{ runner.os }}-${{ hashFiles('.vdc.json', 'Package.resolved') }}-
+            versioned-docc-${{ runner.os }}-
+
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest
 
-      - name: Build DocC archive
-        id: build-docs
-        run: |
-          xcodebuild \
-            docbuild \
-            -scheme $SCHEME_NAME \
-            -destination "platform=macOS" \
-            -derivedDataPath build-docs
-          ARCHIVE=$(find build-docs/Build/Products -name "$SCHEME_NAME.doccarchive" -type d | head -n1)
-          echo "archive=$ARCHIVE" >> $GITHUB_OUTPUT
-
-      - name: Process DocC archive
-        run: |
-          xcrun docc process-archive \
-            transform-for-static-hosting "${{ steps.build-docs.outputs.archive }}" \
-            --output-path docs \
-            --hosting-base-path $HOSTING_BASE_PATH
+      - name: Build versioned DocC site
+        uses: DocCLab/VersionedDocC@0.0.13
+        with:
+          config: .vdc.json
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
@@ -52,7 +54,7 @@ jobs:
       - name: Upload Pages artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: .docs/build/versioned-site/MarkdownView
 
       - id: deployment
         name: Deploy to GitHub Pages

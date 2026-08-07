@@ -29,7 +29,7 @@ Powered by [swift-markdown](https://github.com/swiftlang/swift-markdown), fully 
 You can view documentation on:
 
 - [main @ Swift Package Index](https://swiftpackageindex.com/LiYanan2004/MarkdownView/main/documentation/MarkdownView)
-- [main @ GitHub Pages](https://liyanan2004.github.io/MarkdownView/documentation/markdownview/)
+- [main @ GitHub Pages](https://liyanan2004.github.io/MarkdownView/main/documentation/markdownview/)
 
 ## Getting Started
 
