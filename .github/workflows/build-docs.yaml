@@ -44,7 +44,7 @@ jobs:
           xcode-version: latest
 
       - name: Build versioned DocC site
-        uses: DocCLab/VersionedDocC@0.0.13
+        uses: DocCLab/VersionedDocC@0.0.15
         with:
           config: .vdc.json
 

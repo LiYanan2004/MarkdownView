@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/DocCLab/VersionedDocC/0.0.13/Schema/VersionedDocC.schema.json",
+  "$schema": "https://raw.githubusercontent.com/DocCLab/VersionedDocC/0.0.15/Schema/VersionedDocC.schema.json",
   "schemaVersion": 1,
   "projectName": "MarkdownView",
   "moduleName": "MarkdownView",
