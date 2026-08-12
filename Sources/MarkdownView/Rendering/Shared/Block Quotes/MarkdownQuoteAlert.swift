@@ -38,8 +38,14 @@ enum MarkdownQuoteAlertType: String, CaseIterable {
 
     /// Detects a quote alert type from the text of a blockquote's first paragraph.
     ///
-    /// Matches case-insensitively against `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`,
-    /// `[!WARNING]`, and `[!CAUTION]`. Text after the marker is used as a custom title.
+    /// Matches case-insensitively against:
+    /// - `[!NOTE]`
+    /// - `[!TIP]`
+    /// - `[!IMPORTANT]`
+    /// - `[!WARNING]`
+    /// - `[!CAUTION]`
+    ///
+    /// Text after the marker is used as a custom title.
     static func detect(from text: String) -> (type: MarkdownQuoteAlertType, title: String)? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
