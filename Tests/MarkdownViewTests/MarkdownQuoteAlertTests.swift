@@ -29,16 +29,11 @@ struct MarkdownQuoteAlertTests {
                 from: MarkdownViewRenderer.plainText(of: firstParagraph)
             )
         )
-        let bodyChildren: [any Markup]
-        
-        if children.count > 1 {
-            bodyChildren = Array(children.dropFirst())
-        } else {
-            bodyChildren = MarkdownViewRenderer.stripCalloutPrefix(
-                from: Array(firstParagraph.children),
-                prefix: "[!\(alert.type.rawValue)]"
-            )
-        }
+        var bodyChildren = MarkdownViewRenderer.stripCalloutPrefix(
+            from: Array(firstParagraph.children),
+            prefix: "[!\(alert.type.rawValue)]"
+        )
+        bodyChildren.append(contentsOf: children.dropFirst())
         
         let renderedBody = bodyChildren
             .map(MarkdownViewRenderer.plainText(of:))
