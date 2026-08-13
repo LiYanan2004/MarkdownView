@@ -134,23 +134,16 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
         alertType: MarkdownQuoteAlertType,
         title: String
     ) -> MarkdownNodeView {
-        let bodyChildren: [any Markup]
-        if children.count > 1 {
-            // Blank line separates marker and body.
-            bodyChildren = Array(children.dropFirst())
-        } else if let firstParagraph = children.first {
-            // No blank line: [\!TYPE] and body are in the same paragraph.
-            // Strip the [\!TYPE] prefix from the paragraph's inline children.
-            let inlineChildren = Array(firstParagraph.children)
-            let prefix = "[!\(alertType.rawValue)]"
-            let bodyInlineChildren = MarkdownViewRenderer.stripCalloutPrefix(
-                from: inlineChildren,
-                prefix: prefix
+        var bodyChildren: [any Markup] = []
+        if let firstParagraph = children.first {
+            bodyChildren.append(
+                contentsOf: MarkdownViewRenderer.stripCalloutPrefix(
+                    from: Array(firstParagraph.children),
+                    prefix: "[!\(alertType.rawValue)]"
+                )
             )
-            bodyChildren = bodyInlineChildren
-        } else {
-            bodyChildren = []
         }
+        bodyChildren.append(contentsOf: children.dropFirst())
 
         let content = MarkdownBlockQuoteStyleConfiguration.Content {
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
@@ -437,11 +430,11 @@ extension MarkdownViewRenderer {
         if let inlineCode = markup as? InlineCode {
             return inlineCode.code
         }
-        if let softBreak = markup as? SoftBreak {
-            return softBreak.plainText
+        if markup is SoftBreak {
+            return "\n"
         }
-        if let lineBreak = markup as? LineBreak {
-            return lineBreak.plainText
+        if markup is LineBreak {
+            return "\n"
         }
         if let inlineHTML = markup as? InlineHTML {
             return inlineHTML.plainText
@@ -455,34 +448,30 @@ extension MarkdownViewRenderer {
         return markup.children.reduce(into: "") { $0 += plainText(of: $1) }
     }
 
-    /// Strips the `[!TYPE]` marker from the first Text child of a paragraph's inline children.
-    /// Returns the remaining inline children after the marker (and its trailing soft break).
+    /// Strips the quote-alert marker/title line from a paragraph's inline children.
+    /// Returns the inline children after the first soft or hard break.
     static func stripCalloutPrefix(
         from inlineChildren: [any Markup],
         prefix: String
     ) -> [any Markup] {
-        var result: [any Markup] = []
-        var skippedMarker = false
-
-        for child in inlineChildren {
-            if !skippedMarker {
-                if let text = child as? Markdown.Text, text.string.uppercased().hasPrefix(prefix.uppercased()) {
-                    let remaining = String(text.string.dropFirst(prefix.count))
-                        .trimmingCharacters(in: .whitespaces)
-                    if !remaining.isEmpty {
-                        result.append(Markdown.Text(remaining))
-                    }
-                    skippedMarker = true
-                    continue
-                }
-            }
-            // Skip the soft/line break immediately after the marker
-            if skippedMarker && result.isEmpty && (child is SoftBreak || child is LineBreak) {
-                continue
-            }
-            result.append(child)
+        guard let markerIndex = inlineChildren.firstIndex(where: { child in
+            guard let text = child as? Markdown.Text else { return false }
+            return text.string.uppercased().hasPrefix(prefix.uppercased())
+        }) else {
+            return inlineChildren
         }
 
-        return result
+        let childrenAfterMarker = inlineChildren.dropFirst(markerIndex + 1)
+        guard let lineBreakIndex = childrenAfterMarker.firstIndex(where: {
+            $0 is SoftBreak || $0 is LineBreak
+        }) else {
+            return []
+        }
+
+        return Array(
+            childrenAfterMarker.suffix(
+                from: childrenAfterMarker.index(after: lineBreakIndex)
+            )
+        )
     }
 }

@@ -47,7 +47,15 @@ enum MarkdownQuoteAlertType: String, CaseIterable {
     ///
     /// Text after the marker is used as a custom title.
     static func detect(from text: String) -> (type: MarkdownQuoteAlertType, title: String)? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let firstLine = text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(
+                maxSplits: 1,
+                omittingEmptySubsequences: false,
+                whereSeparator: { $0.isNewline }
+            )
+            .first ?? ""
+        let trimmed = firstLine.trimmingCharacters(in: .whitespaces)
 
         // `NOTE` or `Note` can be also matched
         let uppercased = trimmed.uppercased()
@@ -55,8 +63,11 @@ enum MarkdownQuoteAlertType: String, CaseIterable {
         for type in Self.allCases {
             let prefix = "[!\(type.rawValue)]"
             if uppercased.hasPrefix(prefix) {
-                let remaining = trimmed.dropFirst(prefix.count)
-                    .trimmingCharacters(in: .whitespaces)
+                let suffix = trimmed.dropFirst(prefix.count)
+                guard suffix.isEmpty || suffix.first?.isWhitespace == true else {
+                    continue
+                }
+                let remaining = suffix.trimmingCharacters(in: .whitespaces)
                 let title = remaining.isEmpty ? type.defaultTitle : String(remaining)
                 return (type, title)
             }
