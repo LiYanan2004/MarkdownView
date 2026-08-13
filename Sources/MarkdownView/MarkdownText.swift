@@ -24,6 +24,7 @@ public struct MarkdownText: View {
     @Environment(\.blockQuoteStyle) private var blockQuoteStyle
     @Environment(\.codeBlockStyle) private var codeBlockStyle
     @Environment(\.markdownTableStyle) private var tableStyle
+    @Environment(\.markdownQuoteAlertEnabled) private var quoteAlertEnabled
     
     /// Creates a text-based markdown view for the given markdown source.
     ///
@@ -55,7 +56,8 @@ public struct MarkdownText: View {
                 fonts: fonts,
                 blockQuoteStyle: blockQuoteStyle,
                 codeBlockStyle: codeBlockStyle,
-                tableStyle: tableStyle
+                tableStyle: tableStyle,
+                quoteAlertEnabled: quoteAlertEnabled
             )
             .makeTextContent(for: parseResult.document)
         }
@@ -65,6 +67,7 @@ public struct MarkdownText: View {
         .environment(\.blockQuoteStyle, blockQuoteStyle)
         .environment(\.codeBlockStyle, codeBlockStyle)
         .environment(\.markdownTableStyle, tableStyle)
+        .environment(\.markdownQuoteAlertEnabled, quoteAlertEnabled)
     }
 }
 
