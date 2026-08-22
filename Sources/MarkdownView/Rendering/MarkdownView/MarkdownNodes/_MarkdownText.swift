@@ -13,17 +13,26 @@ import SwiftUI
 struct _MarkdownText: View {
     var text: AttributedString
     @State private var attributedString: RenderedState?
-    
+    @Environment(\.streamingTextAnimation) private var streamingAnimation
+
     init(_ text: AttributedString) {
         self.text = text
     }
 
     var body: some View {
-        Group {
+        let displayText: AttributedString = {
             if let attributedString {
-                Text(Self.visibleText(input: text, rendered: attributedString))
+                return Self.visibleText(input: text, rendered: attributedString)
+            }
+            return text
+        }()
+
+        Group {
+            if #available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *),
+               let streamingAnimation {
+                StreamingAnimatedText(displayText, animation: streamingAnimation)
             } else {
-                Text(text)
+                Text(displayText)
             }
         }
         .task(id: text) {

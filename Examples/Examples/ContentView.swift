@@ -17,12 +17,13 @@ struct ContentView: View {
     @State private var streamingTask: Task<Void, Error>?
     @State private var streamingIntervalMilliseconds = 1.0
     @State private var charactersPerChunk = 1.0
+    @State private var animation: AnimationType = .blur
 
     var body: some View {
         NavigationStack {
             MarkdownPreview(
                 source: source,
-                rendererKind: rendererKind
+                rendererKind: rendererKind, animation: animation.animationType
             )
             .toolbar(content: toolbarContent)
         }
@@ -102,6 +103,14 @@ struct ContentView: View {
                     in: 1 ... 32
                 )
             }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Picker(selection: $animation, label: Text("Streaming Animation")) {
+                    Text("Blur").tag(AnimationType.blur)
+                    Text("Gradient").tag(AnimationType.gradient)
+                    Text("Opacity").tag(AnimationType.opacity)
+                }
+            }
         }
         .formStyle(.grouped)
         .frame(idealWidth: 280)
@@ -136,6 +145,24 @@ struct ContentView: View {
             }
         }
     }
+}
+
+enum AnimationType: Hashable{
+    case blur
+    case gradient
+    case opacity
+    
+    var animationType: any StreamingTextAnimation {
+        switch self {
+        case .blur:
+            .blur
+        case .gradient:
+            .gradient
+        case .opacity:
+            .opacity
+        }
+    }
+    
 }
 
 #Preview {
