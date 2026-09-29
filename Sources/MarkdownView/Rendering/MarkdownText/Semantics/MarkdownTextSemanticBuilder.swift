@@ -117,7 +117,7 @@ private extension MarkdownTextSemanticBuilder {
             let marker = configuration.listConfiguration.orderedListMarker
             return .text(
                 value: marker.marker(
-                    at: listItem.indexInParent,
+                    at: orderedList.markerIndex(forItemAt: listItem.indexInParent),
                     listDepth: orderedList.listDepth
                 ),
                 monospaced: marker.monospaced

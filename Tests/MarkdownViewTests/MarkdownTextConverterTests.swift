@@ -296,6 +296,33 @@ struct MarkdownTextConverterTests {
     }
 
     @Test(
+        "Numbers ordered list items from the list's start number",
+        .tags(.textConversion, .lists),
+        arguments: [
+            ("1. One\n2. Two\n3. Three", ["1.", "2.", "3."]),
+            ("4. Four\n5. Five\n6. Six", ["4.", "5.", "6."]),
+            ("1. One\n\nNote\n\n2. Two\n\nNote\n\n3. Three", ["1.", "2.", "3."]),
+        ]
+    )
+    @MainActor
+    func numbersOrderedListItemsFromStartNumber(markdown: String, expectedMarkers: [String]) {
+        let textContent = MarkdownViewTestSupport.makeTextContent(markdown: markdown)
+        let string = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        ).string
+        let lines = string.split(whereSeparator: \.isNewline)
+        let markers: [String] = lines.compactMap { line -> String? in
+            guard let word = line.split(whereSeparator: \.isWhitespace).first,
+                  word.last == ".",
+                  Int(word.dropLast()) != nil
+            else { return nil }
+            return String(word)
+        }
+
+        #expect(markers == expectedMarkers)
+    }
+
+    @Test(
         "Applies paragraph spacing to code-block attachments",
         .tags(.textConversion, .attachments)
     )

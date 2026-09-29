@@ -45,6 +45,11 @@ struct MarkdownList<List: ListItemContainer>: View {
         var list: MarkdownList<List>
         var listItem: ListItem
         var index: Int
+
+        private var markerIndex: Int {
+            guard let orderedList = list.listItemsContainer as? OrderedList else { return index }
+            return orderedList.markerIndex(forItemAt: index)
+        }
         
         var body: some View {
             if let checkBox = listItem.checkbox {
@@ -53,7 +58,7 @@ struct MarkdownList<List: ListItemContainer>: View {
                 SwiftUI.Text(unorderedMarker.marker(listDepth: list.depth))
                     .backdeployedMonospaced(unorderedMarker.monospaced)
             } else if case let .right(orderedMarker) = list.marker {
-                SwiftUI.Text(orderedMarker.marker(at: index, listDepth: list.depth))
+                SwiftUI.Text(orderedMarker.marker(at: markerIndex, listDepth: list.depth))
                     .backdeployedMonospaced(orderedMarker.monospaced)
             }
         }
