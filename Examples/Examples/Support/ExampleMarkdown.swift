@@ -139,6 +139,30 @@ enum ExampleMarkdown {
     Inline HTML also works in prose, such as <mark>highlighted text</mark>.
 
     ---
+    ## GitHub Flavored Markdown Alerts
+    
+    > [!Warning]
+    >
+    > This is a warning.
+    >
+    > Maybe you should solve it.
+
+    > [!NOTE]
+    > Note
+    
+    > [!TIP]
+    >
+    > Tip
+    
+    > [!IMPORTANT]
+    >
+    > Important
+    
+    > [!CAUTION]
+    >
+    > Caution
+    
+    ---
 
     ## Custom Renderers
 

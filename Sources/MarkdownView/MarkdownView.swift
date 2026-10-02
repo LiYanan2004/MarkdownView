@@ -14,6 +14,7 @@ public struct MarkdownView: View {
     @Environment(\.markdownMathContext) private var mathContext
     @Environment(\.markdownElementRenderers) private var elementRenderers
     @Environment(\.markdownFontGroup) private var fonts
+    @Environment(\.markdownQuoteAlertEnabled) private var quoteAlertEnabled
     
     /// Creates a view that renders given markdown string.
     /// 
@@ -40,7 +41,8 @@ public struct MarkdownView: View {
         MarkdownViewRenderer(
             configuration: configuration,
             mathContext: parseResult.mathContext,
-            elementRenderers: elementRenderers
+            elementRenderers: elementRenderers,
+            quoteAlertEnabled: quoteAlertEnabled
         )
         .makeBody(for: parseResult.document)
         .font(fonts.body._swiftUIFont)

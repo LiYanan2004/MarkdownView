@@ -15,11 +15,7 @@ extension MarkdownTextConverter {
             markup: attachment.markup,
             role: .blockAttachment
         )
-        let viewRenderer = MarkdownViewRenderer(
-            configuration: configuration,
-            mathContext: mathContext,
-            elementRenderers: elementRenderers
-        )
+        let viewRenderer = makeAttachmentRenderer()
         
         return makeAttachmentTextContent(
             id: identifier,
@@ -28,6 +24,15 @@ extension MarkdownTextConverter {
         ) {
             viewRenderer.makeBody(for: attachment.markup)
         }
+    }
+
+    func makeAttachmentRenderer() -> MarkdownViewRenderer {
+        MarkdownViewRenderer(
+            configuration: configuration,
+            mathContext: mathContext,
+            elementRenderers: elementRenderers,
+            quoteAlertEnabled: quoteAlertEnabled
+        )
     }
 }
 
