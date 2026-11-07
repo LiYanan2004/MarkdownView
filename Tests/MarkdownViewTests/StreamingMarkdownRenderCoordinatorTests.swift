@@ -13,6 +13,63 @@ import Testing
 @MainActor
 struct StreamingMarkdownRenderCoordinatorTests {
     @Test(
+        "Cancellation releases objects captured by the render handler",
+        .tags(.streaming, .rendering)
+    )
+    func cancellationReleasesCapturedObjects() async throws {
+        let coordinator = StreamingMarkdownRenderCoordinator()
+        weak var capturedCoordinator: StreamingMarkdownRenderCoordinator?
+        var didRender = false
+
+        do {
+            let renderOwner = StreamingMarkdownRenderCoordinator()
+            capturedCoordinator = renderOwner
+            coordinator.submit(
+                MarkdownViewTestSupport.makeParseRequest(markdown: "# Retained handler")
+            ) { [renderOwner] _ in
+                renderOwner.setRenderInterval(.milliseconds(100))
+                didRender = true
+            }
+        }
+
+        try await MarkdownViewTestSupport.waitUntil { didRender }
+        #expect(capturedCoordinator != nil)
+
+        coordinator.cancel()
+
+        #expect(capturedCoordinator == nil)
+    }
+
+    @Test(
+        "Renders a new request after cancellation",
+        .tags(.streaming, .rendering)
+    )
+    func rendersAfterCancellation() async throws {
+        let coordinator = StreamingMarkdownRenderCoordinator()
+        var cancelledHandlerWasCalled = false
+        var renderedSourceText: String?
+        defer { coordinator.cancel() }
+
+        coordinator.submit(
+            MarkdownViewTestSupport.makeParseRequest(markdown: "# Cancelled")
+        ) { _ in
+            cancelledHandlerWasCalled = true
+        }
+        coordinator.cancel()
+
+        let sourceText = "# Resumed"
+        coordinator.submit(
+            MarkdownViewTestSupport.makeParseRequest(markdown: sourceText)
+        ) { parseResult in
+            renderedSourceText = parseResult.sourceSnapshot.text
+        }
+
+        try await MarkdownViewTestSupport.waitUntil { renderedSourceText != nil }
+        #expect(renderedSourceText == sourceText)
+        #expect(cancelledHandlerWasCalled == false)
+    }
+
+    @Test(
         "Renders the latest submitted request after input stops",
         .tags(.streaming, .rendering)
     )
