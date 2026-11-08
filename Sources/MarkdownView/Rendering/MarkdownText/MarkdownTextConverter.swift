@@ -327,6 +327,10 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 extension MarkdownTextConverter {
     func render(_ nodes: [MarkdownTextSemanticNode]) -> TextContent {
         combineBlocks(nodes.map(render))
+            .mergingAttributes(
+                AttributeContainer().foregroundColor(configuration.textColor),
+                mergePolicy: .keepCurrent
+            )
     }
 
     func render(_ node: MarkdownTextSemanticNode) -> TextContent {

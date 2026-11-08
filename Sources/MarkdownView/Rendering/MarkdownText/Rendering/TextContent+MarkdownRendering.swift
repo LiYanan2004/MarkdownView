@@ -5,16 +5,19 @@ import SwiftUI
 
 extension TextContent {
     @MainActor
-    func mergingAttributes(_ attributes: AttributeContainer) -> TextContent {
+    func mergingAttributes(
+        _ attributes: AttributeContainer,
+        mergePolicy: AttributedString.AttributeMergePolicy = .keepNew
+    ) -> TextContent {
         TextContent(
             fragments.map { fragment in
                 switch fragment {
                 case .string(let string):
                     .attributedString(AttributedString(string, attributes: attributes))
                 case .attributedString(let attributedString):
-                    .attributedString(attributedString.mergingAttributes(attributes))
+                    .attributedString(attributedString.mergingAttributes(attributes, mergePolicy: mergePolicy))
                 case .view:
-                    .attributedString(fragment.asAttributedString().mergingAttributes(attributes))
+                    .attributedString(fragment.asAttributedString().mergingAttributes(attributes, mergePolicy: mergePolicy))
                 }
             }
         )
