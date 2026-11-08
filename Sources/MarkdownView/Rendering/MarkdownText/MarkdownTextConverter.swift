@@ -148,7 +148,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
                     markup: text,
                     role: .math(kind: .display, occurrence: 0)
                 ),
-                replacement: nil,
+                replacement: displayMathReplacement(for: mathIdentifier),
                 componentSpacing: configuration.componentSpacing,
                 sizing: .fittingLineFragment
             ) {
@@ -165,12 +165,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
         }
         #endif
         return TextContent(
-            .attributedString(
-                AttributedString(
-                    plainText,
-                    attributes: AttributeContainer([.font : fonts.body.asPlatformFont])
-                )
-            )
+            .attributedString(AttributedString(plainText, attributes: bodyTextAttributes))
         )
     }
 
@@ -325,6 +320,11 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 }
 
 extension MarkdownTextConverter {
+    // Set on every plain run, so a run never takes on the attributes of an attachment before it
+    var bodyTextAttributes: AttributeContainer {
+        AttributeContainer([.font: fonts.body.asPlatformFont])
+    }
+
     func render(_ nodes: [MarkdownTextSemanticNode]) -> TextContent {
         combineBlocks(nodes.map(render))
             .mergingAttributes(

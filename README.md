@@ -110,7 +110,7 @@ MarkdownView("Inline math: $E = mc^2$")
     .markdownMathRenderingEnabled()
 ```
 
-Both inline math and display math are supported.
+Both inline math and display math are supported. A formula that SwiftMath can't render is shown as its source.
 
 Math rendering is available on iOS and macOS when the `LaTeX` trait is enabled. The trait is enabled by default.
 

@@ -22,15 +22,15 @@ extension MarkdownTextConverter {
             }
 
             if searchRange.lowerBound < placeholderSegment.range.lowerBound {
-                textContent += TextContent(
-                    .string(String(text[searchRange.lowerBound..<placeholderSegment.range.lowerBound]))
+                textContent += plainTextContent(
+                    text[searchRange.lowerBound..<placeholderSegment.range.lowerBound]
                 )
             }
 
             switch placeholderSegment.match.kind {
             case .inline:
                 guard let latexText = mathContext.inlineMathStorage[placeholderSegment.match.identifier] else {
-                    textContent += TextContent(.string(String(text[placeholderSegment.range])))
+                    textContent += plainTextContent(text[placeholderSegment.range])
                     searchRange = placeholderSegment.range.upperBound..<text.endIndex
                     continue
                 }
@@ -50,7 +50,7 @@ extension MarkdownTextConverter {
             case .display:
                 let identifier = placeholderSegment.match.identifier
                 guard mathContext.displayMathStorage[identifier] != nil else {
-                    textContent += TextContent(.string(String(text[placeholderSegment.range])))
+                    textContent += plainTextContent(text[placeholderSegment.range])
                     searchRange = placeholderSegment.range.upperBound..<text.endIndex
                     continue
                 }
@@ -60,7 +60,7 @@ extension MarkdownTextConverter {
                         markup: sourceMarkup,
                         role: .math(kind: .display, occurrence: displayMathOccurrence)
                     ),
-                    replacement: nil,
+                    replacement: displayMathReplacement(for: identifier),
                     componentSpacing: configuration.componentSpacing,
                     sizing: .fittingLineFragment
                 ) {
@@ -74,10 +74,18 @@ extension MarkdownTextConverter {
         }
 
         if searchRange.lowerBound < text.endIndex {
-            textContent += TextContent(.string(String(text[searchRange])))
+            textContent += plainTextContent(text[searchRange])
         }
 
         return textContent
+    }
+
+    func displayMathReplacement(for identifier: UUID) -> AttributedString? {
+        mathContext?.displayMathStorage[identifier].map { AttributedString($0) }
+    }
+
+    private func plainTextContent(_ text: Substring) -> TextContent {
+        TextContent(.attributedString(AttributedString(String(text), attributes: bodyTextAttributes)))
     }
 }
 
