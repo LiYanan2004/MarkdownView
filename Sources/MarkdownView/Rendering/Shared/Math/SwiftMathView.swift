@@ -16,8 +16,6 @@ struct SwiftMathView: View {
     var labelMode: MTMathUILabelMode
     var textAlignment: MTTextAlignment
 
-    @Environment(\.colorScheme) private var colorScheme
-
     private var equation: String {
         guard let mathRepresentation = MathParser(text: latex).mathRepresentations.first,
               mathRepresentation.range == latex.startIndex..<latex.endIndex,
@@ -36,41 +34,68 @@ struct SwiftMathView: View {
         return String(latex[contentStartIndex..<contentEndIndex])
     }
 
-    private var textColor: MTColor {
-        MTColor(colorScheme == .dark ? Color.white : Color.black)
-    }
-    
     var body: some View {
-        SwiftMathPlatformView(
+        let mathView = SwiftMathPlatformView(
             equation: equation,
             fontSize: font.asPlatformFont.pointSize,
             labelMode: labelMode,
-            textAlignment: textAlignment,
-            textColor: textColor
+            textAlignment: textAlignment
         )
-        .alignmentGuide(.firstTextBaseline) { dimensions in
-            font.asPlatformFont.ascender
-        }
-        .alignmentGuide(.lastTextBaseline) { dimensions in
-            font.asPlatformFont.ascender
-        }
+
+        mathView
+            .hidden()
+            .overlay {
+                Rectangle()
+                    .fill(.foreground)
+                    .mask { mathView.glyphMask }
+                    .allowsHitTesting(false)
+            }
+            .alignmentGuide(.firstTextBaseline) { dimensions in
+                font.asPlatformFont.ascender
+            }
+            .alignmentGuide(.lastTextBaseline) { dimensions in
+                font.asPlatformFont.ascender
+            }
     }
 }
 
+@MainActor
 fileprivate struct SwiftMathPlatformView {
     var equation: String
     var fontSize: CGFloat
     var labelMode: MTMathUILabelMode
     var textAlignment: MTTextAlignment
-    var textColor: MTColor
     
-    @MainActor
+    var glyphMask: some View {
+        let mathLabel = MTMathUILabel()
+        apply(to: mathLabel)
+        #if canImport(UIKit)
+        let size = mathLabel.intrinsicContentSize
+        mathLabel.frame.size = size
+        mathLabel.layoutIfNeeded()
+        #elseif canImport(AppKit)
+        let size = mathLabel.fittingSize
+        mathLabel.frame.size = size
+        mathLabel.layoutSubtreeIfNeeded()
+        #endif
+        let displayList = mathLabel.displayList
+
+        return Canvas { context, size in
+            context.withCGContext { graphicsContext in
+                graphicsContext.translateBy(x: 0, y: size.height)
+                graphicsContext.scaleBy(x: 1, y: -1)
+                displayList?.draw(graphicsContext)
+            }
+        }
+        .frame(width: size.width, height: size.height)
+    }
+
     private func apply(to mathLabel: MTMathUILabel) {
         mathLabel.latex = equation
         mathLabel.fontSize = fontSize
         mathLabel.labelMode = labelMode
         mathLabel.textAlignment = textAlignment
-        mathLabel.textColor = textColor
+        mathLabel.textColor = .black
         mathLabel.displayErrorInline = false
     }
 }
@@ -133,6 +158,17 @@ extension SwiftMathPlatformView: NSViewRepresentable {
             textAlignment: .left
         )
     }
+    .foregroundStyle(.red)
+}
+
+#Preview("Gradient foreground") {
+    SwiftMathView(
+        latex: #"\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}"#,
+        font: PlatformFont.preferredFont(forTextStyle: .body),
+        labelMode: .display,
+        textAlignment: .center
+    )
+    .foregroundStyle(.linearGradient(colors: [.red, .blue], startPoint: .leading, endPoint: .trailing))
 }
 
 #endif

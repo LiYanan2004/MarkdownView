@@ -63,9 +63,7 @@ fileprivate extension MarkdownTextConverter {
                 attributedString += row
             }
         case let blockDirective as BlockDirective:
-            let wrappedString = blockDirective.children
-                .compactMap { $0.format() }
-                .joined(separator: "\n")
+            let wrappedString = blockDirective.wrappedMarkdown
             return wrappedString.isEmpty ? nil : AttributedString(wrappedString)
         case let image as Markdown.Image:
             let alternativeText = image.plainText.trimmingCharacters(in: .whitespacesAndNewlines)
