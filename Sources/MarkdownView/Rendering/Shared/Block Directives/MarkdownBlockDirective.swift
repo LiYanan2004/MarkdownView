@@ -24,10 +24,7 @@ struct MarkdownBlockDirective: View {
     var body: some View {
         if let renderer = blockDirectiveRenderer(for: blockDirective.name) {
             let configuration = MarkdownBlockDirectiveRendererConfiguration(
-                wrappedString: blockDirective
-                    .children
-                    .compactMap { $0.format() }
-                    .joined(separator: "\n"),
+                wrappedString: blockDirective.wrappedMarkdown,
                 arguments: blockDirective
                     .argumentText
                     .parseNameValueArguments()

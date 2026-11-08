@@ -11,6 +11,7 @@ import SwiftUI
 struct MarkdownRendererConfiguration: Hashable, AllowingModifyThroughKeyPath, Sendable {
     var preferredBaseURL: URL?
     var componentSpacing: CGFloat = 8
+    var textColor: Color = .primary
     
     var tintColors: [MarkdownTintableComponent : Color] = [:]
     var textColor: Color?

@@ -59,7 +59,7 @@ public struct MarkdownText: View {
             )
             .makeTextContent(for: parseResult.document)
         }
-        .environment(\.markdownRendererConfiguration, configuration)
+        .foregroundStyle(configuration.textColor)
         .environment(\.markdownMathContext, parseResult.mathContext)
         .environment(\.markdownElementRenderers, elementRenderers)
         .environment(\.markdownFontGroup, fonts)
@@ -95,6 +95,7 @@ public struct MarkdownText: View {
         ```
         """
     )
+    .markdownTextColor(.green)
     .padding()
 }
 #endif

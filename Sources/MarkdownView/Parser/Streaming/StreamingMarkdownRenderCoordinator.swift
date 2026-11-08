@@ -29,12 +29,12 @@ final class StreamingMarkdownRenderCoordinator {
         renderTask?.cancel()
         renderTask = nil
         pendingRequest = nil
+        renderHandler = nil
     }
 
     func reset() {
         cancel()
         parsedResult = nil
-        renderHandler = nil
     }
 
     func setRenderInterval(_ renderInterval: Duration) {
