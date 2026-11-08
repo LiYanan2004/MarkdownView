@@ -14,7 +14,6 @@ struct MarkdownRendererConfiguration: Hashable, AllowingModifyThroughKeyPath, Se
     var textColor: Color = .primary
     
     var tintColors: [MarkdownTintableComponent : Color] = [:]
-    var textColor: Color?
     var underlineLinks: Bool = false
     var listConfiguration: MarkdownListConfiguration = MarkdownListConfiguration()
 

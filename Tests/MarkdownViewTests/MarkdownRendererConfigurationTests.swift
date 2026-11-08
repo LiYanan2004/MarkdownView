@@ -27,12 +27,4 @@ struct MarkdownRendererConfigurationTests {
 
         #expect(url.absoluteString == "https://example.com/articles/guide")
     }
-
-    @Test(
-        "Leaves the text color to the platform unless asked",
-        .tags(.configuration, .textColor)
-    )
-    func leavesTheTextColorToThePlatformUnlessAsked() {
-        #expect(MarkdownRendererConfiguration().textColor == nil)
-    }
 }

@@ -32,12 +32,10 @@ extension MarkdownTextConverter {
             .paragraphStyle: continuationParagraphStyle as NSParagraphStyle,
             .font: fonts.body.asPlatformFont
         ])
-        // The text color goes on the marker only: merged into the content, it would replace
-        // the tint of inline code and links
         let markerContent = makeMarkerContent(
             for: listItem.marker,
             sourceMarkup: listItem.sourceMarkup,
-            baseAttributes: listItemAttributes.merging(bodyTextAttributes)
+            baseAttributes: listItemAttributes
         )
         let leadingContent = combine(listItem.leadingChildren.map(renderMarkup))
         let trailingContent = combineBlocks(listItem.trailingBlocks.map { trailingBlock in

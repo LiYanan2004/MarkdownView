@@ -322,11 +322,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
 extension MarkdownTextConverter {
     // Set on every plain run, so a run never takes on the attributes of an attachment before it
     var bodyTextAttributes: AttributeContainer {
-        var attributes = AttributeContainer([.font: fonts.body.asPlatformFont])
-        if let textColor = configuration.textColor {
-            attributes.foregroundColor = textColor
-        }
-        return attributes
+        AttributeContainer([.font: fonts.body.asPlatformFont])
     }
 
     func render(_ nodes: [MarkdownTextSemanticNode]) -> TextContent {

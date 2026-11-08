@@ -261,6 +261,54 @@ struct MarkdownTextConverterTests {
         #expect(firstDisplayIdentifier != secondDisplayIdentifier)
         #expect(firstDisplayIdentifier != firstInlineIdentifier)
     }
+
+    @Test(
+        "Gives text between formulas the body font",
+        .tags(.textConversion, .math, .regression)
+    )
+    @MainActor
+    func givesTextBetweenFormulasTheBodyFont() {
+        let bodyFont = PlatformFont.systemFont(ofSize: 15)
+        let preprocessingResult = MarkdownMathPreprocessor()
+            .preprocessingResult(for: #"Only $\frac{1}{N}$ of the keys move."#)
+        let textContent = MarkdownViewTestSupport.makeTextContent(
+            markdown: preprocessingResult.markdown,
+            mathContext: preprocessingResult.context,
+            fonts: AnyMarkdownFontGroup(MarkdownViewTestSupport.FontGroupStub(bodyFont: bodyFont))
+        )
+        let attributedString = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        )
+
+        for words in ["Only", "of the keys move."] {
+            #expect(
+                MarkdownViewTestSupport.font(in: attributedString, matching: words) == bodyFont,
+                "\(words) isn't in the body font"
+            )
+        }
+    }
+
+    @Test(
+        "Copies a display formula as its source",
+        .tags(.textConversion, .math)
+    )
+    @MainActor
+    func copiesADisplayFormulaAsItsSource() throws {
+        let preprocessingResult = MarkdownMathPreprocessor()
+            .preprocessingResult(for: "The share is\n\n$$\n\\frac{K}{N}\n$$")
+        let identifier = try #require(preprocessingResult.context.displayMathStorage.keys.first)
+        let converter = MarkdownTextConverter(
+            configuration: MarkdownRendererConfiguration(),
+            mathContext: preprocessingResult.context,
+            elementRenderers: [],
+            fonts: AnyMarkdownFontGroup(.automatic)
+        )
+
+        #expect(
+            converter.displayMathReplacement(for: identifier).map { String($0.characters) }
+                == "$$\n\\frac{K}{N}\n$$"
+        )
+    }
     #endif
 
     @Test(
