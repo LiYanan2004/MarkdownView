@@ -23,6 +23,5 @@ extension Tag {
     @Tag static var rendering: Self
     @Tag static var state: Self
     @Tag static var streaming: Self
-    @Tag static var textColor: Self
     @Tag static var textConversion: Self
 }

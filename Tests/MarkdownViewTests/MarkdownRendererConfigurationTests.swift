@@ -28,14 +28,10 @@ struct MarkdownRendererConfigurationTests {
         #expect(url.absoluteString == "https://example.com/articles/guide")
     }
 
-    @Test(
-        "Leaves KaTeX compatibility and the text color off unless asked",
-        .tags(.configuration, .math, .textColor)
-    )
-    func leavesKaTeXCompatibilityAndTheTextColorOffUnlessAsked() {
+    @Test("Leaves KaTeX compatibility off unless asked", .tags(.configuration, .math))
+    func leavesKaTeXCompatibilityOffUnlessAsked() {
         let configuration = MarkdownRendererConfiguration()
 
         #expect(!configuration.mathKaTeXCompatibility)
-        #expect(configuration.textColor == nil)
     }
 }

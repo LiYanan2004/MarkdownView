@@ -147,13 +147,6 @@ MarkdownView("> Quote and `inline code`")
 
 ![](/Images/tint.jpeg)
 
-Set the text color. Inline code and links keep their tint colors. `MarkdownText` doesn't follow `foregroundStyle(_:)`, so use this to color it.
-
-```swift
-MarkdownText(markdownText)
-    .markdownTextColor(.brown)
-```
-
 Set table, block quote, and code block styles.
 
 ```swift

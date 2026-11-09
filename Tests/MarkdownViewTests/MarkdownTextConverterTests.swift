@@ -17,6 +17,51 @@ import Testing
 
 @Suite("Markdown Text Converter")
 struct MarkdownTextConverterTests {
+    @Test("Applies the default text color while preserving component colors", .tags(.textConversion))
+    @MainActor
+    func appliesTextColor() throws {
+        for textColor in [Color.primary, .green, .red] {
+            let configuration = MarkdownRendererConfiguration()
+                .with(\.textColor, textColor)
+                .with(\.tintColors, [.link: .orange, .inlineCodeBlock: .purple])
+
+            for fixture in TextColorFixture.allCases {
+                let content = MarkdownViewTestSupport.makeTextContent(
+                    markdown: fixture.markdown,
+                    configuration: configuration
+                )
+                let attributedString = MarkdownViewTestSupport.attributedString(in: content)
+                let range = try #require(attributedString.range(of: fixture.text))
+                #expect(attributedString[range].foregroundColor == (fixture.color ?? textColor))
+            }
+        }
+    }
+
+    enum TextColorFixture: CaseIterable {
+        case paragraph, heading, emphasis, list, link, inlineCode
+
+        var markdown: String {
+            switch self {
+            case .paragraph: "sample"
+            case .heading: "# sample"
+            case .emphasis: "**sample**"
+            case .list: "- sample"
+            case .link: "[sample](https://example.com)"
+            case .inlineCode: "`sample`"
+            }
+        }
+
+        var text: String { "sample" }
+
+        var color: Color? {
+            switch self {
+            case .link: .orange
+            case .inlineCode: .purple
+            default: nil
+            }
+        }
+    }
+
     @Test(
         "Converts basic Markdown nodes to plain text",
         .tags(.textConversion)
@@ -215,6 +260,54 @@ struct MarkdownTextConverterTests {
 
         #expect(firstDisplayIdentifier != secondDisplayIdentifier)
         #expect(firstDisplayIdentifier != firstInlineIdentifier)
+    }
+
+    @Test(
+        "Gives text between formulas the body font",
+        .tags(.textConversion, .math, .regression)
+    )
+    @MainActor
+    func givesTextBetweenFormulasTheBodyFont() {
+        let bodyFont = PlatformFont.systemFont(ofSize: 15)
+        let preprocessingResult = MarkdownMathPreprocessor()
+            .preprocessingResult(for: #"Only $\frac{1}{N}$ of the keys move."#)
+        let textContent = MarkdownViewTestSupport.makeTextContent(
+            markdown: preprocessingResult.markdown,
+            mathContext: preprocessingResult.context,
+            fonts: AnyMarkdownFontGroup(MarkdownViewTestSupport.FontGroupStub(bodyFont: bodyFont))
+        )
+        let attributedString = NSAttributedString(
+            MarkdownViewTestSupport.attributedString(in: textContent)
+        )
+
+        for words in ["Only", "of the keys move."] {
+            #expect(
+                MarkdownViewTestSupport.font(in: attributedString, matching: words) == bodyFont,
+                "\(words) isn't in the body font"
+            )
+        }
+    }
+
+    @Test(
+        "Copies a display formula as its source",
+        .tags(.textConversion, .math)
+    )
+    @MainActor
+    func copiesADisplayFormulaAsItsSource() throws {
+        let preprocessingResult = MarkdownMathPreprocessor()
+            .preprocessingResult(for: "The share is\n\n$$\n\\frac{K}{N}\n$$")
+        let identifier = try #require(preprocessingResult.context.displayMathStorage.keys.first)
+        let converter = MarkdownTextConverter(
+            configuration: MarkdownRendererConfiguration(),
+            mathContext: preprocessingResult.context,
+            elementRenderers: [],
+            fonts: AnyMarkdownFontGroup(.automatic)
+        )
+
+        #expect(
+            converter.displayMathReplacement(for: identifier).map { String($0.characters) }
+                == "$$\n\\frac{K}{N}\n$$"
+        )
     }
     #endif
 

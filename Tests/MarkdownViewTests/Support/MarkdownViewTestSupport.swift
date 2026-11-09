@@ -274,13 +274,6 @@ enum MarkdownViewTestSupport {
         }
     }
 
-    static func foregroundColor(
-        in attributedString: AttributedString,
-        matching substring: String
-    ) -> Color? {
-        firstRun(in: attributedString, matching: substring)?.foregroundColor
-    }
-
     private static func firstRun(
         in attributedString: AttributedString,
         matching substring: String
