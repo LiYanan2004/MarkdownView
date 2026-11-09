@@ -112,6 +112,14 @@ MarkdownView("Inline math: $E = mc^2$")
 
 Both inline math and display math are supported. A formula that SwiftMath can't render is shown as its source.
 
+Render math written for KaTeX — its symbols, commands defined in terms of other commands, and Unicode characters typed into math — with `markdownMathKaTeXCompatibility()`. It registers KaTeX's symbols in SwiftMath's global symbol table.
+
+```swift
+MarkdownView(#"$x \leqslant y$, $\Reals$, $a \pmod{n}$, $α ≤ β$"#)
+    .markdownMathRenderingEnabled()
+    .markdownMathKaTeXCompatibility()
+```
+
 Math rendering is available on iOS and macOS when the `LaTeX` trait is enabled. The trait is enabled by default.
 
 ### Customize appearances

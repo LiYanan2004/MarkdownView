@@ -11,6 +11,8 @@ import SwiftMath
 import SwiftUI
 
 struct SwiftMathView: View {
+    @Environment(\.markdownRendererConfiguration) private var configuration
+
     var latex: String
     var font: any CustomCTFontConvertible
     var labelMode: MTMathUILabelMode
@@ -36,13 +38,16 @@ struct SwiftMathView: View {
 
     var body: some View {
         let fontSize = font.asPlatformFont.pointSize
+        let typesetEquation = configuration.mathKaTeXCompatibility
+            ? SwiftMathCompatibility.typesettable(equation)
+            : equation
         if let metrics = SwiftMathTypesetting.metrics(
-            for: equation,
+            for: typesetEquation,
             fontSize: fontSize,
             labelMode: labelMode
         ) {
             let mathView = SwiftMathPlatformView(
-                equation: equation,
+                equation: typesetEquation,
                 fontSize: fontSize,
                 labelMode: labelMode,
                 textAlignment: textAlignment

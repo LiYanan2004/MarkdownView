@@ -27,4 +27,11 @@ struct MarkdownRendererConfigurationTests {
 
         #expect(url.absoluteString == "https://example.com/articles/guide")
     }
+
+    @Test("Leaves KaTeX compatibility off unless asked", .tags(.configuration, .math))
+    func leavesKaTeXCompatibilityOffUnlessAsked() {
+        let configuration = MarkdownRendererConfiguration()
+
+        #expect(!configuration.mathKaTeXCompatibility)
+    }
 }

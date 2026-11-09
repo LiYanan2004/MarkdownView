@@ -16,6 +16,19 @@ extension View {
     }
 }
 
+extension View {
+    /// Renders math written for KaTeX: its symbols, commands defined in terms of other commands, and Unicode characters typed into math.
+    ///
+    /// The first time it renders a formula, it registers KaTeX's symbols in SwiftMath's global symbol table (`MTMathAtomFactory`). SwiftMath's own symbols are kept.
+    ///
+    /// - parameter enabled: A Boolean value that indicates whether to render math written for KaTeX. The default value is true.
+    nonisolated public func markdownMathKaTeXCompatibility(_ enabled: Bool = true) -> some View {
+        transformEnvironment(\.markdownRendererConfiguration) { configuration in
+            configuration.mathKaTeXCompatibility = enabled
+        }
+    }
+}
+
 // MARK: - Auxiliary
 
 fileprivate struct MarkdownMathRenderingModifier: ViewModifier {
