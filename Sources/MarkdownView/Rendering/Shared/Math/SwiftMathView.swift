@@ -11,6 +11,8 @@ import SwiftMath
 import SwiftUI
 
 struct SwiftMathView: View {
+    @Environment(\.markdownRendererConfiguration) private var configuration
+
     var latex: String
     var font: any CustomCTFontConvertible
     var labelMode: MTMathUILabelMode
