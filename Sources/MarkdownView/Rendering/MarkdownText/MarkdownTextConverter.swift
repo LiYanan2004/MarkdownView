@@ -21,12 +21,14 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
     var blockQuoteStyle: any MarkdownBlockQuoteStyle
     var codeBlockStyle: any MarkdownCodeBlockStyle
     var tableStyle: any MarkdownTableStyle
+    var quoteAlertEnabled: Bool
 
     init(
         configuration: MarkdownRendererConfiguration,
         mathContext: MarkdownMathContext?,
         elementRenderers: [MarkdownElementRendererRegistration],
-        fonts: AnyMarkdownFontGroup
+        fonts: AnyMarkdownFontGroup,
+        quoteAlertEnabled: Bool = false
     ) {
         let environmentValues = EnvironmentValues()
 
@@ -37,7 +39,8 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
             fonts: fonts,
             blockQuoteStyle: environmentValues.blockQuoteStyle,
             codeBlockStyle: environmentValues.codeBlockStyle,
-            tableStyle: environmentValues.markdownTableStyle
+            tableStyle: environmentValues.markdownTableStyle,
+            quoteAlertEnabled: quoteAlertEnabled
         )
     }
 
@@ -48,7 +51,8 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
         fonts: AnyMarkdownFontGroup,
         blockQuoteStyle: any MarkdownBlockQuoteStyle,
         codeBlockStyle: any MarkdownCodeBlockStyle,
-        tableStyle: any MarkdownTableStyle
+        tableStyle: any MarkdownTableStyle,
+        quoteAlertEnabled: Bool
     ) {
         self.configuration = configuration
         self.mathContext = mathContext
@@ -57,6 +61,7 @@ struct MarkdownTextConverter: @MainActor MarkupVisitor {
         self.blockQuoteStyle = blockQuoteStyle
         self.codeBlockStyle = codeBlockStyle
         self.tableStyle = tableStyle
+        self.quoteAlertEnabled = quoteAlertEnabled
     }
 
     func makeTextContent(for markup: any Markup) -> TextContent {

@@ -159,13 +159,15 @@ enum MarkdownViewTestSupport {
         mathContext: MarkdownMathContext? = nil,
         elementRenderers: [MarkdownElementRendererRegistration] = [],
         fonts: AnyMarkdownFontGroup = AnyMarkdownFontGroup(.automatic),
+        quoteAlertEnabled: Bool = false,
         parseOptions: ParseOptions = []
     ) -> TextContent {
         let converter = MarkdownTextConverter(
             configuration: configuration,
             mathContext: mathContext,
             elementRenderers: elementRenderers,
-            fonts: fonts
+            fonts: fonts,
+            quoteAlertEnabled: quoteAlertEnabled
         )
 
         return converter.makeTextContent(

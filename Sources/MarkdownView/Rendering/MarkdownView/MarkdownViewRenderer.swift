@@ -14,16 +14,19 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     var configuration: MarkdownRendererConfiguration
     var mathContext: MarkdownMathContext?
     var elementRenderers: [MarkdownElementRendererRegistration]
+    var quoteAlertEnabled: Bool
     private var activeInlineIntent: InlinePresentationIntent = []
-    
+
     init(
         configuration: MarkdownRendererConfiguration,
         mathContext: MarkdownMathContext?,
-        elementRenderers: [MarkdownElementRendererRegistration]
+        elementRenderers: [MarkdownElementRendererRegistration],
+        quoteAlertEnabled: Bool = false
     ) {
         self.configuration = configuration
         self.mathContext = mathContext
         self.elementRenderers = elementRenderers
+        self.quoteAlertEnabled = quoteAlertEnabled
     }
     
     func makeBody(for markup: any Markup) -> some View {
@@ -93,6 +96,20 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
     }
     
     func visitBlockQuote(_ blockQuote: BlockQuote) -> MarkdownNodeView {
+        let children = Array(blockQuote.children)
+        if quoteAlertEnabled,
+           let firstParagraph = children.first as? Paragraph,
+           let alert = MarkdownQuoteAlertType.detect(
+               from: firstParagraph
+           ) {
+            return visitQuoteAlertBlockQuote(
+                blockQuote,
+                children: children,
+                alertType: alert.type,
+                title: alert.title
+            )
+        }
+
         let content = MarkdownBlockQuoteStyleConfiguration.Content {
             VStack(alignment: .leading, spacing: configuration.componentSpacing) {
                 ForEach(Array(blockQuote.children.enumerated()), id: \.offset) { _, child in
@@ -108,6 +125,43 @@ struct MarkdownViewRenderer: @preconcurrency MarkupVisitor {
         return MarkdownNodeView {
             MarkdownBlockQuote(content: content)
                 .tint(configuration.tintColors[.blockQuote, default: .accentColor])
+        }
+    }
+
+    func visitQuoteAlertBlockQuote(
+        _ blockQuote: BlockQuote,
+        children: [any Markup],
+        alertType: MarkdownQuoteAlertType,
+        title: String
+    ) -> MarkdownNodeView {
+        var bodyChildren: [any Markup] = []
+        if let firstParagraph = children.first as? Paragraph,
+           let bodyParagraph = MarkdownViewRenderer.paragraphByStrippingCalloutPrefix(
+               from: firstParagraph,
+               prefix: "[!\(alertType.rawValue)]"
+           ) {
+            bodyChildren.append(bodyParagraph)
+        }
+        bodyChildren.append(contentsOf: children.dropFirst())
+
+        let content = MarkdownBlockQuoteStyleConfiguration.Content {
+            VStack(alignment: .leading, spacing: configuration.componentSpacing) {
+                ForEach(Array(bodyChildren.enumerated()), id: \.offset) { _, child in
+                    MarkdownViewRenderer(
+                        configuration: configuration,
+                        mathContext: mathContext,
+                        elementRenderers: elementRenderers
+                    )
+                    .makeBody(for: child)
+                }
+            }
+        }
+        return MarkdownNodeView {
+            MarkdownQuoteAlert(
+                alertType: alertType,
+                title: title,
+                content: AnyView(content)
+            )
         }
     }
     
@@ -353,12 +407,75 @@ fileprivate extension MarkdownViewRenderer {
             elementRenderers: elementRenderers
         )
         .makeBody(for: cell)
-        
+
         return MarkdownTableStyleConfiguration.Table.Cell(
             horizontalAlignment: cell.horizontalAlignment,
             textAlignment: cell.textAlignment,
             colspan: Int(cell.colspan),
             content: content
         )
+    }
+}
+
+// MARK: - Utilities
+
+extension MarkdownViewRenderer {
+    /// Collects the plain text from a markup node and its inline children,
+    /// without any formatting prefixes from ancestral elements.
+    static func plainText(of markup: any Markup) -> String {
+        if let text = markup as? Markdown.Text {
+            return text.string
+        }
+        if let inlineCode = markup as? InlineCode {
+            return inlineCode.code
+        }
+        if markup is SoftBreak {
+            return "\n"
+        }
+        if markup is LineBreak {
+            return "\n"
+        }
+        if let inlineHTML = markup as? InlineHTML {
+            return inlineHTML.plainText
+        }
+        if let symbolLink = markup as? SymbolLink {
+            return symbolLink.plainText
+        }
+        if let customInline = markup as? CustomInline {
+            return customInline.plainText
+        }
+        return markup.children.reduce(into: "") { $0 += plainText(of: $1) }
+    }
+
+    /// Strips the quote-alert marker line while preserving the remaining
+    /// inline nodes inside a paragraph.
+    static func paragraphByStrippingCalloutPrefix(
+        from paragraph: Paragraph,
+        prefix: String
+    ) -> Paragraph? {
+        let inlineChildren = Array(paragraph.children)
+        guard let marker = inlineChildren.first as? Markdown.Text,
+              marker.string.trimmingCharacters(in: .whitespaces)
+                .caseInsensitiveCompare(prefix) == .orderedSame else {
+            return nil
+        }
+
+        let childrenAfterMarker = inlineChildren.dropFirst()
+        guard let lineBreakIndex = childrenAfterMarker.firstIndex(where: {
+            $0 is SoftBreak || $0 is LineBreak
+        }) else {
+            return nil
+        }
+
+        let bodyChildren = childrenAfterMarker
+            .suffix(
+                from: childrenAfterMarker.index(after: lineBreakIndex)
+            )
+            .compactMap { $0 as? any InlineMarkup }
+        guard bodyChildren.isEmpty == false else {
+            return nil
+        }
+
+        return Paragraph(bodyChildren)
     }
 }
