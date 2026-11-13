@@ -9,6 +9,7 @@ import SwiftUI
 struct MarkdownPreview: View {
     var source: StreamingMarkdownSource
     var rendererKind: MarkdownRendererKind
+    var animation: any StreamingTextAnimation
 
     var body: some View {
         ScrollView {
@@ -40,6 +41,7 @@ struct MarkdownPreview: View {
                     MarkdownView(parseResult)
             }
         }
+        .markdownStreamingAnimation(animation)
     }
 
     private static let showcaseBaseURL = URL(string: "https://developer.apple.com")!
